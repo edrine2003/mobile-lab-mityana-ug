@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Laboratory Mityana Uganda</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #1e90ff;
+      color: white;
+      text-align: center;
+      padding: 20px 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    main {
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    select[multiple] {
+      height: 180px;
+    }
+    button {
+      background-color: #1e90ff;
+      color: white;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #0b70d0;
+    }
+    #confirmation {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.1em;
+    }
+    #totalDisplay {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #1e90ff;
+    }
+    .contact {
+      margin-top: 30px;
+      background-color: #e1f0ff;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .contact a {
+      color: #1e90ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    @media(max-width: 600px){
+      main {
+        margin: 15px;
+        padding: 15px;
+      }
+      select[multiple] {
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Mobile Laboratory Mityana Uganda</h1>
+  <p>Order your lab tests online easily</p>
+</header>
+
+<main>
+  <form id="orderForm">
+    <label for="name">Full Name:</label>
+    <input type="text" id="name" placeholder="Enter your full name" required>
+
+    <label for="phone">Phone Number:</label>
+    <input type="text" id="phone" placeholder="Enter your phone number" required>
+
+    <label for="tests">Select Tests:</label>
+    <select id="tests" multiple required>
+      <option value="CBC">Complete Blood Count (CBC) - UGX 15,000</option>
+      <option value="Hb">Hemoglobin (Hb) - UGX 10,000</option>
+      <option value="Blood Glucose">Blood Glucose (FBS & RBS) - UGX 7,000</option>
+      <option value="RFT">Kidney Function Test (RFT) - UGX 50,000</option>
+      <option value="LFT">Liver Function Test (LFT) - UGX 50,000</option>
+      <option value="Electrolytes">Electrolytes - UGX 50,000</option>
+      <option value="Blood Smear">Blood Smear - UGX 5,000</option>
+      <option value="RPR/Syphilis">RPR / Syphilis - UGX 8,000</option>
+      <option value="HIV">HIV RDT - UGX 7,000</option>
+      <option value="Hep B">Hepatitis B Rapid Test - UGX 10,000</option>
+      <option value="Hep C">Hepatitis C Rapid Test - UGX 10,000</option>
+      <option value="Gonorrhea">Gonorrhea Test - UGX 15,000</option>
+      <option value="Chlamydia">Chlamydia Test - UGX 15,000</option>
+      <option value="Urinalysis">Urinalysis - UGX 8,000</option>
+      <option value="Widal Serum">Widal Serum - UGX 8,000</option>
+      <option value="Widal Stool">Widal Stool - UGX 12,000</option>
+      <option value="Hpylori Serum">H. Pylori Serum - UGX 8,000</option>
+      <option value="Hpylori Stool">H. Pylori Stool - UGX 12,000</option>
+      <option value="PSA">PSA - UGX 25,000</option>
+      <option value="HCG">Pregnancy Test (hCG) - UGX 5,000</option>
+      <option value="Lipid Profile">Lipid Profile - UGX 40,000</option>
+      <option value="BAT">Bleeding & Clotting Tests (BAT) - UGX 15,000</option>
+      <option value="RF">Rheumatoid Factor (RF) - UGX 15,000</option>
+      <option value="Blood Grouping">Blood Grouping - UGX 10,000</option>
+    </select>
+
+    <p id="totalDisplay">Total: UGX 0</p>
+
+    <label for="location">Your Location (Address or GPS link):</label>
+    <input type="text" id="location" placeholder="Enter your address or GPS location" required>
+
+    <label for="payment">Payment Method:</label>
+    <select id="payment" required>
+      <option value="MTN Mobile Money">MTN Mobile Money</option>
+      <option value="Airtel Money">Airtel Money</option>
+      <option value="Bank Transfer">Bank Transfer</option>
+    </select>
+
+    <button type="submit">Send Order via WhatsApp & Email</button>
+  </form>
+
+  <div id="confirmation"></div>
+
+  <div class="contact">
+    <h3>Contact Us</h3>
+    <p>Email: <a href="mailto:edrinehero@gmail.com">edrinehero@gmail.com</a></p>
+    <p>WhatsApp: <a href="https://wa.me/750992939" target="_blank">wa.me/750992939</a></p>
+    <p>Phone: 0778379591 / 0750992939</p>
+  </div>
+</main>
+
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script>
+  (function(){ emailjs.init("QPXYuZG5LIiv_1x3H"); })();
+
+  const testPrices = {
+    "CBC":15000,"Hb":10000,"Blood Glucose":7000,"RFT":50000,"LFT":50000,
+    "Electrolytes":50000,"Blood Smear":5000,"RPR/Syphilis":8000,"HIV":7000,
+    "Hep B":10000,"Hep C":10000,"Gonorrhea":15000,"Chlamydia":15000,
+    "Urinalysis":8000,"Widal Serum":8000,"Widal Stool":12000,
+    "Hpylori Serum":8000,"Hpylori Stool":12000,"PSA":25000,"HCG":5000,
+    "Lipid Profile":40000,"BAT":15000,"RF":15000,"Blood Grouping":10000
+  };
+
+  const whatsappNumber = "750992939";
+  const serviceID = "service_sjp4zrf";
+  const templateID = "lab_order";
+  const confirmationDiv = document.getElementById("confirmation");
+  const totalDisplay = document.getElementById('totalDisplay');
+  const testsSelect = document.getElementById('tests');
+
+  // Update total live
+  testsSelect.addEventListener('change', function(){
+    const selectedTests = Array.from(this.selectedOptions).map(o=>o.value);
+    const total = selectedTests.reduce((sum,test)=>sum+testPrices[test],0);
+    totalDisplay.textContent = `Total: UGX ${total}`;
+  });
+
+  // Form submit
+  document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name=document.getElementById('name').value;
+    const phone=document.getElementById('phone').value;
+    const testsSelected=Array.from(testsSelect.selectedOptions).map(o=>o.value);
+    const location=document.getElementById('location').value;
+    const payment=document.getElementById('payment').value;
+
+    if(testsSelected.length===0){ alert("Please select at least one test."); return; }
+
+    const total = testsSelected.reduce((sum,test)=>sum+testPrices[test],0);
+    const orderMessage=`Mobile Lab Order:\nName: ${name}\nPhone: ${phone}\nTests Ordered: ${testsSelected.join(', ')}\nTotal Amount: UGX ${total}\nLocation: ${location}\nPayment Method: ${payment}`;
+
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`,'_blank');
+
+    emailjs.send(serviceID,templateID,{
+      name:name,phone:phone,tests:testsSelected.join(', '),total:`UGX ${total}`,location:location,payment:payment
+    }).then(function(response){
+      confirmationDiv.innerHTML="✅ Your order has been sent successfully via WhatsApp and Email!";
+      document.getElementById('orderForm').reset();
+      totalDisplay.textContent = "Total: UGX 0"; // Reset total
+    },function(error){
+      confirmationDiv.innerHTML="❌ Failed to send the order. Please try again.";
+      console.log(error);
+    });
+  });
+</script>
+
+</body>
+</html>
