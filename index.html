@@ -59,6 +59,9 @@ button:hover { background:#389ca0; }
 .order-preview-header { background-color: #4cafcb; color: white; padding: 10px; font-weight: bold; text-align: center; }
 .order-preview-body { background: white; padding: 15px; line-height: 1.5; }
 .order-preview-body p { margin: 5px 0; font-size: 0.95em; }
+.lab-link { text-align:center; margin-bottom:20px; }
+.lab-link a { background:#007b9e; color:white; padding:12px 20px; border-radius:6px; text-decoration:none; font-weight:bold; display:inline-block; }
+.lab-link a:hover { background:#005f75; }
 @media(max-width:600px){ .container { margin:10px; padding:15px; } .tests-container { grid-template-columns:1fr; max-height:300px; } }
 </style>
 </head>
@@ -68,6 +71,11 @@ button:hover { background:#389ca0; }
   <div class="header">
     <h2>🧪 Mobile Lab Order Form</h2>
     <h3>For the love of your health</h3>
+  </div>
+
+  <!-- Lab Reports button (added) -->
+  <div class="lab-link">
+    <a href="lab-report.html" target="_blank" rel="noopener">📑 Enter Lab Results</a>
   </div>
 
   <form id="orderForm">
@@ -117,7 +125,7 @@ button:hover { background:#389ca0; }
       <label><input type="checkbox" class="test" value="Widal Stool" data-price="12000"> Widal Stool (12,000 UGX)</label>
       <label><input type="checkbox" class="test" value="Gram staining" data-price="10000"> Gram Staining (10,000 UGX)</label>
       <label><input type="checkbox" class="test" value="deoxyribonucleic acid" data-price="450000"> DNA (450,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="sickling test" data-price="40000"> sickling test (40,000 UGX)</label>
+      <label><input type="checkbox" class="test" value="sickling test" data-price="40000"> Sickling Test (40,000 UGX)</label>
     </div>
 
     <label>Location:</label>
@@ -203,6 +211,7 @@ function updateTotalAndPreview() {
   `;
 }
 
+// Attach listeners
 testCheckboxes.forEach(cb => cb.addEventListener("change", updateTotalAndPreview));
 notesInput.addEventListener("input", updateTotalAndPreview);
 
@@ -221,6 +230,10 @@ locButton.addEventListener("click", () => {
   } else { alert("Geolocation not supported."); }
 });
 
+// Initialize preview
+updateTotalAndPreview();
+
+// Form submit
 document.getElementById("orderForm").addEventListener("submit", function(e) {
   e.preventDefault();
   const name = document.getElementById("name").value;
@@ -258,12 +271,9 @@ document.getElementById("orderForm").addEventListener("submit", function(e) {
     confirmationDiv.textContent = "❌ Failed to send order. Please try again.";
     console.error(err);
   });
+
 });
-  <a href="lab-report.html" class="btn">Enter Lab Results</a>
 
 </script>
 </body>
 </html>
-
-
-
