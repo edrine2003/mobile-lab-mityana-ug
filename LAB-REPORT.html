@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mobile Lab Mityana — Laboratory Report System</title>
+  <meta name="description" content="Enter, preview, print and share client laboratory results for Mobile Lab Mityana (Uganda)." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
+          colors: {
+            brand: {
+              50: '#eefdf3', 100:'#d6f7e1', 200:'#b0efc7', 300:'#7de6a8', 400:'#4fd98a', 500:'#22c55e', 600:'#16a34a', 700:'#15803d', 800:'#166534', 900:'#14532d'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- QRCode generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-MnZ3+8U6ZcNIqf6qC0Z2yD1wNyqEU9L5dS8D9g8kJYw9wP8Hn6b3E4C1d6iB6a3k5Yk7J1zv1tO3J2Xx2C0F6g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    @media print {
+      /* Hide all but the report */
+      #app { display: none; }
+      #printable { display: block !important; }
+      .no-print { display: none !important; }
+      @page { size: A4; margin: 14mm; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="no-print sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-brand-600 text-white grid place-items-center font-black">ML</div>
+        <div>
+          <h1 class="text-lg font-semibold">Mobile Lab Mityana — Laboratory Report System</h1>
+          <p class="text-xs text-slate-500">Aligned with <a class="underline" href="https://edrine2003.github.io/mobile-lab-mityana-ug/" target="_blank">mobile-lab-mityana-ug</a></p>
+        </div>
+      </div>
+      <div class="text-xs text-slate-500">Local time: <span id="clock"></span></div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6" id="app">
+    <!-- Left: Data Entry -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="p-4 sm:p-6 border-b bg-slate-50">
+        <h2 class="text-base sm:text-lg font-semibold">Client & Sample Details</h2>
+      </div>
+      <div class="p-4 sm:p-6 space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+          <label class="block"> <span class="text-sm font-medium">Client Name</span>
+            <input id="clientName" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g., Jane Namusoke" />
+          </label>
+          <label class="block"> <span class="text-sm font-medium">Client ID / Ref</span>
+            <input id="clientId" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g., ML-2025-00123" />
+          </label>
+          <label class="block"> <span class="text-sm font-medium">Age</span>
+            <input id="age" type="number" min="0" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g., 34" />
+          </label>
+          <label class="block"> <span class="text-sm font-medium">Sex</span>
+            <select id="sex" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500">
+              <option value="">— Select —</option>
+              <option>Female</option>
+              <option>Male</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label class="block md:col-span-2"> <span class="text-sm font-medium">Phone</span>
+            <input id="phone" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g., 0778 379 591" />
+          </label>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <label class="block"> <span class="text-sm font-medium">Sample Type</span>
+            <input id="sampleType" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g., Whole blood, Urine" />
+          </label>
+          <label class="block"> <span class="text-sm font-medium">Collection Date & Time</span>
+            <input id="collectionDate" type="datetime-local" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" />
+          </label>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <label class="block"> <span class="text-sm font-medium">Requesting Clinician</span>
+            <input id="clinician" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g., Dr. Ssenoga" />
+          </label>
+          <label class="block"> <span class="text-sm font-medium">Location / Facility</span>
+            <input id="location" class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g., Wabigalo, Mityana" />
+          </label>
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-6 border-t bg-slate-50">
+        <h2 class="text-base sm:text-lg font-semibold">Select Tests Performed</h2>
+        <p class="text-sm text-slate-500">Tick the tests and fill in results. Use “Custom Test” for anything not listed.</p>
+      </div>
+
+      <div class="p-4 sm:p-6 space-y-6">
+        <!-- Tests Checklist -->
+        <div class="grid md:grid-cols-2 gap-4">
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-malaria" /> Malaria RDT</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-typhoid" /> Typhoid (Widal)</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-hiv" /> HIV 1/2 Rapid</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-preg" /> Pregnancy (hCG)</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-covid" /> COVID‑19 Ag</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-brucella" /> Brucella</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-bloodgroup" /> Blood Grouping & Rh</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-cbc" /> CBC (summary)</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-urinalysis" /> Urinalysis (dipstick)</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-stool" /> Stool Microscopy</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-hpylori" /> H. pylori</label>
+          <label class="inline-flex items-center gap-2"><input type="checkbox" class="testToggle" data-target="t-custom" /> Custom Test</label>
+        </div>
+
+        <!-- Test Panels -->
+        <div id="panels" class="space-y-5">
+          <!-- Malaria -->
+          <div id="t-malaria" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">Malaria RDT</div>
+            <div class="grid md:grid-cols-3 gap-3">
+              <label class="block text-sm">Result
+                <select class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" data-field="malaria.result">
+                  <option value="">— Select —</option>
+                  <option>Positive</option>
+                  <option>Negative</option>
+                  <option>Invalid</option>
+                </select>
+              </label>
+              <label class="block text-sm">Parasite Density (optional)
+                <input class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" placeholder="e.g., ++ or paras/µL" data-field="malaria.density" />
+              </label>
+              <label class="block text-sm">Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300 focus:border-brand-500 focus:ring-brand-500" data-field="malaria.comment" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Typhoid -->
+          <div id="t-typhoid" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">Typhoid (Widal)</div>
+            <div class="grid md:grid-cols-4 gap-3 text-sm">
+              <label class="block"> O titre
+                <input class="mt-1 w-full rounded-xl border-slate-300" placeholder="e.g., 1:80" data-field="typhoid.O" />
+              </label>
+              <label class="block"> H titre
+                <input class="mt-1 w-full rounded-xl border-slate-300" placeholder="e.g., 1:160" data-field="typhoid.H" />
+              </label>
+              <label class="block"> Paratyphi A
+                <input class="mt-1 w-full rounded-xl border-slate-300" placeholder="e.g., 1:40" data-field="typhoid.A" />
+              </label>
+              <label class="block"> Paratyphi B
+                <input class="mt-1 w-full rounded-xl border-slate-300" placeholder="e.g., 1:40" data-field="typhoid.B" />
+              </label>
+            </div>
+          </div>
+
+          <!-- HIV -->
+          <div id="t-hiv" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">HIV 1/2 Rapid</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> Result
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="hiv.result">
+                  <option value="">— Select —</option>
+                  <option>Reactive</option>
+                  <option>Non-reactive</option>
+                  <option>Inconclusive</option>
+                </select>
+              </label>
+              <label class="block"> Kit(s) Used
+                <input class="mt-1 w-full rounded-xl border-slate-300" placeholder="e.g., Determine / First Response" data-field="hiv.kit" />
+              </label>
+              <label class="block"> Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="hiv.comment" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Pregnancy -->
+          <div id="t-preg" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">Pregnancy (hCG)</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> Result
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="preg.result">
+                  <option value="">— Select —</option>
+                  <option>Positive</option>
+                  <option>Negative</option>
+                  <option>Invalid</option>
+                </select>
+              </label>
+              <label class="block"> Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="preg.comment" />
+              </label>
+            </div>
+          </div>
+
+          <!-- COVID -->
+          <div id="t-covid" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">COVID‑19 Antigen Rapid</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> Result
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="covid.result">
+                  <option value="">— Select —</option>
+                  <option>Positive</option>
+                  <option>Negative</option>
+                  <option>Invalid</option>
+                </select>
+              </label>
+              <label class="block"> Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="covid.comment" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Brucella -->
+          <div id="t-brucella" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">Brucella</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> Result
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="brucella.result">
+                  <option value="">— Select —</option>
+                  <option>Positive</option>
+                  <option>Negative</option>
+                  <option>Inconclusive</option>
+                </select>
+              </label>
+              <label class="block"> Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="brucella.comment" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Blood Group -->
+          <div id="t-bloodgroup" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">Blood Grouping & Rh</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> ABO Group
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="blood.group">
+                  <option value="">—</option>
+                  <option>O</option><option>A</option><option>B</option><option>AB</option>
+                </select>
+              </label>
+              <label class="block"> Rh Factor
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="blood.rh">
+                  <option value="">—</option>
+                  <option>Positive (+)</option>
+                  <option>Negative (−)</option>
+                </select>
+              </label>
+              <label class="block"> Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="blood.comment" />
+              </label>
+            </div>
+          </div>
+
+          <!-- CBC -->
+          <div id="t-cbc" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">CBC (Summary)</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> Hb (g/dL)
+                <input type="number" step="0.1" class="mt-1 w-full rounded-xl border-slate-300" data-field="cbc.hb" />
+              </label>
+              <label class="block"> WBC (×10⁹/L)
+                <input type="number" step="0.1" class="mt-1 w-full rounded-xl border-slate-300" data-field="cbc.wbc" />
+              </label>
+              <label class="block"> Platelets (×10⁹/L)
+                <input type="number" step="1" class="mt-1 w-full rounded-xl border-slate-300" data-field="cbc.plt" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Urinalysis -->
+          <div id="t-urinalysis" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">Urinalysis (Dipstick)</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> pH
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="urinalysis.ph" placeholder="5.0 – 8.0" />
+              </label>
+              <label class="block"> SG
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="urinalysis.sg" placeholder="1.005 – 1.030" />
+              </label>
+              <label class="block"> Protein
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="urinalysis.protein">
+                  <option value="">—</option><option>Neg</option><option>Trace</option><option>+</option><option>++</option><option>+++</option>
+                </select>
+              </label>
+              <label class="block"> Glucose
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="urinalysis.glucose">
+                  <option value="">—</option><option>Neg</option><option>Trace</option><option>+</option><option>++</option><option>+++</option>
+                </select>
+              </label>
+              <label class="block"> Ketones
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="urinalysis.ketones">
+                  <option value="">—</option><option>Neg</option><option>Trace</option><option>+</option><option>++</option><option>+++</option>
+                </select>
+              </label>
+              <label class="block"> Nitrite
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="urinalysis.nitrite">
+                  <option value="">—</option><option>Negative</option><option>Positive</option>
+                </select>
+              </label>
+              <label class="block"> Leukocytes
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="urinalysis.leukocytes">
+                  <option value="">—</option><option>Neg</option><option>Trace</option><option>+</option><option>++</option><option>+++</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <!-- Stool -->
+          <div id="t-stool" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">Stool Microscopy</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> Ova/Cysts
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="stool.ova">
+                  <option value="">—</option><option>Absent</option><option>Present</option>
+                </select>
+              </label>
+              <label class="block"> Blood
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="stool.blood">
+                  <option value="">—</option><option>Absent</option><option>Present</option>
+                </select>
+              </label>
+              <label class="block"> Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="stool.comment" />
+              </label>
+            </div>
+          </div>
+
+          <!-- H. pylori -->
+          <div id="t-hpylori" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">H. pylori</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> Result
+                <select class="mt-1 w-full rounded-xl border-slate-300" data-field="hpylori.result">
+                  <option value="">—</option><option>Positive</option><option>Negative</option><option>Inconclusive</option>
+                </select>
+              </label>
+              <label class="block"> Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="hpylori.comment" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Custom -->
+          <div id="t-custom" class="hidden border rounded-xl p-4">
+            <div class="font-medium mb-2">Custom Test</div>
+            <div class="grid md:grid-cols-3 gap-3 text-sm">
+              <label class="block"> Test Name
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="custom.name" placeholder="e.g., Liver Function Tests" />
+              </label>
+              <label class="block"> Result / Value
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="custom.result" placeholder="e.g., Normal" />
+              </label>
+              <label class="block"> Comments
+                <input class="mt-1 w-full rounded-xl border-slate-300" data-field="custom.comment" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button id="btnPreview" class="px-4 py-2 rounded-xl bg-brand-600 text-white hover:bg-brand-700">Update Preview</button>
+          <button id="btnPrint" class="px-4 py-2 rounded-xl bg-slate-800 text-white hover:bg-slate-900">Print / Save PDF</button>
+          <button id="btnSave" class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:border-slate-400">Save Draft</button>
+          <button id="btnLoad" class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:border-slate-400">Load Draft</button>
+          <button id="btnClear" class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:border-slate-400">Clear</button>
+          <button id="btnShare" class="px-4 py-2 rounded-xl bg-white border border-brand-600 text-brand-700 hover:bg-brand-50">Generate Share Link</button>
+          <button id="btnExport" class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:border-slate-400">Export JSON</button>
+          <label class="px-4 py-2 rounded-xl bg-white border border-slate-300 hover:border-slate-400 cursor-pointer">Import JSON
+            <input id="fileImport" type="file" accept="application/json" class="hidden" />
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Report Preview -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="p-4 sm:p-6 border-b bg-slate-50 flex items-center justify-between">
+        <h2 class="text-base sm:text-lg font-semibold">Report Preview</h2>
+        <span class="text-xs text-slate-500">A4 layout • prints clean</span>
+      </div>
+      <div class="p-2 sm:p-4">
+        <div id="report" class="bg-white border border-slate-200 rounded-xl p-6 max-w-[210mm] mx-auto">
+          <!-- Header -->
+          <div class="flex items-start justify-between gap-4 border-b pb-4">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-xl bg-brand-600 text-white grid place-items-center font-black">ML</div>
+              <div>
+                <div class="text-xl font-bold leading-tight">Mobile Lab Mityana</div>
+                <div class="text-xs text-slate-500">Wabigalo • Mityana, Uganda • +256 778 379 591</div>
+                <div class="text-xs text-slate-500">Website: edrine2003.github.io/mobile-lab-mityana-ug</div>
+              </div>
+            </div>
+            <div class="text-right text-xs">
+              <div class="font-semibold">Laboratory Report</div>
+              <div>Report No: <span id="r-ref">—</span></div>
+              <div>Date: <span id="r-date">—</span></div>
+            </div>
+          </div>
+
+          <!-- Client block -->
+          <div class="grid grid-cols-2 gap-3 text-sm mt-4">
+            <div>Client: <span class="font-medium" id="r-name">—</span></div>
+            <div>Client ID: <span class="font-medium" id="r-id">—</span></div>
+            <div>Age: <span class="font-medium" id="r-age">—</span></div>
+            <div>Sex: <span class="font-medium" id="r-sex">—</span></div>
+            <div>Phone: <span class="font-medium" id="r-phone">—</span></div>
+            <div>Sample: <span class="font-medium" id="r-sample">—</span></div>
+            <div>Collected: <span class="font-medium" id="r-collected">—</span></div>
+            <div>Location: <span class="font-medium" id="r-location">—</span></div>
+            <div class="col-span-2">Clinician: <span class="font-medium" id="r-clinician">—</span></div>
+          </div>
+
+          <!-- Results Table -->
+          <div class="mt-5">
+            <div class="text-base font-semibold mb-2">Results</div>
+            <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="text-left p-2 border-b">Test</th>
+                  <th class="text-left p-2 border-b">Result</th>
+                  <th class="text-left p-2 border-b">Comments / Values</th>
+                </tr>
+              </thead>
+              <tbody id="r-rows"></tbody>
+            </table>
+          </div>
+
+          <!-- Footer -->
+          <div class="mt-6 grid grid-cols-2 gap-4 items-end">
+            <div>
+              <div class="text-sm">Authorised by:</div>
+              <div class="mt-10 border-t pt-2 text-sm font-medium">Lab Scientist / Technician</div>
+            </div>
+            <div class="justify-self-end text-center">
+              <div id="qrcode" class="inline-block"></div>
+              <div class="text-[10px] text-slate-500 mt-1">Scan to verify</div>
+            </div>
+          </div>
+
+          <div class="mt-4 text-[10px] text-slate-500">
+            Disclaimer: Results are for clinical correlation only. If results are borderline or inconclusive, consider repeat testing.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Printable copy (hidden) -->
+  <div id="printable" class="hidden">
+    <div id="printArea" class="max-w-[210mm] mx-auto"></div>
+  </div>
+
+  <script>
+    // --- Utilities ---
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+    const byDataField = (key) => `[data-field="${key}"]`;
+
+    function nowLocalISO() {
+      const d = new Date();
+      const tzoffset = d.getTimezoneOffset() * 60000; // ms
+      return new Date(d - tzoffset).toISOString().slice(0,16);
+    }
+
+    function uiClock(){ $('#clock').textContent = new Date().toLocaleString(); }
+    setInterval(uiClock, 1000); uiClock();
+
+    const storageKey = 'mlmityana_report_v1';
+
+    // --- Toggle panels ---
+    $$('.testToggle').forEach(cb=>{
+      cb.addEventListener('change', e=>{
+        const t = document.getElementById(cb.dataset.target);
+        if (cb.checked) t.classList.remove('hidden');
+        else t.classList.add('hidden');
+      });
+    });
+
+    // Prefill collection time
+    $('#collectionDate').value = nowLocalISO();
+
+    // --- Data gatherer ---
+    function gatherData(){
+      const data = {
+        meta: { version: 1, generatedAt: new Date().toISOString() },
+        client: {
+          name: $('#clientName').value.trim(), id: $('#clientId').value.trim(),
+          age: $('#age').value, sex: $('#sex').value, phone: $('#phone').value.trim(),
+          sample: $('#sampleType').value.trim(), collected: $('#collectionDate').value,
+          clinician: $('#clinician').value.trim(), location: $('#location').value.trim()
+        },
+        tests: {}
+      };
+      // For each panel, read fields if visible
+      $$('#panels [data-field]').forEach(el=>{
+        const [group, key] = el.dataset.field.split('.');
+        const panel = el.closest('div[id^="t-"]');
+        const toggler = $(`.testToggle[data-target="${panel.id}"]`);
+        if (!toggler || !toggler.checked) return;
+        data.tests[group] ||= {};
+        data.tests[group][key] = el.type === 'select-one' ? el.value : el.value.trim();
+      });
+      return data;
+    }
+
+    function humanRows(data){
+      const rows = [];
+      const t = data.tests || {};
+      const push = (name, result, comment='') => {
+        if (!name) return;
+        rows.push(`<tr><td class="p-2 border-b align-top">${name}</td><td class="p-2 border-b">${result||''}</td><td class="p-2 border-b">${comment||''}</td></tr>`);
+      };
+      if (t.malaria) push('Malaria RDT', t.malaria.result, [t.malaria.density, t.malaria.comment].filter(Boolean).join(' • '));
+      if (t.typhoid) push('Typhoid (Widal)', [t.typhoid.O?`O ${t.typhoid.O}`:'', t.typhoid.H?`H ${t.typhoid.H}`:'', t.typhoid.A?`A ${t.typhoid.A}`:'', t.typhoid.B?`B ${t.typhoid.B}`:''].filter(Boolean).join(' | '));
+      if (t.hiv) push('HIV 1/2 Rapid', t.hiv.result, [t.hiv.kit, t.hiv.comment].filter(Boolean).join(' • '));
+      if (t.preg) push('Pregnancy (hCG)', t.preg.result, t.preg.comment);
+      if (t.covid) push('COVID‑19 Ag', t.covid.result, t.covid.comment);
+      if (t.brucella) push('Brucella', t.brucella.result, t.brucella.comment);
+      if (t.blood) push('Blood Group & Rh', [t.blood.group, t.blood.rh].filter(Boolean).join(' '), t.blood.comment);
+      if (t.cbc) push('CBC (Summary)', [t.cbc.hb?`Hb ${t.cbc.hb} g/dL`:'' , t.cbc.wbc?`WBC ${t.cbc.wbc} ×10⁹/L`:'' , t.cbc.plt?`Plt ${t.cbc.plt} ×10⁹/L`:''].filter(Boolean).join(' | '));
+      if (t.urinalysis) push('Urinalysis (Dipstick)', [
+        t.urinalysis.ph?`pH ${t.urinalysis.ph}`:'', t.urinalysis.sg?`SG ${t.urinalysis.sg}`:'',
+        t.urinalysis.protein?`Protein ${t.urinalysis.protein}`:'', t.urinalysis.glucose?`Glucose ${t.urinalysis.glucose}`:'',
+        t.urinalysis.ketones?`Ketones ${t.urinalysis.ketones}`:'', t.urinalysis.nitrite?`Nitrite ${t.urinalysis.nitrite}`:'', t.urinalysis.leukocytes?`Leukocytes ${t.urinalysis.leukocytes}`:''
+      ].filter(Boolean).join(' | '));
+      if (t.stool) push('Stool Microscopy', [t.stool.ova?`Ova/Cysts: ${t.stool.ova}`:'', t.stool.blood?`Blood: ${t.stool.blood}`:''].filter(Boolean).join(' | '), t.stool.comment);
+      if (t.hpylori) push('H. pylori', t.hpylori.result, t.hpylori.comment);
+      if (t.custom && (t.custom.name || t.custom.result || t.custom.comment)) push(t.custom.name||'Custom', t.custom.result, t.custom.comment);
+      return rows.join('');
+    }
+
+    function updatePreview(fromShare=false){
+      const data = gatherData();
+      // Basic derived
+      $('#r-ref').textContent = data.client.id || '—';
+      $('#r-date').textContent = new Date().toLocaleString();
+      $('#r-name').textContent = data.client.name || '—';
+      $('#r-id').textContent = data.client.id || '—';
+      $('#r-age').textContent = data.client.age || '—';
+      $('#r-sex').textContent = data.client.sex || '—';
+      $('#r-phone').textContent = data.client.phone || '—';
+      $('#r-sample').textContent = data.client.sample || '—';
+      $('#r-collected').textContent = data.client.collected ? new Date(data.client.collected).toLocaleString() : '—';
+      $('#r-clinician').textContent = data.client.clinician || '—';
+      $('#r-location').textContent = data.client.location || '—';
+      $('#r-rows').innerHTML = humanRows(data) || `<tr><td class='p-2' colspan='3'>No test results entered yet.</td></tr>`;
+
+      // QR code - share link
+      const share = makeShareLink(data);
+      $('#qrcode').innerHTML='';
+      new QRCode(document.getElementById('qrcode'), { text: share, width: 96, height: 96 });
+
+      if (!fromShare) history.replaceState(null, '', window.location.pathname); // clear hash while editing
+      return data;
+    }
+
+    function saveDraft(){
+      localStorage.setItem(storageKey, JSON.stringify(gatherData()));
+      toast('Draft saved locally.');
+    }
+
+    function loadDraft(){
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return toast('No draft found.');
+      applyData(JSON.parse(raw));
+      toast('Draft loaded.');
+    }
+
+    function clearAll(){
+      localStorage.removeItem(storageKey);
+      document.querySelector('form')?.reset?.();
+      // Reset inputs
+      $$('#app input, #app select').forEach(el=>{ if (el.type!=='file') el.value = ''; });
+      // Uncheck toggles and hide panels
+      $$('.testToggle').forEach(cb=>{ cb.checked=false; document.getElementById(cb.dataset.target).classList.add('hidden'); });
+      $('#collectionDate').value = nowLocalISO();
+      updatePreview();
+    }
+
+    function exportJSON(){
+      const data = gatherData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${data.client.id||'lab-report'}.json`;
+      a.click(); URL.revokeObjectURL(url);
+    }
+
+    $('#fileImport').addEventListener('change', (e)=>{
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{ try { applyData(JSON.parse(ev.target.result)); toast('Imported.'); } catch { toast('Invalid JSON file.'); } };
+      reader.readAsText(file);
+    });
+
+    function makeShareLink(data){
+      try {
+        const payload = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data)))));
+        return `${location.origin}${location.pathname}#data=${payload}`;
+      } catch { return location.href; }
+    }
+
+    function copyShare(){
+      const link = makeShareLink(gatherData());
+      navigator.clipboard.writeText(link).then(()=>toast('Share link copied.')).catch(()=>{ prompt('Copy link:', link); });
+      history.replaceState(null,'', `#data=${link.split('#data=')[1]}`);
+    }
+
+    function applyData(data){
+      const c = data.client || {};
+      $('#clientName').value = c.name||'';
+      $('#clientId').value = c.id||'';
+      $('#age').value = c.age||'';
+      $('#sex').value = c.sex||'';
+      $('#phone').value = c.phone||'';
+      $('#sampleType').value = c.sample||'';
+      $('#collectionDate').value = c.collected||nowLocalISO();
+      $('#clinician').value = c.clinician||'';
+      $('#location').value = c.location||'';
+
+      // Enable panels when there is data
+      const t = data.tests||{};
+      const map = { malaria:'t-malaria', typhoid:'t-typhoid', hiv:'t-hiv', preg:'t-preg', covid:'t-covid', brucella:'t-brucella', blood:'t-bloodgroup', cbc:'t-cbc', urinalysis:'t-urinalysis', stool:'t-stool', hpylori:'t-hpylori', custom:'t-custom' };
+      Object.entries(map).forEach(([key,id])=>{
+        const has = t[key] && Object.keys(t[key]).length;
+        const cb = $(`.testToggle[data-target="${id}"]`);
+        cb.checked = !!has; document.getElementById(id).classList.toggle('hidden', !has);
+        if (has){
+          Object.entries(t[key]).forEach(([k,v])=>{
+            const el = $(`[data-field="${key}.${k}"]`);
+            if (el) el.value = v;
+          });
+        }
+      });
+
+      updatePreview(true);
+    }
+
+    // Toast helper
+    const toaster = document.createElement('div');
+    toaster.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 space-y-2 z-[9999] no-print';
+    document.body.appendChild(toaster);
+    function toast(msg){
+      const el = document.createElement('div');
+      el.className = 'px-4 py-2 bg-slate-900 text-white rounded-xl shadow-lg';
+      el.textContent = msg; toaster.appendChild(el); setTimeout(()=>el.remove(), 2500);
+    }
+
+    // Buttons
+    $('#btnPreview').addEventListener('click', ()=> updatePreview());
+    $('#btnPrint').addEventListener('click', ()=>{
+      // render clean printable clone
+      const clone = $('#report').cloneNode(true);
+      $('#printArea').innerHTML = ''; $('#printArea').appendChild(clone);
+      window.print();
+    });
+    $('#btnSave').addEventListener('click', saveDraft);
+    $('#btnLoad').addEventListener('click', loadDraft);
+    $('#btnClear').addEventListener('click', clearAll);
+    $('#btnShare').addEventListener('click', copyShare);
+    $('#btnExport').addEventListener('click', exportJSON);
+
+    // Load from URL hash if present
+    (function(){
+      const hash = location.hash;
+      const m = hash.match(/#data=([^&]+)/);
+      if (m && m[1]){
+        try {
+          const json = decodeURIComponent(escape(atob(decodeURIComponent(m[1]))));
+          const data = JSON.parse(json);
+          applyData(data);
+          toast('Loaded from share link.');
+        } catch (e) { console.warn(e); }
+      }
+    })();
+
+    // Initial preview
+    updatePreview();
+  </script>
+</body>
+</html>
