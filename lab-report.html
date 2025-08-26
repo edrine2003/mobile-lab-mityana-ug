@@ -1,187 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secure Lab Report System with History</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-    h1 { text-align: center; }
-    .test-label { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
-    .test-label input[type=text] { margin-left: auto; width: 100px; padding: 4px; }
-    .button { padding: 8px 16px; margin: 5px; cursor: pointer; }
-    #report { margin-top: 20px; background: #fff; padding: 20px; border-radius: 8px; }
-    #historyDiv { margin-top: 20px; background: #fff; padding: 10px; border-radius: 8px; }
-  </style>
-</head>
-<body>
-
-<h1>Secure Lab Report System</h1>
-
-<div id="loginDiv">
-  <label>Password: <input type="password" id="password"></label>
-  <button class="button" onclick="login()">Unlock</button>
-</div>
-
-<div id="labDiv" style="display:none;">
-  <h2>Tests Performed</h2>
-  <div id="testsContainer"></div>
-
-  <button class="button" onclick="saveResults()">Save Results</button>
-  <button class="button" onclick="generateReport()">Generate Report</button>
-
-  <div id="report"></div>
-
-  <div id="historyDiv">
-    <h3>Previous Results</h3>
-    <select id="historySelect">
-      <option value="">-- Select a saved result --</option>
-    </select>
-    <button class="button" onclick="loadHistory()">Load</button>
-  </div>
-</div>
+<!-- Include QRCode.js for QR generation if not already -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <script>
-const passwordKey = "labSystemPassword";
-const resultsHistoryKey = "labResultsHistory";
-const testsList = [
-  "Bleeding & Clotting (BAT)","Blood Glucose","Blood Grouping","Blood Smear",
-  "Brucella","CBC","Chlamydia","Electrolytes","Gonorrhea","Pregnancy (hCG)",
-  "Hepatitis B","Hepatitis C","HIV","H. Pylori (Serum)","H. Pylori (Stool)",
-  "Lipid Profile","Liver Function","PSA","Kidney Function","Rheumatoid Factor",
-  "RPR/Syphilis","Stool Analysis","Urinalysis","Widal (Serum)","Widal (Stool)",
-  "Gram Staining","DNA Test","Sickle Cell (Sickling)"
-];
+(async ()=>{
 
-// Generate test checkboxes
-const container = document.getElementById('testsContainer');
-testsList.forEach(test => {
-  const label = document.createElement('label');
-  label.className = "test-label";
-  label.innerHTML = `<input type="checkbox" class="test-checkbox" value="${test}"><span>${test}</span><input type="text" class="test-result" placeholder="Result">`;
-  container.appendChild(label);
-});
+// --- Utilities ---
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
 
-// Login / unlock function
-function login() {
-  const pw = document.getElementById('password').value;
-  if(!pw) return alert("Enter password!");
-  if(!localStorage.getItem(passwordKey)) {
-    localStorage.setItem(passwordKey, CryptoJS.SHA256(pw).toString());
-    alert("Password set! Remember it, it's required to unlock later.");
-  }
-  const storedHash = localStorage.getItem(passwordKey);
-  if(CryptoJS.SHA256(pw).toString() !== storedHash) {
-    return alert("Incorrect password!");
-  }
-  document.getElementById('loginDiv').style.display = "none";
-  document.getElementById('labDiv').style.display = "block";
-  loadResults(pw);
-  loadHistoryList();
+function bufToBase64(buf) {
+  return btoa(String.fromCharCode(...new Uint8Array(buf)));
+}
+function base64ToBuf(b64) {
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return arr.buffer;
 }
 
-// Save results securely in localStorage and archive
-function saveResults() {
-  const pw = document.getElementById('password').value;
-  const results = {};
-  document.querySelectorAll('.test-label').forEach(label => {
-    const checkbox = label.querySelector('.test-checkbox');
-    const resultInput = label.querySelector('.test-result');
-    if(checkbox.checked) results[checkbox.value] = resultInput.value;
+async function deriveKey(passphrase, salt, iterations=150000) {
+  const passKey = await crypto.subtle.importKey(
+    'raw', textEncoder.encode(passphrase),
+    {name:'PBKDF2'}, false, ['deriveKey']
+  );
+  return await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: salt, iterations: iterations, hash:'SHA-256' },
+    passKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt','decrypt']
+  );
+}
+
+// --- Encryption / Decryption ---
+async function encryptReport(passphrase, jsonObj) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(passphrase, salt.buffer);
+  const plain = textEncoder.encode(JSON.stringify(jsonObj));
+  const cipher = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, plain);
+  return `${bufToBase64(salt.buffer)}.${bufToBase64(iv.buffer)}.${bufToBase64(cipher)}`;
+}
+
+async function decryptReport(passphrase, payload) {
+  const parts = payload.split('.');
+  if(parts.length !== 3) throw new Error('Invalid encrypted payload');
+  const salt = base64ToBuf(parts[0]);
+  const iv = new Uint8Array(base64ToBuf(parts[1]));
+  const cipher = base64ToBuf(parts[2]);
+  const key = await deriveKey(passphrase, salt);
+  const plainBuf = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, cipher);
+  return JSON.parse(textDecoder.decode(plainBuf));
+}
+
+// --- Modal passphrase UI ---
+function promptPassphrase(message='Enter passphrase:') {
+  return new Promise((resolve)=>{
+    const modal = document.createElement('div');
+    modal.style = `
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;
+    `;
+    modal.innerHTML = `
+      <div style="background:#fff;padding:20px;border-radius:8px;min-width:300px;text-align:center;">
+        <p>${message}</p>
+        <input type="password" id="modalPass" style="width:80%;padding:8px;margin-bottom:10px;" />
+        <br>
+        <button id="okBtn">OK</button>
+        <button id="cancelBtn">Cancel</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    const input = modal.querySelector('#modalPass');
+    input.focus();
+    modal.querySelector('#okBtn').onclick = ()=>{ resolve(input.value); document.body.removeChild(modal); };
+    modal.querySelector('#cancelBtn').onclick = ()=>{ resolve(null); document.body.removeChild(modal); };
   });
-  const encrypted = CryptoJS.AES.encrypt(JSON.stringify(results), pw).toString();
-  localStorage.setItem('labResults', encrypted);
-
-  // Save to history with timestamp
-  const history = JSON.parse(localStorage.getItem(resultsHistoryKey) || "[]");
-  history.push({ timestamp: new Date().toLocaleString(), data: encrypted });
-  localStorage.setItem(resultsHistoryKey, JSON.stringify(history));
-  alert("Results saved securely and archived!");
-  loadHistoryList();
 }
 
-// Load current results
-function loadResults(pw) {
-  const encrypted = localStorage.getItem('labResults');
-  if(!encrypted) return;
+// --- Share / Load ---
+async function makeEncryptedShareLink() {
   try {
-    const bytes = CryptoJS.AES.decrypt(encrypted, pw);
-    const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-    for(let test in data) {
-      document.querySelectorAll('.test-label').forEach(label => {
-        const checkbox = label.querySelector('.test-checkbox');
-        const resultInput = label.querySelector('.test-result');
-        if(checkbox.value === test) {
-          checkbox.checked = true;
-          resultInput.value = data[test];
-        }
-      });
-    }
-  } catch(e) {
-    console.log("Error decrypting results", e);
+    const data = gatherData(); // your existing function
+    const pass = await promptPassphrase('Enter passphrase to encrypt this report:');
+    if(!pass) return toast('Encryption canceled.');
+    const payload = await encryptReport(pass, data);
+    const url = `${location.origin}${location.pathname}#data=${encodeURIComponent(payload)}`;
+    
+    try { await navigator.clipboard.writeText(url); toast('Encrypted link copied!'); }
+    catch { prompt('Encrypted link (copy manually):', url); }
+
+    // QR Code
+    const qrcodeEl = document.getElementById('qrcode');
+    if(qrcodeEl){ qrcodeEl.innerHTML=''; QRCode.toCanvas(qrcodeEl, url, {width:120,height:120}).catch(console.error); }
+
+    return url;
+  } catch(err){ console.error(err); toast('Encryption failed: ' + err.message); }
+}
+
+async function tryLoadFromHash() {
+  const m = location.hash.match(/#data=([^&]+)/);
+  if(!m) return false;
+  const payload = decodeURIComponent(m[1]);
+
+  if(payload.split('.').length !== 3){
+    // legacy unencrypted
+    try { const json = JSON.parse(atob(payload)); applyData(json); toast('Loaded unencrypted report'); return true; }
+    catch(e){ console.warn('Unrecognized hash', e); return false; }
   }
+
+  const pass = await promptPassphrase('Report is locked. Enter passphrase:');
+  if(!pass) { toast('Passphrase required.'); return false; }
+  try { const data = await decryptReport(pass, payload); applyData(data); toast('Report decrypted'); return true; }
+  catch(err){ console.error(err); alert('Incorrect passphrase or corrupted data.'); return false; }
 }
 
-// Generate printable report
-function generateReport() {
-  const reportDiv = document.getElementById('report');
-  let html = "<h3>Lab Report</h3><table border='1' cellpadding='5'><tr><th>Test</th><th>Result</th></tr>";
-  document.querySelectorAll('.test-label').forEach(label => {
-    const checkbox = label.querySelector('.test-checkbox');
-    const resultInput = label.querySelector('.test-result');
-    if(checkbox.checked) {
-      html += `<tr><td>${checkbox.value}</td><td>${resultInput.value}</td></tr>`;
-    }
-  });
-  html += "</table>";
-  reportDiv.innerHTML = html;
+// --- Export / Import ---
+async function exportEncryptedJSONToFile() {
+  const data = gatherData();
+  const pass = await promptPassphrase('Enter passphrase for export:');
+  if(!pass) return toast('Export canceled.');
+  const payload = await encryptReport(pass, data);
+  const blob = new Blob([payload], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${data.client?.id||'lab-report'}.enc.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Encrypted file exported.');
 }
 
-// Load history list into dropdown
-function loadHistoryList() {
-  const history = JSON.parse(localStorage.getItem(resultsHistoryKey) || "[]");
-  const select = document.getElementById('historySelect');
-  select.innerHTML = "<option value=''>-- Select a saved result --</option>";
-  history.forEach((item, idx) => {
-    select.innerHTML += `<option value="${idx}">${item.timestamp}</option>`;
-  });
+async function promptImportAndDecrypt() {
+  const enc = prompt('Paste encrypted payload or URL hash:');
+  if(!enc) return;
+  const m = enc.match(/#data=([^&]+)/);
+  const payload = m ? decodeURIComponent(m[1]) : enc.trim();
+  const pass = await promptPassphrase('Enter passphrase:');
+  if(!pass) return;
+  try { const data = await decryptReport(pass, payload); applyData(data); toast('Imported report decrypted'); }
+  catch(err){ console.error(err); alert('Failed to decrypt: wrong passphrase or corrupted data.'); }
 }
 
-// Load selected historical result
-function loadHistory() {
-  const idx = document.getElementById('historySelect').value;
-  if(idx === "") return alert("Select a saved result!");
-  const pw = document.getElementById('password').value;
-  const history = JSON.parse(localStorage.getItem(resultsHistoryKey) || "[]");
-  const encrypted = history[idx].data;
-  try {
-    const bytes = CryptoJS.AES.decrypt(encrypted, pw);
-    const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-    // Clear all
-    document.querySelectorAll('.test-label').forEach(label => {
-      const checkbox = label.querySelector('.test-checkbox');
-      const resultInput = label.querySelector('.test-result');
-      checkbox.checked = false;
-      resultInput.value = "";
-    });
-    // Load selected
-    for(let test in data) {
-      document.querySelectorAll('.test-label').forEach(label => {
-        const checkbox = label.querySelector('.test-checkbox');
-        const resultInput = label.querySelector('.test-result');
-        if(checkbox.value === test) {
-          checkbox.checked = true;
-          resultInput.value = data[test];
-        }
-      });
-    }
-    generateReport();
-  } catch(e) {
-    alert("Error decrypting historical result. Wrong password?");
-  }
-}
+// --- Setup ---
+const shareBtn = document.getElementById('btnShare');
+if(shareBtn){ shareBtn.onclick = ()=>makeEncryptedShareLink(); }
+
+window.addEventListener('load', ()=>{ setTimeout(()=>tryLoadFromHash(), 250); });
+
+// Expose for debugging / manual use
+window.encryptReport = encryptReport;
+window.decryptReport = decryptReport;
+window.makeEncryptedShareLink = makeEncryptedShareLink;
+window.promptImportAndDecrypt = promptImportAndDecrypt;
+window.exportEncryptedJSONToFile = exportEncryptedJSONToFile;
+
+})();
 </script>
-
-</body>
-</html>
