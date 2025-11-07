@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mobile Lab Order - Mityana Uganda</title>
 
-<!-- Google Search Console Verification -->
+<!-- Google Search Console -->
 <meta name="google-site-verification" content="tUarZUV2kLHSdPwtH2XDQTg7pc8zm3USMo9efqhsQrI" />
 
-<!-- SEO Meta Tags -->
+<!-- SEO -->
 <meta name="description" content="Book your mobile lab tests online in Mityana, Uganda. Quick, reliable, and convenient medical lab services at your doorstep.">
 <meta name="keywords" content="Mobile Lab, Lab Tests, Mityana, Uganda, Blood Test, Urinalysis, Health Services">
 <meta name="author" content="EdriNe">
 <meta name="robots" content="index, follow">
 
-<!-- Open Graph for social media -->
+<!-- Open Graph -->
 <meta property="og:title" content="Mobile Lab Order - Mityana Uganda">
 <meta property="og:description" content="Book your mobile lab tests online in Mityana, Uganda. Quick, reliable, and convenient medical lab services at your doorstep.">
 <meta property="og:url" content="https://edrine2003.github.io/mobile-lab-mityana-ug/">
@@ -27,11 +27,19 @@
 <meta name="twitter:description" content="Book your mobile lab tests online in Mityana, Uganda. Quick, reliable, and convenient medical lab services at your doorstep.">
 <meta name="twitter:image" content="https://edrine2003.github.io/mobile-lab-mityana-ug/og-image.png">
 
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4cafcb">
+
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
   (function() { emailjs.init({ publicKey: "QPXYuZG5LIiv_1x3H" }); })();
 </script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
 <style>
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f7fa; color:#333; }
@@ -55,22 +63,20 @@ button:hover { background:#389ca0; }
 .location-buttons { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
 .location-buttons button { flex:1; }
 .notes-card { background:#fffbe6; border:1px solid #ffe58f; border-radius:6px; padding:10px; margin-bottom:15px; }
-.order-preview { border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.15); margin-bottom:15px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-.order-preview-header { background-color:#4cafcb; color:white; padding:10px; font-weight:bold; text-align:center; }
-.order-preview-body { background:white; padding:15px; line-height:1.5; }
-.order-preview-body p { margin:5px 0; font-size:0.95em; }
+.order-preview { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+.order-preview-header { background-color: #4cafcb; color: white; padding: 10px; font-weight: bold; text-align: center; }
+.order-preview-body { background: white; padding: 15px; line-height: 1.5; }
+.order-preview-body p { margin: 5px 0; font-size: 0.95em; }
 .lab-link { text-align:center; margin-bottom:20px; }
 .lab-link a { background:#007b9e; color:white; padding:12px 20px; border-radius:6px; text-decoration:none; font-weight:bold; display:inline-block; }
 .lab-link a:hover { background:#005f75; }
 @media(max-width:600px){ .container { margin:10px; padding:15px; } .tests-container { grid-template-columns:1fr; max-height:300px; } }
 
-/* Popup Notification Styles */
-.popup-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; }
-.popup-box { background:#fff; width:320px; max-width:90%; margin:150px auto; border-radius:10px; padding:20px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.2); animation:fadeIn 0.3s ease; }
-.popup-box h3 { color:#4cafcb; margin-bottom:10px; }
-.popup-box button { background:#4cafcb; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; }
-.popup-box button:hover { background:#389ca0; }
-@keyframes fadeIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+/* Popup Overlay */
+#popupOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center; }
+#popupBox { background:white; padding:20px; border-radius:10px; max-width:400px; width:90%; text-align:center; }
+#popupBox h2 { margin-top:0; color:#4cafcb; }
+#popupBox button { margin-top:15px; width:auto; }
 </style>
 </head>
 <body>
@@ -104,36 +110,7 @@ button:hover { background:#389ca0; }
     <input type="tel" id="phone" required>
 
     <label>Select Tests:</label>
-    <div class="tests-container">
-      <label><input type="checkbox" class="test" value="BAT" data-price="15000"> Bleeding & Clotting Test (15,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Blood Glucose" data-price="7000"> Blood Glucose (7,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Blood Grouping" data-price="10000"> Blood Grouping (10,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Blood Smear" data-price="5000"> Blood Smear (5,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Brucella Test" data-price="10000"> Brucella Test (10,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="CBC" data-price="15000"> CBC - Complete Blood Count (15,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Chlamydia" data-price="15000"> Chlamydia Test (15,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Electrolytes" data-price="50000"> Electrolytes (50,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Gonorrhea" data-price="15000"> Gonorrhea Test (15,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="HCG" data-price="5000"> Pregnancy Test (hCG) (5,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Hep B" data-price="10000"> Hepatitis B (10,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Hep C" data-price="10000"> Hepatitis C (10,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="HIV" data-price="7000"> HIV (7,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Hpylori Serum" data-price="8000"> H. Pylori Serum (8,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Hpylori Stool" data-price="20000"> H. Pylori Stool (20,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Lipid Profile" data-price="40000"> Lipid Profile (40,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="LFT" data-price="50000"> Liver Function Test (50,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="PSA" data-price="25000"> PSA (25,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="RFT" data-price="50000"> Kidney Function Test (50,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="RF" data-price="15000"> Rheumatoid Factor (15,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="RPR/Syphilis" data-price="8000"> RPR/Syphilis (8,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Stool Analysis" data-price="15000"> Stool Analysis (15,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Urinalysis" data-price="8000"> Urinalysis (8,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Widal Serum" data-price="8000"> Widal Serum (8,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Widal Stool" data-price="20000"> Widal Stool (20,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="Gram staining" data-price="10000"> Gram Staining (10,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="deoxyribonucleic acid" data-price="600000"> DNA (600,000 UGX)</label>
-      <label><input type="checkbox" class="test" value="sickling test" data-price="40000"> Sickling Test (40,000 UGX)</label>
-    </div>
+    <div class="tests-container" id="testsContainer"></div>
 
     <label>Location:</label>
     <div class="location-buttons">
@@ -184,22 +161,86 @@ button:hover { background:#389ca0; }
     <p>Phone: 0778379591 / 0750992939</p>
     <p>WhatsApp: <a href="https://wa.me/750992939" target="_blank">wa.me/750992939</a></p>
     <p>For the love of your health ❤️</p>
-    <p>In association with one of the biggest laboratories in Uganda, this system is designed to reach your doorstep for accurate diagnosis.</p>
-    <p>Treatment shall be availed upon request after diagnosis.</p>
+    <p>In association with one of the biggest laboratories in Uganda.</p>
   </div>
 </div>
 
-<!-- Popup Notification -->
-<div id="popupOverlay" class="popup-overlay">
-  <div class="popup-box">
-    <h3 id="popupTitle">Notification</h3>
-    <p id="popupMessage">This is your message content.</p>
+<!-- Popup -->
+<div id="popupOverlay">
+  <div id="popupBox">
+    <h2 id="popupTitle"></h2>
+    <p id="popupMessage"></p>
     <button onclick="closePopup()">Close</button>
   </div>
 </div>
 
 <script>
-/* Form & Preview */
+// --- PWA & Firebase setup ---
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+Notification.requestPermission().then(permission => {
+  if(permission === 'granted'){
+    messaging.getToken({ vapidKey: '<YOUR_PUBLIC_VAPID_KEY>' }).then(token => {
+      if(token) console.log("FCM Token:", token);
+    });
+  }
+});
+
+// --- Service Worker Registration ---
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/service-worker.js')
+    .then(reg=>console.log("Service Worker registered", reg.scope))
+    .catch(err=>console.log("SW failed", err));
+}
+
+// --- Lab tests list ---
+const tests = [
+  {name:"Bleeding & Clotting Test", price:15000},
+  {name:"Blood Glucose", price:7000},
+  {name:"Blood Grouping", price:10000},
+  {name:"Blood Smear", price:5000},
+  {name:"Brucella Test", price:10000},
+  {name:"CBC - Complete Blood Count", price:15000},
+  {name:"Chlamydia Test", price:15000},
+  {name:"Electrolytes", price:50000},
+  {name:"Gonorrhea Test", price:15000},
+  {name:"Pregnancy Test (hCG)", price:5000},
+  {name:"Hepatitis B", price:10000},
+  {name:"Hepatitis C", price:10000},
+  {name:"HIV", price:7000},
+  {name:"H. Pylori Serum", price:8000},
+  {name:"H. Pylori Stool", price:20000},
+  {name:"Lipid Profile", price:40000},
+  {name:"Liver Function Test (LFT)", price:50000},
+  {name:"PSA", price:25000},
+  {name:"Kidney Function Test (RFT)", price:50000},
+  {name:"Rheumatoid Factor", price:15000},
+  {name:"RPR/Syphilis", price:8000},
+  {name:"Stool Analysis", price:15000},
+  {name:"Urinalysis", price:8000},
+  {name:"Widal Serum", price:8000},
+  {name:"Widal Stool", price:20000},
+  {name:"Gram Staining", price:10000},
+  {name:"DNA", price:600000},
+  {name:"Sickling Test", price:40000}
+];
+
+const testsContainer = document.getElementById("testsContainer");
+tests.forEach(t=>{
+  const label = document.createElement("label");
+  label.innerHTML = `<input type="checkbox" class="test" value="${t.name}" data-price="${t.price}"> ${t.name} (${t.price.toLocaleString()} UGX)`;
+  testsContainer.appendChild(label);
+});
+
 const testCheckboxes = document.querySelectorAll(".test");
 const totalInput = document.getElementById("total");
 const paymentSelect = document.getElementById("payment");
@@ -214,37 +255,41 @@ const whatsappNumber = "750992939";
 const serviceID = "service_sjp4zrf";
 const templateID = "lab_order";
 
+// --- Update Total & Preview ---
 function updateTotalAndPreview(){
-  let total=0;
-  let selectedTests=[];
-  testCheckboxes.forEach(cb=>{if(cb.checked){total+=parseInt(cb.getAttribute("data-price"));selectedTests.push(cb.value);}});
-  totalInput.value=total.toLocaleString();
-  orderPreview.querySelector(".order-preview-body").innerHTML=`
+  let total = 0, selectedTests = [];
+  testCheckboxes.forEach(cb=>{
+    if(cb.checked){ total+=parseInt(cb.getAttribute("data-price")); selectedTests.push(cb.value); }
+  });
+  totalInput.value = total.toLocaleString();
+  orderPreview.querySelector(".order-preview-body").innerHTML = `
     <p><strong>Tests:</strong> ${selectedTests.length?selectedTests.join(", "):"No tests selected yet."}</p>
     <p><strong>Total:</strong> UGX ${total.toLocaleString()}</p>
     <p><strong>Notes:</strong> ${notesInput.value||"None"}</p>
   `;
 }
-testCheckboxes.forEach(cb=>cb.addEventListener("change",updateTotalAndPreview));
-notesInput.addEventListener("input",updateTotalAndPreview);
 
-paymentSelect.addEventListener("change",function(){
-  mtnDetails.style.display=paymentSelect.value==="MTN Mobile Money"?"block":"none";
-  airtelDetails.style.display=paymentSelect.value==="Airtel Money"?"block":"none";
-});
-
-locButton.addEventListener("click",()=>{
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(position=>{
-      const lat=position.coords.latitude;
-      const lon=position.coords.longitude;
-      locationInput.value=`https://www.google.com/maps?q=${lat},${lon}`;
-    },()=>{alert("Unable to retrieve your location.");});
-  }else{alert("Geolocation not supported.");}
-});
+testCheckboxes.forEach(cb=>cb.addEventListener("change", updateTotalAndPreview));
+notesInput.addEventListener("input", updateTotalAndPreview);
 updateTotalAndPreview();
 
-document.getElementById("orderForm").addEventListener("submit",function(e){
+// --- Payment toggle ---
+paymentSelect.addEventListener("change", ()=>{
+  mtnDetails.style.display = paymentSelect.value==="MTN Mobile Money"?"block":"none";
+  airtelDetails.style.display = paymentSelect.value==="Airtel Money"?"block":"none";
+});
+
+// --- Geolocation ---
+locButton.addEventListener("click", ()=>{
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      locationInput.value = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+    }, ()=>alert("Unable to retrieve location."));
+  } else alert("Geolocation not supported.");
+});
+
+// --- Form submission ---
+document.getElementById("orderForm").addEventListener("submit", e=>{
   e.preventDefault();
   const name=document.getElementById("name").value;
   const age=document.getElementById("age").value;
@@ -256,19 +301,20 @@ document.getElementById("orderForm").addEventListener("submit",function(e){
   const notes=notesInput.value;
 
   let testsSelected=[];
-  testCheckboxes.forEach(cb=>{if(cb.checked)testsSelected.push(`${cb.value} (UGX ${parseInt(cb.getAttribute("data-price")).toLocaleString()})`);});
+  testCheckboxes.forEach(cb=>{if(cb.checked) testsSelected.push(`${cb.value} (UGX ${parseInt(cb.getAttribute("data-price")).toLocaleString()})`);});
 
-  let paymentDetails=payment;
+  let paymentDetails = payment;
   if(payment==="MTN Mobile Money") paymentDetails+=" - 0778379591 (Kwikiriza Jenipher)";
   if(payment==="Airtel Money") paymentDetails+=" - 0706559100 (Nambi Amina)";
 
-  const orderMessage=`🧪 Mobile Lab Order:\nName: ${name}\nAge: ${age}\nSex: ${sex}\nPhone: ${phone}\nTests:\n${testsSelected.join("\n")}\nTotal: UGX ${total}\nLocation: ${location}\nPayment: ${paymentDetails}\nNotes: ${notes}`;
+  const orderMessage = `🧪 Mobile Lab Order:\nName: ${name}\nAge: ${age}\nSex: ${sex}\nPhone: ${phone}\nTests:\n${testsSelected.join("\n")}\nTotal: UGX ${total}\nLocation: ${location}\nPayment: ${paymentDetails}\nNotes: ${notes}`;
+
   window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`,'_blank');
 
   emailjs.send(serviceID,templateID,{
-    name:name,age:age,sex:sex,phone:phone,
-    tests:testsSelected.join("<br>"),total:`UGX ${total}`,
-    location:location,payment:paymentDetails,notes:notes
+    name:name, age:age, sex:sex, phone:phone,
+    tests:testsSelected.join("<br>"), total:`UGX ${total}`,
+    location:location, payment:paymentDetails, notes:notes
   }).then(()=>{
     confirmationDiv.textContent="✅ Order submitted successfully via WhatsApp and Email!";
     showPopup("Success","Order submitted successfully!");
@@ -277,36 +323,22 @@ document.getElementById("orderForm").addEventListener("submit",function(e){
     mtnDetails.style.display="none";
     airtelDetails.style.display="none";
     updateTotalAndPreview();
-  },(err)=>{
+  }, err=>{
     confirmationDiv.textContent="❌ Failed to send order. Please try again.";
     showPopup("Error","Failed to submit order. Try again.");
     console.error(err);
   });
 });
 
-/* Popup Functions */
+// --- Popup ---
 function showPopup(title,message){
   document.getElementById("popupTitle").textContent=title;
   document.getElementById("popupMessage").textContent=message;
-  document.getElementById("popupOverlay").style.display="block";
+  document.getElementById("popupOverlay").style.display="flex";
 }
 function closePopup(){
   document.getElementById("popupOverlay").style.display="none";
 }
-
-/* Announcement Loader (once per day) */
-window.addEventListener("load",()=>{
-  fetch("announcement.txt").then(r=>r.text()).then(msg=>{
-    if(msg.trim()!==""){
-      const lastShown=localStorage.getItem("announcementDate");
-      const today=new Date().toISOString().split("T")[0];
-      if(lastShown!==today){
-        showPopup("Announcement",msg);
-        localStorage.setItem("announcementDate",today);
-      }
-    }
-  }).catch(err=>console.log("No announcement file found.",err));
-});
 </script>
 </body>
 </html>
