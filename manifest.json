@@ -1,11 +1,13 @@
 {
   "name": "Mobile Lab Mityana",
-  "short_name": "MobileLab",
+  "short_name": "Mobile Lab",
+  "description": "Book mobile lab tests online in Mityana, Uganda. Quick, reliable, and convenient medical services at your doorstep.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#4cafcb",
+  "background_color": "#ffffff",
   "theme_color": "#4cafcb",
-  "description": "Book your mobile lab tests online in Mityana, Uganda. Quick, reliable, and convenient medical lab services at your doorstep.",
+  "orientation": "portrait",
+  "scope": "./",
   "icons": [
     {
       "src": "icon-192.png",
