@@ -1,7 +1,9 @@
-// firebase.js
+// Firebase V9+ Modular SDK
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBupOR8UtVs5V_FI7Ce2FXqeRuplpkrEsU",
   authDomain: "mobile-lab-mityana.firebaseapp.com",
@@ -12,29 +14,38 @@ const firebaseConfig = {
   measurementId: "G-LBZW2Y0ZT9"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// Ask for permission and get token
-export async function initPush() {
+// Request notification permission + get token
+export async function requestPermission() {
+  console.log("Requesting notification permission...");
+
   const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    alert("Notifications blocked. Enable them in browser settings.");
+    return;
+  }
 
-  if (permission === "granted") {
-    const token = await getToken(messaging, {
-      vapidKey:
-        "BC9jijIAAote0XZQonTbMJQTRmv8-4Sk-3rqaKCBEbAWn0_CTF0ClgY8ZtEPK3_9rXqBA0qFfgS4J_ysLoSYtRs",
-    });
+  const vapidKey = "BCqjIjiAAote0XZQonTbMJQTRmv8-4Sk-3rqaKCBEbAWn0_CTFO6IgY8ZtEPK3_9rXqBA0qFfgS4J_ysLoSYtRs";
 
-    console.log("FCM Device Token:", token);
-    alert("Your device token:\n" + token);
+  const token = await getToken(messaging, { vapidKey });
 
+  if (token) {
+    console.log("FCM Token:", token);
+    // TODO: SEND TOKEN TO YOUR SERVER OR DATABASE
   } else {
-    console.log("Notification permission denied.");
+    console.error("No registration token available");
   }
 }
 
-// Handle foreground messages
+// Foreground listener
 onMessage(messaging, (payload) => {
   console.log("Message received in foreground:", payload);
-  alert(payload.notification.title + "\n" + payload.notification.body);
+
+  new Notification(payload.notification.title, {
+    body: payload.notification.body,
+    icon: "/icon.png"
+  });
 });
