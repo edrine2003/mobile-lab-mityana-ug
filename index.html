@@ -359,6 +359,20 @@ function closePopup(){
   document.getElementById("popupOverlay").style.display="none";
 }
 </script>
+  <script type="module">
+  import { initPush } from "./firebase.js";
+
+  // Register the service worker
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => {
+        console.log("Service worker registered");
+        initPush(); // Initialize push notifications
+      });
+  }
+</script>
+
 </body>
 </html>
+
 
