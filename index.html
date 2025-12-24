@@ -1,38 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mobile Lab Order – Mityana Uganda</title>
 
-<!-- SEO -->
-<meta name="description" content="Book mobile lab tests in Mityana, Uganda." />
-<meta name="theme-color" content="#4cafcb" />
+<meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
+<meta name="theme-color" content="#4cafcb">
 
-<!-- PWA -->
-<link rel="manifest" href="manifest.json" />
-<link rel="icon" href="icon-192.png" />
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
 
 <!-- EmailJS (PUBLIC KEY ONLY) -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-  emailjs.init("QPXYuZG5LIiv_1x3H"); // ✅ PUBLIC KEY ONLY
+  emailjs.init("QPXYuZG5LIiv_1x3H");
 </script>
 
 <style>
 body{font-family:Arial;background:#f4f7fa;margin:0}
-.container{max-width:750px;margin:20px auto;background:#fff;padding:20px;border-radius:10px}
+.container{max-width:800px;margin:20px auto;background:#fff;padding:20px;border-radius:10px}
 .header{text-align:center;background:#4cafcb;color:#fff;padding:15px;border-radius:10px}
 label{font-weight:bold}
 input,select,textarea{width:100%;padding:10px;margin:5px 0 15px;border-radius:6px;border:1px solid #ccc}
-.tests-container{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-button{background:#4cafcb;color:white;padding:12px;border:none;border-radius:6px;cursor:pointer;width:100%}
+.tests-container{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:350px;overflow:auto;border:1px solid #ccc;padding:10px;border-radius:6px}
+.tests-container label{font-weight:normal}
+button{background:#4cafcb;color:#fff;padding:12px;border:none;border-radius:6px;cursor:pointer;width:100%}
 button:hover{background:#389ca0}
 .payment-details{display:none;padding:10px;border-radius:6px;margin-bottom:10px}
 #mtnDetails{background:#fff3cd}
 #airtelDetails{background:#e0f7fa}
 .order-preview{border:1px solid #ccc;padding:10px;border-radius:6px;margin-bottom:15px}
 #confirmation{text-align:center;font-weight:bold;margin-top:15px}
+@media(max-width:600px){.tests-container{grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -40,167 +40,189 @@ button:hover{background:#389ca0}
 
 <div class="container">
   <div class="header">
-    <h2>🧪 Mobile Lab Order</h2>
+    <h2>🧪 Mobile Lab Order Form</h2>
     <p>For the love of your health</p>
   </div>
 
-  <form id="orderForm">
+<form id="orderForm">
 
-    <label>Full Name</label>
-    <input id="name" required />
+<label>Full Name</label>
+<input id="name" required>
 
-    <label>Email</label>
-    <input type="email" id="email" required />
+<label>Email</label>
+<input type="email" id="email" required>
 
-    <label>Age</label>
-    <input type="number" id="age" required />
+<label>Age</label>
+<input type="number" id="age" required>
 
-    <label>Sex</label>
-    <select id="sex" required>
-      <option value="">-- Select --</option>
-      <option>Male</option>
-      <option>Female</option>
-      <option>Other</option>
-    </select>
+<label>Sex</label>
+<select id="sex" required>
+  <option value="">-- Select --</option>
+  <option>Male</option>
+  <option>Female</option>
+  <option>Other</option>
+</select>
 
-    <label>Phone</label>
-    <input id="phone" required />
+<label>Phone</label>
+<input id="phone" required>
 
-    <label>Select Tests</label>
-    <div class="tests-container" id="testsContainer"></div>
+<label>Select Tests</label>
+<div class="tests-container" id="testsContainer"></div>
 
-    <label>Location</label>
-    <input id="location" placeholder="Enter address or Google Maps link" required />
+<label>Location</label>
+<input id="location" placeholder="Address or Google Maps link" required>
 
-    <label>Payment Method</label>
-    <select id="payment" required>
-      <option value="">-- Select --</option>
-      <option>Cash on Delivery</option>
-      <option>MTN Mobile Money</option>
-      <option>Airtel Money</option>
-    </select>
+<label>Payment Method</label>
+<select id="payment" required>
+  <option value="">-- Select --</option>
+  <option>Cash on Delivery</option>
+  <option>MTN Mobile Money</option>
+  <option>Airtel Money</option>
+</select>
 
-    <div id="mtnDetails" class="payment-details">
-      MTN MoMo: <b>0778379591 – Kwikiriza Jenipher</b>
-    </div>
+<div id="mtnDetails" class="payment-details">
+  MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b>
+</div>
 
-    <div id="airtelDetails" class="payment-details">
-      Airtel Money: <b>0706559100 – Nambi Amina</b>
-    </div>
+<div id="airtelDetails" class="payment-details">
+  Airtel Money: <b>0706559100 – Nambi Amina</b>
+</div>
 
-    <label>Notes</label>
-    <textarea id="notes"></textarea>
+<label>Notes (Optional)</label>
+<textarea id="notes"></textarea>
 
-    <label>Total (UGX)</label>
-    <input id="total" readonly value="0" />
+<label>Total (UGX)</label>
+<input id="total" readonly value="0">
 
-    <div class="order-preview" id="orderPreview">
-      No tests selected
-    </div>
+<div class="order-preview" id="preview">No tests selected</div>
 
-    <button type="submit">Submit Order</button>
-  </form>
+<button type="submit">Submit Order</button>
 
-  <div id="confirmation"></div>
+</form>
+
+<div id="confirmation"></div>
 </div>
 
 <script>
-// ---------- TESTS ----------
+// ---------- TESTS LIST (ALL INCLUDED) ----------
 const tests = [
-  {name:"Bleeding & Clotting Test", price:15000},
-  {name:"Blood Glucose", price:7000},
-  {name:"Blood Grouping", price:10000},
-  {name:"Blood Smear", price:5000},
-  {name:"Brucella Test", price:10000},
-  {name:"CBC - Complete Blood Count", price:15000},
-  {name:"Chlamydia Test", price:15000},
-  {name:"Electrolytes", price:50000},
-  {name:"Gonorrhea Test", price:15000},
-  {name:"Pregnancy Test (hCG)", price:5000},
-  {name:"Hepatitis B", price:10000},
-  {name:"Hepatitis C", price:10000},
-  {name:"HIV", price:7000},
-  {name:"H. Pylori Serum", price:8000},
-  {name:"H. Pylori Stool", price:20000},
-  {name:"High viginal swab", price:10000},
-  {name:"High viginal swab culture and sensitivity", price:120000},
-  {name:"Lipid Profile", price:40000},
-  {name:"Liver Function Test (LFT)", price:50000},
-  {name:"PSA", price:25000},
-  {name:"Kidney Function Test (RFT)", price:50000},
-  {name:"Rheumatoid Factor", price:15000},
-  {name:"RPR/Syphilis", price:8000},
-  {name:"Stool Analysis", price:15000},
-  {name:"Urinalysis", price:8000},
-  {name:"Widal Serum", price:8000},
-  {name:"Widal Stool", price:20000},
-  {name:"Gram Staining", price:10000},
-  {name:"DNA", price:600000},
-  {name:"Sickling Test", price:40000}
-];
+ {name:"Bleeding & Clotting Test",price:15000},
+ {name:"Blood Glucose",price:7000},
+ {name:"Blood Grouping",price:10000},
+ {name:"Blood Smear",price:5000},
+ {name:"Brucella Test",price:10000},
+ {name:"CBC - Complete Blood Count",price:15000},
+ {name:"Chlamydia Test",price:15000},
+ {name:"Electrolytes",price:50000},
+ {name:"Gonorrhea Test",price:15000},
+ {name:"Pregnancy Test (hCG)",price:5000},
+ {name:"Hepatitis B",price:10000},
+ {name:"Hepatitis C",price:10000},
+ {name:"HIV",price:7000},
+ {name:"H. Pylori Serum",price:8000},
+ {name:"H. Pylori Stool",price:20000},
+ {name:"High Vaginal Swab",price:10000},
+ {name:"High Vaginal Swab C&S",price:120000},
+ {name:"Lipid Profile",price:40000},
+ {name:"Liver Function Test (LFT)",price:50000},
+ {name:"PSA",price:25000},
+ {name:"Kidney Function Test (RFT)",price:50000},
+ {name:"Rheumatoid Factor",price:15000},
+ {name:"RPR / Syphilis",price:8000},
+ {name:"Stool Analysis",price:15000},
+ {name:"Urinalysis",price:8000},
+ {name:"Widal Serum",price:8000},
+ {name:"Widal Stool",price:20000},
+ {name:"Gram Staining",price:10000},
+ {name:"DNA",price:600000},
+ {name:"Sickling Test",price:40000}
 ];
 
-const testsContainer = document.getElementById("testsContainer");
-tests.forEach(t=>{
-  testsContainer.innerHTML +=
-   `<label><input type="checkbox" data-price="${t.price}" value="${t.name}"> ${t.name} (${t.price})</label>`;
+// ---------- RENDER TESTS ----------
+const container = document.getElementById("testsContainer");
+const totalInput = document.getElementById("total");
+const preview = document.getElementById("preview");
+
+tests.forEach(test=>{
+  const label = document.createElement("label");
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.value = test.name;
+  cb.dataset.price = test.price;
+  cb.addEventListener("change", updateTotal);
+  label.appendChild(cb);
+  label.append(` ${test.name} (UGX ${test.price.toLocaleString()})`);
+  container.appendChild(label);
 });
 
 // ---------- TOTAL ----------
-const totalInput=document.getElementById("total");
-const preview=document.getElementById("orderPreview");
-
 function updateTotal(){
   let total=0, list=[];
-  document.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+  container.querySelectorAll("input[type=checkbox]").forEach(cb=>{
     if(cb.checked){
-      total+=+cb.dataset.price;
-      list.push(`${cb.value} (UGX ${cb.dataset.price})`);
+      total+=Number(cb.dataset.price);
+      list.push(`${cb.value} (UGX ${cb.dataset.price.toLocaleString()})`);
     }
   });
-  totalInput.value=total.toLocaleString();
-  preview.innerHTML=list.length?list.join("<br>"):"No tests selected";
+  totalInput.value = total.toLocaleString();
+  preview.innerHTML = list.length ? list.join("<br>") : "No tests selected";
 }
-document.querySelectorAll("input[type=checkbox]").forEach(cb=>cb.onchange=updateTotal);
 
 // ---------- PAYMENT ----------
-const payment=document.getElementById("payment");
-payment.onchange=()=>{
-  mtnDetails.style.display=payment.value==="MTN Mobile Money"?"block":"none";
-  airtelDetails.style.display=payment.value==="Airtel Money"?"block":"none";
+const payment = document.getElementById("payment");
+payment.onchange = ()=>{
+  mtnDetails.style.display = payment.value==="MTN Mobile Money"?"block":"none";
+  airtelDetails.style.display = payment.value==="Airtel Money"?"block":"none";
 };
 
-// ---------- FORM ----------
-document.getElementById("orderForm").onsubmit=e=>{
+// ---------- FORM SUBMIT ----------
+document.getElementById("orderForm").onsubmit = e=>{
   e.preventDefault();
 
-  const orderId="ML-"+Date.now();
+  const orderId = "ML-" + Date.now();
 
-  const params={
-    order_id:orderId,
-    name:name.value,
-    email:email.value,
-    age:age.value,
-    sex:sex.value,
-    phone:phone.value,
-    tests:preview.innerHTML,
-    total:"UGX "+totalInput.value,
-    location:location.value,
-    payment:payment.value,
-    notes:notes.value
+  const params = {
+    order_id: orderId,
+    name: name.value,
+    email: email.value,
+    age: age.value,
+    sex: sex.value,
+    phone: phone.value,
+    tests: preview.innerHTML,
+    total: "UGX " + totalInput.value,
+    location: location.value,
+    payment: payment.value,
+    notes: notes.value || "None"
   };
 
+  // WhatsApp backup
+  const waText = `
+Mobile Lab Order
+Order ID: ${orderId}
+Name: ${params.name}
+Phone: ${params.phone}
+Tests:
+${preview.innerText}
+Total: ${params.total}
+Location: ${params.location}
+Payment: ${params.payment}
+`;
+  window.open(`https://wa.me/750992939?text=${encodeURIComponent(waText)}`);
+
+  // Email
   emailjs.send("service_sjp4zrf","lab_order",params)
-  .then(()=>{
-    confirmation.innerHTML="✅ Order sent successfully!";
-    e.target.reset();
-    preview.innerHTML="No tests selected";
-    totalInput.value="0";
-  })
-  .catch(err=>{
-    confirmation.innerHTML="❌ Failed to send order";
-    console.error(err);
-  });
+    .then(()=>{
+      confirmation.innerHTML="✅ Order submitted successfully!";
+      e.target.reset();
+      preview.innerHTML="No tests selected";
+      totalInput.value="0";
+      mtnDetails.style.display="none";
+      airtelDetails.style.display="none";
+    })
+    .catch(err=>{
+      confirmation.innerHTML="❌ Failed to send order";
+      console.error(err);
+    });
 };
 </script>
 
