@@ -1,227 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mobile Lab Order - Mityana Uganda</title>
-
-<!-- Google Search Console -->
-<meta name="google-site-verification" content="tUarZUV2kLHSdPwtH2XDQTg7pc8zm3USMo9efqhsQrI" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mobile Lab Order – Mityana Uganda</title>
 
 <!-- SEO -->
-<meta name="description" content="Book your mobile lab tests online in Mityana, Uganda. Quick, reliable, and convenient medical lab services at your doorstep.">
-<meta name="keywords" content="Mobile Lab, Lab Tests, Mityana, Uganda, Blood Test, Urinalysis, Health Services">
-<meta name="author" content="EdriNe">
-<meta name="robots" content="index, follow">
+<meta name="description" content="Book mobile lab tests in Mityana, Uganda." />
+<meta name="theme-color" content="#4cafcb" />
 
-<!-- Open Graph -->
-<meta property="og:title" content="Mobile Lab Order - Mityana Uganda">
-<meta property="og:description" content="Book your mobile lab tests online in Mityana, Uganda. Quick, reliable, and convenient medical lab services at your doorstep.">
-<meta property="og:url" content="https://edrine2003.github.io/mobile-lab-mityana-ug/">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://edrine2003.github.io/mobile-lab-mityana-ug/og-image.png">
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon-192.png" />
 
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Mobile Lab Order - Mityana Uganda">
-<meta name="twitter:description" content="Book your mobile lab tests online in Mityana, Uganda. Quick, reliable, and convenient medical lab services at your doorstep.">
-<meta name="twitter:image" content="https://edrine2003.github.io/mobile-lab-mityana-ug/og-image.png">
-
-<!-- PWA manifest -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#4cafcb">
-
-<!-- EmailJS -->
+<!-- EmailJS (PUBLIC KEY ONLY) -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-  (function() { emailjs.init({ publicKey: "QPXYuZG5LIiv_1x3H" }); })();
+  emailjs.init("QPXYuZG5LIiv_1x3H"); // ✅ PUBLIC KEY ONLY
 </script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
-
 <style>
-body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f7fa; color:#333; }
-.container { max-width:750px; margin:20px auto; padding:20px; background:white; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
-.header { text-align:center; background:#4cafcb; padding:15px; border-radius:10px; margin-bottom:20px; color:white; }
-.header h2 { margin:5px 0; font-size:1.6em; }
-.header h3 { margin:5px 0; font-weight:normal; font-size:1em; color:#e0f7fa; }
-form label { font-weight:bold; margin-top:10px; display:block; }
-input, select, textarea { margin:5px 0 15px 0; padding:10px; width:100%; border:1px solid #ccc; border-radius:6px; font-size:1em; }
-.tests-container { display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:400px; overflow-y:auto; padding:10px; border:1px solid #ccc; border-radius:6px; background:#f9f9f9; }
-.tests-container label { display:block; font-weight:normal; }
-button { background:#4cafcb; color:white; padding:12px; border:none; border-radius:6px; cursor:pointer; font-size:1em; width:100%; }
-button:hover { background:#389ca0; }
-.payment-details { display:none; margin:10px 0; padding:10px; border-radius:6px; font-size:0.95em; }
-#mtnDetails { background:#fff3cd; border:1px solid #ffeeba; }
-#airtelDetails { background:#e0f7fa; border:1px solid #b2ebf2; }
-#confirmation { font-weight:bold; margin-top:15px; text-align:center; color:green; }
-.contact { text-align:center; margin-top:25px; background:#e8f4f8; padding:15px; border-radius:8px; color:#333; }
-.contact a { color:#007b9e; text-decoration:none; font-weight:bold; }
-.contact h3 { margin-top:0; color:#4cafcb; }
-.location-buttons { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
-.location-buttons button { flex:1; }
-.notes-card { background:#fffbe6; border:1px solid #ffe58f; border-radius:6px; padding:10px; margin-bottom:15px; }
-.order-preview { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-.order-preview-header { background-color: #4cafcb; color: white; padding: 10px; font-weight: bold; text-align: center; }
-.order-preview-body { background: white; padding: 15px; line-height: 1.5; }
-.order-preview-body p { margin: 5px 0; font-size: 0.95em; }
-.lab-link { text-align:center; margin-bottom:20px; }
-.lab-link a { background:#007b9e; color:white; padding:12px 20px; border-radius:6px; text-decoration:none; font-weight:bold; display:inline-block; }
-.lab-link a:hover { background:#005f75; }
-@media(max-width:600px){ .container { margin:10px; padding:15px; } .tests-container { grid-template-columns:1fr; max-height:300px; } }
-
-/* Popup Overlay */
-#popupOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center; }
-#popupBox { background:white; padding:20px; border-radius:10px; max-width:400px; width:90%; text-align:center; }
-#popupBox h2 { margin-top:0; color:#4cafcb; }
-#popupBox button { margin-top:15px; width:auto; }
+body{font-family:Arial;background:#f4f7fa;margin:0}
+.container{max-width:750px;margin:20px auto;background:#fff;padding:20px;border-radius:10px}
+.header{text-align:center;background:#4cafcb;color:#fff;padding:15px;border-radius:10px}
+label{font-weight:bold}
+input,select,textarea{width:100%;padding:10px;margin:5px 0 15px;border-radius:6px;border:1px solid #ccc}
+.tests-container{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{background:#4cafcb;color:white;padding:12px;border:none;border-radius:6px;cursor:pointer;width:100%}
+button:hover{background:#389ca0}
+.payment-details{display:none;padding:10px;border-radius:6px;margin-bottom:10px}
+#mtnDetails{background:#fff3cd}
+#airtelDetails{background:#e0f7fa}
+.order-preview{border:1px solid #ccc;padding:10px;border-radius:6px;margin-bottom:15px}
+#confirmation{text-align:center;font-weight:bold;margin-top:15px}
 </style>
- <!-- Progressive Web App Manifest -->
-<link rel="manifest" href="manifest.json">
-
-<!-- Theme color for address bar -->
-<meta name="theme-color" content="#4cafcb">
-
-<!-- Favicon / App icons -->
-<link rel="icon" href="icon-192.png" type="image/png">
-
-<!-- Register Service Worker -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(() => console.log('✅ Service Worker registered'))
-        .catch(err => console.error('❌ Service Worker failed:', err));
-    });
-  }
-</script> 
 </head>
+
 <body>
 
 <div class="container">
   <div class="header">
-    <h2>🧪 Mobile Lab Order Form</h2>
-    <h3>For the love of your health</h3>
-  </div>
-
-  <div class="lab-link">
-    <a href="lab-report.html" target="_blank" rel="noopener">📑 Enter Lab Results</a>
+    <h2>🧪 Mobile Lab Order</h2>
+    <p>For the love of your health</p>
   </div>
 
   <form id="orderForm">
-    <label>Full Name:</label>
-    <input type="text" id="name" required>
 
-    <label>Age:</label>
-    <input type="number" id="age" min="1" required>
+    <label>Full Name</label>
+    <input id="name" required />
 
-    <label>Sex:</label>
+    <label>Email</label>
+    <input type="email" id="email" required />
+
+    <label>Age</label>
+    <input type="number" id="age" required />
+
+    <label>Sex</label>
     <select id="sex" required>
       <option value="">-- Select --</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-      <option value="Other">Other</option>
+      <option>Male</option>
+      <option>Female</option>
+      <option>Other</option>
     </select>
 
-    <label>Phone:</label>
-    <input type="tel" id="phone" required>
+    <label>Phone</label>
+    <input id="phone" required />
 
-    <label>Select Tests:</label>
+    <label>Select Tests</label>
     <div class="tests-container" id="testsContainer"></div>
 
-    <label>Location:</label>
-    <div class="location-buttons">
-      <input type="text" id="location" placeholder="Enter address manually" required>
-      <button type="button" id="locButton">Use Current Location</button>
-    </div>
+    <label>Location</label>
+    <input id="location" placeholder="Enter address or Google Maps link" required />
 
-    <div class="notes-card">
-      <label>Notes (Optional):</label>
-      <textarea id="notes" placeholder="Add any notes for the technician..." rows="3"></textarea>
-    </div>
-
-    <label>Payment Method:</label>
+    <label>Payment Method</label>
     <select id="payment" required>
       <option value="">-- Select --</option>
-      <option value="Cash on Delivery">Cash on Delivery</option>
-      <option value="MTN Mobile Money">MTN Mobile Money</option>
-      <option value="Airtel Money">Airtel Money</option>
-      <option value="Card">Card</option>
+      <option>Cash on Delivery</option>
+      <option>MTN Mobile Money</option>
+      <option>Airtel Money</option>
     </select>
 
     <div id="mtnDetails" class="payment-details">
-      📲 MTN Mobile Money Payment:<br>Number: <b>0778379591</b><br>Name: <b>Kwikiriza Jenipher</b>
+      MTN MoMo: <b>0778379591 – Kwikiriza Jenipher</b>
     </div>
 
     <div id="airtelDetails" class="payment-details">
-      📲 Airtel Money Payment:<br>Number: <b>0706559100</b><br>Name: <b>Nambi Amina</b>
+      Airtel Money: <b>0706559100 – Nambi Amina</b>
     </div>
 
-    <label>Total (UGX):</label>
-    <input type="text" id="total" readonly value="0">
+    <label>Notes</label>
+    <textarea id="notes"></textarea>
+
+    <label>Total (UGX)</label>
+    <input id="total" readonly value="0" />
 
     <div class="order-preview" id="orderPreview">
-      <div class="order-preview-header">🧾 Your Order Preview</div>
-      <div class="order-preview-body">
-        <p>No tests selected yet.</p>
-      </div>
+      No tests selected
     </div>
 
     <button type="submit">Submit Order</button>
   </form>
 
   <div id="confirmation"></div>
-
-  <div class="contact">
-    <h3>Contact Us</h3>
-    <p>Email: <a href="mailto:edrinehero@gmail.com">edrinehero@gmail.com</a></p>
-    <p>Phone: 0778379591 / 0750992939</p>
-    <p>WhatsApp: <a href="https://wa.me/750992939" target="_blank">wa.me/750992939</a></p>
-    <p>For the love of your health ❤️</p>
-    <p>In association with one of the biggest laboratories in Uganda.</p>
-  </div>
-</div>
-
-<!-- Popup -->
-<div id="popupOverlay">
-  <div id="popupBox">
-    <h2 id="popupTitle"></h2>
-    <p id="popupMessage"></p>
-    <button onclick="closePopup()">Close</button>
-  </div>
 </div>
 
 <script>
-// --- PWA & Firebase setup ---
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const messaging = firebase.messaging();
-
-Notification.requestPermission().then(permission => {
-  if(permission === 'granted'){
-    messaging.getToken({ vapidKey: '<YOUR_PUBLIC_VAPID_KEY>' }).then(token => {
-      if(token) console.log("FCM Token:", token);
-    });
-  }
-});
-
-// --- Service Worker Registration ---
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/service-worker.js')
-    .then(reg=>console.log("Service Worker registered", reg.scope))
-    .catch(err=>console.log("SW failed", err));
-}
-
-// --- Lab tests list ---
+// ---------- TESTS ----------
 const tests = [
   {name:"Bleeding & Clotting Test", price:15000},
   {name:"Blood Glucose", price:7000},
@@ -254,128 +138,71 @@ const tests = [
   {name:"DNA", price:600000},
   {name:"Sickling Test", price:40000}
 ];
+];
 
 const testsContainer = document.getElementById("testsContainer");
 tests.forEach(t=>{
-  const label = document.createElement("label");
-  label.innerHTML = `<input type="checkbox" class="test" value="${t.name}" data-price="${t.price}"> ${t.name} (${t.price.toLocaleString()} UGX)`;
-  testsContainer.appendChild(label);
+  testsContainer.innerHTML +=
+   `<label><input type="checkbox" data-price="${t.price}" value="${t.name}"> ${t.name} (${t.price})</label>`;
 });
 
-const testCheckboxes = document.querySelectorAll(".test");
-const totalInput = document.getElementById("total");
-const paymentSelect = document.getElementById("payment");
-const mtnDetails = document.getElementById("mtnDetails");
-const airtelDetails = document.getElementById("airtelDetails");
-const confirmationDiv = document.getElementById("confirmation");
-const locButton = document.getElementById("locButton");
-const locationInput = document.getElementById("location");
-const notesInput = document.getElementById("notes");
-const orderPreview = document.getElementById("orderPreview");
-const whatsappNumber = "750992939";
-const serviceID = "service_sjp4zrf";
-const templateID = "lab_order";
+// ---------- TOTAL ----------
+const totalInput=document.getElementById("total");
+const preview=document.getElementById("orderPreview");
 
-// --- Update Total & Preview ---
-function updateTotalAndPreview(){
-  let total = 0, selectedTests = [];
-  testCheckboxes.forEach(cb=>{
-    if(cb.checked){ total+=parseInt(cb.getAttribute("data-price")); selectedTests.push(cb.value); }
+function updateTotal(){
+  let total=0, list=[];
+  document.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+    if(cb.checked){
+      total+=+cb.dataset.price;
+      list.push(`${cb.value} (UGX ${cb.dataset.price})`);
+    }
   });
-  totalInput.value = total.toLocaleString();
-  orderPreview.querySelector(".order-preview-body").innerHTML = `
-    <p><strong>Tests:</strong> ${selectedTests.length?selectedTests.join(", "):"No tests selected yet."}</p>
-    <p><strong>Total:</strong> UGX ${total.toLocaleString()}</p>
-    <p><strong>Notes:</strong> ${notesInput.value||"None"}</p>
-  `;
+  totalInput.value=total.toLocaleString();
+  preview.innerHTML=list.length?list.join("<br>"):"No tests selected";
 }
+document.querySelectorAll("input[type=checkbox]").forEach(cb=>cb.onchange=updateTotal);
 
-testCheckboxes.forEach(cb=>cb.addEventListener("change", updateTotalAndPreview));
-notesInput.addEventListener("input", updateTotalAndPreview);
-updateTotalAndPreview();
+// ---------- PAYMENT ----------
+const payment=document.getElementById("payment");
+payment.onchange=()=>{
+  mtnDetails.style.display=payment.value==="MTN Mobile Money"?"block":"none";
+  airtelDetails.style.display=payment.value==="Airtel Money"?"block":"none";
+};
 
-// --- Payment toggle ---
-paymentSelect.addEventListener("change", ()=>{
-  mtnDetails.style.display = paymentSelect.value==="MTN Mobile Money"?"block":"none";
-  airtelDetails.style.display = paymentSelect.value==="Airtel Money"?"block":"none";
-});
-
-// --- Geolocation ---
-locButton.addEventListener("click", ()=>{
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(pos=>{
-      locationInput.value = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-    }, ()=>alert("Unable to retrieve location."));
-  } else alert("Geolocation not supported.");
-});
-
-// --- Form submission ---
-document.getElementById("orderForm").addEventListener("submit", e=>{
+// ---------- FORM ----------
+document.getElementById("orderForm").onsubmit=e=>{
   e.preventDefault();
-  const name=document.getElementById("name").value;
-  const age=document.getElementById("age").value;
-  const sex=document.getElementById("sex").value;
-  const phone=document.getElementById("phone").value;
-  const location=locationInput.value;
-  const payment=paymentSelect.value;
-  const total=totalInput.value;
-  const notes=notesInput.value;
 
-  let testsSelected=[];
-  testCheckboxes.forEach(cb=>{if(cb.checked) testsSelected.push(`${cb.value} (UGX ${parseInt(cb.getAttribute("data-price")).toLocaleString()})`);});
+  const orderId="ML-"+Date.now();
 
-  let paymentDetails = payment;
-  if(payment==="MTN Mobile Money") paymentDetails+=" - 0778379591 (Kwikiriza Jenipher)";
-  if(payment==="Airtel Money") paymentDetails+=" - 0706559100 (Nambi Amina)";
+  const params={
+    order_id:orderId,
+    name:name.value,
+    email:email.value,
+    age:age.value,
+    sex:sex.value,
+    phone:phone.value,
+    tests:preview.innerHTML,
+    total:"UGX "+totalInput.value,
+    location:location.value,
+    payment:payment.value,
+    notes:notes.value
+  };
 
-  const orderMessage = `🧪 Mobile Lab Order:\nName: ${name}\nAge: ${age}\nSex: ${sex}\nPhone: ${phone}\nTests:\n${testsSelected.join("\n")}\nTotal: UGX ${total}\nLocation: ${location}\nPayment: ${paymentDetails}\nNotes: ${notes}`;
-
-  window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`,'_blank');
-
-  emailjs.send(serviceID,templateID,{
-    name:name, age:age, sex:sex, phone:phone,
-    tests:testsSelected.join("<br>"), total:`UGX ${total}`,
-    location:location, payment:paymentDetails, notes:notes
-  }).then(()=>{
-    confirmationDiv.textContent="✅ Order submitted successfully via WhatsApp and Email!";
-    showPopup("Success","Order submitted successfully!");
-    document.getElementById("orderForm").reset();
+  emailjs.send("service_sjp4zrf","lab_order",params)
+  .then(()=>{
+    confirmation.innerHTML="✅ Order sent successfully!";
+    e.target.reset();
+    preview.innerHTML="No tests selected";
     totalInput.value="0";
-    mtnDetails.style.display="none";
-    airtelDetails.style.display="none";
-    updateTotalAndPreview();
-  }, err=>{
-    confirmationDiv.textContent="❌ Failed to send order. Please try again.";
-    showPopup("Error","Failed to submit order. Try again.");
+  })
+  .catch(err=>{
+    confirmation.innerHTML="❌ Failed to send order";
     console.error(err);
   });
-});
-
-// --- Popup ---
-function showPopup(title,message){
-  document.getElementById("popupTitle").textContent=title;
-  document.getElementById("popupMessage").textContent=message;
-  document.getElementById("popupOverlay").style.display="flex";
-}
-function closePopup(){
-  document.getElementById("popupOverlay").style.display="none";
-}
-</script>
-  <script type="module">
-  import { initPush } from "./firebase.js";
-
-  // Register the service worker
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => {
-        console.log("Service worker registered");
-        initPush(); // Initialize push notifications
-      });
-  }
+};
 </script>
 
 </body>
 </html>
-
-
-
