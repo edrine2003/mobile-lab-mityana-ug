@@ -241,7 +241,7 @@ const firebaseConfig={
 const app=initializeApp(firebaseConfig);
 const messaging=getMessaging(app);
 
-const reg=await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+const reg=await navigator.serviceWorker.register('./firebase-messaging-sw.js");
 
 if(await Notification.requestPermission()==="granted"){
   const token=await getToken(messaging,{
@@ -261,3 +261,4 @@ onMessage(messaging,p=>{
 
 </body>
 </html>
+
