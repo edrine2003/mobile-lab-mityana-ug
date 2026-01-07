@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 
-<!-- EmailJS (PUBLIC KEY ONLY) -->
+<!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
   emailjs.init("QPXYuZG5LIiv_1x3H");
@@ -46,16 +46,16 @@ button:hover{background:#389ca0}
 
 <form id="orderForm">
 
-<label>Full Name</label>
+<label for="name">Full Name</label>
 <input id="name" required>
 
-<label>Email</label>
+<label for="email">Email</label>
 <input type="email" id="email" required>
 
-<label>Age</label>
+<label for="age">Age</label>
 <input type="number" id="age" required>
 
-<label>Sex</label>
+<label for="sex">Sex</label>
 <select id="sex" required>
   <option value="">-- Select --</option>
   <option>Male</option>
@@ -63,16 +63,16 @@ button:hover{background:#389ca0}
   <option>Other</option>
 </select>
 
-<label>Phone</label>
-<input id="phone" required>
+<label for="phone">Phone</label>
+<input id="phone" required pattern="^(07|2567)[0-9]{8}$">
 
 <label>Select Tests</label>
 <div class="tests-container" id="testsContainer"></div>
 
-<label>Location</label>
+<label for="location">Location</label>
 <input id="location" placeholder="Address or Google Maps link" required>
 
-<label>Payment Method</label>
+<label for="payment">Payment Method</label>
 <select id="payment" required>
   <option value="">-- Select --</option>
   <option>Cash on Delivery</option>
@@ -88,7 +88,7 @@ button:hover{background:#389ca0}
   Airtel Money: <b>0706559100 – Nambi Amina</b>
 </div>
 
-<label>Notes (Optional)</label>
+<label for="notes">Notes (Optional)</label>
 <textarea id="notes"></textarea>
 
 <label>Total (UGX)</label>
@@ -98,13 +98,26 @@ button:hover{background:#389ca0}
 
 <button type="submit">Submit Order</button>
 
+<p style="font-size:12px;color:#666;text-align:center">
+Sample collection available within Mityana & nearby areas.
+</p>
+
 </form>
 
 <div id="confirmation"></div>
 </div>
 
 <script>
-// ---------- TESTS LIST (ALL INCLUDED) ----------
+// ---------- ELEMENTS ----------
+const testsContainer = document.getElementById("testsContainer");
+const totalInput = document.getElementById("total");
+const preview = document.getElementById("preview");
+const payment = document.getElementById("payment");
+const mtnDetails = document.getElementById("mtnDetails");
+const airtelDetails = document.getElementById("airtelDetails");
+const confirmation = document.getElementById("confirmation");
+
+// ---------- TESTS ----------
 const tests = [
  {name:"Bleeding & Clotting Test",price:15000},
  {name:"Blood Glucose",price:7000},
@@ -139,91 +152,111 @@ const tests = [
 ];
 
 // ---------- RENDER TESTS ----------
-const container = document.getElementById("testsContainer");
-const totalInput = document.getElementById("total");
-const preview = document.getElementById("preview");
-
-tests.forEach(test=>{
-  const label = document.createElement("label");
-  const cb = document.createElement("input");
-  cb.type = "checkbox";
-  cb.value = test.name;
-  cb.dataset.price = test.price;
-  cb.addEventListener("change", updateTotal);
+tests.forEach(t=>{
+  const label=document.createElement("label");
+  const cb=document.createElement("input");
+  cb.type="checkbox";
+  cb.dataset.price=t.price;
+  cb.value=t.name;
+  cb.onchange=updateTotal;
   label.appendChild(cb);
-  label.append(` ${test.name} (UGX ${test.price.toLocaleString()})`);
-  container.appendChild(label);
+  label.append(` ${t.name} (UGX ${t.price.toLocaleString()})`);
+  testsContainer.appendChild(label);
 });
 
-// ---------- TOTAL ----------
 function updateTotal(){
-  let total=0, list=[];
-  container.querySelectorAll("input[type=checkbox]").forEach(cb=>{
-    if(cb.checked){
-      total+=Number(cb.dataset.price);
-      list.push(`${cb.value} (UGX ${cb.dataset.price.toLocaleString()})`);
-    }
+  let total=0,list=[];
+  document.querySelectorAll("#testsContainer input:checked").forEach(cb=>{
+    total+=Number(cb.dataset.price);
+    list.push(`${cb.value} (UGX ${Number(cb.dataset.price).toLocaleString()})`);
   });
-  totalInput.value = total.toLocaleString();
-  preview.innerHTML = list.length ? list.join("<br>") : "No tests selected";
+  totalInput.value=total.toLocaleString();
+  preview.innerHTML=list.length?list.join("<br>"):"No tests selected";
 }
 
-// ---------- PAYMENT ----------
-const payment = document.getElementById("payment");
-payment.onchange = ()=>{
-  mtnDetails.style.display = payment.value==="MTN Mobile Money"?"block":"none";
-  airtelDetails.style.display = payment.value==="Airtel Money"?"block":"none";
+payment.onchange=()=>{
+  mtnDetails.style.display=payment.value==="MTN Mobile Money"?"block":"none";
+  airtelDetails.style.display=payment.value==="Airtel Money"?"block":"none";
 };
 
-// ---------- FORM SUBMIT ----------
-document.getElementById("orderForm").onsubmit = e=>{
+// ---------- SUBMIT ----------
+document.getElementById("orderForm").onsubmit=e=>{
   e.preventDefault();
+  if(totalInput.value==="0"){alert("Please select at least one test");return;}
 
-  const orderId = "ML-" + Date.now();
+  const orderId="ML-"+Date.now();
 
-  const params = {
-    order_id: orderId,
-    name: name.value,
-    email: email.value,
-    age: age.value,
-    sex: sex.value,
-    phone: phone.value,
-    tests: preview.innerHTML,
-    total: "UGX " + totalInput.value,
-    location: location.value,
-    payment: payment.value,
-    notes: notes.value || "None"
+  const params={
+    order_id:orderId,
+    name:name.value,
+    email:email.value,
+    age:age.value,
+    sex:sex.value,
+    phone:phone.value,
+    tests:preview.innerText,
+    total:"UGX "+totalInput.value,
+    location:location.value,
+    payment:payment.value,
+    notes:notes.value||"None"
   };
 
-  // WhatsApp backup
-  const waText = `
-Mobile Lab Order
+  const waText=`Mobile Lab Order
 Order ID: ${orderId}
 Name: ${params.name}
 Phone: ${params.phone}
 Tests:
-${preview.innerText}
+${params.tests}
 Total: ${params.total}
 Location: ${params.location}
-Payment: ${params.payment}
-`;
-  window.open(`https://wa.me/750992939?text=${encodeURIComponent(waText)}`);
+Payment: ${params.payment}`;
 
-  // Email
+  window.open(`https://wa.me/256750992939?text=${encodeURIComponent(waText)}`);
+
   emailjs.send("service_sjp4zrf","lab_order",params)
-    .then(()=>{
-      confirmation.innerHTML="✅ Order submitted successfully!";
-      e.target.reset();
-      preview.innerHTML="No tests selected";
-      totalInput.value="0";
-      mtnDetails.style.display="none";
-      airtelDetails.style.display="none";
-    })
-    .catch(err=>{
-      confirmation.innerHTML="❌ Failed to send order";
-      console.error(err);
-    });
+  .then(()=>{
+    confirmation.innerHTML="✅ Order submitted successfully!";
+    e.target.reset();
+    preview.innerHTML="No tests selected";
+    totalInput.value="0";
+    mtnDetails.style.display="none";
+    airtelDetails.style.display="none";
+  })
+  .catch(()=>confirmation.innerHTML="❌ Failed to send order");
 };
+</script>
+
+<!-- 🔔 FIREBASE PUSH NOTIFICATIONS -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2",
+  messagingSenderId:"624002906588",
+  appId:"1:624002906588:web:08b4259f90ffa9adad7719"
+};
+
+const app=initializeApp(firebaseConfig);
+const messaging=getMessaging(app);
+
+const reg=await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+if(await Notification.requestPermission()==="granted"){
+  const token=await getToken(messaging,{
+    vapidKey:"BDRlDDgqLQANN1vjJ1F16Z3oIQvY8VJC_eDLzGG3E53xzIMQ_HcHYv-S233aJ03lRwI2nZ0H_8dzqxuiju96QEw",
+    serviceWorkerRegistration:reg
+  });
+  console.log("🔥 FCM TOKEN:",token);
+}
+
+onMessage(messaging,p=>{
+  new Notification(p.notification.title,{
+    body:p.notification.body,
+    icon:"/icon-192.png"
+  });
+});
 </script>
 
 </body>
