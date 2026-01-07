@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://edrine2003.github.io/mobile-lab-mityana-ug/sitemap.xml
