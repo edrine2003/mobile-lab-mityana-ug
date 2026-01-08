@@ -241,11 +241,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// ✅ REGISTER SERVICE WORKER (DEFINE reg HERE)
-const reg = await navigator.serviceWorker.register("firebase-messaging-sw.js");
-console.log("Service Worker registered:", reg);
+// ✅ REGISTER SERVICE WORKER (FIXED PATH + SCOPE)
+const reg = await navigator.serviceWorker.register(
+  "/mobile-lab-mityana-ug/firebase-messaging-sw.js",
+  { scope: "/mobile-lab-mityana-ug/" }
+);
 
-// ✅ REQUEST PERMISSION & GET TOKEN
+console.log("✅ Service Worker registered");
+
+// ✅ REQUEST PERMISSION
 const permission = await Notification.requestPermission();
 
 if (permission === "granted") {
@@ -256,19 +260,19 @@ if (permission === "granted") {
 
   console.log("🔥 FCM TOKEN:", token);
   alert("FCM TOKEN:\n\n" + token);
+}
 
-);
-
-// ✅ FOREGROUND NOTIFICATIONS
+// ✅ FOREGROUND MESSAGE
 onMessage(messaging, payload => {
   new Notification(payload.notification.title, {
     body: payload.notification.body,
-    icon: "icon-192.png"
+    icon: "/mobile-lab-mityana-ug/icon-192.png"
   });
 });
 </script>
 </body>
 </html>
+
 
 
 
