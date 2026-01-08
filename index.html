@@ -230,36 +230,43 @@ Payment: ${params.payment}`;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
-const firebaseConfig={
-  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId:"mobile-lab-mityana-aeae2",
-  messagingSenderId:"624002906588",
-  appId:"1:624002906588:web:08b4259f90ffa9adad7719"
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719"
 };
 
-const app=initializeApp(firebaseConfig);
-const messaging=getMessaging(app);
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
-const registration = await navigator.serviceWorker.register("firebase-messaging-sw.js");
+// ✅ REGISTER SERVICE WORKER (DEFINE reg HERE)
+const reg = await navigator.serviceWorker.register("firebase-messaging-sw.js");
+console.log("Service Worker registered:", reg);
 
-if(await Notification.requestPermission()==="granted"){
-  const token=await getToken(messaging,{
-    vapidKey:"BDRlDDgqLQANN1vjJ1F16Z3oIQvY8VJC_eDLzGG3E53xzIMQ_HcHYv-S233aJ03lRwI2nZ0H_8dzqxuiju96QEw",
-    serviceWorkerRegistration:reg
+// ✅ REQUEST PERMISSION & GET TOKEN
+const permission = await Notification.requestPermission();
+
+if (permission === "granted") {
+  const token = await getToken(messaging, {
+    vapidKey: "BDRlDDgqLQANN1vjJ1F16Z3oIQvY8VJC_eDLzGG3E53xzIMQ_HcHYv-S233aJ03lRwI2nZ0H_8dzqxuiju96QEw",
+    serviceWorkerRegistration: reg
   });
-  console.log("🔥 FCM TOKEN:",token);
+
+  console.log("🔥 FCM TOKEN:", token);
 }
 
-onMessage(messaging,p=>{
-  new Notification(p.notification.title,{
-    body:p.notification.body,
-    icon:"/icon-192.png"
+// ✅ FOREGROUND NOTIFICATIONS
+onMessage(messaging, payload => {
+  new Notification(payload.notification.title, {
+    body: payload.notification.body,
+    icon: "icon-192.png"
   });
 });
 </script>
-
 </body>
 </html>
+
 
 
