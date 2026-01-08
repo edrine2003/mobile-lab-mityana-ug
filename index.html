@@ -223,6 +223,11 @@ Payment: ${params.payment}`;
   })
   .catch(()=>confirmation.innerHTML="❌ Failed to send order");
 };
+  if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js")
+    .then(() => console.log("PWA Service Worker registered"));
+}
+
 </script>
 
 <!-- 🔔 FIREBASE PUSH NOTIFICATIONS -->
@@ -272,6 +277,7 @@ onMessage(messaging, payload => {
 </script>
 </body>
 </html>
+
 
 
 
