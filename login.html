@@ -53,17 +53,19 @@
 
   const msg = document.getElementById("msg");
 
-  function cleanPhone(p){
-    p = p.trim();
-    if(p.startsWith("+")) p = p.substring(1);
-    if(p.startsWith("07")) return "256" + p.substring(1);
-    return p;
+  function cleanPhone(input){
+    let p = String(input || "").replace(/\s+/g, "");
+    if(p.startsWith("+")) p = p.slice(1);
+    if(/^07\d{8}$/.test(p)) return "256" + p.slice(1);
+    if(/^2567\d{8}$/.test(p)) return p;
+    return null;
   }
 
   document.getElementById("loginBtn").addEventListener("click", async () => {
     msg.textContent = "";
 
-    const input = document.getElementById("emailOrPhone").value.trim().toLowerCase();
+    const inputRaw = document.getElementById("emailOrPhone").value.trim();
+    const input = inputRaw.toLowerCase();
     const password = document.getElementById("password").value;
 
     if(!input || !password){
@@ -73,25 +75,20 @@
 
     let emailToLogin = input;
 
-    // ✅ If input is phone, lookup email in Firestore
-    const isPhone = /^(\+?256|0)?7\d{8}$/.test(input) || /^2567\d{8}$/.test(input);
+    // ✅ detect phone and convert to email
+    const possiblePhone = cleanPhone(input);
+    if(possiblePhone){
+      const q = await db.collection("users").where("phone", "==", possiblePhone).limit(1).get();
+      if(q.empty){
+        msg.textContent = "❌ Phone number not registered. Please register.";
+        return;
+      }
+      emailToLogin = q.docs[0].data().email;
+    }
 
     try{
-      if(isPhone){
-        const phone = cleanPhone(input);
-        const q = await db.collection("users").where("phone", "==", phone).limit(1).get();
-
-        if(q.empty){
-          msg.textContent = "❌ Phone number not registered. Please register.";
-          return;
-        }
-
-        emailToLogin = q.docs[0].data().email;
-      }
-
       await auth.signInWithEmailAndPassword(emailToLogin, password);
       window.location.href = "index.html";
-
     }catch(error){
       if(error.code === "auth/wrong-password") msg.textContent = "❌ Wrong password.";
       else if(error.code === "auth/user-not-found") msg.textContent = "❌ Account not found. Register first.";
