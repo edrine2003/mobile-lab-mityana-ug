@@ -50,6 +50,7 @@
 </div>
 
 <script>
+  // ✅ Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
     authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -65,11 +66,23 @@
 
   const msg = document.getElementById("msg");
 
-  function cleanPhone(p){
-    p = p.trim();
-    if(p.startsWith("+")) p = p.substring(1);
-    if(p.startsWith("07")) return "256" + p.substring(1);
-    return p;
+  // ✅ FIXED PHONE CLEANER (NO MORE BUG)
+  function cleanPhone(input){
+    let p = String(input || "").replace(/\s+/g, "");
+
+    if(p.startsWith("+")) p = p.slice(1);
+
+    // 07XXXXXXXX → 2567XXXXXXXX
+    if(/^07\d{8}$/.test(p)){
+      return "256" + p.slice(1);
+    }
+
+    // already correct format
+    if(/^2567\d{8}$/.test(p)){
+      return p;
+    }
+
+    return null; // invalid format
   }
 
   document.getElementById("registerBtn").addEventListener("click", async () => {
@@ -79,14 +92,19 @@
     const fullName = document.getElementById("fullName").value.trim();
     const age = document.getElementById("age").value.trim();
     const sex = document.getElementById("sex").value.trim();
-    const phoneRaw = document.getElementById("phone").value.trim();
-    const phone = cleanPhone(phoneRaw);
+    const rawPhone = document.getElementById("phone").value;
+    const phone = cleanPhone(rawPhone);
     const location = document.getElementById("location").value.trim();
     const email = document.getElementById("email").value.trim().toLowerCase();
     const password = document.getElementById("password").value;
 
-    if(!fullName || !age || !sex || !phone || !location || !email || !password){
+    if(!fullName || !age || !sex || !location || !email || !password){
       msg.textContent = "❌ Please fill in all fields.";
+      return;
+    }
+
+    if(!phone){
+      msg.textContent = "❌ Invalid phone number. Use 07XXXXXXXX or 2567XXXXXXXX.";
       return;
     }
 
@@ -95,24 +113,24 @@
       return;
     }
 
-    // ✅ check if phone already exists in Firestore
+    // ✅ Check phone duplicates properly
     try{
-      const phoneCheck = await db.collection("users").where("phone", "==", phone).get();
+      const phoneCheck = await db.collection("users").where("phone", "==", phone).limit(1).get();
       if(!phoneCheck.empty){
         msg.textContent = "❌ This phone number is already registered. Please login.";
         return;
       }
     }catch(e){
-      msg.textContent = "❌ Firestore error (phone check). Check Firebase rules.";
+      msg.textContent = "❌ Firestore error: Check Firebase Firestore Rules.";
       return;
     }
 
-    // ✅ create account in Firebase Auth
+    // ✅ Create Firebase Auth user
     try{
       const userCredential = await auth.createUserWithEmailAndPassword(email, password);
       const uid = userCredential.user.uid;
 
-      // ✅ save patient details in Firestore
+      // ✅ Save full profile in Firestore
       await db.collection("users").doc(uid).set({
         fullName,
         age: Number(age),
@@ -124,15 +142,14 @@
       });
 
       msg.style.color = "#16a34a";
-      msg.textContent = "✅ Account created successfully! Redirecting to login...";
-
+      msg.textContent = "✅ Account created! Redirecting to login...";
       setTimeout(()=> window.location.href="login.html", 1200);
 
     }catch(error){
       if(error.code === "auth/email-already-in-use"){
         msg.textContent = "❌ Email already registered. Please login.";
       }else if(error.code === "auth/invalid-email"){
-        msg.textContent = "❌ Invalid email format.";
+        msg.textContent = "❌ Invalid email.";
       }else{
         msg.textContent = "❌ " + error.message;
       }
