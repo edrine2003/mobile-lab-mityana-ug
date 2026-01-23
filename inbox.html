@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patient Inbox – Mobile Lab Mityana</title>
+
+<meta name="description" content="Check your lab results online – Mobile Lab Mityana">
+<meta name="theme-color" content="#0ea5e9">
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+:root{
+  --primary:#0ea5e9;
+  --primary2:#14b8a6;
+  --dark:#0f172a;
+  --muted:#64748b;
+  --border:rgba(15,23,42,0.12);
+  --card:rgba(255,255,255,0.92);
+  --shadow:0 12px 30px rgba(2,6,23,0.12);
+}
+*{box-sizing:border-box;}
+body{
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f7fa;
+  color: var(--dark);
+}
+.container{max-width: 900px;margin: 20px auto;padding: 16px;}
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.header{
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  color:#fff;
+  padding: 18px 16px;
+  text-align:center;
+  position: relative;
+}
+.header h2{margin: 0;font-size: 22px;}
+.header p{margin: 6px 0 0;font-size: 13px;opacity: 0.95;}
+#logoutBtn{
+  position:fixed;
+  bottom:14px;
+  right:14px;
+  padding:10px 12px;
+  border:none;
+  border-radius:12px;
+  background:#ef4444;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+  z-index:9999;
+}
+#logoutBtn:hover{filter:brightness(0.95);}
+.inbox-list{padding: 16px;}
+.result-card{
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.95);
+  margin-bottom: 12px;
+  padding: 12px;
+  transition: 0.2s;
+  cursor: pointer;
+}
+.result-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(2,6,23,0.08);
+}
+.result-card h3{margin:0;font-size:15px;}
+.result-card p{margin:4px 0;font-size:13px;color:var(--muted);}
+.new-badge{
+  display:inline-block;
+  background: #ef4444;
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+.popup{
+  position:fixed;
+  top:20px;
+  right:20px;
+  background: #0ea5e9;
+  color:#fff;
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.15);
+  z-index:9999;
+  display:none;
+  font-weight:700;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="header">
+      <h2>🧪 Patient Inbox</h2>
+      <p>View your lab results securely • Mityana & Nearby Areas</p>
+    </div>
+
+    <div class="inbox-list" id="inboxList">
+      <p>Loading your results...</p>
+    </div>
+
+  </div>
+</div>
+
+<button id="logoutBtn">Logout</button>
+<div class="popup" id="popup"></div>
+
+<script>
+// Firebase init
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const inboxList = document.getElementById("inboxList");
+const logoutBtn = document.getElementById("logoutBtn");
+const popup = document.getElementById("popup");
+
+// Require login
+auth.onAuthStateChanged(async (user)=>{
+  if(!user){
+    window.location.href = "login.html";
+    return;
+  }
+
+  loadInbox(user.uid);
+});
+
+// Logout
+logoutBtn.addEventListener("click", async ()=>{
+  await auth.signOut();
+  window.location.href = "login.html";
+});
+
+// Load inbox
+async function loadInbox(uid){
+  inboxList.innerHTML = "<p>Loading your results...</p>";
+
+  const snapshot = await db.collection("results")
+    .where("userId","==",uid)
+    .orderBy("date","desc")
+    .get();
+
+  if(snapshot.empty){
+    inboxList.innerHTML = "<p>No results yet.</p>";
+    return;
+  }
+
+  inboxList.innerHTML = "";
+
+  snapshot.forEach(doc=>{
+    const data = doc.data();
+    const card = document.createElement("div");
+    card.className = "result-card";
+    card.innerHTML = `
+      <h3>${data.date} - ${data.testName || "Lab Results"}
+      ${!data.seen ? '<span class="new-badge">NEW</span>' : ''}</h3>
+      <p>${data.testResults}</p>
+    `;
+    card.addEventListener("click", ()=>{
+      // mark as seen
+      if(!data.seen){
+        db.collection("results").doc(doc.id).update({seen:true});
+        card.querySelector(".new-badge")?.remove();
+      }
+      showPopup("You viewed your result!");
+    });
+    inboxList.appendChild(card);
+  });
+}
+
+// Popup
+function showPopup(message){
+  popup.innerText = message;
+  popup.style.display = "block";
+  setTimeout(()=>{popup.style.display="none";}, 3000);
+}
+</script>
+</body>
+</html>
