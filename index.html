@@ -328,6 +328,11 @@ button:hover{filter: brightness(0.98);}
         </div>
 
         <div>
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="e.g. name@gmail.com">
+        </div>
+
+        <div>
           <label for="age">Age</label>
           <input type="number" id="age" required placeholder="e.g. 25">
         </div>
@@ -448,7 +453,7 @@ const testCategories = [
       {name:"Blood Glucose",price:7000},
       {name:"Blood Grouping",price:10000},
       {name:"Bleeding & Clotting Test",price:15000},
-      {name:"Malaria",price:5000},
+      {name:"Blood Smear",price:5000},
       {name:"Electrolytes",price:50000},
       {name:"Lipid Profile",price:40000},
       {name:"Liver Function Test (LFT)",price:50000},
@@ -557,8 +562,9 @@ function renderTests(filterText=""){
 
 renderTests();
 
+// ✅✅✅ FIXED TOTAL FUNCTION (NO COMMAS STORED)
 function updateTotal(){
-  let total=0, list=[];
+  let total = 0, list = [];
   const checked = document.querySelectorAll("#testsContainer input[type='checkbox']:checked");
 
   checked.forEach(cb=>{
@@ -566,8 +572,12 @@ function updateTotal(){
     list.push(`${cb.value} (UGX ${Number(cb.dataset.price).toLocaleString()})`);
   });
 
-  totalInput.value = total.toLocaleString();
+  // ✅ FIX: total stored as NUMBER (no commas)
+  totalInput.value = total;
+
+  // ✅ Keep display formatted
   totalText.innerText = total.toLocaleString();
+
   selectedCount.innerText = `${checked.length} selected`;
   preview.innerHTML = list.length ? list.join("<br>") : "No tests selected";
 }
@@ -595,7 +605,8 @@ function saveOrder(order){
 document.getElementById("orderForm").onsubmit=e=>{
   e.preventDefault();
 
-  if(totalInput.value==="0"){
+  // ✅✅✅ FIXED SUBMIT CHECK (NUMBER)
+  if(Number(totalInput.value) === 0){
     alert("Please select at least one test");
     return;
   }
@@ -610,7 +621,10 @@ document.getElementById("orderForm").onsubmit=e=>{
     sex:sexInput.value,
     phone:phoneInput.value,
     tests:preview.innerText,
-    total:"UGX "+totalInput.value,
+
+    // ✅✅✅ FIXED TOTAL FORMAT
+    total:"UGX " + Number(totalInput.value).toLocaleString(),
+
     location:locationInput.value,
     payment:payment.value,
     notes:notesInput.value||"None"
@@ -672,4 +686,3 @@ Phone: ${params.phone}
 
 </body>
 </html>
-
