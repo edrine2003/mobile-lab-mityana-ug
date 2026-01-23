@@ -1,76 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mobile Lab – Login</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login – Mobile Lab</title>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-body{font-family:Arial,sans-serif;background:#f0f4f8;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
-.container{background:#fff;padding:30px;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,0.12);width:350px}
-h2{text-align:center;margin-bottom:20px;color:#0ea5e9}
-input{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid #ccc;outline:none}
-button{width:100%;padding:12px;margin-top:12px;background:#0ea5e9;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer}
-button:hover{background:#14b8a6}
-.toggle-btn{margin-top:12px;text-align:center;cursor:pointer;color:#0ea5e9;text-decoration:underline;font-size:14px}
-#error-msg{color:red;font-size:14px;margin-top:6px;text-align:center}
+  body{font-family:Arial;background:#f4f7fa;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+  .box{background:#fff;padding:22px;border-radius:14px;width:360px;box-shadow:0 10px 25px rgba(0,0,0,.12)}
+  h2{text-align:center;color:#0ea5e9;margin:0 0 14px}
+  input{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid #ccc;outline:none}
+  button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:10px;background:#0ea5e9;color:#fff;font-weight:800;cursor:pointer}
+  button:hover{filter:brightness(.95)}
+  .small{text-align:center;margin-top:10px;font-size:13px}
+  .small a{color:#0ea5e9;text-decoration:underline;cursor:pointer}
+  #msg{margin-top:10px;text-align:center;font-size:13px;color:#ef4444;font-weight:700}
 </style>
 </head>
 <body>
-<div class="container">
-  <h2>Login</h2>
-  <input type="text" id="emailOrPhone" placeholder="Email or Phone" required>
-  <input type="password" id="password" placeholder="Password" required>
+
+<div class="box">
+  <h2>Patient Login</h2>
+
+  <input id="emailOrPhone" placeholder="Email or Phone" required />
+  <input id="password" type="password" placeholder="Password" required />
+
   <button id="loginBtn">Login</button>
-  <div id="error-msg"></div>
-  <div class="toggle-btn" onclick="window.location.href='register.html'">Don't have an account? Register</div>
+  <div id="msg"></div>
+
+  <div class="small">
+    No account? <a href="register.html">Register</a>
+  </div>
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+  const firebaseConfig = {
+    apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+    authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+    projectId: "mobile-lab-mityana-aeae2",
+    storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+    messagingSenderId: "624002906588",
+    appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+  };
 
-const loginBtn = document.getElementById("loginBtn");
-const errorMsg = document.getElementById("error-msg");
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-loginBtn.addEventListener("click", ()=>{
-  const emailOrPhone = document.getElementById("emailOrPhone").value.trim();
-  const password = document.getElementById("password").value;
+  const msg = document.getElementById("msg");
 
-  errorMsg.textContent = "";
-
-  if (!emailOrPhone || !password) { errorMsg.textContent="Email/Phone & password required"; return; }
-
-  // Detect if input is a phone number (starts with 07 or 2567)
-  let isPhone = /^(\+?256|0)7\d{8}$/.test(emailOrPhone);
-  
-  if(isPhone){
-    // Phone login workaround: Firebase requires linking phone to email; we will assume users registered with email+phone, so login via email
-    alert("⚠️ Phone login requires your registered email. Please enter email."); 
-    return;
+  function cleanPhone(p){
+    p = p.trim();
+    if(p.startsWith("+")) p = p.substring(1);
+    if(p.startsWith("07")) return "256" + p.substring(1);
+    return p;
   }
 
-  // Email login
-  auth.signInWithEmailAndPassword(emailOrPhone,password)
-    .then(userCredential=>{
-      window.location.href="index.html"; // redirect to lab order
-    })
-    .catch(error=>{
-      if(error.code==="auth/wrong-password") errorMsg.textContent="Wrong password";
-      else if(error.code==="auth/user-not-found") errorMsg.textContent="No account found, please register";
-      else errorMsg.textContent = error.message;
-    });
-});
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    msg.textContent = "";
+
+    const input = document.getElementById("emailOrPhone").value.trim().toLowerCase();
+    const password = document.getElementById("password").value;
+
+    if(!input || !password){
+      msg.textContent = "❌ Enter email/phone and password.";
+      return;
+    }
+
+    let emailToLogin = input;
+
+    // ✅ If input is phone, lookup email in Firestore
+    const isPhone = /^(\+?256|0)?7\d{8}$/.test(input) || /^2567\d{8}$/.test(input);
+
+    try{
+      if(isPhone){
+        const phone = cleanPhone(input);
+        const q = await db.collection("users").where("phone", "==", phone).limit(1).get();
+
+        if(q.empty){
+          msg.textContent = "❌ Phone number not registered. Please register.";
+          return;
+        }
+
+        emailToLogin = q.docs[0].data().email;
+      }
+
+      await auth.signInWithEmailAndPassword(emailToLogin, password);
+      window.location.href = "index.html";
+
+    }catch(error){
+      if(error.code === "auth/wrong-password") msg.textContent = "❌ Wrong password.";
+      else if(error.code === "auth/user-not-found") msg.textContent = "❌ Account not found. Register first.";
+      else msg.textContent = "❌ " + error.message;
+    }
+  });
 </script>
+
 </body>
 </html>
