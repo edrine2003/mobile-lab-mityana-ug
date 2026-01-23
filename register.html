@@ -1,160 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register – Mobile Lab</title>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
-  body{font-family:Arial;background:#f4f7fa;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
-  .box{background:#fff;padding:22px;border-radius:14px;width:360px;box-shadow:0 10px 25px rgba(0,0,0,.12)}
-  h2{text-align:center;color:#0ea5e9;margin:0 0 14px}
-  input,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid #ccc;outline:none}
-  button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:10px;background:#0ea5e9;color:#fff;font-weight:800;cursor:pointer}
-  button:hover{filter:brightness(.95)}
-  .small{text-align:center;margin-top:10px;font-size:13px}
-  .small a{color:#0ea5e9;text-decoration:underline;cursor:pointer}
-  #msg{margin-top:10px;text-align:center;font-size:13px;color:#ef4444;font-weight:700}
+body { font-family: Arial; display: flex; justify-content: center; padding-top: 50px; }
+form { max-width: 400px; width: 100%; background: #f5f5f5; padding: 20px; border-radius: 12px; }
+input, select { width: 100%; padding: 10px; margin: 6px 0 14px; border-radius: 8px; border: 1px solid #ccc; }
+button { width: 100%; padding: 12px; background: #0ea5e9; border: none; color: #fff; font-weight: bold; border-radius: 8px; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<div class="box">
-  <h2>Patient Registration</h2>
-
-  <input id="fullName" placeholder="Full Name" required />
-  <input id="age" type="number" placeholder="Age" required />
-
+<form id="registerForm">
+  <h2>Register</h2>
+  <input type="text" id="name" placeholder="Full Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <input type="number" id="age" placeholder="Age" required>
   <select id="sex" required>
     <option value="">-- Select Sex --</option>
     <option>Male</option>
     <option>Female</option>
     <option>Other</option>
   </select>
-
-  <input id="phone" placeholder="Phone (07XXXXXXXX or 2567XXXXXXXX)" required />
-  <input id="location" placeholder="Location (Area / Landmark)" required />
-  <input id="email" type="email" placeholder="Email" required />
-  <input id="password" type="password" placeholder="Password (6+ chars)" required />
-
-  <button id="registerBtn">Create Account</button>
-  <div id="msg"></div>
-
-  <div class="small">
-    Already registered? <a href="login.html">Login</a>
-  </div>
-</div>
+  <input type="text" id="phone" placeholder="Phone (e.g. 07XXXXXXXX)" required>
+  <input type="text" id="location" placeholder="Location / Address" required>
+  <button type="submit">Register</button>
+  <p>Already have an account? <a href="login.html">Login</a></p>
+  <p id="msg" style="color:red;"></p>
+</form>
 
 <script>
-  // ✅ Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-    authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-    projectId: "mobile-lab-mityana-aeae2",
-    storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-    messagingSenderId: "624002906588",
-    appId: "1:624002906588:web:08b4259f90ffa9adad7719",
-  };
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719"
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
+document.getElementById("registerForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const age = document.getElementById("age").value;
+  const sex = document.getElementById("sex").value;
+  const phone = document.getElementById("phone").value.trim();
+  const location = document.getElementById("location").value.trim();
   const msg = document.getElementById("msg");
 
-  // ✅ FIXED PHONE CLEANER (NO MORE BUG)
-  function cleanPhone(input){
-    let p = String(input || "").replace(/\s+/g, "");
+  try {
+    // Create user
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
 
-    if(p.startsWith("+")) p = p.slice(1);
+    // Save details in Firestore
+    await db.collection("users").doc(user.uid).set({
+      fullName: name,
+      email: email,
+      age: age,
+      sex: sex,
+      phone: phone,
+      location: location
+    });
 
-    // 07XXXXXXXX → 2567XXXXXXXX
-    if(/^07\d{8}$/.test(p)){
-      return "256" + p.slice(1);
-    }
+    msg.style.color = "green";
+    msg.innerText = "✅ Registered successfully! Redirecting...";
+    setTimeout(()=>{ window.location.href = "login.html"; }, 1500);
 
-    // already correct format
-    if(/^2567\d{8}$/.test(p)){
-      return p;
-    }
-
-    return null; // invalid format
+  } catch (err) {
+    console.error(err);
+    msg.style.color = "red";
+    msg.innerText = err.message;
   }
-
-  document.getElementById("registerBtn").addEventListener("click", async () => {
-    msg.style.color = "#ef4444";
-    msg.textContent = "";
-
-    const fullName = document.getElementById("fullName").value.trim();
-    const age = document.getElementById("age").value.trim();
-    const sex = document.getElementById("sex").value.trim();
-    const rawPhone = document.getElementById("phone").value;
-    const phone = cleanPhone(rawPhone);
-    const location = document.getElementById("location").value.trim();
-    const email = document.getElementById("email").value.trim().toLowerCase();
-    const password = document.getElementById("password").value;
-
-    if(!fullName || !age || !sex || !location || !email || !password){
-      msg.textContent = "❌ Please fill in all fields.";
-      return;
-    }
-
-    if(!phone){
-      msg.textContent = "❌ Invalid phone number. Use 07XXXXXXXX or 2567XXXXXXXX.";
-      return;
-    }
-
-    if(password.length < 6){
-      msg.textContent = "❌ Password must be at least 6 characters.";
-      return;
-    }
-
-    // ✅ Check phone duplicates properly
-    try{
-      const phoneCheck = await db.collection("users").where("phone", "==", phone).limit(1).get();
-      if(!phoneCheck.empty){
-        msg.textContent = "❌ This phone number is already registered. Please login.";
-        return;
-      }
-    }catch(e){
-      msg.textContent = "❌ Firestore error: Check Firebase Firestore Rules.";
-      return;
-    }
-
-    // ✅ Create Firebase Auth user
-    try{
-      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-      const uid = userCredential.user.uid;
-
-      // ✅ Save full profile in Firestore
-      await db.collection("users").doc(uid).set({
-        fullName,
-        age: Number(age),
-        sex,
-        phone,
-        location,
-        email,
-        createdAt: new Date().toISOString()
-      });
-
-      msg.style.color = "#16a34a";
-      msg.textContent = "✅ Account created! Redirecting to login...";
-      setTimeout(()=> window.location.href="login.html", 1200);
-
-    }catch(error){
-      if(error.code === "auth/email-already-in-use"){
-        msg.textContent = "❌ Email already registered. Please login.";
-      }else if(error.code === "auth/invalid-email"){
-        msg.textContent = "❌ Invalid email.";
-      }else{
-        msg.textContent = "❌ " + error.message;
-      }
-    }
-  });
+};
 </script>
 
 </body>
