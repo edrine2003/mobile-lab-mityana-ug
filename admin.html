@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Orders – Mobile Lab</title>
+
+<style>
+:root{
+  --primary:#0ea5e9;
+  --primary2:#14b8a6;
+  --dark:#0f172a;
+  --muted:#64748b;
+  --border:rgba(15,23,42,0.12);
+  --card:#ffffff;
+  --bg:#f1f5f9;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--dark);
+  padding: 16px;
+}
+
+.header{
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  color: #fff;
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 14px;
+}
+
+.header h2{margin:0;font-size:18px}
+.header p{margin:6px 0 0;font-size:12px;opacity:0.95}
+
+.tools{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom: 12px;
+}
+
+input{
+  flex:1;
+  min-width: 200px;
+  padding: 12px;
+  border-radius: 14px;
+  border:1px solid var(--border);
+  background:#fff;
+}
+
+button{
+  padding: 12px 14px;
+  border: none;
+  border-radius: 14px;
+  background: var(--primary);
+  color:#fff;
+  font-weight: 800;
+  cursor:pointer;
+}
+
+button.danger{background:#ef4444}
+button.gray{background:#475569}
+
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.meta{
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+strong{color: var(--dark)}
+
+.orderText{
+  white-space: pre-wrap;
+  font-size: 13px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+  margin-top: 10px;
+  flex-wrap:wrap;
+}
+
+.row a{
+  flex:1;
+  text-decoration:none;
+  text-align:center;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--dark);
+  font-weight: 800;
+}
+
+.small{
+  font-size: 12px;
+  color: var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>📋 Admin Orders – Mobile Lab Mityana</h2>
+  <p>Orders saved on this phone (local storage). Use search to find patient quickly.</p>
+</div>
+
+<div class="tools">
+  <input id="search" placeholder="Search by name, phone, test, order ID..." />
+  <button class="gray" onclick="exportOrders()">⬇ Export</button>
+  <button class="danger" onclick="clearOrders()">🗑 Clear All</button>
+</div>
+
+<div class="small" id="countText"></div>
+<br>
+
+<div id="orders"></div>
+
+<script>
+const KEY = "mobile_lab_orders";
+
+function getOrders(){
+  return JSON.parse(localStorage.getItem(KEY) || "[]");
+}
+
+function setOrders(arr){
+  localStorage.setItem(KEY, JSON.stringify(arr));
+}
+
+function formatOrder(o){
+  return `Order ID: ${o.order_id}
+Date: ${o.created_at}
+
+Name: ${o.name}
+Phone: ${o.phone}
+Email: ${o.email}
+Age: ${o.age}
+Sex: ${o.sex}
+
+Location: ${o.location}
+Payment: ${o.payment}
+
+Tests:
+${o.tests}
+
+Total: ${o.total}
+Notes: ${o.notes}`;
+}
+
+function renderOrders(){
+  const q = (document.getElementById("search").value || "").toLowerCase();
+  const ordersDiv = document.getElementById("orders");
+  const all = getOrders();
+
+  const filtered = all.filter(o => formatOrder(o).toLowerCase().includes(q));
+
+  document.getElementById("countText").innerText =
+    `Showing ${filtered.length} / ${all.length} orders`;
+
+  ordersDiv.innerHTML = "";
+
+  if(filtered.length === 0){
+    ordersDiv.innerHTML = `<div class="card">No orders found.</div>`;
+    return;
+  }
+
+  filtered.forEach((o, idx)=>{
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const text = formatOrder(o);
+
+    const waText = `Mobile Lab Order (Admin Copy)
+${text}`;
+
+    card.innerHTML = `
+      <div class="meta"><strong>${o.name}</strong> • ${o.phone} • ${o.created_at}</div>
+      <div class="orderText">${text}</div>
+      <div class="row">
+        <a href="https://wa.me/256750992939?text=${encodeURIComponent(waText)}" target="_blank">📲 WhatsApp Patient</a>
+        <a href="#" onclick="deleteOrder(${idx});return false;">🗑 Delete</a>
+      </div>
+    `;
+
+    ordersDiv.appendChild(card);
+  });
+}
+
+function deleteOrder(indexInFiltered){
+  const q = (document.getElementById("search").value || "").toLowerCase();
+  const all = getOrders();
+  const filtered = all.filter(o => formatOrder(o).toLowerCase().includes(q));
+  const orderToDelete = filtered[indexInFiltered];
+
+  const newAll = all.filter(o => o.order_id !== orderToDelete.order_id);
+  setOrders(newAll);
+  renderOrders();
+}
+
+function clearOrders(){
+  if(confirm("Clear all saved orders on this phone?")){
+    localStorage.removeItem(KEY);
+    renderOrders();
+  }
+}
+
+function exportOrders(){
+  const all = getOrders();
+  if(all.length === 0){
+    alert("No orders to export.");
+    return;
+  }
+
+  const text = all.map(o => "------------------------\n" + formatOrder(o)).join("\n\n");
+  const blob = new Blob([text], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "mobile_lab_orders.txt";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("search").addEventListener("input", renderOrders);
+renderOrders();
+</script>
+
+</body>
+</html>
