@@ -10,29 +10,22 @@
 <style>
 body { font-family: Arial; display: flex; justify-content: center; padding-top: 50px; }
 form { max-width: 400px; width: 100%; background: #f5f5f5; padding: 20px; border-radius: 12px; }
-input, select { width: 100%; padding: 10px; margin: 6px 0 14px; border-radius: 8px; border: 1px solid #ccc; }
+input { width: 100%; padding: 10px; margin: 6px 0 14px; border-radius: 8px; border: 1px solid #ccc; }
 button { width: 100%; padding: 12px; background: #0ea5e9; border: none; color: #fff; font-weight: bold; border-radius: 8px; cursor: pointer; }
+#msg { font-weight: bold; margin-top: 10px; text-align: center; }
 </style>
 </head>
 <body>
 
 <form id="registerForm">
   <h2>Register</h2>
-  <input type="text" id="name" placeholder="Full Name" required>
+  <input type="text" id="fullName" placeholder="Full Name" required>
   <input type="email" id="email" placeholder="Email" required>
+  <input type="text" id="phone" placeholder="Phone (07XXXXXXXX)" required>
   <input type="password" id="password" placeholder="Password" required>
-  <input type="number" id="age" placeholder="Age" required>
-  <select id="sex" required>
-    <option value="">-- Select Sex --</option>
-    <option>Male</option>
-    <option>Female</option>
-    <option>Other</option>
-  </select>
-  <input type="text" id="phone" placeholder="Phone (e.g. 07XXXXXXXX)" required>
-  <input type="text" id="location" placeholder="Location / Address" required>
   <button type="submit">Register</button>
   <p>Already have an account? <a href="login.html">Login</a></p>
-  <p id="msg" style="color:red;"></p>
+  <p id="msg"></p>
 </form>
 
 <script>
@@ -49,41 +42,42 @@ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+const msg = document.getElementById("msg");
 
 document.getElementById("registerForm").onsubmit = async (e) => {
   e.preventDefault();
-  const name = document.getElementById("name").value.trim();
+  const name = document.getElementById("fullName").value.trim();
   const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const age = document.getElementById("age").value;
-  const sex = document.getElementById("sex").value;
   const phone = document.getElementById("phone").value.trim();
-  const location = document.getElementById("location").value.trim();
-  const msg = document.getElementById("msg");
+  const password = document.getElementById("password").value;
 
   try {
-    // Create user
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    const user = userCredential.user;
+    // Check if phone already exists
+    const phoneCheck = await db.collection("users").where("phone", "==", phone).get();
+    if(!phoneCheck.empty) throw new Error("Phone number already registered");
 
-    // Save details in Firestore
-    await db.collection("users").doc(user.uid).set({
+    // Create user with email
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = userCredential.user.uid;
+
+    // Save extra details in Firestore
+    await db.collection("users").doc(uid).set({
       fullName: name,
       email: email,
-      age: age,
-      sex: sex,
       phone: phone,
-      location: location
+      created_at: new Date().toLocaleString()
     });
 
-    msg.style.color = "green";
-    msg.innerText = "✅ Registered successfully! Redirecting...";
-    setTimeout(()=>{ window.location.href = "login.html"; }, 1500);
+    // ✅ Show popup message
+    alert("✅ Account created successfully! You can now login.");
 
-  } catch (err) {
-    console.error(err);
+    // Redirect to login
+    window.location.href = "login.html";
+
+  } catch (error) {
+    console.error(error);
     msg.style.color = "red";
-    msg.innerText = err.message;
+    msg.innerText = error.message;
   }
 };
 </script>
