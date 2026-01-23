@@ -117,6 +117,15 @@ const mtnDetails = document.getElementById("mtnDetails");
 const airtelDetails = document.getElementById("airtelDetails");
 const confirmation = document.getElementById("confirmation");
 
+// ✅ FIXED INPUTS (NO MORE UNDEFINED)
+const nameInput = document.getElementById("name");
+const emailInput = document.getElementById("email");
+const ageInput = document.getElementById("age");
+const sexInput = document.getElementById("sex");
+const phoneInput = document.getElementById("phone");
+const locationInput = document.getElementById("location");
+const notesInput = document.getElementById("notes");
+
 // ---------- TESTS ----------
 const tests = [
  {name:"Bleeding & Clotting Test",price:15000},
@@ -188,16 +197,16 @@ document.getElementById("orderForm").onsubmit=e=>{
 
   const params={
     order_id:orderId,
-    name:name.value,
-    email:email.value,
-    age:age.value,
-    sex:sex.value,
-    phone:phone.value,
+    name:nameInput.value,
+    email:emailInput.value,
+    age:ageInput.value,
+    sex:sexInput.value,
+    phone:phoneInput.value,
     tests:preview.innerText,
     total:"UGX "+totalInput.value,
-    location:location.value,
+    location:locationInput.value,
     payment:payment.value,
-    notes:notes.value||"None"
+    notes:notesInput.value||"None"
   };
 
   const waText=`Mobile Lab Order
@@ -205,7 +214,7 @@ Order ID: ${orderId}
 Name: ${params.name}
 Phone: ${params.phone}
 Tests:
-${params.tests}
+${preview.innerText}
 Total: ${params.total}
 Location: ${params.location}
 Payment: ${params.payment}`;
@@ -223,11 +232,12 @@ Payment: ${params.payment}`;
   })
   .catch(()=>confirmation.innerHTML="❌ Failed to send order");
 };
-  if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js")
-    .then(() => console.log("PWA Service Worker registered"));
-}
 
+// ---------- PWA ----------
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js")
+    .then(() => console.log("✅ PWA Service Worker registered"));
+}
 </script>
 
 <!-- 🔔 FIREBASE PUSH NOTIFICATIONS -->
@@ -264,7 +274,6 @@ if (permission === "granted") {
   });
 
   console.log("🔥 FCM TOKEN:", token);
-  
 }
 
 // ✅ FOREGROUND MESSAGE
@@ -275,12 +284,6 @@ onMessage(messaging, payload => {
   });
 });
 </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
