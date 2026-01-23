@@ -18,21 +18,109 @@
 </script>
 
 <style>
-body{font-family:Arial;background:#f4f7fa;margin:0}
-.container{max-width:800px;margin:20px auto;background:#fff;padding:20px;border-radius:10px}
-.header{text-align:center;background:#4cafcb;color:#fff;padding:15px;border-radius:10px}
+/* ✅ BACKGROUND IMAGE BEHIND THE WHOLE WEBSITE */
+body{
+  font-family: Arial, sans-serif;
+  margin: 0;
+
+  /* 🔥 Put your image name here (same folder as this HTML) */
+  background:
+    linear-gradient(rgba(244,247,250,0.85), rgba(244,247,250,0.85)),
+    url("lab-bg.jpg") no-repeat center center fixed;
+  background-size: cover;
+}
+
+/* ✅ MAIN CONTAINER */
+.container{
+  max-width:800px;
+  margin:20px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* ✅ HEADER */
+.header{
+  text-align:center;
+  background:#4cafcb;
+  color:#fff;
+  padding:15px;
+  border-radius:10px;
+}
+
 label{font-weight:bold}
-input,select,textarea{width:100%;padding:10px;margin:5px 0 15px;border-radius:6px;border:1px solid #ccc}
-.tests-container{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:350px;overflow:auto;border:1px solid #ccc;padding:10px;border-radius:6px}
-.tests-container label{font-weight:normal}
-button{background:#4cafcb;color:#fff;padding:12px;border:none;border-radius:6px;cursor:pointer;width:100%}
+
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  margin:5px 0 15px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.tests-container{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  max-height:350px;
+  overflow:auto;
+  border:1px solid #ccc;
+  padding:10px;
+  border-radius:6px;
+  background:#fafafa;
+}
+
+.tests-container label{
+  font-weight:normal;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+button{
+  background:#4cafcb;
+  color:#fff;
+  padding:12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  width:100%;
+  font-size: 16px;
+}
+
 button:hover{background:#389ca0}
-.payment-details{display:none;padding:10px;border-radius:6px;margin-bottom:10px}
+
+.payment-details{
+  display:none;
+  padding:10px;
+  border-radius:6px;
+  margin-bottom:10px;
+  font-size: 14px;
+}
+
 #mtnDetails{background:#fff3cd}
 #airtelDetails{background:#e0f7fa}
-.order-preview{border:1px solid #ccc;padding:10px;border-radius:6px;margin-bottom:15px}
-#confirmation{text-align:center;font-weight:bold;margin-top:15px}
-@media(max-width:600px){.tests-container{grid-template-columns:1fr}}
+
+.order-preview{
+  border:1px solid #ccc;
+  padding:10px;
+  border-radius:6px;
+  margin-bottom:15px;
+  background:#f9f9f9;
+}
+
+#confirmation{
+  text-align:center;
+  font-weight:bold;
+  margin-top:15px;
+}
+
+/* ✅ MOBILE RESPONSIVE */
+@media(max-width:600px){
+  .tests-container{grid-template-columns:1fr}
+}
 </style>
 </head>
 
@@ -64,7 +152,7 @@ button:hover{background:#389ca0}
 </select>
 
 <label for="phone">Phone</label>
-<input id="phone" required pattern="^(07|2567)[0-9]{8}$">
+<input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX">
 
 <label>Select Tests</label>
 <div class="tests-container" id="testsContainer"></div>
@@ -89,7 +177,7 @@ button:hover{background:#389ca0}
 </div>
 
 <label for="notes">Notes (Optional)</label>
-<textarea id="notes"></textarea>
+<textarea id="notes" placeholder="Any extra information e.g. fasting, home landmark, preferred time..."></textarea>
 
 <label>Total (UGX)</label>
 <input id="total" readonly value="0">
@@ -117,7 +205,7 @@ const mtnDetails = document.getElementById("mtnDetails");
 const airtelDetails = document.getElementById("airtelDetails");
 const confirmation = document.getElementById("confirmation");
 
-// ✅ FIXED INPUTS (NO MORE UNDEFINED)
+// ✅ FIXED INPUTS (NO UNDEFINED)
 const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");
 const ageInput = document.getElementById("age");
@@ -191,7 +279,10 @@ payment.onchange=()=>{
 // ---------- SUBMIT ----------
 document.getElementById("orderForm").onsubmit=e=>{
   e.preventDefault();
-  if(totalInput.value==="0"){alert("Please select at least one test");return;}
+  if(totalInput.value==="0"){
+    alert("Please select at least one test");
+    return;
+  }
 
   const orderId="ML-"+Date.now();
 
@@ -230,7 +321,9 @@ Payment: ${params.payment}`;
     mtnDetails.style.display="none";
     airtelDetails.style.display="none";
   })
-  .catch(()=>confirmation.innerHTML="❌ Failed to send order");
+  .catch(()=>{
+    confirmation.innerHTML="❌ Failed to send order";
+  });
 };
 
 // ---------- PWA ----------
