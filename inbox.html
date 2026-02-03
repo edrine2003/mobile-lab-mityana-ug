@@ -3,10 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Patient Inbox – Mobile Lab Mityana</title>
+<title>Mobile Lab Order – Mityana Uganda</title>
 
-<meta name="description" content="Check your lab results online – Mobile Lab Mityana">
+<meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
 <meta name="theme-color" content="#0ea5e9">
+
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  emailjs.init("QPXYuZG5LIiv_1x3H");
+</script>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -23,103 +31,104 @@
   --card:rgba(255,255,255,0.92);
   --shadow:0 12px 30px rgba(2,6,23,0.12);
 }
-*{box-sizing:border-box;}
-body{
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f4f7fa;
-  color: var(--dark);
-}
-.container{max-width: 900px;margin: 20px auto;padding: 16px;}
-.card{
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.header{
-  background: linear-gradient(135deg, var(--primary), var(--primary2));
-  color:#fff;
-  padding: 18px 16px;
-  text-align:center;
-  position: relative;
-}
-.header h2{margin: 0;font-size: 22px;}
-.header p{margin: 6px 0 0;font-size: 13px;opacity: 0.95;}
-#logoutBtn{
-  position:fixed;
-  bottom:14px;
-  right:14px;
-  padding:10px 12px;
-  border:none;
-  border-radius:12px;
-  background:#ef4444;
-  color:#fff;
-  font-weight:900;
-  cursor:pointer;
-  z-index:9999;
-}
+*{box-sizing:border-box}
+body{font-family: Arial; margin:0; background:linear-gradient(rgba(241,245,249,0.82), rgba(241,245,249,0.82)), url("lab-bg.jpg") no-repeat center center fixed; background-size:cover; color:var(--dark);}
+.container{max-width:900px;margin:18px auto;padding:16px;}
+.card{background:var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); overflow:hidden;}
+.header{background:linear-gradient(135deg,var(--primary),var(--primary2)); color:#fff; padding:18px 16px; text-align:center; position:relative;}
+.header h2{margin:0;font-size:22px;}
+.header p{margin:6px 0 0;font-size:13px;opacity:0.95;}
+.header-actions{margin-top:12px; display:flex; justify-content:center; gap:10px; flex-wrap: wrap;}
+.call-btn{text-decoration:none; display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:999px; font-weight:800; font-size:13px; color:#fff; border:1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.14);}
+.call-btn:hover{background: rgba(255,255,255,0.22);}
+.form-body{padding:18px;}
+.grid2{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
+@media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+label{font-weight:700;font-size:13px;color:var(--dark);}
+input,select,textarea{width:100%; padding:12px; margin:6px 0 14px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.95); outline:none; transition:0.2s;}
+input:focus, select:focus, textarea:focus{border-color: rgba(14,165,233,0.7); box-shadow:0 0 0 4px rgba(14,165,233,0.18);}
+small.note{display:block; margin-top:-10px; margin-bottom:12px; color:var(--muted); font-size:12px;}
+.tests-area{border:1px solid var(--border); border-radius:14px; padding:12px; background:rgba(255,255,255,0.65);}
+.category{margin-bottom:14px;}
+.cat-title{display:flex; align-items:center; justify-content: space-between; gap:10px; margin:8px 0 10px;}
+.cat-title h3{font-size:14px;margin:0;color:var(--dark);}
+.cat-title span{font-size:12px;color:var(--muted);}
+.tests-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+@media(max-width:720px){.tests-grid{grid-template-columns:1fr;}}
+.test-item{display:flex; gap:10px; padding:10px; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,0.92); cursor:pointer; transition:0.18s;}
+.test-item:hover{transform:translateY(-1px); border-color:rgba(14,165,233,0.55); box-shadow:0 10px 18px rgba(2,6,23,0.08);}
+.test-item input{width:auto;margin:3px 0 0;}
+.test-name{font-weight:700;font-size:13px;margin:0;}
+.test-price{font-size:12px;color:var(--muted);margin:3px 0 0;}
+#userDetails{background: rgba(14,165,233,0.08); padding:12px; border-radius:14px; margin-bottom:12px; font-size:14px;}
+#logoutBtn{margin-top:16px; padding:10px 14px; border:none; border-radius:12px; background:#ef4444; color:#fff; font-weight:900; cursor:pointer; position:fixed; bottom:20px; right:20px;}
 #logoutBtn:hover{filter:brightness(0.95);}
-.inbox-list{padding: 16px;}
-.result-card{
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.95);
-  margin-bottom: 12px;
-  padding: 12px;
-  transition: 0.2s;
-  cursor: pointer;
-}
-.result-card:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(2,6,23,0.08);
-}
-.result-card h3{margin:0;font-size:15px;}
-.result-card p{margin:4px 0;font-size:13px;color:var(--muted);}
-.new-badge{
-  display:inline-block;
-  background: #ef4444;
-  color:#fff;
-  font-size:10px;
-  font-weight:700;
-  padding: 2px 6px;
-  border-radius: 999px;
-  margin-left: 6px;
-}
-.popup{
-  position:fixed;
-  top:20px;
-  right:20px;
-  background: #0ea5e9;
-  color:#fff;
-  padding: 12px 18px;
-  border-radius: 12px;
-  box-shadow:0 6px 16px rgba(0,0,0,0.15);
-  z-index:9999;
-  display:none;
-  font-weight:700;
-}
+#inbox, #adminOrders{margin-top:20px;}
+table{width:100%; border-collapse:collapse; margin-top:12px;}
+th,td{border:1px solid var(--border); padding:8px; font-size:13px; text-align:left;}
+th{background:var(--primary); color:#fff;}
+textarea.result{width:100%; padding:8px; border-radius:8px; border:1px solid var(--border); margin-top:4px; resize:vertical;}
+button.sendWA{background:#10b981; margin-top:4px; width:100%; font-weight:700;}
 </style>
 </head>
 <body>
-
 <div class="container">
   <div class="card">
     <div class="header">
-      <h2>🧪 Patient Inbox</h2>
-      <p>View your lab results securely • Mityana & Nearby Areas</p>
+      <h2>🧪 Mobile Lab Order Form</h2>
+      <p>For the love of your health • Mityana & Nearby Areas</p>
+      <div class="header-actions">
+        <a class="call-btn" href="tel:+256778379791">📞 Call MTN: +256 778 379 791</a>
+        <a class="call-btn" href="tel:0750992939">📞 Call Airtel: 0750 992 939</a>
+      </div>
     </div>
 
-    <div class="inbox-list" id="inboxList">
-      <p>Loading your results...</p>
+    <!-- Logged-in User Details -->
+    <div id="userDetails">Loading account info...</div>
+
+    <!-- Admin Links -->
+    <div class="action-row" id="adminLinks" style="display:none;">
+      <a href="#adminOrders">📋 View All Orders (Admin)</a>
+    </div>
+
+    <!-- Patient Section -->
+    <div id="patientSection">
+      <form id="orderForm" class="form-body">
+        <div class="grid2">
+          <div><label for="name">Full Name</label><input id="name" required placeholder="e.g. Namiyingo Joyce"></div>
+          <div><label for="email">Email</label><input type="email" id="email" required></div>
+          <div><label for="age">Age</label><input type="number" id="age" required></div>
+          <div><label for="sex">Sex</label><select id="sex" required><option value="">-- Select --</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+          <div><label for="phone">Phone</label><input id="phone" required></div>
+          <div><label for="location">Location</label><input id="location" required></div>
+        </div>
+
+        <label>Select Tests</label>
+        <input id="searchTests" placeholder="Search test...">
+        <div class="tests-area" id="testsContainer"></div>
+        <button type="submit">Submit Order</button>
+      </form>
+
+      <div id="inbox"></div>
+    </div>
+
+    <!-- Admin Orders -->
+    <div id="adminOrders" style="display:none;">
+      <h3>📋 All Orders (Admin)</h3>
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th><th>Patient</th><th>Phone</th><th>Tests</th><th>Status</th><th>Results</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
   </div>
 </div>
 
 <button id="logoutBtn">Logout</button>
-<div class="popup" id="popup"></div>
 
 <script>
 // Firebase init
@@ -127,77 +136,156 @@ const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
 };
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const inboxList = document.getElementById("inboxList");
-const logoutBtn = document.getElementById("logoutBtn");
-const popup = document.getElementById("popup");
+const testsContainer = document.getElementById("testsContainer");
+const searchTests = document.getElementById("searchTests");
+const inbox = document.getElementById("inbox");
+const adminOrders = document.getElementById("adminOrders");
+const ordersTableBody = document.querySelector("#ordersTable tbody");
+const patientSection = document.getElementById("patientSection");
+const userDetailsDiv = document.getElementById("userDetails");
 
-// Require login
-auth.onAuthStateChanged(async (user)=>{
-  if(!user){
-    window.location.href = "login.html";
-    return;
-  }
+// Full original tests
+const testCategories = [
+  { title: "Blood Tests", tests: [
+      {name:"CBC - Complete Blood Count",price:15000},{name:"Blood Glucose",price:7000},{name:"Blood Grouping",price:10000},{name:"Bleeding & Clotting Test",price:15000},{name:"Malaria (B/S)",price:5000},{name:"Electrolytes",price:50000},{name:"Lipid Profile",price:40000},{name:"Liver Function Test (LFT)",price:50000},{name:"Kidney Function Test (RFT)",price:50000},{name:"PSA",price:25000},{name:"Sickling Test",price:40000},{name:"DNA",price:600000}
+    ] },
+  { title:"Infections / STIs", tests:[
+      {name:"HIV",price:7000},{name:"Hepatitis B",price:10000},{name:"Hepatitis C",price:10000},{name:"RPR / Syphilis",price:8000},{name:"Gonorrhea Test",price:15000},{name:"Chlamydia Test",price:15000},{name:"Brucella Test",price:10000}
+    ] },
+  { title:"Stool / Urine", tests:[
+      {name:"Urinalysis",price:8000},{name:"Stool Analysis",price:15000},{name:"H. Pylori Stool",price:20000},{name:"Widal Stool",price:20000}
+    ] },
+  { title:"H. Pylori / Gastro", tests:[{name:"H. Pylori Serum",price:8000}] },
+  { title:"Women's Health", tests:[
+      {name:"Pregnancy Test (hCG)",price:5000},{name:"High Vaginal Swab",price:10000},{name:"High Vaginal Swab C&S",price:120000},{name:"Gram Staining",price:10000}
+    ] },
+  { title:"Widal / Febrile Illness", tests:[{name:"Widal Serum",price:8000}] },
+  { title:"Autoimmune / Others", tests:[{name:"Rheumatoid Factor",price:15000}] }
+];
 
-  loadInbox(user.uid);
-});
+// Render tests
+function renderTests(filter=""){
+  testsContainer.innerHTML="";
+  testCategories.forEach(cat=>{
+    const filtered = cat.tests.filter(t=>t.name.toLowerCase().includes(filter.toLowerCase()));
+    if(filtered.length===0) return;
+    const wrapper = document.createElement("div"); wrapper.className="category";
+    const titleRow = document.createElement("div"); titleRow.className="cat-title";
+    titleRow.innerHTML=`<h3>✅ ${cat.title}</h3><span>${filtered.length} tests</span>`;
+    const grid = document.createElement("div"); grid.className="tests-grid";
+    filtered.forEach(t=>{
+      const label = document.createElement("label"); label.className="test-item";
+      const cb = document.createElement("input"); cb.type="checkbox"; cb.value=t.name; cb.dataset.price=t.price;
+      const info = document.createElement("div"); info.innerHTML=`<p class="test-name">${t.name}</p><p class="test-price">UGX ${t.price.toLocaleString()}</p>`;
+      label.appendChild(cb); label.appendChild(info); grid.appendChild(label);
+    });
+    wrapper.appendChild(titleRow); wrapper.appendChild(grid); testsContainer.appendChild(wrapper);
+  });
+}
+renderTests();
+searchTests.addEventListener("input",()=>renderTests(searchTests.value));
 
 // Logout
-logoutBtn.addEventListener("click", async ()=>{
-  await auth.signOut();
-  window.location.href = "login.html";
+document.getElementById("logoutBtn").addEventListener("click",()=>auth.signOut());
+
+// Auth + role-based display
+auth.onAuthStateChanged(async user=>{
+  if(!user){ window.location.href="login.html"; return; }
+  const doc = await db.collection("users").doc(user.uid).get();
+  let role="patient"; let data={};
+  if(doc.exists){ data = doc.data(); role=data.role||"patient"; }
+  userDetailsDiv.innerHTML=`<b>Logged in as:</b> ${data.fullName||user.email} | ${data.age||""} | ${data.sex||""} | ${data.phone||""}`;
+  if(role==="admin"){ patientSection.style.display="none"; adminOrders.style.display="block"; loadAdminOrders(); }
+  else{ patientSection.style.display="block"; adminOrders.style.display="none"; loadInbox(user.uid); }
 });
 
-// Load inbox
+// Patient submit order
+document.getElementById("orderForm").onsubmit = async e=>{
+  e.preventDefault();
+  const selectedTests = Array.from(document.querySelectorAll("#testsContainer input[type='checkbox']:checked")).map(i=>i.value);
+  if(selectedTests.length===0) return alert("Select at least one test");
+  const order = {
+    patientId: auth.currentUser.uid,
+    patientName: document.getElementById("name").value,
+    phone: document.getElementById("phone").value,
+    tests:selectedTests,
+    status:"Pending",
+    results:"",
+    createdAt: new Date()
+  };
+  await db.collection("orders").add(order);
+  alert("Order submitted!");
+  e.target.reset(); renderTests();
+  loadInbox(auth.currentUser.uid);
+};
+
+// Load inbox for patient
 async function loadInbox(uid){
-  inboxList.innerHTML = "<p>Loading your results...</p>";
-
-  const snapshot = await db.collection("results")
-    .where("userId","==",uid)
-    .orderBy("date","desc")
-    .get();
-
-  if(snapshot.empty){
-    inboxList.innerHTML = "<p>No results yet.</p>";
-    return;
-  }
-
-  inboxList.innerHTML = "";
-
+  inbox.innerHTML="<h3>📥 Your Orders</h3>";
+  const snapshot = await db.collection("orders").where("patientId","==",uid).orderBy("createdAt","desc").get();
+  if(snapshot.empty){ inbox.innerHTML+="<p>No orders yet.</p>"; return; }
   snapshot.forEach(doc=>{
-    const data = doc.data();
-    const card = document.createElement("div");
-    card.className = "result-card";
-    card.innerHTML = `
-      <h3>${data.date} - ${data.testName || "Lab Results"}
-      ${!data.seen ? '<span class="new-badge">NEW</span>' : ''}</h3>
-      <p>${data.testResults}</p>
-    `;
-    card.addEventListener("click", ()=>{
-      // mark as seen
-      if(!data.seen){
-        db.collection("results").doc(doc.id).update({seen:true});
-        card.querySelector(".new-badge")?.remove();
-      }
-      showPopup("You viewed your result!");
-    });
-    inboxList.appendChild(card);
+    const d=doc.data();
+    const div=document.createElement("div");
+    div.className="card"; div.style.padding="8px; margin-bottom:8px";
+    div.innerHTML=`<b>Order ID:</b> ${doc.id}<br><b>Tests:</b> ${d.tests.join(", ")}<br><b>Status:</b> ${d.status}<br><b>Results:</b> ${d.results||"N/A"}`;
+    inbox.appendChild(div);
   });
 }
 
-// Popup
-function showPopup(message){
-  popup.innerText = message;
-  popup.style.display = "block";
-  setTimeout(()=>{popup.style.display="none";}, 3000);
+// Load admin orders
+async function loadAdminOrders(){
+  ordersTableBody.innerHTML="";
+  const snapshot = await db.collection("orders").orderBy("createdAt","desc").get();
+  snapshot.forEach(doc=>{
+    const d=doc.data();
+    const tr = document.createElement("tr");
+    tr.innerHTML=`
+      <td>${doc.id}</td>
+      <td>${d.patientName}</td>
+      <td>${d.phone}</td>
+      <td>${d.tests.join(", ")}</td>
+      <td>
+        <select data-id="${doc.id}" class="statusSelect">
+          <option ${d.status==="Pending"?"selected":""}>Pending</option>
+          <option ${d.status==="Completed"?"selected":""}>Completed</option>
+          <option ${d.status==="Lacking"?"selected":""}>Lacking</option>
+        </select>
+      </td>
+      <td><textarea class="result" data-id="${doc.id}">${d.results||""}</textarea></td>
+      <td><button class="sendWA" data-id="${doc.id}" data-phone="${d.phone}">Send WhatsApp</button></td>
+    `;
+    ordersTableBody.appendChild(tr);
+  });
+
+  // Event listeners for admin
+  document.querySelectorAll(".statusSelect").forEach(s=>{
+    s.addEventListener("change", async e=>{
+      const id = e.target.dataset.id;
+      await db.collection("orders").doc(id).update({status:e.target.value});
+    });
+  });
+  document.querySelectorAll(".result").forEach(r=>{
+    r.addEventListener("change", async e=>{
+      const id = e.target.dataset.id;
+      await db.collection("orders").doc(id).update({results:e.target.value});
+    });
+  });
+  document.querySelectorAll(".sendWA").forEach(b=>{
+    b.addEventListener("click",()=>{
+      const id=b.dataset.id; const phone=b.dataset.phone;
+      const row = b.closest("tr");
+      const status = row.querySelector(".statusSelect").value;
+      const results = row.querySelector(".result").value;
+      const msg=`Lab Results\nOrder ID: ${id}\nStatus: ${status}\nResults: ${results}`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+    });
+  });
 }
 </script>
 </body>
