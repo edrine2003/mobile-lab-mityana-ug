@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mobile Lab Order – Mityana Uganda</title>
+
 <meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
 <meta name="theme-color" content="#0ea5e9">
 
@@ -12,7 +13,9 @@
 
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init("QPXYuZG5LIiv_1x3H");</script>
+<script>
+  emailjs.init("QPXYuZG5LIiv_1x3H");
+</script>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -20,37 +23,198 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-/* Keep your original CSS unchanged */
-:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(15,23,42,0.12);--card:rgba(255,255,255,0.92);--shadow:0 12px 30px rgba(2,6,23,0.12);}
+:root{
+  --primary:#0ea5e9;
+  --primary2:#14b8a6;
+  --dark:#0f172a;
+  --muted:#64748b;
+  --border:rgba(15,23,42,0.12);
+  --card:rgba(255,255,255,0.92);
+  --shadow:0 12px 30px rgba(2,6,23,0.12);
+}
 *{box-sizing:border-box}
-body{font-family: Arial;margin:0;background:linear-gradient(rgba(241,245,249,0.82),rgba(241,245,249,0.82)),url("lab-bg.jpg") no-repeat center center fixed;background-size:cover;color:var(--dark);}
+body{
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background:
+    linear-gradient(rgba(241,245,249,0.82), rgba(241,245,249,0.82)),
+    url("lab-bg.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: var(--dark);
+}
 .container{max-width: 900px;margin: 18px auto;padding: 16px;}
-.card{background: var(--card);border: 1px solid var(--border);border-radius: 18px;box-shadow: var(--shadow);overflow: hidden;}
-.header{background: linear-gradient(135deg, var(--primary), var(--primary2));color:#fff;padding: 18px 16px;text-align:center;position: relative;}
-.header h2{margin:0;font-size:22px;} .header p{margin:6px 0 0;font-size:13px;opacity:0.95;}
-.header-actions{margin-top:12px;display:flex;justify-content:center;gap:10px;flex-wrap: wrap;}
-.call-btn{text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius: 999px;font-weight:800;font-size:13px;color:#fff;border:1px solid rgba(255,255,255,0.35);background: rgba(255,255,255,0.14);}
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.header{
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
+  color:#fff;
+  padding: 18px 16px;
+  text-align:center;
+  position: relative;
+}
+.header h2{margin: 0;font-size: 22px;}
+.header p{margin: 6px 0 0;font-size: 13px;opacity: 0.95;}
+.header-actions{
+  margin-top: 12px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap: wrap;
+}
+.call-btn{
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  color:#fff;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.14);
+}
 .call-btn:hover{background: rgba(255,255,255,0.22);}
 .form-body{padding: 18px;}
 .grid2{display: grid;grid-template-columns: 1fr 1fr;gap: 12px;}
 @media(max-width:720px){.grid2{grid-template-columns: 1fr;}}
 label{font-weight: 700;font-size: 13px;color: var(--dark);}
-input,select,textarea{width:100%;padding:12px 12px;margin:6px 0 14px;border-radius:12px;border:1px solid var(--border);background: rgba(255,255,255,0.95);outline:none;transition:0.2s;}
-input:focus, select:focus, textarea:focus{border-color: rgba(14,165,233,0.7);box-shadow:0 0 0 4px rgba(14,165,233,0.18);}
-small.note{display:block;margin-top:-10px;margin-bottom:12px;color: var(--muted);font-size:12px;}
-.tests-area{border:1px solid var(--border);border-radius:14px;padding:12px;background: rgba(255,255,255,0.65);}
-.test-item{display:flex;gap:10px;padding:10px 10px;border:1px solid var(--border);border-radius:14px;background: rgba(255,255,255,0.92);cursor:pointer;transition:0.18s;}
-.test-item:hover{transform:translateY(-1px);border-color:rgba(14,165,233,0.55);box-shadow:0 10px 18px rgba(2,6,23,0.08);}
-.test-item input{width:auto;margin:3px 0 0;}
-.test-name{font-weight:700;font-size:13px;margin:0;}
-.test-price{font-size:12px;color: var(--muted);margin:3px 0 0;}
-#userDetails{background: rgba(14,165,233,0.08);padding:12px;border-radius:14px;margin-bottom:12px;font-size:14px;}
-#logoutBtn{margin-top:16px;padding:10px 14px;border:none;border-radius:12px;background:#ef4444;color:#fff;font-weight:900;cursor:pointer;}
+input,select,textarea{
+  width:100%;
+  padding: 12px 12px;
+  margin: 6px 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.95);
+  outline: none;
+  transition: 0.2s;
+}
+input:focus, select:focus, textarea:focus{
+  border-color: rgba(14,165,233,0.7);
+  box-shadow: 0 0 0 4px rgba(14,165,233,0.18);
+}
+small.note{
+  display:block;
+  margin-top:-10px;
+  margin-bottom:12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.tools-bar{display:flex;gap:10px;align-items:center;margin: 8px 0 12px;}
+.search{flex:1;margin:0;}
+.badge{
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(20,184,166,0.15);
+  border: 1px solid rgba(20,184,166,0.35);
+  color: #0f766e;
+  font-weight: 700;
+}
+.tests-area{
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255,255,255,0.65);
+}
+.category{margin-bottom: 14px;}
+.cat-title{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0 10px;
+}
+.cat-title h3{font-size: 14px;margin: 0;color: var(--dark);}
+.cat-title span{font-size: 12px;color: var(--muted);}
+.tests-grid{display:grid;grid-template-columns: 1fr 1fr;gap: 10px;}
+@media(max-width:720px){.tests-grid{grid-template-columns: 1fr;}}
+.test-item{
+  display:flex;
+  gap: 10px;
+  padding: 10px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.92);
+  cursor: pointer;
+  transition: 0.18s;
+}
+.test-item:hover{
+  transform: translateY(-1px);
+  border-color: rgba(14,165,233,0.55);
+  box-shadow: 0 10px 18px rgba(2,6,23,0.08);
+}
+.test-item input{width:auto;margin: 3px 0 0;}
+.test-name{font-weight: 700;font-size: 13px;margin: 0;}
+.test-price{font-size: 12px;color: var(--muted);margin: 3px 0 0;}
+.payment-details{
+  display:none;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  margin: -4px 0 12px;
+  font-size: 13px;
+}
+#userDetails{
+  background: rgba(14,165,233,0.08);
+  padding: 12px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+#logoutBtn{
+  margin-top: 16px;
+  padding:10px 14px;
+  border:none;
+  border-radius:12px;
+  background:#ef4444;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+}
 #logoutBtn:hover{filter:brightness(0.95);}
+.inbox-btn{
+  display:block;
+  margin: 10px 0;
+  padding: 12px;
+  text-align:center;
+  border-radius:14px;
+  background: var(--primary);
+  color:#fff;
+  font-weight:700;
+  text-decoration:none;
+}
+.inbox-btn:hover{background: var(--primary2);}
+.admin-section{
+  display:none;
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.88);
+}
+.admin-section textarea{
+  width:100%; padding:10px; margin-bottom:10px; border-radius:10px; border:1px solid var(--border);
+}
+.admin-section select{
+  width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px;
+}
+.admin-section button{
+  background: var(--primary2); color:#fff; padding:10px; width:100%; border:none; border-radius:12px; font-weight:700; cursor:pointer;
+}
+.admin-section button:hover{filter:brightness(0.95);}
 </style>
 </head>
-
 <body>
+
 <div class="container">
   <div class="card">
     <div class="header">
@@ -62,25 +226,71 @@ small.note{display:block;margin-top:-10px;margin-bottom:12px;color: var(--muted)
       </div>
     </div>
 
-    <!-- Logged-in User Details -->
+    <!-- Logged-in User Info -->
     <div id="userDetails"></div>
 
-    <!-- Inbox Button -->
-    <div class="action-row" id="inboxBtnDiv">
-      <a id="inboxBtn" href="inbox.html">📥 View My Orders / Results</a>
+    <!-- Inbox button for patients -->
+    <a href="inbox.html" class="inbox-btn" id="inboxBtn" style="display:none;">📥 View My Orders</a>
+
+    <!-- Admin Section -->
+    <div class="admin-section" id="adminSection">
+      <h3>Admin: Fill Test Results</h3>
+      <table id="adminOrders" border="1" style="width:100%; margin-bottom:10px; border-collapse:collapse;"></table>
+      <textarea id="resultText" placeholder="Enter results here..."></textarea>
+      <select id="statusSelect">
+        <option value="Completed">Completed ✅</option>
+        <option value="Lacking">Lacking ⚠️</option>
+        <option value="Pending">Pending ⏳</option>
+      </select>
+      <button id="sendWhatsAppBtn">Send via WhatsApp</button>
     </div>
 
+    <!-- Order Form -->
     <form id="orderForm" class="form-body">
       <div class="grid2">
-        <div><label for="name">Full Name</label><input id="name" required placeholder="e.g. Namiyingo Joyce"></div>
-        <div><label for="email">Email</label><input type="email" id="email" required placeholder="e.g. name@gmail.com"></div>
-        <div><label for="age">Age</label><input type="number" id="age" required placeholder="e.g. 25"></div>
-        <div><label for="sex">Sex</label><select id="sex" required><option value="">-- Select --</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-        <div><label for="phone">Phone</label><input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX"><small class="note">Example: 0750992939</small></div>
-        <div><label for="location">Location</label><input id="location" placeholder="Address or Google Maps link" required><small class="note">Add landmark for easy pickup</small></div>
+        <div>
+          <label for="name">Full Name</label>
+          <input id="name" required placeholder="e.g. Namiyingo Joyce">
+        </div>
+
+        <div>
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="e.g. name@gmail.com">
+        </div>
+
+        <div>
+          <label for="age">Age</label>
+          <input type="number" id="age" required placeholder="e.g. 25">
+        </div>
+
+        <div>
+          <label for="sex">Sex</label>
+          <select id="sex" required>
+            <option value="">-- Select --</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="phone">Phone</label>
+          <input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX">
+          <small class="note">Example: 0750992939</small>
+        </div>
+
+        <div>
+          <label for="location">Location</label>
+          <input id="location" placeholder="Address or Google Maps link" required>
+          <small class="note">Add landmark for easy pickup</small>
+        </div>
       </div>
 
       <label>Select Tests</label>
+      <div class="tools-bar">
+        <input class="search" id="searchTests" placeholder="Search test..."/>
+        <div class="badge" id="selectedCount">0 selected</div>
+      </div>
       <div class="tests-area" id="testsContainer"></div>
 
       <label for="payment">Payment Method</label>
@@ -91,59 +301,110 @@ small.note{display:block;margin-top:-10px;margin-bottom:12px;color: var(--muted)
         <option>Airtel Money</option>
       </select>
 
+      <div id="mtnDetails" class="payment-details">
+        MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b>
+      </div>
+      <div id="airtelDetails" class="payment-details">
+        Airtel Money: <b>0706559100 – Nambi Amina</b>
+      </div>
+
       <label for="notes">Notes (Optional)</label>
       <textarea id="notes" placeholder="Any extra info e.g. fasting, preferred time, symptoms..."></textarea>
 
       <button type="submit">Submit Order</button>
+      <div id="confirmation"></div>
+
       <button type="button" id="logoutBtn">Logout</button>
     </form>
   </div>
 </div>
 
 <script>
-// Firebase Init
-const firebaseConfig = { apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY", authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com", projectId:"mobile-lab-mityana-aeae2" };
+// Firebase init
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+};
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 // Elements
 const testsContainer = document.getElementById("testsContainer");
+const totalInput = document.createElement("input"); // placeholder, can add later
+const totalText = document.createElement("div"); // placeholder
+const preview = document.createElement("div"); // placeholder
+const payment = document.getElementById("payment");
+const mtnDetails = document.getElementById("mtnDetails");
+const airtelDetails = document.getElementById("airtelDetails");
+const confirmation = document.getElementById("confirmation");
+const searchTests = document.getElementById("searchTests");
+const selectedCount = document.getElementById("selectedCount");
+const inboxBtn = document.getElementById("inboxBtn");
+const adminSection = document.getElementById("adminSection");
 const userDetailsDiv = document.getElementById("userDetails");
-const inboxBtnDiv = document.getElementById("inboxBtnDiv");
-
-// Inputs
-const nameInput = document.getElementById("name");
-const emailInput = document.getElementById("email");
-const ageInput = document.getElementById("age");
-const sexInput = document.getElementById("sex");
-const phoneInput = document.getElementById("phone");
-const locationInput = document.getElementById("location");
-const notesInput = document.getElementById("notes");
 
 // Admin WhatsApp
-const adminWhatsApp="256750992939";
+const adminWhatsApp = "256750992939";
 
-// Tests (full list)
+// All your tests (full list)
 const testCategories = [
-{title:"Blood Tests", tests:[{name:"CBC - Complete Blood Count",price:15000},{name:"Blood Glucose",price:7000},{name:"Blood Grouping",price:10000},{name:"Bleeding & Clotting Test",price:15000},{name:"Malaria (B/S)",price:5000},{name:"Electrolytes",price:50000},{name:"Lipid Profile",price:40000},{name:"Liver Function Test (LFT)",price:50000},{name:"Kidney Function Test (RFT)",price:50000},{name:"PSA",price:25000},{name:"Sickling Test",price:40000},{name:"DNA",price:600000}]},
-{title:"Infections / STIs", tests:[{name:"HIV",price:7000},{name:"Hepatitis B",price:10000},{name:"Hepatitis C",price:10000},{name:"RPR / Syphilis",price:8000},{name:"Gonorrhea Test",price:15000},{name:"Chlamydia Test",price:15000},{name:"Brucella Test",price:10000}]},
-{title:"Stool / Urine", tests:[{name:"Urinalysis",price:8000},{name:"Stool Analysis",price:15000},{name:"H. Pylori Stool",price:20000},{name:"Widal Stool",price:20000}]},
-{title:"H. Pylori / Gastro", tests:[{name:"H. Pylori Serum",price:8000}]},
-{title:"Women's Health", tests:[{name:"Pregnancy Test (hCG)",price:5000},{name:"High Vaginal Swab",price:10000},{name:"High Vaginal Swab C&S",price:120000},{name:"Gram Staining",price:10000}]},
-{title:"Widal / Febrile Illness", tests:[{name:"Widal Serum",price:8000}]},
-{title:"Autoimmune / Others", tests:[{name:"Rheumatoid Factor",price:15000}]}
+  { title: "Blood Tests", tests: [
+      {name:"CBC - Complete Blood Count",price:15000},
+      {name:"Blood Glucose",price:7000},
+      {name:"Blood Grouping",price:10000},
+      {name:"Bleeding & Clotting Test",price:15000},
+      {name:"Malaria (B/S)",price:5000},
+      {name:"Electrolytes",price:50000},
+      {name:"Lipid Profile",price:40000},
+      {name:"Liver Function Test (LFT)",price:50000},
+      {name:"Kidney Function Test (RFT)",price:50000},
+      {name:"PSA",price:25000},
+      {name:"Sickling Test",price:40000},
+      {name:"DNA",price:600000}
+    ] },
+  { title:"Infections / STIs", tests:[
+      {name:"HIV",price:7000},
+      {name:"Hepatitis B",price:10000},
+      {name:"Hepatitis C",price:10000},
+      {name:"RPR / Syphilis",price:8000},
+      {name:"Gonorrhea Test",price:15000},
+      {name:"Chlamydia Test",price:15000},
+      {name:"Brucella Test",price:10000}
+    ] },
+  { title:"Stool / Urine", tests:[
+      {name:"Urinalysis",price:8000},
+      {name:"Stool Analysis",price:15000},
+      {name:"H. Pylori Stool",price:20000},
+      {name:"Widal Stool",price:20000}
+    ] },
+  { title:"H. Pylori / Gastro", tests:[{name:"H. Pylori Serum",price:8000}] },
+  { title:"Women's Health", tests:[
+      {name:"Pregnancy Test (hCG)",price:5000},
+      {name:"High Vaginal Swab",price:10000},
+      {name:"High Vaginal Swab C&S",price:120000},
+      {name:"Gram Staining",price:10000}
+    ] },
+  { title:"Widal / Febrile Illness", tests:[{name:"Widal Serum",price:8000}] },
+  { title:"Autoimmune / Others", tests:[{name:"Rheumatoid Factor",price:15000}] }
 ];
 
 // Render tests
-function renderTests(){
+function renderTests(filterText=""){
   testsContainer.innerHTML="";
   testCategories.forEach(cat=>{
-    const wrapper=document.createElement("div"); wrapper.className="category";
-    const titleRow=document.createElement("div"); titleRow.className="cat-title";
-    titleRow.innerHTML=`<h3>${cat.title}</h3>`;
-    const grid=document.createElement("div"); grid.className="tests-grid";
-    cat.tests.forEach(t=>{
+    const filtered = cat.tests.filter(t=>t.name.toLowerCase().includes(filterText.toLowerCase()));
+    if(filtered.length===0) return;
+    const wrapper = document.createElement("div"); wrapper.className="category";
+    const titleRow = document.createElement("div"); titleRow.className="cat-title";
+    titleRow.innerHTML=`<h3>✅ ${cat.title}</h3><span>${filtered.length} tests</span>`;
+    const grid = document.createElement("div"); grid.className="tests-grid";
+    filtered.forEach(t=>{
       const label=document.createElement("label"); label.className="test-item";
       const cb=document.createElement("input"); cb.type="checkbox"; cb.dataset.price=t.price; cb.value=t.name;
       const info=document.createElement("div"); info.innerHTML=`<p class="test-name">${t.name}</p><p class="test-price">UGX ${t.price.toLocaleString()}</p>`;
@@ -153,25 +414,7 @@ function renderTests(){
   });
 }
 renderTests();
-
-// Auth
-auth.onAuthStateChanged(async(user)=>{
-  if(!user){ window.location.href="login.html"; return; }
-  const doc=await db.collection("users").doc(user.uid).get();
-  let role="patient";
-  if(doc.exists){
-    const data=doc.data();
-    nameInput.value=data.fullName||"";
-    ageInput.value=data.age||"";
-    sexInput.value=data.sex||"";
-    phoneInput.value=data.phone||"";
-    locationInput.value=data.location||"";
-    emailInput.value=data.email||user.email||"";
-    role=data.role||"patient";
-    userDetailsDiv.innerHTML=`<b>Logged in as:</b> ${data.fullName||""} | Age: ${data.age||""} | Sex: ${data.sex||""} | Phone: ${data.phone||""} | Email: ${data.email||user.email||""}`;
-  } else { emailInput.value=user.email||""; userDetailsDiv.innerHTML=`<b>Logged in as:</b> ${user.email||""}`; }
-});
-document.getElementById("logoutBtn").addEventListener("click", async()=>{await auth.signOut();window.location.href="login.html";});
 </script>
+
 </body>
 </html>
