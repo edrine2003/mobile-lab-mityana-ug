@@ -3,11 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mobile Lab Dashboard – Mityana Uganda</title>
-<meta name="description" content="Mobile Lab Orders for Mityana & Nearby Areas">
+<title>Mobile Lab Order – Mityana Uganda</title>
+
+<meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
 <meta name="theme-color" content="#0ea5e9">
+
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  emailjs.init("QPXYuZG5LIiv_1x3H");
+</script>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -25,15 +32,9 @@
   --shadow:0 12px 30px rgba(2,6,23,0.12);
 }
 *{box-sizing:border-box}
-body{
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: linear-gradient(rgba(241,245,249,0.82), rgba(241,245,249,0.82)), url("lab-bg.jpg") no-repeat center center fixed;
-  background-size: cover;
-  color: var(--dark);
-}
-.container{max-width: 1000px; margin: 20px auto; padding: 16px;}
-.card{background: var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); overflow:hidden;}
+body{font-family: Arial; margin:0; background:linear-gradient(rgba(241,245,249,0.82), rgba(241,245,249,0.82)), url("lab-bg.jpg") no-repeat center center fixed; background-size:cover; color:var(--dark);}
+.container{max-width:900px;margin:18px auto;padding:16px;}
+.card{background:var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); overflow:hidden;}
 .header{background:linear-gradient(135deg,var(--primary),var(--primary2)); color:#fff; padding:18px 16px; text-align:center; position:relative;}
 .header h2{margin:0;font-size:22px;}
 .header p{margin:6px 0 0;font-size:13px;opacity:0.95;}
@@ -43,10 +44,10 @@ body{
 .form-body{padding:18px;}
 .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
 @media(max-width:720px){.grid2{grid-template-columns:1fr;}}
-label{font-weight:700;font-size:13px;color: var(--dark);}
+label{font-weight:700;font-size:13px;color:var(--dark);}
 input,select,textarea{width:100%; padding:12px; margin:6px 0 14px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.95); outline:none; transition:0.2s;}
-input:focus, select:focus, textarea:focus{border-color: rgba(14,165,233,0.7); box-shadow: 0 0 0 4px rgba(14,165,233,0.18);}
-small.note{display:block; margin-top:-10px; margin-bottom:12px; color: var(--muted); font-size:12px;}
+input:focus, select:focus, textarea:focus{border-color: rgba(14,165,233,0.7); box-shadow:0 0 0 4px rgba(14,165,233,0.18);}
+small.note{display:block; margin-top:-10px; margin-bottom:12px; color:var(--muted); font-size:12px;}
 .tests-area{border:1px solid var(--border); border-radius:14px; padding:12px; background:rgba(255,255,255,0.65);}
 .category{margin-bottom:14px;}
 .cat-title{display:flex; align-items:center; justify-content: space-between; gap:10px; margin:8px 0 10px;}
@@ -74,37 +75,44 @@ button.sendWA{background:#10b981; margin-top:4px; width:100%; font-weight:700;}
 <div class="container">
   <div class="card">
     <div class="header">
-      <h2>🧪 Mobile Lab Dashboard</h2>
-      <p>Mityana & Nearby Areas</p>
+      <h2>🧪 Mobile Lab Order Form</h2>
+      <p>For the love of your health • Mityana & Nearby Areas</p>
       <div class="header-actions">
-        <a class="call-btn" href="tel:+256778379791">📞 Call MTN</a>
-        <a class="call-btn" href="tel:0750992939">📞 Call Airtel</a>
+        <a class="call-btn" href="tel:+256778379791">📞 Call MTN: +256 778 379 791</a>
+        <a class="call-btn" href="tel:0750992939">📞 Call Airtel: 0750 992 939</a>
       </div>
     </div>
 
-    <!-- Logged-in User Info -->
+    <!-- Logged-in User Details -->
     <div id="userDetails">Loading account info...</div>
 
-    <!-- Test Order Form (patients) -->
+    <!-- Admin Links -->
+    <div class="action-row" id="adminLinks" style="display:none;">
+      <a href="#adminOrders">📋 View All Orders (Admin)</a>
+    </div>
+
+    <!-- Patient Section -->
     <div id="patientSection">
       <form id="orderForm" class="form-body">
         <div class="grid2">
-          <div><label for="name">Full Name</label><input id="name" required></div>
+          <div><label for="name">Full Name</label><input id="name" required placeholder="e.g. Namiyingo Joyce"></div>
           <div><label for="email">Email</label><input type="email" id="email" required></div>
           <div><label for="age">Age</label><input type="number" id="age" required></div>
-          <div><label for="sex">Sex</label><select id="sex" required><option value="">--Select--</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+          <div><label for="sex">Sex</label><select id="sex" required><option value="">-- Select --</option><option>Male</option><option>Female</option><option>Other</option></select></div>
           <div><label for="phone">Phone</label><input id="phone" required></div>
           <div><label for="location">Location</label><input id="location" required></div>
         </div>
+
         <label>Select Tests</label>
         <input id="searchTests" placeholder="Search test...">
         <div class="tests-area" id="testsContainer"></div>
         <button type="submit">Submit Order</button>
       </form>
+
       <div id="inbox"></div>
     </div>
 
-    <!-- Admin Orders (hidden from patients) -->
+    <!-- Admin Orders -->
     <div id="adminOrders" style="display:none;">
       <h3>📋 All Orders (Admin)</h3>
       <table id="ordersTable">
@@ -133,15 +141,6 @@ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Test data
-const testCategories = [
-  { title: "Blood Tests", tests: [
-    {name:"CBC",price:15000},{name:"Glucose",price:7000},{name:"LFT",price:50000}
-  ] },
-  { title:"STIs", tests:[{name:"HIV",price:7000},{name:"Syphilis",price:8000}] }
-];
-
-// Elements
 const testsContainer = document.getElementById("testsContainer");
 const searchTests = document.getElementById("searchTests");
 const inbox = document.getElementById("inbox");
@@ -149,6 +148,25 @@ const adminOrders = document.getElementById("adminOrders");
 const ordersTableBody = document.querySelector("#ordersTable tbody");
 const patientSection = document.getElementById("patientSection");
 const userDetailsDiv = document.getElementById("userDetails");
+
+// Full original tests
+const testCategories = [
+  { title: "Blood Tests", tests: [
+      {name:"CBC - Complete Blood Count",price:15000},{name:"Blood Glucose",price:7000},{name:"Blood Grouping",price:10000},{name:"Bleeding & Clotting Test",price:15000},{name:"Malaria (B/S)",price:5000},{name:"Electrolytes",price:50000},{name:"Lipid Profile",price:40000},{name:"Liver Function Test (LFT)",price:50000},{name:"Kidney Function Test (RFT)",price:50000},{name:"PSA",price:25000},{name:"Sickling Test",price:40000},{name:"DNA",price:600000}
+    ] },
+  { title:"Infections / STIs", tests:[
+      {name:"HIV",price:7000},{name:"Hepatitis B",price:10000},{name:"Hepatitis C",price:10000},{name:"RPR / Syphilis",price:8000},{name:"Gonorrhea Test",price:15000},{name:"Chlamydia Test",price:15000},{name:"Brucella Test",price:10000}
+    ] },
+  { title:"Stool / Urine", tests:[
+      {name:"Urinalysis",price:8000},{name:"Stool Analysis",price:15000},{name:"H. Pylori Stool",price:20000},{name:"Widal Stool",price:20000}
+    ] },
+  { title:"H. Pylori / Gastro", tests:[{name:"H. Pylori Serum",price:8000}] },
+  { title:"Women's Health", tests:[
+      {name:"Pregnancy Test (hCG)",price:5000},{name:"High Vaginal Swab",price:10000},{name:"High Vaginal Swab C&S",price:120000},{name:"Gram Staining",price:10000}
+    ] },
+  { title:"Widal / Febrile Illness", tests:[{name:"Widal Serum",price:8000}] },
+  { title:"Autoimmune / Others", tests:[{name:"Rheumatoid Factor",price:15000}] }
+];
 
 // Render tests
 function renderTests(filter=""){
@@ -158,12 +176,12 @@ function renderTests(filter=""){
     if(filtered.length===0) return;
     const wrapper = document.createElement("div"); wrapper.className="category";
     const titleRow = document.createElement("div"); titleRow.className="cat-title";
-    titleRow.innerHTML=`<h3>${cat.title}</h3><span>${filtered.length} tests</span>`;
+    titleRow.innerHTML=`<h3>✅ ${cat.title}</h3><span>${filtered.length} tests</span>`;
     const grid = document.createElement("div"); grid.className="tests-grid";
     filtered.forEach(t=>{
       const label = document.createElement("label"); label.className="test-item";
       const cb = document.createElement("input"); cb.type="checkbox"; cb.value=t.name; cb.dataset.price=t.price;
-      const info = document.createElement("div"); info.innerHTML=`<p class="test-name">${t.name}</p><p class="test-price">UGX ${t.price}</p>`;
+      const info = document.createElement("div"); info.innerHTML=`<p class="test-name">${t.name}</p><p class="test-price">UGX ${t.price.toLocaleString()}</p>`;
       label.appendChild(cb); label.appendChild(info); grid.appendChild(label);
     });
     wrapper.appendChild(titleRow); wrapper.appendChild(grid); testsContainer.appendChild(wrapper);
@@ -177,7 +195,7 @@ document.getElementById("logoutBtn").addEventListener("click",()=>auth.signOut()
 
 // Auth + role-based display
 auth.onAuthStateChanged(async user=>{
-  if(!user) { window.location.href="login.html"; return; }
+  if(!user){ window.location.href="login.html"; return; }
   const doc = await db.collection("users").doc(user.uid).get();
   let role="patient"; let data={};
   if(doc.exists){ data = doc.data(); role=data.role||"patient"; }
