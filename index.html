@@ -4,18 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mobile Lab Order – Mityana Uganda</title>
-
 <meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
 <meta name="theme-color" content="#0ea5e9">
-
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  emailjs.init("QPXYuZG5LIiv_1x3H");
-</script>
+<script>emailjs.init("QPXYuZG5LIiv_1x3H");</script>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -24,228 +20,59 @@
 
 <style>
 :root{
-  --primary:#0ea5e9;
-  --primary2:#14b8a6;
-  --dark:#0f172a;
-  --muted:#64748b;
-  --border:rgba(15,23,42,0.12);
-  --card:rgba(255,255,255,0.92);
-  --shadow:0 12px 30px rgba(2,6,23,0.12);
+  --primary:#0ea5e9; --primary2:#14b8a6; --dark:#0f172a; --muted:#64748b;
+  --border:rgba(15,23,42,0.12); --card:rgba(255,255,255,0.92); --shadow:0 12px 30px rgba(2,6,23,0.12);
 }
 *{box-sizing:border-box}
-body{
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background:
-    linear-gradient(rgba(241,245,249,0.82), rgba(241,245,249,0.82)),
-    url("lab-bg.jpg") no-repeat center center fixed;
-  background-size: cover;
-  color: var(--dark);
-}
-.container{max-width: 900px;margin: 18px auto;padding: 16px;}
-.card{
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.header{
-  background: linear-gradient(135deg, var(--primary), var(--primary2));
-  color:#fff;
-  padding: 18px 16px;
-  text-align:center;
-  position: relative;
-}
-.header h2{margin: 0;font-size: 22px;}
-.header p{margin: 6px 0 0;font-size: 13px;opacity: 0.95;}
-.header-actions{
-  margin-top: 12px;
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap: wrap;
-}
-.call-btn{
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 13px;
-  color:#fff;
-  border: 1px solid rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.14);
-}
+body{font-family: Arial,sans-serif;margin:0;background:linear-gradient(rgba(241,245,249,0.82), rgba(241,245,249,0.82)),url("lab-bg.jpg") no-repeat center center fixed;background-size: cover;color: var(--dark);}
+.container{max-width: 950px;margin: 18px auto;padding: 16px;}
+.card{background: var(--card);border: 1px solid var(--border);border-radius: 18px;box-shadow: var(--shadow);overflow: hidden;}
+.header{background: linear-gradient(135deg, var(--primary), var(--primary2));color:#fff;padding: 18px 16px;text-align:center;position: relative;}
+.header h2{margin:0;font-size:22px;}
+.header p{margin:6px 0 0;font-size:13px;opacity:0.95;}
+.header-actions{margin-top:12px;display:flex;justify-content:center;gap:10px;flex-wrap: wrap;}
+.call-btn{text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius: 999px;font-weight:800;font-size:13px;color:#fff;border:1px solid rgba(255,255,255,0.35);background: rgba(255,255,255,0.14);}
 .call-btn:hover{background: rgba(255,255,255,0.22);}
-.form-body{padding: 18px;}
-.grid2{display: grid;grid-template-columns: 1fr 1fr;gap: 12px;}
-@media(max-width:720px){.grid2{grid-template-columns: 1fr;}}
-label{font-weight: 700;font-size: 13px;color: var(--dark);}
-input,select,textarea{
-  width:100%;
-  padding: 12px 12px;
-  margin: 6px 0 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.95);
-  outline: none;
-  transition: 0.2s;
-}
-input:focus, select:focus, textarea:focus{
-  border-color: rgba(14,165,233,0.7);
-  box-shadow: 0 0 0 4px rgba(14,165,233,0.18);
-}
-small.note{
-  display:block;
-  margin-top:-10px;
-  margin-bottom:12px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.tools-bar{display:flex;gap:10px;align-items:center;margin: 8px 0 12px;}
+.form-body{padding:18px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+label{font-weight:700;font-size:13px;color: var(--dark);}
+input,select,textarea{width:100%;padding:12px 12px;margin:6px 0 14px;border-radius:12px;border:1px solid var(--border);background: rgba(255,255,255,0.95);outline:none;transition:0.2s;}
+input:focus, select:focus, textarea:focus{border-color: rgba(14,165,233,0.7);box-shadow:0 0 0 4px rgba(14,165,233,0.18);}
+small.note{display:block;margin-top:-10px;margin-bottom:12px;color: var(--muted);font-size:12px;}
+.tools-bar{display:flex;gap:10px;align-items:center;margin:8px 0 12px;}
 .search{flex:1;margin:0;}
-.badge{
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: rgba(20,184,166,0.15);
-  border: 1px solid rgba(20,184,166,0.35);
-  color: #0f766e;
-  font-weight: 700;
-}
-.tests-area{
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px;
-  background: rgba(255,255,255,0.65);
-}
-.category{margin-bottom: 14px;}
-.cat-title{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 8px 0 10px;
-}
-.cat-title h3{font-size: 14px;margin: 0;color: var(--dark);}
-.cat-title span{font-size: 12px;color: var(--muted);}
-.tests-grid{display:grid;grid-template-columns: 1fr 1fr;gap: 10px;}
-@media(max-width:720px){.tests-grid{grid-template-columns: 1fr;}}
-.test-item{
-  display:flex;
-  gap: 10px;
-  padding: 10px 10px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.92);
-  cursor: pointer;
-  transition: 0.18s;
-}
-.test-item:hover{
-  transform: translateY(-1px);
-  border-color: rgba(14,165,233,0.55);
-  box-shadow: 0 10px 18px rgba(2,6,23,0.08);
-}
-.test-item input{width:auto;margin: 3px 0 0;}
-.test-name{font-weight: 700;font-size: 13px;margin: 0;}
-.test-price{font-size: 12px;color: var(--muted);margin: 3px 0 0;}
-.payment-details{
-  display:none;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  margin: -4px 0 12px;
-  font-size: 13px;
-}
-#mtnDetails{background: rgba(245,158,11,0.12);}
-#airtelDetails{background: rgba(239,68,68,0.10);}
-.summary{display:grid;grid-template-columns: 1fr 1fr;gap: 12px;margin-top: 6px;}
-@media(max-width:720px){.summary{grid-template-columns: 1fr;}}
-.total-box{
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(14,165,233,0.08);
-}
-.total-box label{display:block;margin-bottom: 6px;}
-.total-input{font-size: 20px;font-weight: 800;color: #0369a1;}
-.order-preview{
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.88);
-  max-height: 170px;
-  overflow: auto;
-}
-button{
-  background: linear-gradient(135deg, var(--primary), var(--primary2));
-  color:#fff;
-  padding: 13px 14px;
-  border:none;
-  border-radius: 14px;
-  cursor:pointer;
-  width:100%;
-  font-size: 16px;
-  font-weight: 800;
-  margin-top: 12px;
-  box-shadow: 0 12px 22px rgba(14,165,233,0.2);
-}
-button:hover{filter: brightness(0.98);}
-#confirmation{text-align:center;font-weight:bold;margin-top: 14px;}
-.action-row{
-  display:flex;
-  gap:10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-.action-row a{
-  flex:1;
-  min-width: 180px;
-  text-decoration:none;
-  text-align:center;
-  padding:12px 12px;
-  border-radius: 14px;
-  font-weight: 800;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.88);
-  color: var(--dark);
-}
-.action-row a:hover{
-  box-shadow: 0 10px 18px rgba(2,6,23,0.10);
-  transform: translateY(-1px);
-}
-.footer-note{
-  font-size: 12px;
-  color: var(--muted);
-  text-align:center;
-  padding: 10px 0 16px;
-}
-#userDetails{
-  background: rgba(14,165,233,0.08);
-  padding: 12px;
-  border-radius: 14px;
-  margin-bottom: 12px;
-  font-size: 14px;
-}
-#logoutBtn{
-  margin-top: 16px;
-  padding:10px 14px;
-  border:none;
-  border-radius:12px;
-  background:#ef4444;
-  color:#fff;
-  font-weight:900;
-  cursor:pointer;
-}
+.badge{font-size:12px;padding:8px 10px;border-radius:999px;background: rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.35);color:#0f766e;font-weight:700;}
+.tests-area{border:1px solid var(--border);border-radius:14px;padding:12px;background: rgba(255,255,255,0.65);}
+.category{margin-bottom:14px;}
+.cat-title{display:flex;align-items:center;justify-content: space-between;gap:10px;margin:8px 0 10px;}
+.cat-title h3{font-size:14px;margin:0;color: var(--dark);}
+.cat-title span{font-size:12px;color: var(--muted);}
+.tests-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:720px){.tests-grid{grid-template-columns:1fr;}}
+.test-item{display:flex;gap:10px;padding:10px 10px;border:1px solid var(--border);border-radius:14px;background: rgba(255,255,255,0.92);cursor:pointer;transition:0.18s;}
+.test-item:hover{transform: translateY(-1px);border-color: rgba(14,165,233,0.55);box-shadow:0 10px 18px rgba(2,6,23,0.08);}
+.test-item input{width:auto;margin:3px 0 0;}
+.test-name{font-weight:700;font-size:13px;margin:0;}
+.test-price{font-size:12px;color: var(--muted);margin:3px 0 0;}
+.payment-details{display:none;padding:12px;border-radius:14px;border:1px solid var(--border);margin:-4px 0 12px;font-size:13px;}
+#userDetails{background: rgba(14,165,233,0.08);padding:12px;border-radius:14px;margin-bottom:12px;font-size:14px;}
+#logoutBtn{position:fixed;bottom:20px;right:20px;padding:10px 14px;border:none;border-radius:12px;background:#ef4444;color:#fff;font-weight:900;cursor:pointer;}
 #logoutBtn:hover{filter:brightness(0.95);}
+.admin-section, .patient-inbox{margin-top:24px;}
+table{width:100%;border-collapse:collapse;}
+table, th, td{border:1px solid var(--border);}
+th, td{padding:8px;font-size:13px;text-align:left;}
+textarea.result-input{width:100%;height:60px;padding:6px;border-radius:8px;border:1px solid var(--border);resize:vertical;}
+.status-btn{padding:6px 8px;border:none;border-radius:8px;cursor:pointer;font-weight:700;color:#fff;}
+.status-completed{background: #16a34a;}
+.status-pending{background:#facc15;color:#000;}
+.status-lacking{background:#ef4444;}
+.send-wa{background:#0ea5e9;color:#fff;padding:6px 10px;border-radius:8px;text-decoration:none;font-weight:700;}
+.send-wa:hover{opacity:0.9;}
 </style>
 </head>
-
 <body>
-
 <div class="container">
   <div class="card">
     <div class="header">
@@ -262,27 +89,25 @@ button:hover{filter: brightness(0.98);}
 
     <!-- Admin Links (hidden from patient) -->
     <div class="action-row" id="adminLinks" style="display:none;">
-      <a href="admin.html">📋 View All Orders (Admin)</a>
+      <a href="#" id="viewAllOrdersBtn">📋 View All Orders (Admin)</a>
       <a href="users.html">👥 Manage Users</a>
     </div>
 
+    <!-- Patient Form -->
     <form id="orderForm" class="form-body">
       <div class="grid2">
         <div>
           <label for="name">Full Name</label>
           <input id="name" required placeholder="e.g. Namiyingo Joyce">
         </div>
-
         <div>
           <label for="email">Email</label>
           <input type="email" id="email" required placeholder="e.g. name@gmail.com">
         </div>
-
         <div>
           <label for="age">Age</label>
           <input type="number" id="age" required placeholder="e.g. 25">
         </div>
-
         <div>
           <label for="sex">Sex</label>
           <select id="sex" required>
@@ -292,13 +117,11 @@ button:hover{filter: brightness(0.98);}
             <option>Other</option>
           </select>
         </div>
-
         <div>
           <label for="phone">Phone</label>
           <input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX">
           <small class="note">Example: 0750992939</small>
         </div>
-
         <div>
           <label for="location">Location</label>
           <input id="location" placeholder="Address or Google Maps link" required>
@@ -308,7 +131,7 @@ button:hover{filter: brightness(0.98);}
 
       <label>Select Tests</label>
       <div class="tools-bar">
-        <input class="search" id="searchTests" placeholder="Search test (e.g. HIV, CBC, Widal, HVS)..." />
+        <input class="search" id="searchTests" placeholder="Search test..."/>
         <div class="badge" id="selectedCount">0 selected</div>
       </div>
       <div class="tests-area" id="testsContainer"></div>
@@ -321,12 +144,8 @@ button:hover{filter: brightness(0.98);}
         <option>Airtel Money</option>
       </select>
 
-      <div id="mtnDetails" class="payment-details">
-        MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b>
-      </div>
-      <div id="airtelDetails" class="payment-details">
-        Airtel Money: <b>0706559100 – Nambi Amina</b>
-      </div>
+      <div id="mtnDetails" class="payment-details">MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b></div>
+      <div id="airtelDetails" class="payment-details">Airtel Money: <b>0706559100 – Nambi Amina</b></div>
 
       <label for="notes">Notes (Optional)</label>
       <textarea id="notes" placeholder="Any extra info e.g. fasting, preferred time, symptoms..."></textarea>
@@ -337,38 +156,56 @@ button:hover{filter: brightness(0.98);}
           <div class="total-input" id="totalText">0</div>
           <input id="total" readonly value="0" style="display:none">
         </div>
-
         <div class="order-preview" id="preview">No tests selected</div>
       </div>
 
       <button type="submit">Submit Order</button>
       <div id="confirmation"></div>
-
-      <div class="action-row" id="afterActions" style="display:none;">
-        <a id="sendScreenshotBtn" href="#" target="_blank">📸 Send Screenshot of Order</a>
-      </div>
-
-      <button type="button" id="logoutBtn">Logout</button>
-      <div class="footer-note">
-        Sample collection available within Mityana & nearby areas.
-      </div>
-
     </form>
+
+    <!-- Patient Inbox -->
+    <div class="patient-inbox" id="patientInbox" style="display:none;">
+      <h3>📥 Your Orders</h3>
+      <table id="inboxTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Tests</th>
+            <th>Status</th>
+            <th>Results</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Admin Section -->
+    <div class="admin-section" id="adminSection" style="display:none;">
+      <h3>📝 All Orders (Admin)</h3>
+      <table id="adminOrdersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Patient</th>
+            <th>Phone</th>
+            <th>Tests</th>
+            <th>Results</th>
+            <th>Status</th>
+            <th>WhatsApp</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <button id="logoutBtn">Logout</button>
   </div>
 </div>
 
 <script>
-// Firebase init
-const firebaseConfig = {
-  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
-};
+// Firebase config
+const firebaseConfig = {apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.appspot.com",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -383,10 +220,12 @@ const airtelDetails = document.getElementById("airtelDetails");
 const confirmation = document.getElementById("confirmation");
 const searchTests = document.getElementById("searchTests");
 const selectedCount = document.getElementById("selectedCount");
-const afterActions = document.getElementById("afterActions");
-const sendScreenshotBtn = document.getElementById("sendScreenshotBtn");
 const adminLinks = document.getElementById("adminLinks");
 const userDetailsDiv = document.getElementById("userDetails");
+const adminSection = document.getElementById("adminSection");
+const patientInbox = document.getElementById("patientInbox");
+const inboxTableBody = document.querySelector("#inboxTable tbody");
+const adminOrdersTableBody = document.querySelector("#adminOrdersTable tbody");
 
 // Inputs
 const nameInput = document.getElementById("name");
@@ -400,46 +239,15 @@ const notesInput = document.getElementById("notes");
 // Admin WhatsApp
 const adminWhatsApp = "256750992939";
 
-// Tests
+// Tests organized by category
 const testCategories = [
-  { title: "Blood Tests", tests: [
-      {name:"CBC - Complete Blood Count",price:15000},
-      {name:"Blood Glucose",price:7000},
-      {name:"Blood Grouping",price:10000},
-      {name:"Bleeding & Clotting Test",price:15000},
-      {name:"malaria ( b/s)",price:5000},
-      {name:"Electrolytes",price:50000},
-      {name:"Lipid Profile",price:40000},
-      {name:"Liver Function Test (LFT)",price:50000},
-      {name:"Kidney Function Test (RFT)",price:50000},
-      {name:"PSA",price:25000},
-      {name:"Sickling Test",price:40000},
-      {name:"DNA",price:600000}
-    ] },
-  { title:"Infections / STIs", tests:[
-      {name:"HIV",price:7000},
-      {name:"Hepatitis B",price:10000},
-      {name:"Hepatitis C",price:10000},
-      {name:"RPR / Syphilis",price:8000},
-      {name:"Gonorrhea Test",price:15000},
-      {name:"Chlamydia Test",price:15000},
-      {name:"Brucella Test",price:10000}
-    ] },
-  { title:"Stool / Urine", tests:[
-      {name:"Urinalysis",price:8000},
-      {name:"Stool Analysis",price:15000},
-      {name:"H. Pylori Stool",price:20000},
-      {name:"Widal Stool",price:20000}
-    ] },
-  { title:"H. Pylori / Gastro", tests:[{name:"H. Pylori Serum",price:8000}] },
-  { title:"Women's Health", tests:[
-      {name:"Pregnancy Test (hCG)",price:5000},
-      {name:"High Vaginal Swab",price:10000},
-      {name:"High Vaginal Swab C&S",price:120000},
-      {name:"Gram Staining",price:10000}
-    ] },
-  { title:"Widal / Febrile Illness", tests:[{name:"Widal Serum",price:8000}] },
-  { title:"Autoimmune / Others", tests:[{name:"Rheumatoid Factor",price:15000}] }
+  { title: "Blood Tests", tests: [{name:"CBC - Complete Blood Count",price:15000},{name:"Blood Glucose",price:7000},{name:"Blood Grouping",price:10000},{name:"Bleeding & Clotting Test",price:15000},{name:"malaria ( b/s)",price:5000},{name:"Electrolytes",price:50000},{name:"Lipid Profile",price:40000},{name:"Liver Function Test (LFT)",price:50000},{name:"Kidney Function Test (RFT)",price:50000},{name:"PSA",price:25000},{name:"Sickling Test",price:40000},{name:"DNA",price:600000}]},
+  { title:"Infections / STIs", tests:[{name:"HIV",price:7000},{name:"Hepatitis B",price:10000},{name:"Hepatitis C",price:10000},{name:"RPR / Syphilis",price:8000},{name:"Gonorrhea Test",price:15000},{name:"Chlamydia Test",price:15000},{name:"Brucella Test",price:10000}]},
+  { title:"Stool / Urine", tests:[{name:"Urinalysis",price:8000},{name:"Stool Analysis",price:15000},{name:"H. Pylori Stool",price:20000},{name:"Widal Stool",price:20000}]},
+  { title:"H. Pylori / Gastro", tests:[{name:"H. Pylori Serum",price:8000}]},
+  { title:"Women's Health", tests:[{name:"Pregnancy Test (hCG)",price:5000},{name:"High Vaginal Swab",price:10000},{name:"High Vaginal Swab C&S",price:120000},{name:"Gram Staining",price:10000}]},
+  { title:"Widal / Febrile Illness", tests:[{name:"Widal Serum",price:8000}]},
+  { title:"Autoimmune / Others", tests:[{name:"Rheumatoid Factor",price:15000}]}
 ];
 
 // Render tests
@@ -455,33 +263,22 @@ function renderTests(filterText=""){
     filtered.forEach(t=>{
       const label=document.createElement("label"); label.className="test-item";
       const cb=document.createElement("input"); cb.type="checkbox"; cb.dataset.price=t.price; cb.value=t.name; cb.onchange=updateTotal;
-      const info=document.createElement("div"); info.innerHTML=`<p class="test-name">${t.name}</p><p class="test-price">UGX ${t.price.toLocaleString()}</p>`;
+      const info=document.createElement("div"); info.innerHTML=`<p class="test-name">${t.name}</p><p class="test-price">UGX ${Number(t.price).toLocaleString()}</p>`;
       label.appendChild(cb); label.appendChild(info); grid.appendChild(label);
     });
     wrapper.appendChild(titleRow); wrapper.appendChild(grid); testsContainer.appendChild(wrapper);
   });
 }
 renderTests();
-
-// Update total
 function updateTotal(){
   let total=0,list=[];
-  const checked=document.querySelectorAll("#testsContainer input[type='checkbox']:checked");
-  checked.forEach(cb=>{ total+=Number(cb.dataset.price); list.push(`${cb.value} (UGX ${Number(cb.dataset.price).toLocaleString()})`); });
+  document.querySelectorAll("#testsContainer input[type='checkbox']:checked").forEach(cb=>{ total+=Number(cb.dataset.price); list.push(`${cb.value} (UGX ${Number(cb.dataset.price).toLocaleString()})`); });
   totalInput.value=total; totalText.innerText=total.toLocaleString();
-  selectedCount.innerText=`${checked.length} selected`;
+  selectedCount.innerText=`${document.querySelectorAll("#testsContainer input[type='checkbox']:checked").length} selected`;
   preview.innerHTML=list.length?list.join("<br>"):"No tests selected";
 }
 searchTests.addEventListener("input", e=>{ renderTests(e.target.value.trim()); updateTotal(); });
-
-// Payment toggle
 payment.onchange=()=>{ mtnDetails.style.display=payment.value==="MTN Mobile Money"?"block":"none"; airtelDetails.style.display=payment.value==="Airtel Money"?"block":"none"; };
-
-// Save order locally
-function saveOrder(order){
-  const key="mobile_lab_orders"; const existing=JSON.parse(localStorage.getItem(key)||"[]");
-  existing.unshift(order); localStorage.setItem(key,JSON.stringify(existing));
-}
 
 // Submit order
 document.getElementById("orderForm").onsubmit=e=>{
@@ -489,39 +286,65 @@ document.getElementById("orderForm").onsubmit=e=>{
   if(Number(totalInput.value)===0){ alert("Please select at least one test"); return; }
   const orderId="ML-"+Date.now();
   const params={
-    order_id:orderId,
-    name:nameInput.value,
-    email:emailInput.value,
-    age:ageInput.value,
-    sex:sexInput.value,
-    phone:phoneInput.value,
-    tests:preview.innerText,
-    total:"UGX "+Number(totalInput.value).toLocaleString(),
-    location:locationInput.value,
-    payment:payment.value,
-    notes:notesInput.value||"None"
+    order_id:orderId,name:nameInput.value,email:emailInput.value,age:ageInput.value,sex:sexInput.value,
+    phone:phoneInput.value,tests:preview.innerText,total:"UGX "+Number(totalInput.value).toLocaleString(),
+    location:locationInput.value,payment:payment.value,notes:notesInput.value||"None",
+    status:"Pending",results:""
   };
-  saveOrder({...params, created_at:new Date().toLocaleString()});
-  const waText=`Mobile Lab Order\nOrder ID: ${orderId}\nName: ${params.name}\nPhone: ${params.phone}\nAge: ${params.age}\nSex: ${params.sex}\nTests:\n${preview.innerText}\nTotal: ${params.total}\nLocation: ${params.location}\nPayment: ${params.payment}\nNotes: ${params.notes}`;
-  window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(waText)}`);
-  const screenshotText=`Hello Doctor Edrine,\nI have submitted my Mobile Lab Order.\nOrder ID: ${orderId}\nName: ${params.name}\nPhone: ${params.phone}\n✅ I am sending the screenshot of my order now.`;
-  sendScreenshotBtn.href=`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(screenshotText)}`;
-  emailjs.send("service_sjp4zrf","lab_order",params)
+  db.collection("orders").doc(orderId).set(params)
   .then(()=>{
-    confirmation.innerHTML="✅ Order submitted successfully! Please send a screenshot of your order.";
-    afterActions.style.display="flex";
-    e.target.reset();
-    preview.innerHTML="No tests selected"; totalInput.value="0"; totalText.innerText="0"; selectedCount.innerText="0 selected"; mtnDetails.style.display="none"; airtelDetails.style.display="none"; renderTests();
-  })
-  .catch(()=>{ confirmation.innerHTML="❌ Failed to send order"; });
+    confirmation.innerHTML="✅ Order submitted!";
+    renderPatientInbox(auth.currentUser.uid);
+    const waText=`Mobile Lab Order\nOrder ID: ${orderId}\nName: ${params.name}\nPhone: ${params.phone}\nTests:\n${preview.innerText}\nTotal: ${params.total}\nLocation: ${params.location}\nPayment: ${params.payment}\nNotes: ${params.notes}`;
+    window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(waText)}`);
+    document.getElementById("orderForm").reset(); preview.innerHTML="No tests selected"; totalInput.value="0"; totalText.innerText="0"; selectedCount.innerText="0 selected"; mtnDetails.style.display="none"; airtelDetails.style.display="none"; renderTests();
+  }).catch(err=>{console.error(err); confirmation.innerHTML="❌ Failed to submit order"; });
 };
 
-// Logout button
-document.getElementById("logoutBtn").addEventListener("click", async ()=>{
-  await auth.signOut(); window.location.href="login.html";
-});
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", async ()=>{await auth.signOut(); window.location.href="login.html";});
 
-// Auth + Role
+// Render patient inbox
+function renderPatientInbox(uid){
+  inboxTableBody.innerHTML="";
+  db.collection("orders").where("email","==",emailInput.value).get().then(snapshot=>{
+    snapshot.forEach(doc=>{
+      const data=doc.data();
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>${data.order_id}</td><td>${data.tests}</td><td>${data.status}</td><td>${data.results||"-"}</td>`;
+      inboxTableBody.appendChild(tr);
+    });
+    patientInbox.style.display="block";
+  });
+}
+
+// Render admin orders
+function renderAdminOrders(){
+  adminOrdersTableBody.innerHTML="";
+  db.collection("orders").orderBy("order_id","desc").get().then(snapshot=>{
+    snapshot.forEach(doc=>{
+      const data=doc.data();
+      const tr=document.createElement("tr");
+      const resultTextarea = `<textarea class="result-input" id="res_${data.order_id}">${data.results||""}</textarea>`;
+      const statusBtns = `<button class="status-btn status-completed" onclick="updateStatus('${data.order_id}','Completed')">Completed</button>
+                          <button class="status-btn status-pending" onclick="updateStatus('${data.order_id}','Pending')">Pending</button>
+                          <button class="status-btn status-lacking" onclick="updateStatus('${data.order_id}','Lacking')">Lacking</button>`;
+      const waLink = `<a class="send-wa" href="https://wa.me/${data.phone}?text=${encodeURIComponent('Your lab results are ready.\n'+(data.results||'Pending'))}" target="_blank">Send WhatsApp</a>`;
+      tr.innerHTML=`<td>${data.order_id}</td><td>${data.name}</td><td>${data.phone}</td><td>${data.tests}</td><td>${resultTextarea}</td><td>${statusBtns}</td><td>${waLink}</td>`;
+      adminOrdersTableBody.appendChild(tr);
+    });
+    adminSection.style.display="block";
+  });
+}
+
+// Update status and results (Admin)
+window.updateStatus=(orderId,status)=>{
+  const res = document.getElementById("res_"+orderId).value;
+  db.collection("orders").doc(orderId).update({status:status,results:res})
+  .then(()=>{alert("Updated "+status+"!"); renderAdminOrders(); });
+}
+
+// Auth & Role
 auth.onAuthStateChanged(async (user)=>{
   if(!user){ window.location.href="login.html"; return; }
   const doc=await db.collection("users").doc(user.uid).get();
@@ -532,10 +355,9 @@ auth.onAuthStateChanged(async (user)=>{
     role=data.role||"patient";
     userDetailsDiv.innerHTML=`<b>Logged in as:</b> ${data.fullName || ""} | Age: ${data.age || ""} | Sex: ${data.sex || ""} | Phone: ${data.phone || ""} | Email: ${data.email || user.email || ""}`;
   } else { emailInput.value=user.email||""; userDetailsDiv.innerHTML=`<b>Logged in as:</b> ${user.email||""}`; }
-  // show admin links only to admin
-  if(role==="admin"){ adminLinks.style.display="flex"; }
+  if(role==="admin"){ adminLinks.style.display="flex"; renderAdminOrders(); }
+  else{ renderPatientInbox(user.uid); document.getElementById("orderForm").style.display="block"; }
 });
 </script>
-
 </body>
 </html>
