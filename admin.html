@@ -2,29 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Admin Panel – Mobile Lab Mityana</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel – Mobile Lab</title>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
 body{
-  font-family: Arial, sans-serif;
+  font-family:Arial, sans-serif;
   background:#f4f7fa;
   margin:0;
+  padding:20px;
 }
 .container{
-  max-width:900px;
-  margin:20px auto;
-  background:#fff;
+  max-width:600px;
+  margin:auto;
+  background:white;
   padding:20px;
-  border-radius:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,.1);
+  border-radius:14px;
 }
-h2{margin-top:0}
-select,input,textarea,button{
+h2{text-align:center}
+input, textarea, button{
   width:100%;
   padding:12px;
   margin:8px 0;
@@ -33,46 +29,56 @@ select,input,textarea,button{
 }
 button{
   background:#0ea5e9;
-  color:#fff;
+  color:white;
   font-weight:bold;
-  border:none;
   cursor:pointer;
 }
-button:hover{opacity:.95}
 .logout{
   background:#ef4444;
-  margin-top:10px;
 }
-.notice{
-  color:#64748b;
-  font-size:13px;
+.result-box{
+  background:#ecfeff;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+  font-size:14px;
 }
 </style>
 </head>
+
 <body>
 
 <div class="container">
-  <h2>🛡️ Admin Panel – Mobile Lab</h2>
-  <p class="notice">Only authorized admins can access this page.</p>
+  <h2>🧑‍⚕️ Admin – Upload Lab Results</h2>
 
-  <label>Select Patient</label>
-  <select id="patientSelect">
-    <option value="">Loading patients...</option>
-  </select>
+  <p><b>Logged in as:</b> <span id="edrinehero@gmail.com"></span></p>
 
-  <label>Test Name</label>
-  <input id="testName" placeholder="e.g. HIV, CBC, Widal">
+  <hr>
 
-  <label>Results</label>
-  <textarea id="results" rows="5" placeholder="Enter test results here"></textarea>
+  <h3>📌 Patient Identification</h3>
+  <input id="patientUID" placeholder="Paste Patient UID (required)">
 
-  <button onclick="sendResult()">📤 Send Result to Patient</button>
+  <h3>🧪 Test Details</h3>
+  <input id="testName" placeholder="Test Name (e.g CBC, HIV)">
+  <textarea id="testResult" placeholder="Enter full test results"></textarea>
+  <input id="testDate" type="date">
 
-  <button class="logout" onclick="logout()">Logout</button>
+  <button onclick="uploadResult()">📤 Upload Result</button>
+
+  <div id="status" class="result-box"></div>
+
+  <hr>
+
+  <button class="logout" onclick="logout()">🚪 Logout</button>
 </div>
 
+<!-- FIREBASE SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
-// 🔥 Firebase config
+// 🔥 Firebase config (YOUR PROJECT)
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -81,77 +87,53 @@ const firebaseConfig = {
   messagingSenderId: "624002906588",
   appId: "1:624002906588:web:08b4259f90ffa9adad7719"
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ✅ ADMIN EMAILS (ONLY THESE CAN ACCESS)
-const ADMIN_EMAILS = [
-  "edrinehero@gmail.com"
-];
-
-// 🔐 Protect admin page
-auth.onAuthStateChanged(async user=>{
-  if(!user){
-    window.location.href="login.html";
-    return;
+// 🔒 ADMIN PROTECTION
+auth.onAuthStateChanged(user=>{
+  if(!user || user.email !== "edrinehero@gmail.com"){
+    alert("Access denied");
+    window.location.href = "login.html";
+  }else{
+    document.getElementById("adminEmail").innerText = user.email;
   }
-
-  if(!ADMIN_EMAILS.includes(user.email)){
-    alert("❌ Access denied. Admins only.");
-    await auth.signOut();
-    window.location.href="login.html";
-    return;
-  }
-
-  loadPatients();
 });
 
-// Load patients
-async function loadPatients(){
-  const select=document.getElementById("patientSelect");
-  select.innerHTML="<option value=''>Select patient</option>";
+// 📤 Upload lab result
+async function uploadResult(){
+  const uid = patientUID.value.trim();
+  const test = testName.value.trim();
+  const result = testResult.value.trim();
+  const date = testDate.value;
 
-  const snapshot=await db.collection("users").get();
-  snapshot.forEach(doc=>{
-    const d=doc.data();
-    const opt=document.createElement("option");
-    opt.value=doc.id;
-    opt.textContent=`${d.fullName} (${d.phone})`;
-    select.appendChild(opt);
-  });
-}
-
-// Send results
-async function sendResult(){
-  const uid=document.getElementById("patientSelect").value;
-  const testName=document.getElementById("testName").value.trim();
-  const result=document.getElementById("results").value.trim();
-
-  if(!uid||!testName||!result){
-    alert("Please fill all fields");
+  if(!uid || !test || !result || !date){
+    status.innerText = "❌ Fill all fields";
     return;
   }
 
-  await db.collection("results").add({
+  await db.collection("lab_results").add({
     userId: uid,
-    testName: testName,
-    testResults: result,
-    date: new Date().toLocaleDateString(),
-    seen: false
+    testName: test,
+    result: result,
+    date: date,
+    uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  alert("✅ Result sent to patient inbox");
-  document.getElementById("testName").value="";
-  document.getElementById("results").value="";
+  status.innerText = "✅ Result uploaded successfully";
+  testName.value="";
+  testResult.value="";
 }
 
-// Logout
-async function logout(){
-  await auth.signOut();
-  window.location.href="login.html";
+// 🚪 Logout
+function logout(){
+  auth.signOut().then(()=>{
+    window.location.href="login.html";
+  });
 }
 </script>
+
 </body>
 </html>
