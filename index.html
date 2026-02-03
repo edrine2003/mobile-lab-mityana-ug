@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mobile Lab Order – Mityana Uganda</title>
-
 <meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
 <meta name="theme-color" content="#0ea5e9">
 
@@ -13,9 +12,7 @@
 
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  emailjs.init("QPXYuZG5LIiv_1x3H");
-</script>
+<script>emailjs.init("QPXYuZG5LIiv_1x3H");</script>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -239,7 +236,6 @@ button:hover{filter: brightness(0.98);}
 #logoutBtn:hover{filter:brightness(0.95);}
 </style>
 </head>
-
 <body>
 
 <button id="logoutBtn">Logout</button>
@@ -256,23 +252,19 @@ button:hover{filter: brightness(0.98);}
     </div>
 
     <form id="orderForm" class="form-body">
-
       <div class="grid2">
         <div>
           <label for="name">Full Name</label>
           <input id="name" required placeholder="e.g. Namiyingo Joyce">
         </div>
-
         <div>
           <label for="email">Email</label>
           <input type="email" id="email" required placeholder="e.g. name@gmail.com">
         </div>
-
         <div>
           <label for="age">Age</label>
           <input type="number" id="age" required placeholder="e.g. 25">
         </div>
-
         <div>
           <label for="sex">Sex</label>
           <select id="sex" required>
@@ -282,13 +274,11 @@ button:hover{filter: brightness(0.98);}
             <option>Other</option>
           </select>
         </div>
-
         <div>
           <label for="phone">Phone</label>
           <input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX">
           <small class="note">Example: 0750992939</small>
         </div>
-
         <div>
           <label for="location">Location</label>
           <input id="location" placeholder="Address or Google Maps link" required>
@@ -297,12 +287,10 @@ button:hover{filter: brightness(0.98);}
       </div>
 
       <label>Select Tests</label>
-
       <div class="tools-bar">
-        <input class="search" id="searchTests" placeholder="Search test (e.g. HIV, CBC, Widal, HVS)..." />
+        <input class="search" id="searchTests" placeholder="Search test..."/>
         <div class="badge" id="selectedCount">0 selected</div>
       </div>
-
       <div class="tests-area" id="testsContainer"></div>
 
       <label for="payment">Payment Method</label>
@@ -312,14 +300,8 @@ button:hover{filter: brightness(0.98);}
         <option>MTN Mobile Money</option>
         <option>Airtel Money</option>
       </select>
-
-      <div id="mtnDetails" class="payment-details">
-        MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b>
-      </div>
-
-      <div id="airtelDetails" class="payment-details">
-        Airtel Money: <b>0706559100 – Nambi Amina</b>
-      </div>
+      <div id="mtnDetails" class="payment-details">MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b></div>
+      <div id="airtelDetails" class="payment-details">Airtel Money: <b>0706559100 – Nambi Amina</b></div>
 
       <label for="notes">Notes (Optional)</label>
       <textarea id="notes" placeholder="Any extra info e.g. fasting, preferred time, symptoms..."></textarea>
@@ -330,7 +312,6 @@ button:hover{filter: brightness(0.98);}
           <div class="total-input" id="totalText">0</div>
           <input id="total" readonly value="0" style="display:none">
         </div>
-
         <div class="order-preview" id="preview">No tests selected</div>
       </div>
 
@@ -343,16 +324,15 @@ button:hover{filter: brightness(0.98);}
         <a href="admin.html">📋 View Admin Orders</a>
       </div>
 
-      <div class="footer-note">
-        Sample collection available within Mityana & nearby areas.
-      </div>
-
+      <div class="footer-note">Sample collection available within Mityana & nearby areas.</div>
     </form>
   </div>
 </div>
 
 <script>
-// ✅ Firebase init
+// ---------------------------
+// Firebase init
+// ---------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -362,18 +342,14 @@ const firebaseConfig = {
   appId: "1:624002906588:web:08b4259f90ffa9adad7719",
 };
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ✅ Require login + auto-fill all details
+// ---------------------------
+// Require login
+// ---------------------------
 auth.onAuthStateChanged(async (user)=>{
-  if(!user){
-    window.location.href = "login.html";
-    return;
-  }
-
-  // auto fill from Firestore
+  if(!user){ window.location.href="login.html"; return; }
   const doc = await db.collection("users").doc(user.uid).get();
   if(doc.exists){
     const data = doc.data();
@@ -384,18 +360,15 @@ auth.onAuthStateChanged(async (user)=>{
     document.getElementById("location").value = data.location || "";
     document.getElementById("email").value = data.email || user.email || "";
   }else{
-    // fallback
     document.getElementById("email").value = user.email || "";
   }
 });
 
-// ✅ Logout button
-document.getElementById("logoutBtn").addEventListener("click", async ()=>{
-  await auth.signOut();
-  window.location.href = "login.html";
-});
+document.getElementById("logoutBtn").addEventListener("click", async ()=>{await auth.signOut(); window.location.href="login.html";});
 
-// ---------- ELEMENTS ----------
+// ---------------------------
+// Tests
+// ---------------------------
 const testsContainer = document.getElementById("testsContainer");
 const totalInput = document.getElementById("total");
 const totalText = document.getElementById("totalText");
@@ -410,7 +383,6 @@ const selectedCount = document.getElementById("selectedCount");
 const afterActions = document.getElementById("afterActions");
 const sendScreenshotBtn = document.getElementById("sendScreenshotBtn");
 
-// ✅ INPUTS
 const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");
 const ageInput = document.getElementById("age");
@@ -419,235 +391,87 @@ const phoneInput = document.getElementById("phone");
 const locationInput = document.getElementById("location");
 const notesInput = document.getElementById("notes");
 
-// ✅ YOUR WHATSAPP NUMBER
 const adminWhatsApp = "256750992939";
 
-// ---------- TESTS ----------
 const testCategories = [
-  {
-    title: "Blood Tests",
-    tests: [
-      {name:"CBC - Complete Blood Count",price:15000},
-      {name:"Blood Glucose",price:7000},
-      {name:"Blood Grouping",price:10000},
-      {name:"Bleeding & Clotting Test",price:15000},
-      {name:"malaria ( b/s)",price:5000},
-      {name:"Electrolytes",price:50000},
-      {name:"Lipid Profile",price:40000},
-      {name:"Liver Function Test (LFT)",price:50000},
-      {name:"Kidney Function Test (RFT)",price:50000},
-      {name:"PSA",price:25000},
-      {name:"Sickling Test",price:40000},
-      {name:"DNA",price:600000}
-    ]
-  },
-  {
-    title: "Infections / STIs",
-    tests: [
-      {name:"HIV",price:7000},
-      {name:"Hepatitis B",price:10000},
-      {name:"Hepatitis C",price:10000},
-      {name:"RPR / Syphilis",price:8000},
-      {name:"Gonorrhea Test",price:15000},
-      {name:"Chlamydia Test",price:15000},
-      {name:"Brucella Test",price:10000}
-    ]
-  },
-  {
-    title: "Stool / Urine",
-    tests: [
-      {name:"Urinalysis",price:8000},
-      {name:"Stool Analysis",price:15000},
-      {name:"H. Pylori Stool",price:20000},
-      {name:"Widal Stool",price:20000}
-    ]
-  },
-  {
-    title: "H. Pylori / Gastro",
-    tests: [
-      {name:"H. Pylori Serum",price:8000}
-    ]
-  },
-  {
-    title: "Women's Health",
-    tests: [
-      {name:"Pregnancy Test (hCG)",price:5000},
-      {name:"High Vaginal Swab",price:10000},
-      {name:"High Vaginal Swab C&S",price:120000},
-      {name:"Gram Staining",price:10000}
-    ]
-  },
-  {
-    title: "Widal / Febrile Illness",
-    tests: [
-      {name:"Widal Serum",price:8000}
-    ]
-  },
-  {
-    title: "Autoimmune / Others",
-    tests: [
-      {name:"Rheumatoid Factor",price:15000}
-    ]
-  }
+  {title:"Blood Tests", tests:[
+      {name:"CBC - Complete Blood Count",price:15000},{name:"Blood Glucose",price:7000},{name:"Blood Grouping",price:10000},{name:"Bleeding & Clotting Test",price:15000},{name:"malaria ( b/s)",price:5000},{name:"Electrolytes",price:50000},{name:"Lipid Profile",price:40000},{name:"Liver Function Test (LFT)",price:50000},{name:"Kidney Function Test (RFT)",price:50000},{name:"PSA",price:25000},{name:"Sickling Test",price:40000},{name:"DNA",price:600000}]},
+  {title:"Infections / STIs", tests:[
+      {name:"HIV",price:7000},{name:"Hepatitis B",price:10000},{name:"Hepatitis C",price:10000},{name:"RPR / Syphilis",price:8000},{name:"Gonorrhea Test",price:15000},{name:"Chlamydia Test",price:15000},{name:"Brucella Test",price:10000}]},
+  {title:"Stool / Urine", tests:[
+      {name:"Urinalysis",price:8000},{name:"Stool Analysis",price:15000},{name:"H. Pylori Stool",price:20000},{name:"Widal Stool",price:20000}]},
+  {title:"H. Pylori / Gastro", tests:[{name:"H. Pylori Serum",price:8000}]},
+  {title:"Women's Health", tests:[{name:"HVS",price:10000},{name:"Pap Smear",price:15000}]}
 ];
 
-// ---------- RENDER ----------
-function renderTests(filterText=""){
-  testsContainer.innerHTML = "";
+let selectedTests = [];
 
+// Render tests
+function renderTests(filter=""){
+  testsContainer.innerHTML="";
   testCategories.forEach(cat=>{
-    const filtered = cat.tests.filter(t =>
-      t.name.toLowerCase().includes(filterText.toLowerCase())
-    );
-    if(filtered.length === 0) return;
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "category";
-
-    const titleRow = document.createElement("div");
-    titleRow.className = "cat-title";
-    titleRow.innerHTML = `<h3>✅ ${cat.title}</h3><span>${filtered.length} tests</span>`;
-
-    const grid = document.createElement("div");
-    grid.className = "tests-grid";
-
-    filtered.forEach(t=>{
-      const label = document.createElement("label");
-      label.className = "test-item";
-
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.dataset.price = t.price;
-      cb.value = t.name;
-      cb.onchange = updateTotal;
-
-      const info = document.createElement("div");
-      info.innerHTML = `
-        <p class="test-name">${t.name}</p>
-        <p class="test-price">UGX ${t.price.toLocaleString()}</p>
-      `;
-
-      label.appendChild(cb);
-      label.appendChild(info);
-      grid.appendChild(label);
+    const filteredTests = cat.tests.filter(t=>t.name.toLowerCase().includes(filter.toLowerCase()));
+    if(filteredTests.length===0) return;
+    const catDiv = document.createElement("div");
+    catDiv.className="category";
+    catDiv.innerHTML=`<div class="cat-title"><h3>${cat.title}</h3></div>`;
+    const grid = document.createElement("div"); grid.className="tests-grid";
+    filteredTests.forEach(test=>{
+      const item = document.createElement("div"); item.className="test-item";
+      item.innerHTML=`<input type="checkbox" data-name="${test.name}" data-price="${test.price}"><div><p class="test-name">${test.name}</p><p class="test-price">${test.price} UGX</p></div>`;
+      const checkbox = item.querySelector("input");
+      checkbox.addEventListener("change",()=>updateSelection(checkbox));
+      grid.appendChild(item);
     });
-
-    wrapper.appendChild(titleRow);
-    wrapper.appendChild(grid);
-    testsContainer.appendChild(wrapper);
+    catDiv.appendChild(grid);
+    testsContainer.appendChild(catDiv);
   });
 }
-renderTests();
-
-function updateTotal(){
-  let total = 0, list = [];
-  const checked = document.querySelectorAll("#testsContainer input[type='checkbox']:checked");
-
-  checked.forEach(cb=>{
-    total += Number(cb.dataset.price);
-    list.push(`${cb.value} (UGX ${Number(cb.dataset.price).toLocaleString()})`);
-  });
-
+function updateSelection(checkbox){
+  const name = checkbox.dataset.name;
+  const price = parseInt(checkbox.dataset.price);
+  if(checkbox.checked){
+    selectedTests.push({name,price});
+  }else{
+    selectedTests = selectedTests.filter(t=>t.name!==name);
+  }
+  updateSummary();
+}
+function updateSummary(){
+  let total = selectedTests.reduce((sum,t)=>sum+t.price,0);
   totalInput.value = total;
   totalText.innerText = total.toLocaleString();
-
-  selectedCount.innerText = `${checked.length} selected`;
-  preview.innerHTML = list.length ? list.join("<br>") : "No tests selected";
+  preview.innerHTML = selectedTests.length>0 ? selectedTests.map(t=>`${t.name} - ${t.price.toLocaleString()} UGX`).join("<br>") : "No tests selected";
+  selectedCount.innerText = `${selectedTests.length} selected`;
 }
 
-searchTests.addEventListener("input", (e)=>{
-  renderTests(e.target.value.trim());
-  updateTotal();
+// Payment toggle
+payment.addEventListener("change",()=>{
+  mtnDetails.style.display = payment.value==="MTN Mobile Money" ? "block":"none";
+  airtelDetails.style.display = payment.value==="Airtel Money" ? "block":"none";
 });
 
-// ---------- PAYMENT ----------
-payment.onchange=()=>{
-  mtnDetails.style.display=payment.value==="MTN Mobile Money"?"block":"none";
-  airtelDetails.style.display=payment.value==="Airtel Money"?"block":"none";
-};
+// Search
+searchTests.addEventListener("input",(e)=>renderTests(e.target.value));
 
-// ---------- SAVE ORDER LOCAL ----------
-function saveOrder(order){
-  const key = "mobile_lab_orders";
-  const existing = JSON.parse(localStorage.getItem(key) || "[]");
-  existing.unshift(order);
-  localStorage.setItem(key, JSON.stringify(existing));
-}
-
-// ---------- SUBMIT ----------
-document.getElementById("orderForm").onsubmit=e=>{
+// Form submit
+document.getElementById("orderForm").addEventListener("submit",async (e)=>{
   e.preventDefault();
-
-  if(Number(totalInput.value) === 0){
-    alert("Please select at least one test");
-    return;
-  }
-
-  const orderId="ML-"+Date.now();
-
-  const params={
-    order_id:orderId,
-    name:nameInput.value,
-    email:emailInput.value,
-    age:ageInput.value,
-    sex:sexInput.value,
-    phone:phoneInput.value,
-    tests:preview.innerText,
-    total:"UGX " + Number(totalInput.value).toLocaleString(),
-    location:locationInput.value,
-    payment:payment.value,
-    notes:notesInput.value||"None"
+  if(selectedTests.length===0){alert("Select at least one test"); return;}
+  const orderData = {
+    name:nameInput.value,email:emailInput.value,age:ageInput.value,sex:sexInput.value,
+    phone:phoneInput.value,location:locationInput.value,notes:notesInput.value,
+    payment:payment.value,tests:selectedTests,total:totalInput.value,date:new Date().toLocaleString()
   };
-
-  saveOrder({
-    ...params,
-    created_at: new Date().toLocaleString()
-  });
-
-  const waText=`Mobile Lab Order
-Order ID: ${orderId}
-Name: ${params.name}
-Phone: ${params.phone}
-Age: ${params.age}
-Sex: ${params.sex}
-Tests:
-${preview.innerText}
-Total: ${params.total}
-Location: ${params.location}
-Payment: ${params.payment}
-Notes: ${params.notes}`;
-
-  window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(waText)}`);
-
-  const screenshotText=`Hello Doctor Edrine,
-I have submitted my Mobile Lab Order.
-
-Order ID: ${orderId}
-Name: ${params.name}
-Phone: ${params.phone}
-
-✅ I am sending the screenshot of my order now.`;
-
-  sendScreenshotBtn.href = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(screenshotText)}`;
-
-  emailjs.send("service_sjp4zrf","lab_order",params)
-  .then(()=>{
-    confirmation.innerHTML="✅ Order submitted successfully! Please send a screenshot of your order.";
+  try{
+    await db.collection("orders").add(orderData);
+    confirmation.innerText="✅ Order submitted successfully!";
     afterActions.style.display="flex";
-    e.target.reset();
-    preview.innerHTML="No tests selected";
-    totalInput.value="0";
-    totalText.innerText="0";
-    selectedCount.innerText="0 selected";
-    mtnDetails.style.display="none";
-    airtelDetails.style.display="none";
-    renderTests();
-  })
-  .catch(()=>{
-    confirmation.innerHTML="❌ Failed to send order";
-  });
-};
-</script>
+    sendScreenshotBtn.href=`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(`New Lab Order from ${orderData.name}:\n${selectedTests.map(t=>t.name+" - "+t.price).join("\n")}\nTotal: ${orderData.total} UGX\nPhone: ${orderData.phone}\nLocation: ${orderData.location}`)}`;
+  }catch(err){console.error(err); alert("Error submitting order")}
+});
 
+document.addEventListener("DOMContentLoaded",()=>renderTests());
+</script>
 </body>
 </html>
