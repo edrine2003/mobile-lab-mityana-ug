@@ -223,7 +223,7 @@ button:hover{filter: brightness(0.98);}
   text-align:center;
   padding: 10px 0 16px;
 }
-/* 🔐 Logout button – desktop hidden */
+/* 🔐 Logout button – hidden by default */
 #logoutBtn{
   display: none;
   position: fixed;
@@ -237,6 +237,20 @@ button:hover{filter: brightness(0.98);}
   cursor: pointer;
   box-shadow: 0 10px 22px rgba(239,68,68,0.35);
 }
+
+/* 📱 Mobile / touch devices only */
+@media (hover: none) and (pointer: coarse) {
+  #logoutBtn{
+    display: block;
+    bottom: 20px;
+    right: 16px;
+  }
+}
+
+#logoutBtn:hover{
+  filter: brightness(0.95);
+}
+
 
 /* 📱 Mobile only */
 @media (max-width: 768px){
@@ -662,3 +676,4 @@ Phone: ${params.phone}
 
 </body>
 </html>
+
