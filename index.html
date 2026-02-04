@@ -414,7 +414,248 @@ function renderTests(filterText=""){
   });
 }
 renderTests();
-</script>
+  <script>
+/* ================= AUTH STATE ================= */
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
 
+  userDetailsDiv.innerHTML = `
+    <b>Account:</b> ${user.email}<br>
+    <b>User ID:</b> ${user.uid}
+  `;
+
+  inboxBtn.style.display = "block";
+
+  // ADMIN CHECK (EMAIL BASED)
+  if (user.email === "edrinehero@gmail.com") {
+    adminSection.style.display = "block";
+    loadAdminOrders();
+  }
+});
+
+/* ================= LOGOUT ================= */
+document.getElementById("logoutBtn").onclick = () => {
+  auth.signOut().then(() => location.href = "login.html");
+};
+
+/* ================= SEARCH ================= */
+searchTests.addEventListener("input", e => {
+  renderTests(e.target.value);
+});
+
+/* ================= SELECT COUNT ================= */
+document.addEventListener("change", () => {
+  const checked = document.querySelectorAll(".test-item input:checked").length;
+  selectedCount.innerText = `${checked} selected`;
+});
+
+/* ================= PAYMENT TOGGLE ================= */
+payment.addEventListener("change", () => {
+  mtnDetails.style.display = payment.value === "MTN Mobile Money" ? "block" : "none";
+  airtelDetails.style.display = payment.value === "Airtel Money" ? "block" : "none";
+});
+
+/* ================= SUBMIT ORDER ================= */
+document.getElementById("orderForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const selectedTests = [];
+  document.querySelectorAll(".test-item input:checked").forEach(cb => {
+    selectedTests.push({
+      name: cb.value,
+      price: cb.dataset.price
+    });
+  });
+
+  if (selectedTests.length === 0) {
+    alert("Please select at least one test");
+    return;
+  }
+
+  const user = auth.currentUser;
+
+  await db.collection("orders").add({
+    userId: user.uid,
+    email: user.email,
+    name: name.value,
+    age: age.value,
+    sex: sex.value,
+    phone: phone.value,
+    location: location.value,
+    tests: selectedTests,
+    payment: payment.value,
+    notes: notes.value,
+    status: "Pending",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  confirmation.innerHTML = "✅ Order submitted successfully";
+  document.getElementById("orderForm").reset();
+  selectedCount.innerText = "0 selected";
+});
+
+/* ================= ADMIN LOAD ORDERS ================= */
+function loadAdminOrders() {
+  const table = document.getElementById("adminOrders");
+  table.innerHTML = `
+    <tr>
+      <th>Patient</th>
+      <th>Phone</th>
+      <th>Tests</th>
+      <th>Status</th>
+    </tr>
+  `;
+
+  db.collection("orders")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${d.name}</td>
+          <td>${d.phone}</td>
+          <td>${d.tests.map(t=>t.name).join(", ")}</td>
+          <td>${d.status}</td>
+        `;
+        table.appendChild(row);
+      });
+    });
+}
+
+/* ================= WHATSAPP SEND ================= */
+document.getElementById("sendWhatsAppBtn").onclick = () => {
+  const text = document.getElementById("resultText").value;
+  if (!text) return alert("Enter results");
+
+  const link = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(text)}`;
+  window.open(link, "_blank");
+};
+  <script>
+/* ================= AUTH STATE ================= */
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  userDetailsDiv.innerHTML = `
+    <b>Account:</b> ${user.email}<br>
+    <b>User ID:</b> ${user.uid}
+  `;
+
+  inboxBtn.style.display = "block";
+
+  // ADMIN CHECK (EMAIL BASED)
+  if (user.email === "edrinehero@gmail.com") {
+    adminSection.style.display = "block";
+    loadAdminOrders();
+  }
+});
+
+/* ================= LOGOUT ================= */
+document.getElementById("logoutBtn").onclick = () => {
+  auth.signOut().then(() => location.href = "login.html");
+};
+
+/* ================= SEARCH ================= */
+searchTests.addEventListener("input", e => {
+  renderTests(e.target.value);
+});
+
+/* ================= SELECT COUNT ================= */
+document.addEventListener("change", () => {
+  const checked = document.querySelectorAll(".test-item input:checked").length;
+  selectedCount.innerText = `${checked} selected`;
+});
+
+/* ================= PAYMENT TOGGLE ================= */
+payment.addEventListener("change", () => {
+  mtnDetails.style.display = payment.value === "MTN Mobile Money" ? "block" : "none";
+  airtelDetails.style.display = payment.value === "Airtel Money" ? "block" : "none";
+});
+
+/* ================= SUBMIT ORDER ================= */
+document.getElementById("orderForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const selectedTests = [];
+  document.querySelectorAll(".test-item input:checked").forEach(cb => {
+    selectedTests.push({
+      name: cb.value,
+      price: cb.dataset.price
+    });
+  });
+
+  if (selectedTests.length === 0) {
+    alert("Please select at least one test");
+    return;
+  }
+
+  const user = auth.currentUser;
+
+  await db.collection("orders").add({
+    userId: user.uid,
+    email: user.email,
+    name: name.value,
+    age: age.value,
+    sex: sex.value,
+    phone: phone.value,
+    location: location.value,
+    tests: selectedTests,
+    payment: payment.value,
+    notes: notes.value,
+    status: "Pending",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  confirmation.innerHTML = "✅ Order submitted successfully";
+  document.getElementById("orderForm").reset();
+  selectedCount.innerText = "0 selected";
+});
+
+/* ================= ADMIN LOAD ORDERS ================= */
+function loadAdminOrders() {
+  const table = document.getElementById("adminOrders");
+  table.innerHTML = `
+    <tr>
+      <th>Patient</th>
+      <th>Phone</th>
+      <th>Tests</th>
+      <th>Status</th>
+    </tr>
+  `;
+
+  db.collection("orders")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${d.name}</td>
+          <td>${d.phone}</td>
+          <td>${d.tests.map(t=>t.name).join(", ")}</td>
+          <td>${d.status}</td>
+        `;
+        table.appendChild(row);
+      });
+    });
+}
+
+/* ================= WHATSAPP SEND ================= */
+document.getElementById("sendWhatsAppBtn").onclick = () => {
+  const text = document.getElementById("resultText").value;
+  if (!text) return alert("Enter results");
+
+  const link = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(text)}`;
+  window.open(link, "_blank");
+};
+</script>
+  
 </body>
 </html>
+
