@@ -238,8 +238,8 @@ button:hover{filter: brightness(0.98);}
   box-shadow: 0 10px 22px rgba(239,68,68,0.35);
 }
 
-/* 📱 Mobile / touch devices only */
-@media (hover: none) and (pointer: coarse) {
+/* 📱 Mobile ONLY */
+@media (max-width: 768px) {
   #logoutBtn{
     display: block;
     bottom: 20px;
@@ -676,4 +676,5 @@ Phone: ${params.phone}
 
 </body>
 </html>
+
 
