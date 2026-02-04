@@ -3,195 +3,295 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mobile Lab – Mityana Uganda</title>
+<title>Mobile Lab Order – Mityana Uganda</title>
+
+<meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
+<meta name="theme-color" content="#0ea5e9">
 
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-body{font-family:Arial;background:#f4f7fa;margin:0}
-header{background:#0a7cff;color:#fff;padding:15px;text-align:center}
-.container{max-width:1000px;margin:20px auto;background:#fff;padding:20px;border-radius:10px}
-.section{margin-top:25px}
-h3{color:#0a7cff}
-ul{padding-left:20px}
-li{margin:5px 0}
-.card{border:1px solid #ddd;padding:15px;border-radius:8px;margin-bottom:15px}
-button{padding:10px 15px;border:none;border-radius:5px;background:#0a7cff;color:#fff;cursor:pointer}
-.red{background:#c62828}
-.hidden{display:none}
-.logout{margin-top:40px;text-align:center}
+:root{
+  --primary:#0ea5e9;
+  --primary2:#14b8a6;
+  --dark:#0f172a;
+  --muted:#64748b;
+  --border:rgba(15,23,42,0.12);
+  --card:rgba(255,255,255,0.95);
+  --shadow:0 12px 30px rgba(2,6,23,0.12);
+}
+*{box-sizing:border-box}
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  background:
+    linear-gradient(rgba(241,245,249,0.85), rgba(241,245,249,0.85)),
+    url("lab-bg.jpg") no-repeat center center fixed;
+  background-size:cover;
+  color:var(--dark);
+}
+.container{max-width:900px;margin:18px auto;padding:16px;}
+.card{
+  background:var(--card);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.header{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;
+  padding:18px;
+  text-align:center;
+}
+.header h2{margin:0}
+.header p{margin:6px 0;font-size:13px}
+.call-btn{
+  display:inline-block;
+  margin:5px;
+  padding:10px 14px;
+  border-radius:999px;
+  color:#fff;
+  text-decoration:none;
+  border:1px solid rgba(255,255,255,0.4);
+}
+.form-body{padding:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+label{font-weight:700;font-size:13px}
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  margin:6px 0 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+.tests-area{border:1px solid var(--border);border-radius:14px;padding:12px}
+.category{margin-bottom:14px}
+.cat-title{display:flex;justify-content:space-between}
+.tests-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:720px){.tests-grid{grid-template-columns:1fr}}
+.test-item{
+  display:flex;
+  gap:10px;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  cursor:pointer;
+}
+.test-name{font-weight:700;font-size:13px}
+.test-price{font-size:12px;color:var(--muted)}
+#userDetails{
+  background:rgba(14,165,233,0.1);
+  padding:12px;
+  margin:12px;
+  border-radius:12px;
+}
+.inbox-btn{
+  display:none;
+  margin:12px;
+  padding:12px;
+  text-align:center;
+  background:var(--primary);
+  color:#fff;
+  border-radius:12px;
+  text-decoration:none;
+}
+.admin-section{
+  display:none;
+  margin:12px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+#logoutBtn{
+  position:fixed;
+  bottom:18px;
+  right:18px;
+  background:#ef4444;
+  color:#fff;
+  padding:12px 16px;
+  border:none;
+  border-radius:12px;
+  font-weight:900;
+  cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
-<header>
-<h2>Mobile Laboratory – Mityana</h2>
-<p>Accurate • Affordable • Reliable</p>
-</header>
-
 <div class="container">
+<div class="card">
 
-<!-- ACCOUNT INFO -->
-<div id="accountInfo" class="card hidden">
-<h3>Account Holder</h3>
-<p><b>Name:</b> <span id="accName"></span></p>
-<p><b>Email:</b> <span id="accEmail"></span></p>
-<p><b>Phone:</b> <span id="accPhone"></span></p>
-<p><b>Role:</b> <span id="accRole"></span></p>
+<div class="header">
+<h2>🧪 Mobile Lab Order Form</h2>
+<p>For the love of your health • Mityana & Nearby Areas</p>
+<a class="call-btn" href="tel:+256778379791">📞 MTN</a>
+<a class="call-btn" href="tel:0750992939">📞 Airtel</a>
 </div>
 
-<!-- PATIENT DASHBOARD -->
-<div id="patientDash" class="hidden">
+<div id="userDetails">Loading account…</div>
+<a href="inbox.html" class="inbox-btn" id="inboxBtn">📥 My Orders</a>
 
-<div class="section">
-<h3>HAEMATOLOGY</h3>
-<ul>
-<li>Complete Blood Count (CBC)</li>
-<li>ESR</li>
-<li>Blood Grouping</li>
-<li>Peripheral Blood Film</li>
-<li>Hb%</li>
-<li>Sickle Cell Screening</li>
-</ul>
+<div class="admin-section" id="adminSection">
+<h3>👨‍⚕️ Admin – Incoming Orders</h3>
+<table id="adminOrders" border="1" width="100%" style="border-collapse:collapse"></table>
 </div>
 
-<div class="section">
-<h3>BIOCHEMISTRY</h3>
-<ul>
-<li>Fasting Blood Sugar (FBS)</li>
-<li>Random Blood Sugar (RBS)</li>
-<li>Liver Function Tests (LFT)</li>
-<li>Renal Function Tests (RFT)</li>
-<li>Lipid Profile</li>
-<li>Uric Acid</li>
-<li>Creatinine</li>
-<li>Electrolytes</li>
-</ul>
+<form id="orderForm" class="form-body">
+
+<div class="grid2">
+<div><label>Full Name</label><input id="name" required></div>
+<div><label>Email</label><input id="email" type="email" required></div>
+<div><label>Age</label><input id="age" type="number" required></div>
+<div><label>Sex</label>
+<select id="sex" required>
+<option value="">Select</option>
+<option>Male</option>
+<option>Female</option>
+</select></div>
+<div><label>Phone</label><input id="phone" required></div>
+<div><label>Location</label><input id="location" required></div>
 </div>
 
-<div class="section">
-<h3>SEROLOGY</h3>
-<ul>
-<li>HIV</li>
-<li>HBsAg</li>
-<li>HCV</li>
-<li>VDRL / RPR</li>
-<li>H. Pylori</li>
-<li>ASO</li>
-<li>CRP</li>
-</ul>
-</div>
+<h3>Select Tests</h3>
+<div class="tests-area" id="testsContainer"></div>
 
-<div class="section">
-<h3>MICROBIOLOGY</h3>
-<ul>
-<li>Urinalysis</li>
-<li>Stool Analysis</li>
-<li>Blood Culture</li>
-<li>Urine Culture</li>
-<li>Stool Culture</li>
-<li>Sputum MCS</li>
-</ul>
-</div>
+<label>Payment</label>
+<select id="payment" required>
+<option value="">Select</option>
+<option>Cash</option>
+<option>MTN Mobile Money</option>
+<option>Airtel Money</option>
+</select>
 
-<div class="section">
-<h3>HORMONAL & OTHER TESTS</h3>
-<ul>
-<li>PSA</li>
-<li>Pregnancy Test</li>
-<li>TSH</li>
-<li>T3 / T4</li>
-</ul>
-</div>
+<label>Notes</label>
+<textarea id="notes"></textarea>
 
-<div class="section">
-<button onclick="location.href='inbox.html'">📥 View Results Inbox</button>
-</div>
+<button type="submit">Submit Order</button>
+<div id="confirmation"></div>
+
+</form>
 
 </div>
-<!-- ADMIN DASHBOARD -->
-<div id="adminDash" class="hidden">
-
-<div class="section">
-<h3>Admin – Patient Test Requests</h3>
-<div id="orders"></div>
 </div>
 
-</div>
-
-<div class="logout">
-<button id="logoutBtn" class="red hidden">Logout</button>
-</div>
-
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<button id="logoutBtn">Logout</button>
 
 <script>
-const firebaseConfig = {
+/* ================= FIREBASE ================= */
+firebase.initializeApp({
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.appspot.com",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-const ADMIN_EMAIL = "edrinehero@gmail.com";
-
-auth.onAuthStateChanged(async user=>{
-  if(!user){
-    window.location.href="login.html";
-    return;
-  }
-
-  document.getElementById("logoutBtn").classList.remove("hidden");
-  document.getElementById("accountInfo").classList.remove("hidden");
-
-  document.getElementById("accEmail").textContent=user.email || "-";
-  document.getElementById("accPhone").textContent=user.phoneNumber || "-";
-
-  const snap=await db.collection("users").doc(user.uid).get();
-  if(snap.exists){
-    document.getElementById("accName").textContent=snap.data().name || "-";
-  }
-
-  if(user.email===ADMIN_EMAIL){
-    document.getElementById("accRole").textContent="Admin";
-    document.getElementById("adminDash").classList.remove("hidden");
-    loadOrders();
-  }else{
-    document.getElementById("accRole").textContent="Patient";
-    document.getElementById("patientDash").classList.remove("hidden");
-  }
+  projectId: "mobile-lab-mityana-aeae2"
 });
 
-document.getElementById("logoutBtn").onclick=()=>{
-  auth.signOut();
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+/* ================= TESTS ================= */
+const testCategories=[
+{title:"Blood Tests",tests:[
+{name:"CBC",price:15000},
+{name:"Blood Glucose",price:7000},
+{name:"Blood Grouping",price:10000},
+{name:"Malaria (B/S)",price:5000},
+{name:"LFT",price:50000},
+{name:"RFT",price:50000}
+]},
+{title:"STIs",tests:[
+{name:"HIV",price:7000},
+{name:"Hepatitis B",price:10000},
+{name:"Syphilis (RPR)",price:8000},
+{name:"Gonorrhea",price:15000}
+]},
+{title:"Urine & Stool",tests:[
+{name:"Urinalysis",price:8000},
+{name:"Stool Analysis",price:15000}
+]}
+];
+
+const testsContainer=document.getElementById("testsContainer");
+
+testCategories.forEach(cat=>{
+const div=document.createElement("div");
+div.className="category";
+div.innerHTML=`<div class="cat-title"><b>${cat.title}</b></div>`;
+const grid=document.createElement("div");
+grid.className="tests-grid";
+cat.tests.forEach(t=>{
+grid.innerHTML+=`
+<label class="test-item">
+<input type="checkbox" value="${t.name}" data-price="${t.price}">
+<div>
+<div class="test-name">${t.name}</div>
+<div class="test-price">UGX ${t.price}</div>
+</div>
+</label>`;
+});
+div.appendChild(grid);
+testsContainer.appendChild(div);
+});
+
+/* ================= AUTH ================= */
+auth.onAuthStateChanged(user=>{
+if(!user){location.href="login.html";return;}
+userDetails.innerHTML=`Logged in as <b>${user.email}</b>`;
+inboxBtn.style.display="block";
+if(user.email==="edrinehero@gmail.com"){
+adminSection.style.display="block";
+loadAdminOrders();
+}
+});
+
+/* ================= ORDER ================= */
+orderForm.onsubmit=async e=>{
+e.preventDefault();
+const tests=[...document.querySelectorAll("input[type=checkbox]:checked")]
+.map(cb=>cb.value);
+
+await db.collection("orders").add({
+userId:auth.currentUser.uid,
+email:auth.currentUser.email,
+name:name.value,
+age:age.value,
+sex:sex.value,
+phone:phone.value,
+location:location.value,
+tests,
+payment:payment.value,
+notes:notes.value,
+status:"Pending",
+createdAt:firebase.firestore.FieldValue.serverTimestamp()
+});
+confirmation.innerHTML="✅ Order submitted";
+orderForm.reset();
 };
 
-async function loadOrders(){
-  const ordersDiv=document.getElementById("orders");
-  ordersDiv.innerHTML="Loading...";
-  const q=await db.collection("orders").orderBy("created","desc").get();
-  ordersDiv.innerHTML="";
-  q.forEach(d=>{
-    const o=d.data();
-    ordersDiv.innerHTML+=`
-      <div class="card">
-      <p><b>Patient:</b> ${o.name}</p>
-      <p><b>Tests:</b> ${o.tests.join(", ")}</p>
-      <p><b>Status:</b> ${o.status || "Pending"}</p>
-      </div>`;
-  });
+/* ================= ADMIN ================= */
+function loadAdminOrders(){
+adminOrders.innerHTML="<tr><th>Patient</th><th>Tests</th><th>Status</th></tr>";
+db.collection("orders").onSnapshot(s=>{
+s.forEach(d=>{
+const o=d.data();
+adminOrders.innerHTML+=`
+<tr>
+<td>${o.name}</td>
+<td>${o.tests.join(", ")}</td>
+<td>${o.status}</td>
+</tr>`;
+});
+});
 }
+
+/* ================= LOGOUT ================= */
+logoutBtn.onclick=()=>auth.signOut().then(()=>location.href="login.html");
 </script>
 
 </body>
