@@ -223,19 +223,30 @@ button:hover{filter: brightness(0.98);}
   text-align:center;
   padding: 10px 0 16px;
 }
+/* 🔐 Logout button – desktop hidden */
 #logoutBtn{
-  position:fixed;
-  top:14px;
-  right:14px;
-  padding:10px 12px;
-  border:none;
-  border-radius:12px;
-  background:#ef4444;
-  color:#fff;
-  font-weight:900;
-  cursor:pointer;
-  z-index:9999;
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  border: none;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 900;
+  padding: 14px 18px;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(239,68,68,0.35);
 }
+
+/* 📱 Mobile only */
+@media (max-width: 768px){
+  #logoutBtn{
+    display: block;
+    bottom: 20px;
+    right: 16px;
+  }
+}
+
 #logoutBtn:hover{filter:brightness(0.95);}
 </style>
 </head>
