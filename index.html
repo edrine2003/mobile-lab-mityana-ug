@@ -251,6 +251,28 @@ button:hover{filter: brightness(0.98);}
   filter: brightness(0.95);
 }
 
+/* 👤 Signed-in user profile */
+.user-profile{
+  margin: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(14,165,233,0.08);
+  border: 1px solid var(--border);
+}
+
+.user-profile h3{
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--dark);
+}
+
+.user-profile p{
+  margin: 4px 0;
+  font-size: 13px;
+  color: var(--dark);
+}
+</style>
+
 
 /* 📱 Mobile only */
 @media (max-width: 768px){
@@ -278,9 +300,19 @@ button:hover{filter: brightness(0.98);}
         <a class="call-btn" href="tel:+256778379791">📞 Call MTN: +256 778 379 791</a>
         <a class="call-btn" href="tel:0750992939">📞 Call Airtel: 0750 992 939</a>
       </div>
-    </div>
+   </div>
 
-    <form id="orderForm" class="form-body">
+<!-- 👤 Signed-in User Info -->
+<div id="userProfile" class="user-profile" style="display:none;">
+  <h3>👤 Signed in as</h3>
+  <p><b>Name:</b> <span id="uName">—</span></p>
+  <p><b>Email:</b> <span id="uEmail">—</span></p>
+  <p><b>Phone:</b> <span id="uPhone">—</span></p>
+  <p><b>Location:</b> <span id="uLocation">—</span></p>
+</div>
+
+<form id="orderForm" class="form-body">
+
 
       <div class="grid2">
         <div>
@@ -398,19 +430,30 @@ auth.onAuthStateChanged(async (user)=>{
     return;
   }
 
-  // auto fill from Firestore
+  const profileBox = document.getElementById("userProfile");
+
   const doc = await db.collection("users").doc(user.uid).get();
   if(doc.exists){
     const data = doc.data();
-    document.getElementById("name").value = data.fullName || "";
-    document.getElementById("age").value = data.age || "";
-    document.getElementById("sex").value = data.sex || "";
-    document.getElementById("phone").value = data.phone || "";
-    document.getElementById("location").value = data.location || "";
-    document.getElementById("email").value = data.email || user.email || "";
+
+    // Autofill form
+    nameInput.value = data.fullName || "";
+    ageInput.value = data.age || "";
+    sexInput.value = data.sex || "";
+    phoneInput.value = data.phone || "";
+    locationInput.value = data.location || "";
+    emailInput.value = data.email || user.email || "";
+
+    // ✅ PART 2: fill profile display
+    document.getElementById("uName").innerText = data.fullName || "—";
+    document.getElementById("uEmail").innerText = data.email || user.email;
+    document.getElementById("uPhone").innerText = data.phone || "—";
+    document.getElementById("uLocation").innerText = data.location || "—";
+
+    profileBox.style.display = "block";
   }else{
-    // fallback
-    document.getElementById("email").value = user.email || "";
+    document.getElementById("uEmail").innerText = user.email;
+    profileBox.style.display = "block";
   }
 });
 
