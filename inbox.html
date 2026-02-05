@@ -22,9 +22,9 @@ textarea,input,select{width:100%;padding:8px;margin:6px 0 12px;border-radius:12p
 button{padding:10px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;border:none;border-radius:12px;cursor:pointer;margin-top:6px;width:100%;font-weight:700;box-shadow:0 6px 14px rgba(0,0,0,0.1);transition:0.2s;}
 button:hover{filter:brightness(0.95);transform:translateY(-1px);}
 .status{padding:4px 8px;border-radius:8px;font-size:13px;color:#fff;font-weight:700;}
-.status.Pending{background:#f97316;}
-.status.Completed{background:#16a34a;}
-.status.Lacking{background:#dc2626;}
+.status.pending{background:#f97316;}
+.status.completed{background:#16a34a;}
+.status.lacking{background:#dc2626;}
 .actions{margin-top:12px;}
 </style>
 </head>
@@ -34,7 +34,7 @@ button:hover{filter:brightness(0.95);transform:translateY(-1px);}
   <div class="header"><h2>📥 Inbox – Lab Orders</h2></div>
 
   <div class="search-bar">
-    <input type="text" id="searchOrders" placeholder="Search by patient name, phone or order ID...">
+    <input type="text" id="searchOrders" placeholder="Search by patient name, phone, or order ID...">
   </div>
 
   <div id="ordersContainer"></div>
@@ -65,12 +65,13 @@ auth.onAuthStateChanged(async(user)=>{
     return;
   }
 
-  // 🔹 Load orders
+  // 🔹 Load orders initially
   loadOrders();
 });
 
+// 🔹 Load orders with optional search filter
 function loadOrders(filter=""){
-  db.collection("orders").orderBy("created_at","desc").onSnapshot(snapshot=>{
+  db.collection("orders").orderBy("createdAt","desc").onSnapshot(snapshot=>{
     ordersContainer.innerHTML="";
     if(snapshot.empty){ ordersContainer.innerHTML="<p>No orders yet</p>"; return; }
 
@@ -88,16 +89,16 @@ function loadOrders(filter=""){
       card.innerHTML=`
         <p><b>Order ID:</b> ${o.order_id}</p>
         <p><b>Patient:</b> ${o.name} | ${o.phone}</p>
-        <p><b>Tests:</b><br>${o.tests.replace(/\n/g,"<br>")}</p>
+        <p><b>Tests:</b><br>${o.tests.split(',').join('<br>')}</p>
         <p><b>Total:</b> ${o.total}</p>
-        <p><b>Status:</b> <span class="status ${o.status||'Pending'}">${o.status||'Pending'}</span></p>
+        <p><b>Status:</b> <span class="status ${o.status.toLowerCase()}">${o.status}</span></p>
 
         <label>Results / Notes</label>
-        <textarea id="res_${doc.id}" placeholder="Enter results here">${o.results||''}</textarea>
+        <textarea id="res_${doc.id}" placeholder="Enter results here">${o.resultNotes||''}</textarea>
         <select id="status_${doc.id}">
-          <option value="Pending" ${o.status==="Pending"?"selected":""}>Pending</option>
-          <option value="Completed" ${o.status==="Completed"?"selected":""}>Completed</option>
-          <option value="Lacking" ${o.status==="Lacking"?"selected":""}>Lacking</option>
+          <option value="pending" ${o.status==="pending"?"selected":""}>Pending</option>
+          <option value="completed" ${o.status==="completed"?"selected":""}>Completed</option>
+          <option value="lacking" ${o.status==="lacking"?"selected":""}>Lacking</option>
         </select>
 
         <div class="actions">
@@ -121,7 +122,10 @@ async function updateOrder(docId, phone, name){
 
   if(!results){ alert("Please enter results before sending."); return; }
 
-  await db.collection("orders").doc(docId).update({ results, status });
+  await db.collection("orders").doc(docId).update({ 
+    resultNotes: results, 
+    status 
+  });
 
   const waText = `Hello ${name},\nYour lab results are ready.\nStatus: ${status}\nResults:\n${results}`;
   window.open(`https://wa.me/256${phone.replace(/^0/,'')}?text=${encodeURIComponent(waText)}`);
