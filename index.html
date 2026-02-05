@@ -239,12 +239,20 @@ button:hover{filter: brightness(0.98);}
 }
 
 /* 📱 Mobile ONLY */
-@media (max-width: 768px) {
-  #logoutBtn{
-    display: block;
-    bottom: 20px;
-    right: 16px;
-  }
+#logoutBtn{
+  display: block;
+  position: fixed;
+  bottom: 20px;
+  right: 16px;
+  z-index: 9999;
+  border: none;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 900;
+  padding: 14px 18px;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(239,68,68,0.35);
 }
 
 #logoutBtn:hover{
@@ -720,6 +728,7 @@ Phone: ${params.phone}
 
 </body>
 </html>
+
 
 
 
