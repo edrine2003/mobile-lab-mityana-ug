@@ -3,16 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mobile Lab Order – Mityana Uganda</title>
-<meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
+<title>Inbox – Mobile Lab Admin</title>
 <meta name="theme-color" content="#0ea5e9">
-
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-
-<!-- EmailJS -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init("QPXYuZG5LIiv_1x3H");</script>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -20,158 +12,129 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-/* Keep your original CSS unchanged */
-:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(15,23,42,0.12);--card:rgba(255,255,255,0.92);--shadow:0 12px 30px rgba(2,6,23,0.12);}
-*{box-sizing:border-box}
-body{font-family: Arial;margin:0;background:linear-gradient(rgba(241,245,249,0.82),rgba(241,245,249,0.82)),url("lab-bg.jpg") no-repeat center center fixed;background-size:cover;color:var(--dark);}
-.container{max-width: 900px;margin: 18px auto;padding: 16px;}
-.card{background: var(--card);border: 1px solid var(--border);border-radius: 18px;box-shadow: var(--shadow);overflow: hidden;}
-.header{background: linear-gradient(135deg, var(--primary), var(--primary2));color:#fff;padding: 18px 16px;text-align:center;position: relative;}
-.header h2{margin:0;font-size:22px;} .header p{margin:6px 0 0;font-size:13px;opacity:0.95;}
-.header-actions{margin-top:12px;display:flex;justify-content:center;gap:10px;flex-wrap: wrap;}
-.call-btn{text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius: 999px;font-weight:800;font-size:13px;color:#fff;border:1px solid rgba(255,255,255,0.35);background: rgba(255,255,255,0.14);}
-.call-btn:hover{background: rgba(255,255,255,0.22);}
-.form-body{padding: 18px;}
-.grid2{display: grid;grid-template-columns: 1fr 1fr;gap: 12px;}
-@media(max-width:720px){.grid2{grid-template-columns: 1fr;}}
-label{font-weight: 700;font-size: 13px;color: var(--dark);}
-input,select,textarea{width:100%;padding:12px 12px;margin:6px 0 14px;border-radius:12px;border:1px solid var(--border);background: rgba(255,255,255,0.95);outline:none;transition:0.2s;}
-input:focus, select:focus, textarea:focus{border-color: rgba(14,165,233,0.7);box-shadow:0 0 0 4px rgba(14,165,233,0.18);}
-small.note{display:block;margin-top:-10px;margin-bottom:12px;color: var(--muted);font-size:12px;}
-.tests-area{border:1px solid var(--border);border-radius:14px;padding:12px;background: rgba(255,255,255,0.65);}
-.test-item{display:flex;gap:10px;padding:10px 10px;border:1px solid var(--border);border-radius:14px;background: rgba(255,255,255,0.92);cursor:pointer;transition:0.18s;}
-.test-item:hover{transform:translateY(-1px);border-color:rgba(14,165,233,0.55);box-shadow:0 10px 18px rgba(2,6,23,0.08);}
-.test-item input{width:auto;margin:3px 0 0;}
-.test-name{font-weight:700;font-size:13px;margin:0;}
-.test-price{font-size:12px;color: var(--muted);margin:3px 0 0;}
-#userDetails{background: rgba(14,165,233,0.08);padding:12px;border-radius:14px;margin-bottom:12px;font-size:14px;}
-#logoutBtn{margin-top:16px;padding:10px 14px;border:none;border-radius:12px;background:#ef4444;color:#fff;font-weight:900;cursor:pointer;}
-#logoutBtn:hover{filter:brightness(0.95);}
+body{font-family:Arial,sans-serif;margin:0;background:#f4f7fa;color:#0f172a;}
+.container{max-width:900px;margin:18px auto;padding:16px;}
+.header{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;padding:16px;text-align:center;border-radius:18px 18px 0 0;margin-bottom:12px;}
+.search-bar{margin:12px 0;}
+.search-bar input{width:100%;padding:10px;border-radius:12px;border:1px solid #cbd5e1;}
+.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 8px 20px rgba(0,0,0,0.06);}
+textarea,input,select{width:100%;padding:8px;margin:6px 0 12px;border-radius:12px;border:1px solid #cbd5e1;}
+button{padding:10px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;border:none;border-radius:12px;cursor:pointer;margin-top:6px;width:100%;font-weight:700;box-shadow:0 6px 14px rgba(0,0,0,0.1);transition:0.2s;}
+button:hover{filter:brightness(0.95);transform:translateY(-1px);}
+.status{padding:4px 8px;border-radius:8px;font-size:13px;color:#fff;font-weight:700;}
+.status.Pending{background:#f97316;}
+.status.Completed{background:#16a34a;}
+.status.Lacking{background:#dc2626;}
+.actions{margin-top:12px;}
 </style>
 </head>
-
 <body>
+
 <div class="container">
-  <div class="card">
-    <div class="header">
-      <h2>🧪 Mobile Lab Order Form</h2>
-      <p>For the love of your health • Mityana & Nearby Areas</p>
-      <div class="header-actions">
-        <a class="call-btn" href="tel:+256778379791">📞 Call MTN: +256 778 379 791</a>
-        <a class="call-btn" href="tel:0750992939">📞 Call Airtel: 0750 992 939</a>
-      </div>
-    </div>
+  <div class="header"><h2>📥 Inbox – Lab Orders</h2></div>
 
-    <!-- Logged-in User Details -->
-    <div id="userDetails"></div>
-
-    <!-- Inbox Button -->
-    <div class="action-row" id="inboxBtnDiv">
-      <a id="inboxBtn" href="inbox.html">📥 View My Orders / Results</a>
-    </div>
-
-    <form id="orderForm" class="form-body">
-      <div class="grid2">
-        <div><label for="name">Full Name</label><input id="name" required placeholder="e.g. Namiyingo Joyce"></div>
-        <div><label for="email">Email</label><input type="email" id="email" required placeholder="e.g. name@gmail.com"></div>
-        <div><label for="age">Age</label><input type="number" id="age" required placeholder="e.g. 25"></div>
-        <div><label for="sex">Sex</label><select id="sex" required><option value="">-- Select --</option><option>Male</option><option>Female</option><option>Other</option></select></div>
-        <div><label for="phone">Phone</label><input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX"><small class="note">Example: 0750992939</small></div>
-        <div><label for="location">Location</label><input id="location" placeholder="Address or Google Maps link" required><small class="note">Add landmark for easy pickup</small></div>
-      </div>
-
-      <label>Select Tests</label>
-      <div class="tests-area" id="testsContainer"></div>
-
-      <label for="payment">Payment Method</label>
-      <select id="payment" required>
-        <option value="">-- Select --</option>
-        <option>Cash on Delivery</option>
-        <option>MTN Mobile Money</option>
-        <option>Airtel Money</option>
-      </select>
-
-      <label for="notes">Notes (Optional)</label>
-      <textarea id="notes" placeholder="Any extra info e.g. fasting, preferred time, symptoms..."></textarea>
-
-      <button type="submit">Submit Order</button>
-      <button type="button" id="logoutBtn">Logout</button>
-    </form>
+  <div class="search-bar">
+    <input type="text" id="searchOrders" placeholder="Search by patient name, phone or order ID...">
   </div>
+
+  <div id="ordersContainer"></div>
+  <button id="logoutBtn">Logout</button>
 </div>
 
 <script>
-// Firebase Init
-const firebaseConfig = { apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY", authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com", projectId:"mobile-lab-mityana-aeae2" };
+// 🔹 Firebase Config – replace with your own
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2"
+};
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
+const ordersContainer = document.getElementById("ordersContainer");
 
-// Elements
-const testsContainer = document.getElementById("testsContainer");
-const userDetailsDiv = document.getElementById("userDetails");
-const inboxBtnDiv = document.getElementById("inboxBtnDiv");
-
-// Inputs
-const nameInput = document.getElementById("name");
-const emailInput = document.getElementById("email");
-const ageInput = document.getElementById("age");
-const sexInput = document.getElementById("sex");
-const phoneInput = document.getElementById("phone");
-const locationInput = document.getElementById("location");
-const notesInput = document.getElementById("notes");
-
-// Admin WhatsApp
-const adminWhatsApp="256750992939";
-
-// Tests (full list)
-const testCategories = [
-{title:"Blood Tests", tests:[{name:"CBC - Complete Blood Count",price:15000},{name:"Blood Glucose",price:7000},{name:"HCG Blood",price:15000},{name:"Blood Grouping",price:10000},{name:"Bleeding & Clotting Test",price:15000},{name:"Malaria (B/S)",price:5000},{name:"Electrolytes",price:50000},{name:"Lipid Profile",price:40000},{name:"Liver Function Test (LFT)",price:50000},{name:"Kidney Function Test (RFT)",price:50000},{name:"PSA",price:25000},{name:"Sickling Test",price:40000},{name:"DNA",price:600000}]},
-{title:"Infections / STIs", tests:[{name:"HIV",price:7000},{name:"Hepatitis B",price:10000},{name:"Hepatitis C",price:10000},{name:"RPR / Syphilis",price:8000},{name:"Gonorrhea Test",price:15000},{name:"Chlamydia Test",price:15000},{name:"Brucella Test",price:10000}]},
-{title:"Stool / Urine", tests:[{name:"Urinalysis",price:8000},{name:"Stool Analysis",price:15000},{name:"H. Pylori Stool",price:20000},{name:"Widal Stool",price:20000}]},
-{title:"H. Pylori / Gastro", tests:[{name:"H. Pylori Serum",price:8000}]},
-{title:"Women's Health", tests:[{name:"Pregnancy Test (hCG)",price:5000},{name:"High Vaginal Swab",price:10000},{name:"High Vaginal Swab C&S",price:120000},{name:"Gram Staining",price:10000}]},
-{title:"Widal / Febrile Illness", tests:[{name:"Widal Serum",price:8000}]},
-{title:"Autoimmune / Others", tests:[{name:"Rheumatoid Factor",price:15000}]}
-];
-
-// Render tests
-function renderTests(){
-  testsContainer.innerHTML="";
-  testCategories.forEach(cat=>{
-    const wrapper=document.createElement("div"); wrapper.className="category";
-    const titleRow=document.createElement("div"); titleRow.className="cat-title";
-    titleRow.innerHTML=`<h3>${cat.title}</h3>`;
-    const grid=document.createElement("div"); grid.className="tests-grid";
-    cat.tests.forEach(t=>{
-      const label=document.createElement("label"); label.className="test-item";
-      const cb=document.createElement("input"); cb.type="checkbox"; cb.dataset.price=t.price; cb.value=t.name;
-      const info=document.createElement("div"); info.innerHTML=`<p class="test-name">${t.name}</p><p class="test-price">UGX ${t.price.toLocaleString()}</p>`;
-      label.appendChild(cb); label.appendChild(info); grid.appendChild(label);
-    });
-    wrapper.appendChild(titleRow); wrapper.appendChild(grid); testsContainer.appendChild(wrapper);
-  });
-}
-renderTests();
-
-// Auth
+// 🔹 Admin only
 auth.onAuthStateChanged(async(user)=>{
   if(!user){ window.location.href="login.html"; return; }
-  const doc=await db.collection("users").doc(user.uid).get();
-  let role="patient";
-  if(doc.exists){
-    const data=doc.data();
-    nameInput.value=data.fullName||"";
-    ageInput.value=data.age||"";
-    sexInput.value=data.sex||"";
-    phoneInput.value=data.phone||"";
-    locationInput.value=data.location||"";
-    emailInput.value=data.email||user.email||"";
-    role=data.role||"patient";
-    userDetailsDiv.innerHTML=`<b>Logged in as:</b> ${data.fullName||""} | Age: ${data.age||""} | Sex: ${data.sex||""} | Phone: ${data.phone||""} | Email: ${data.email||user.email||""}`;
-  } else { emailInput.value=user.email||""; userDetailsDiv.innerHTML=`<b>Logged in as:</b> ${user.email||""}`; }
+  const doc = await db.collection("users").doc(user.uid).get();
+  const email = doc.exists ? doc.data().email : user.email;
+  if(email!=="edrinehero@gmail.com"){
+    alert("Access denied"); 
+    window.location.href="index.html"; 
+    return;
+  }
+
+  // 🔹 Load orders
+  loadOrders();
 });
-document.getElementById("logoutBtn").addEventListener("click", async()=>{await auth.signOut();window.location.href="login.html";});
+
+function loadOrders(filter=""){
+  db.collection("orders").orderBy("created_at","desc").onSnapshot(snapshot=>{
+    ordersContainer.innerHTML="";
+    if(snapshot.empty){ ordersContainer.innerHTML="<p>No orders yet</p>"; return; }
+
+    snapshot.forEach(doc=>{
+      const o = doc.data();
+      const lowerFilter = filter.toLowerCase();
+      if(filter && !(
+        o.name.toLowerCase().includes(lowerFilter) ||
+        o.phone.includes(filter) ||
+        o.order_id.toLowerCase().includes(lowerFilter)
+      )) return;
+
+      const card = document.createElement("div");
+      card.className="card";
+      card.innerHTML=`
+        <p><b>Order ID:</b> ${o.order_id}</p>
+        <p><b>Patient:</b> ${o.name} | ${o.phone}</p>
+        <p><b>Tests:</b><br>${o.tests.replace(/\n/g,"<br>")}</p>
+        <p><b>Total:</b> ${o.total}</p>
+        <p><b>Status:</b> <span class="status ${o.status||'Pending'}">${o.status||'Pending'}</span></p>
+
+        <label>Results / Notes</label>
+        <textarea id="res_${doc.id}" placeholder="Enter results here">${o.results||''}</textarea>
+        <select id="status_${doc.id}">
+          <option value="Pending" ${o.status==="Pending"?"selected":""}>Pending</option>
+          <option value="Completed" ${o.status==="Completed"?"selected":""}>Completed</option>
+          <option value="Lacking" ${o.status==="Lacking"?"selected":""}>Lacking</option>
+        </select>
+
+        <div class="actions">
+          <button onclick="updateOrder('${doc.id}','${o.phone}','${o.name}')">💾 Update & Send WhatsApp</button>
+        </div>
+      `;
+      ordersContainer.appendChild(card);
+    });
+  });
+}
+
+// 🔹 Search orders
+document.getElementById("searchOrders").addEventListener("input",(e)=>{
+  loadOrders(e.target.value.trim());
+});
+
+// 🔹 Update order & send WhatsApp
+async function updateOrder(docId, phone, name){
+  const results = document.getElementById(`res_${docId}`).value.trim();
+  const status = document.getElementById(`status_${docId}`).value;
+
+  if(!results){ alert("Please enter results before sending."); return; }
+
+  await db.collection("orders").doc(docId).update({ results, status });
+
+  const waText = `Hello ${name},\nYour lab results are ready.\nStatus: ${status}\nResults:\n${results}`;
+  window.open(`https://wa.me/256${phone.replace(/^0/,'')}?text=${encodeURIComponent(waText)}`);
+
+  alert("Results updated & WhatsApp opened!");
+}
+
+// 🔹 Logout
+document.getElementById("logoutBtn").addEventListener("click", async()=>{
+  await auth.signOut();
+  window.location.href="login.html";
+});
 </script>
+
 </body>
 </html>
