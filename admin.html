@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard – Mobile Lab Mityana</title>
-
-<meta name="description" content="Upload lab results and manage patient requests.">
-<meta name="theme-color" content="#0ea5e9">
+<title>🧪 Admin Dashboard – Mobile Lab</title>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -14,46 +11,24 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-body {font-family: Arial, sans-serif; margin:0; padding:0; background:#f1f5f9; color:#0f172a;}
-.container {max-width:900px; margin:20px auto; padding:16px;}
-.header {background: linear-gradient(135deg,#0ea5e9,#14b8a6); color:#fff; padding:18px; text-align:center; border-radius:12px;}
-.header h2 {margin:0;}
-.logoutBtn {background:#ef4444; color:#fff; padding:12px 18px; border:none; border-radius:999px; font-weight:800; cursor:pointer; float:right; margin-top:-50px;}
-.section {margin-top:20px;}
-.section h3 {margin-bottom:12px;}
-input, textarea {width:100%; padding:10px; margin:6px 0 12px; border-radius:12px; border:1px solid rgba(15,23,42,0.12);}
-button {background: linear-gradient(135deg,#0ea5e9,#14b8a6); color:#fff; padding:12px; border:none; border-radius:12px; cursor:pointer; font-weight:800;}
-button:hover {filter:brightness(0.95);}
-.result-item, .request-item {background:#fff; padding:12px; border-radius:12px; border:1px solid rgba(15,23,42,0.12); margin-bottom:12px;}
-.badge {display:inline-block; background:#ef4444; color:#fff; border-radius:999px; padding:4px 10px; font-size:12px; font-weight:700; margin-left:6px;}
+body{font-family:Arial,sans-serif;margin:0;padding:16px;background:#f1f5f9;color:#0f172a;}
+h2{margin:0 0 16px;}
+#logoutBtn{position:fixed;top:16px;right:16px;background:#ef4444;color:#fff;padding:12px 16px;border:none;border-radius:999px;cursor:pointer;}
+#ordersCounter{font-weight:bold;margin-bottom:12px;}
+.order-card{border:1px solid #cbd5e1;border-radius:12px;padding:12px;margin-bottom:12px;background:#fff;}
+.order-card h4{margin:0 0 6px;font-size:14px;color:#0369a1;}
+.order-card p{margin:2px 0;font-size:13px;}
+textarea{width:100%;padding:8px;margin-top:6px;border-radius:8px;border:1px solid #cbd5e1;}
+button{margin-top:6px;padding:8px 12px;border:none;background:#0ea5e9;color:#fff;border-radius:12px;cursor:pointer;}
+button:hover{filter:brightness(0.95);}
 </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="header">
-    <h2>🧪 Admin Dashboard</h2>
-    <p>Upload lab results and manage patient requests.</p>
-    <button class="logoutBtn" id="logoutBtn">Logout</button>
-  </div>
-
-  <!-- Patient Requests -->
-  <div class="section">
-    <h3>📥 Patient Requests <span id="requestCount" class="badge">0</span></h3>
-    <div id="requestsContainer">
-      Loading requests...
-    </div>
-  </div>
-
-  <!-- Upload Lab Result -->
-  <div class="section">
-    <h3>📤 Upload Lab Result</h3>
-    <input id="patientEmail" placeholder="Patient Email">
-    <textarea id="resultText" placeholder="Enter test results here..."></textarea>
-    <button id="uploadResultBtn">Upload Result</button>
-    <p id="uploadConfirmation"></p>
-  </div>
-</div>
+<button id="logoutBtn">Logout</button>
+<h2>🧪 Admin Dashboard</h2>
+<div id="ordersCounter">Loading requests...</div>
+<div id="ordersContainer"></div>
 
 <script>
 // 🔹 Firebase init
@@ -70,79 +45,19 @@ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+const ordersContainer = document.getElementById("ordersContainer");
+const ordersCounter = document.getElementById("ordersCounter");
+
 // 🔹 Require admin login
-auth.onAuthStateChanged(async user=>{
+auth.onAuthStateChanged(async user => {
   if(!user || user.email !== "edrinehero@gmail.com"){
+    alert("Access denied. Admin only.");
     window.location.href = "login.html";
     return;
   }
 
-  // Show all patient requests
-  const requestsContainer = document.getElementById("requestsContainer");
-  const requestCountBadge = document.getElementById("requestCount");
-
-  const loadRequests = async () => {
-    try {
-      const snapshot = await db.collection("orders").orderBy("created_at", "desc").get();
-      requestsContainer.innerHTML = "";
-      requestCountBadge.innerText = snapshot.size;
-
-      if(snapshot.empty){
-        requestsContainer.innerHTML = "<p>No patient requests yet.</p>";
-        return;
-      }
-
-      snapshot.forEach(doc=>{
-        const data = doc.data();
-        const div = document.createElement("div");
-        div.className = "request-item";
-        div.innerHTML = `
-          <b>Order ID:</b> ${data.order_id}<br>
-          <b>Name:</b> ${data.name}<br>
-          <b>Email:</b> ${data.email}<br>
-          <b>Phone:</b> ${data.phone}<br>
-          <b>Tests:</b> ${data.tests}<br>
-          <b>Total:</b> ${data.total}<br>
-          <b>Payment:</b> ${data.payment}<br>
-          <i>Submitted: ${data.created_at}</i>
-        `;
-        requestsContainer.appendChild(div);
-      });
-    } catch(err){
-      console.error(err);
-      requestsContainer.innerHTML = "<p>Failed to load requests.</p>";
-    }
-  };
-
-  loadRequests();
-
-  // 🔹 Upload lab result
-  const uploadBtn = document.getElementById("uploadResultBtn");
-  uploadBtn.addEventListener("click", async ()=>{
-    const email = document.getElementById("patientEmail").value.trim();
-    const resultText = document.getElementById("resultText").value.trim();
-    const confirmP = document.getElementById("uploadConfirmation");
-
-    if(!email || !resultText){
-      confirmP.innerText = "Please enter patient email and result text.";
-      return;
-    }
-
-    try {
-      await db.collection("results").add({
-        patientEmail: email,
-        resultText: resultText,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      confirmP.innerText = "✅ Lab result uploaded successfully!";
-      document.getElementById("patientEmail").value = "";
-      document.getElementById("resultText").value = "";
-    } catch(err){
-      console.error(err);
-      confirmP.innerText = "❌ Failed to upload result.";
-    }
-  });
-
+  // Load all orders
+  loadOrders();
 });
 
 // 🔹 Logout
@@ -150,6 +65,68 @@ document.getElementById("logoutBtn").addEventListener("click", async ()=>{
   await auth.signOut();
   window.location.href = "login.html";
 });
+
+// 🔹 Load orders
+async function loadOrders(){
+  try{
+    const snapshot = await db.collection("orders").orderBy("created_at","desc").get();
+    const orders = snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+    ordersCounter.innerText = `📥 Total Requests: ${orders.length}`;
+
+    if(orders.length === 0){
+      ordersContainer.innerHTML = "<p>No requests yet.</p>";
+      return;
+    }
+
+    ordersContainer.innerHTML = "";
+    orders.forEach(order=>{
+      const card = document.createElement("div");
+      card.className = "order-card";
+      card.innerHTML = `
+        <h4>Order ID: ${order.order_id}</h4>
+        <p><b>Name:</b> ${order.name} | <b>Phone:</b> ${order.phone}</p>
+        <p><b>Age:</b> ${order.age} | <b>Sex:</b> ${order.sex}</p>
+        <p><b>Tests:</b> ${order.tests}</p>
+        <p><b>Total:</b> ${order.total}</p>
+        <p><b>Payment:</b> ${order.payment}</p>
+        <p><b>Location:</b> ${order.location}</p>
+        <p><b>Notes:</b> ${order.notes}</p>
+        <textarea placeholder="Enter results here" rows="3"></textarea>
+        <button>Upload Results</button>
+      `;
+
+      const btn = card.querySelector("button");
+      const textarea = card.querySelector("textarea");
+
+      btn.addEventListener("click", async ()=>{
+        const resultText = textarea.value.trim();
+        if(!resultText){
+          alert("Please enter results before uploading.");
+          return;
+        }
+
+        // Save to Firestore
+        await db.collection("results").doc(order.id).set({
+          order_id: order.order_id,
+          patient_email: order.email,
+          results: resultText,
+          uploaded_at: new Date()
+        });
+
+        alert("✅ Results uploaded successfully!");
+
+        // Optionally: clear textarea
+        textarea.value = "";
+      });
+
+      ordersContainer.appendChild(card);
+    });
+
+  }catch(err){
+    console.error("Failed to load requests:", err);
+    ordersContainer.innerHTML = "<p>Failed to load requests.</p>";
+  }
+}
 </script>
 
 </body>
