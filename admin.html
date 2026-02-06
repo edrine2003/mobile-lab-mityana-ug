@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🧪 Admin Dashboard – Mobile Lab</title>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -18,12 +17,13 @@ h2{margin:0 0 16px;}
 .order-card{border:1px solid #cbd5e1;border-radius:12px;padding:12px;margin-bottom:12px;background:#fff;}
 .order-card h4{margin:0 0 6px;font-size:14px;color:#0369a1;}
 .order-card p{margin:2px 0;font-size:13px;}
-.result-table{width:100%;border-collapse:collapse;margin-top:8px;}
-.result-table th, .result-table td{border:1px solid #cbd5e1;padding:6px;text-align:left;}
-.result-table th{background:#e0f2fe;}
-.result-table input{width:100%;padding:4px;border:1px solid #cbd5e1;border-radius:6px;}
+input{width:100%;padding:6px;margin-top:4px;border-radius:6px;border:1px solid #cbd5e1;}
 button{margin-top:6px;padding:8px 12px;border:none;background:#0ea5e9;color:#fff;border-radius:12px;cursor:pointer;}
 button:hover{filter:brightness(0.95);}
+table{width:100%;border-collapse:collapse;margin-top:8px;}
+th,td{border:1px solid #cbd5e1;padding:6px;text-align:left;}
+th{background:#e2e8f0;}
+input.result-input{width:90%;border:1px solid #cbd5e1;border-radius:6px;padding:4px;}
 </style>
 </head>
 <body>
@@ -34,7 +34,7 @@ button:hover{filter:brightness(0.95);}
 <div id="ordersContainer"></div>
 
 <script>
-// 🔹 Firebase init
+// Firebase init
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -51,199 +51,130 @@ const db = firebase.firestore();
 const ordersContainer = document.getElementById("ordersContainer");
 const ordersCounter = document.getElementById("ordersCounter");
 
-// 🔹 All test parameters
-const testParameters = {
-  "Urinalysis": [
-    {parameter:"Macroscopy", units:""},
-    {parameter:"Urobilinogen", units:""},
-    {parameter:"Bilirubin", units:""},
-    {parameter:"Specific Gravity", units:""},
-    {parameter:"pH", units:""},
-    {parameter:"Nitrites", units:""},
-    {parameter:"Glucose", units:"mmol/L"},
-    {parameter:"Proteins", units:""},
-    {parameter:"Ketones", units:"% / Trace"},
-    {parameter:"Leucocytes", units:""},
-    {parameter:"RBCs", units:""},
-    {parameter:"Microscopy", units:""}
-  ],
+// All tests breakdown
+const allTests = {
   "CBC - Complete Blood Count": [
-    {parameter:"WBC", units:"10^9/L"},
-    {parameter:"RBC", units:"10^12/L"},
-    {parameter:"Hemoglobin", units:"g/dL"},
-    {parameter:"Hematocrit", units:"%"},
-    {parameter:"MCV", units:"fL"},
-    {parameter:"MCH", units:"pg"},
-    {parameter:"MCHC", units:"g/dL"},
-    {parameter:"Platelets", units:"10^9/L"}
+    {param:"WBC", units:"x10^9/L", result:""},
+    {param:"RBC", units:"x10^12/L", result:""},
+    {param:"Hemoglobin", units:"g/dL", result:""},
+    {param:"Hematocrit", units:"%", result:""},
+    {param:"Platelets", units:"x10^9/L", result:""}
   ],
-  "Blood Glucose":[{parameter:"Glucose", units:"mmol/L"}],
-  "Blood Grouping":[{parameter:"Blood Group", units:""}],
-  "Bleeding & Clotting Test":[
-    {parameter:"Prothrombin Time", units:"sec"},
-    {parameter:"INR", units:""}
+  "Blood Glucose": [
+    {param:"Glucose", units:"mmol/L or mg/dL", result:""}
   ],
-  "Malaria (B/S)":[{parameter:"Result", units:"Positive/Negative"}],
-  "Electrolytes":[
-    {parameter:"Sodium (Na+)", units:"mmol/L"},
-    {parameter:"Potassium (K+)", units:"mmol/L"},
-    {parameter:"Chloride (Cl-)", units:"mmol/L"},
-    {parameter:"Bicarbonate (HCO3-)", units:"mmol/L"}
-  ],
-  "Lipid Profile":[
-    {parameter:"Total Cholesterol", units:"mg/dL"},
-    {parameter:"HDL", units:"mg/dL"},
-    {parameter:"LDL", units:"mg/dL"},
-    {parameter:"Triglycerides", units:"mg/dL"}
-  ],
-  "Liver Function Test (LFT)":[
-    {parameter:"ALT", units:"U/L"},
-    {parameter:"AST", units:"U/L"},
-    {parameter:"ALP", units:"U/L"},
-    {parameter:"Bilirubin Total", units:"mg/dL"},
-    {parameter:"Albumin", units:"g/dL"}
-  ],
-  "Kidney Function Test (RFT)":[
-    {parameter:"Creatinine", units:"mg/dL"},
-    {parameter:"Urea", units:"mg/dL"},
-    {parameter:"Electrolytes Na+", units:"mmol/L"},
-    {parameter:"Electrolytes K+", units:"mmol/L"}
-  ],
-  "PSA":[{parameter:"PSA", units:"ng/mL"}],
-  "HCG Blood":[{parameter:"hCG", units:"mIU/mL"}],
-  "Sickling Test":[{parameter:"Result", units:"Positive/Negative"}],
-  "DNA":[{parameter:"Result", units:""}],
-  "HIV":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
-  "Hepatitis B":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
-  "Hepatitis C":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
-  "RPR / Syphilis":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
-  "Gonorrhea Test":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
-  "Chlamydia Test":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
-  "Brucella Test":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
-  "Urinalysis":[{parameter:"Result", units:""}],
+  "Blood Grouping":[{param:"Blood Group", units:"", result:""}],
+  "Bleeding & Clotting Test":[{param:"Clotting Time", units:"min", result:""}],
+  "Malaria (b/s)":[{param:"Result", units:"", result:""}],
+  "Electrolytes":[{param:"Na+", units:"mmol/L", result:""},{param:"K+", units:"mmol/L", result:""},{param:"Cl-", units:"mmol/L", result:""}],
+  "Lipid Profile":[{param:"Total Cholesterol", units:"mg/dL", result:""},{param:"HDL", units:"mg/dL", result:""},{param:"LDL", units:"mg/dL", result:""},{param:"Triglycerides", units:"mg/dL", result:""}],
+  "Liver Function Test (LFT)":[{param:"ALT", units:"U/L", result:""},{param:"AST", units:"U/L", result:""},{param:"ALP", units:"U/L", result:""},{param:"Bilirubin Total", units:"mg/dL", result:""}],
+  "Kidney Function Test (RFT)":[{param:"Urea", units:"mg/dL", result:""},{param:"Creatinine", units:"mg/dL", result:""}],
+  "PSA":[{param:"PSA", units:"ng/mL", result:""}],
+  "HCG Blood":[{param:"HCG", units:"mIU/mL", result:""}],
+  "Sickling Test":[{param:"Result", units:"", result:""}],
+  "DNA":[{param:"Result", units:"", result:""}],
+  "HIV":[{param:"Result", units:"", result:""}],
+  "Hepatitis B":[{param:"Result", units:"", result:""}],
+  "Hepatitis C":[{param:"Result", units:"", result:""}],
+  "RPR / Syphilis":[{param:"Result", units:"", result:""}],
+  "Gonorrhea Test":[{param:"Result", units:"", result:""}],
+  "Chlamydia Test":[{param:"Result", units:"", result:""}],
+  "Brucella Test":[{param:"Result", units:"", result:""}],
   "Urinalysis":[
-    {parameter:"Macroscopy", units:""},
-    {parameter:"Urobilinogen", units:""},
-    {parameter:"Bilirubin", units:""},
-    {parameter:"Specific Gravity", units:""},
-    {parameter:"pH", units:""},
-    {parameter:"Nitrites", units:""},
-    {parameter:"Glucose", units:"mmol/L"},
-    {parameter:"Proteins", units:""},
-    {parameter:"Ketones", units:"% / Trace"},
-    {parameter:"Leucocytes", units:""},
-    {parameter:"RBCs", units:""},
-    {parameter:"Microscopy", units:""}
+    {param:"Macroscopy", units:"", result:""},
+    {param:"UROBILINOGEN", units:"", result:""},
+    {param:"BILIRUBIN", units:"", result:""},
+    {param:"SPECIFIC GRAVITY", units:"", result:""},
+    {param:"pH", units:"", result:""},
+    {param:"NITRITES", units:"", result:""},
+    {param:"GLUCOSE", units:"mmol/L", result:""},
+    {param:"PROTEINS", units:"", result:""},
+    {param:"KETONES", units:"", result:""},
+    {param:"LEUKOCYTES", units:"", result:""},
+    {param:"RBCs", units:"", result:""},
+    {param:"Microscopy", units:"", result:""}
   ],
-  "Urinalysis Extended":[
-    {parameter:"Macroscopy", units:""},
-    {parameter:"Urobilinogen", units:""},
-    {parameter:"Bilirubin", units:""},
-    {parameter:"Specific Gravity", units:""},
-    {parameter:"pH", units:""},
-    {parameter:"Nitrites", units:""},
-    {parameter:"Glucose", units:"mmol/L or mg/dL"},
-    {parameter:"Proteins", units:""},
-    {parameter:"Ketones", units:"Trace (%)"},
-    {parameter:"Leucocytes", units:""},
-    {parameter:"RBCs", units:""},
-    {parameter:"Microscopy", units:"Pus Cells + Epithelial Cells"}
-  ],
-  "Pregnancy Test (hCG)":[{parameter:"Result", units:"Positive/Negative"}],
-  "High Vaginal Swab":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
-  "High Vaginal Swab C&S":[{parameter:"Result", units:""}],
-  "Gram Staining":[{parameter:"Result", units:""}],
-  "Widal Serum":[{parameter:"O Antigen", units:"Titers"},{parameter:"H Antigen", units:"Titers"}],
-  "H. Pylori Serum":[{parameter:"Result", units:"Positive/Negative"}]
+  "Stool Analysis":[{param:"Result", units:"", result:""}],
+  "H. Pylori Stool":[{param:"Result", units:"", result:""}],
+  "H. Pylori Serum":[{param:"Result", units:"", result:""}],
+  "Pregnancy Test (hCG)":[{param:"Result", units:"", result:""}],
+  "High Vaginal Swab":[{param:"Result", units:"", result:""}],
+  "High Vaginal Swab C&S":[{param:"Result", units:"", result:""}],
+  "Gram Staining":[{param:"Result", units:"", result:""}],
+  "Widal Serum":[{param:"Result", units:"", result:""}],
+  "Rheumatoid Factor":[{param:"Result", units:"", result:""}]
 };
 
-// 🔹 Require admin login
-auth.onAuthStateChanged(async user => {
+// Admin login
+auth.onAuthStateChanged(async user=>{
   if(!user || user.email !== "edrinehero@gmail.com"){
     alert("Access denied. Admin only.");
-    window.location.href = "login.html";
+    window.location.href="login.html";
     return;
   }
   loadOrders();
 });
 
-// 🔹 Logout
-document.getElementById("logoutBtn").addEventListener("click", async ()=>{
+document.getElementById("logoutBtn").addEventListener("click", async()=>{
   await auth.signOut();
-  window.location.href = "login.html";
+  window.location.href="login.html";
 });
 
-// 🔹 Load orders
 async function loadOrders(){
   try{
     const snapshot = await db.collection("orders").orderBy("created_at","desc").get();
     const orders = snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
     ordersCounter.innerText = `📥 Total Requests: ${orders.length}`;
-
-    if(orders.length === 0){
-      ordersContainer.innerHTML = "<p>No requests yet.</p>";
-      return;
-    }
-
-    ordersContainer.innerHTML = "";
+    if(!orders.length){ordersContainer.innerHTML="<p>No requests yet.</p>"; return;}
+    ordersContainer.innerHTML="";
     orders.forEach(order=>{
       const card = document.createElement("div");
-      card.className = "order-card";
+      card.className="order-card";
 
-      let tablesHTML = "";
-      const testList = order.tests.split("\n").map(t=>t.trim());
-      testList.forEach(testName=>{
-        const params = testParameters[testName];
-        if(!params) return;
-        tablesHTML += `<p><b>${testName}</b></p><table class="result-table"><tr><th>Parameter</th><th>Units</th><th>Result</th></tr>`;
-        params.forEach(p=>{
-          tablesHTML += `<tr>
-            <td>${p.parameter}</td>
-            <td>${p.units}</td>
-            <td><input type="text" data-param="${p.parameter}"></td>
-          </tr>`;
-        });
-        tablesHTML += `</table>`;
+      let html = `<h4>Order ID: ${order.order_id}</h4>
+      <p><b>Name:</b> ${order.name} | <b>Phone:</b> ${order.phone}</p>
+      <p><b>Age:</b> ${order.age} | <b>Sex:</b> ${order.sex}</p>
+      <p><b>Tests:</b> ${order.tests}</p>
+      <p><b>Total:</b> ${order.total}</p>
+      <p><b>Payment:</b> ${order.payment}</p>
+      <p><b>Location:</b> ${order.location}</p>
+      <p><b>Notes:</b> ${order.notes}</p>`;
+
+      const selectedTests = order.tests.split("\n");
+      selectedTests.forEach(testName=>{
+        testName=testName.trim();
+        if(allTests[testName]){
+          html+=`<h4>${testName}</h4><table><tr><th>Parameter</th><th>Units</th><th>Result</th></tr>`;
+          allTests[testName].forEach(row=>{
+            html+=`<tr><td>${row.param}</td><td>${row.units}</td><td><input type="text" class="result-input" placeholder="Enter result"></td></tr>`;
+          });
+          html+="</table>";
+        }else{
+          html+=`<textarea class="result-input" placeholder="Enter result for ${testName}" rows="3"></textarea>`;
+        }
       });
 
-      card.innerHTML = `
-        <h4>Order ID: ${order.order_id}</h4>
-        <p><b>Name:</b> ${order.name} | <b>Phone:</b> ${order.phone}</p>
-        <p><b>Age:</b> ${order.age} | <b>Sex:</b> ${order.sex}</p>
-        <p><b>Tests:</b> ${order.tests}</p>
-        <p><b>Total:</b> ${order.total}</p>
-        <p><b>Payment:</b> ${order.payment}</p>
-        <p><b>Location:</b> ${order.location}</p>
-        <p><b>Notes:</b> ${order.notes}</p>
-        ${tablesHTML}
-        <button>Upload Results</button>
-      `;
+      html+='<button>Upload Results</button>';
+      card.innerHTML=html;
 
       const btn = card.querySelector("button");
-      btn.addEventListener("click", async ()=>{
-        const inputs = card.querySelectorAll("input[data-param]");
-        const resultsObj = {};
-        inputs.forEach(i=>{
-          resultsObj[i.dataset.param] = i.value.trim();
-        });
-
+      btn.addEventListener("click", async()=>{
+        const inputs = card.querySelectorAll(".result-input");
+        let results={};
+        inputs.forEach((inp,idx)=>{results[idx]=inp.value.trim();});
         await db.collection("results").doc(order.id).set({
           order_id: order.order_id,
           patient_email: order.email,
-          results: resultsObj,
+          results: results,
           uploaded_at: new Date()
         });
-
         alert("✅ Results uploaded successfully!");
       });
 
       ordersContainer.appendChild(card);
     });
-
-  }catch(err){
-    console.error("Failed to load requests:", err);
-    ordersContainer.innerHTML = "<p>Failed to load requests.</p>";
-  }
+  }catch(err){console.error(err); ordersContainer.innerHTML="<p>Failed to load requests.</p>";}
 }
 </script>
 
