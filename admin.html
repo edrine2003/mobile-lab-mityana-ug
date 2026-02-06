@@ -1,62 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard – Mobile Lab</title>
+<title>🧪 Admin Dashboard</title>
 
-<!-- Firebase v8 -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
 body{
-  font-family: system-ui, sans-serif;
+  font-family: Arial;
   background:#f1f5f9;
-  margin:0;
   padding:20px;
 }
 .card{
-  max-width:700px;
-  margin:auto;
   background:#fff;
-  border-radius:16px;
+  max-width:500px;
+  margin:auto;
   padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.1);
+  border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
 }
-h1{margin-top:0}
+input,textarea,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+}
+button{
+  background:#0ea5e9;
+  color:#fff;
+  font-weight:bold;
+  border:none;
+  border-radius:10px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h1>🧪 Admin Dashboard</h1>
-  <p>Upload lab results and manage patients.</p>
+  <h2>🧪 Admin Dashboard</h2>
+  <p>Upload lab results</p>
+
+  <input id="email" placeholder="Patient Email">
+  <input id="test" placeholder="Test Name (e.g HIV)">
+  <textarea id="result" placeholder="Result details"></textarea>
+
+  <button onclick="uploadResult()">Upload Result</button>
+
+  <p id="msg"></p>
 </div>
 
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+  projectId: "mobile-lab-mityana-aeae2"
 };
 
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
+const db = firebase.firestore();
 
-// 🔐 HARD ADMIN PROTECTION
+// 🔐 Protect admin page
 auth.onAuthStateChanged(user=>{
   if(!user || user.email !== "edrinehero@gmail.com"){
     alert("Access denied");
-    window.location.href = "index.html";
+    window.location.href="login.html";
   }
 });
+
+function uploadResult(){
+  db.collection("results").add({
+    patientEmail: email.value.trim(),
+    testName: test.value.trim(),
+    resultText: result.value.trim(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    msg.innerText="✅ Result uploaded";
+    email.value=test.value=result.value="";
+  }).catch(err=>{
+    msg.innerText=err.message;
+  });
+}
 </script>
 
 </body>
