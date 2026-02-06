@@ -674,7 +674,7 @@ function saveOrder(order){
 }
 
 // ---------- SUBMIT ----------
-document.getElementById("orderForm").onsubmit=e=>{
+document.getElementById("orderForm").onsubmit= async e=>{
   e.preventDefault();
 
   if(Number(totalInput.value) === 0){
@@ -698,11 +698,12 @@ document.getElementById("orderForm").onsubmit=e=>{
     notes:notesInput.value||"None"
   };
 
-  saveOrder({
+  // ✅ Save order to Firestore
+await db.collection("orders").doc(orderId).set({
     ...params,
-    created_at: new Date().toLocaleString()
-  });
-
+    created_at: firebase.firestore.FieldValue.serverTimestamp()
+});
+// 🔹 WhatsApp notification to admin
   const waText=`Mobile Lab Order
 Order ID: ${orderId}
 Name: ${params.name}
@@ -750,6 +751,7 @@ Phone: ${params.phone}
 
 </body>
 </html>
+
 
 
 
