@@ -18,12 +18,12 @@ h2{margin:0 0 16px;}
 .order-card{border:1px solid #cbd5e1;border-radius:12px;padding:12px;margin-bottom:12px;background:#fff;}
 .order-card h4{margin:0 0 6px;font-size:14px;color:#0369a1;}
 .order-card p{margin:2px 0;font-size:13px;}
-.results-table{width:100%;border-collapse:collapse;margin:8px 0;}
-.results-table th, .results-table td{border:1px solid #cbd5e1;padding:6px;font-size:13px;}
-.results-table th{background:#e0f2fe;}
+.result-table{width:100%;border-collapse:collapse;margin-top:8px;}
+.result-table th, .result-table td{border:1px solid #cbd5e1;padding:6px;text-align:left;}
+.result-table th{background:#e0f2fe;}
+.result-table input{width:100%;padding:4px;border:1px solid #cbd5e1;border-radius:6px;}
 button{margin-top:6px;padding:8px 12px;border:none;background:#0ea5e9;color:#fff;border-radius:12px;cursor:pointer;}
 button:hover{filter:brightness(0.95);}
-select{padding:4px;border-radius:6px;border:1px solid #cbd5e1;}
 </style>
 </head>
 <body>
@@ -51,6 +51,112 @@ const db = firebase.firestore();
 const ordersContainer = document.getElementById("ordersContainer");
 const ordersCounter = document.getElementById("ordersCounter");
 
+// 🔹 All test parameters
+const testParameters = {
+  "Urinalysis": [
+    {parameter:"Macroscopy", units:""},
+    {parameter:"Urobilinogen", units:""},
+    {parameter:"Bilirubin", units:""},
+    {parameter:"Specific Gravity", units:""},
+    {parameter:"pH", units:""},
+    {parameter:"Nitrites", units:""},
+    {parameter:"Glucose", units:"mmol/L"},
+    {parameter:"Proteins", units:""},
+    {parameter:"Ketones", units:"% / Trace"},
+    {parameter:"Leucocytes", units:""},
+    {parameter:"RBCs", units:""},
+    {parameter:"Microscopy", units:""}
+  ],
+  "CBC - Complete Blood Count": [
+    {parameter:"WBC", units:"10^9/L"},
+    {parameter:"RBC", units:"10^12/L"},
+    {parameter:"Hemoglobin", units:"g/dL"},
+    {parameter:"Hematocrit", units:"%"},
+    {parameter:"MCV", units:"fL"},
+    {parameter:"MCH", units:"pg"},
+    {parameter:"MCHC", units:"g/dL"},
+    {parameter:"Platelets", units:"10^9/L"}
+  ],
+  "Blood Glucose":[{parameter:"Glucose", units:"mmol/L"}],
+  "Blood Grouping":[{parameter:"Blood Group", units:""}],
+  "Bleeding & Clotting Test":[
+    {parameter:"Prothrombin Time", units:"sec"},
+    {parameter:"INR", units:""}
+  ],
+  "Malaria (B/S)":[{parameter:"Result", units:"Positive/Negative"}],
+  "Electrolytes":[
+    {parameter:"Sodium (Na+)", units:"mmol/L"},
+    {parameter:"Potassium (K+)", units:"mmol/L"},
+    {parameter:"Chloride (Cl-)", units:"mmol/L"},
+    {parameter:"Bicarbonate (HCO3-)", units:"mmol/L"}
+  ],
+  "Lipid Profile":[
+    {parameter:"Total Cholesterol", units:"mg/dL"},
+    {parameter:"HDL", units:"mg/dL"},
+    {parameter:"LDL", units:"mg/dL"},
+    {parameter:"Triglycerides", units:"mg/dL"}
+  ],
+  "Liver Function Test (LFT)":[
+    {parameter:"ALT", units:"U/L"},
+    {parameter:"AST", units:"U/L"},
+    {parameter:"ALP", units:"U/L"},
+    {parameter:"Bilirubin Total", units:"mg/dL"},
+    {parameter:"Albumin", units:"g/dL"}
+  ],
+  "Kidney Function Test (RFT)":[
+    {parameter:"Creatinine", units:"mg/dL"},
+    {parameter:"Urea", units:"mg/dL"},
+    {parameter:"Electrolytes Na+", units:"mmol/L"},
+    {parameter:"Electrolytes K+", units:"mmol/L"}
+  ],
+  "PSA":[{parameter:"PSA", units:"ng/mL"}],
+  "HCG Blood":[{parameter:"hCG", units:"mIU/mL"}],
+  "Sickling Test":[{parameter:"Result", units:"Positive/Negative"}],
+  "DNA":[{parameter:"Result", units:""}],
+  "HIV":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
+  "Hepatitis B":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
+  "Hepatitis C":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
+  "RPR / Syphilis":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
+  "Gonorrhea Test":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
+  "Chlamydia Test":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
+  "Brucella Test":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
+  "Urinalysis":[{parameter:"Result", units:""}],
+  "Urinalysis":[
+    {parameter:"Macroscopy", units:""},
+    {parameter:"Urobilinogen", units:""},
+    {parameter:"Bilirubin", units:""},
+    {parameter:"Specific Gravity", units:""},
+    {parameter:"pH", units:""},
+    {parameter:"Nitrites", units:""},
+    {parameter:"Glucose", units:"mmol/L"},
+    {parameter:"Proteins", units:""},
+    {parameter:"Ketones", units:"% / Trace"},
+    {parameter:"Leucocytes", units:""},
+    {parameter:"RBCs", units:""},
+    {parameter:"Microscopy", units:""}
+  ],
+  "Urinalysis Extended":[
+    {parameter:"Macroscopy", units:""},
+    {parameter:"Urobilinogen", units:""},
+    {parameter:"Bilirubin", units:""},
+    {parameter:"Specific Gravity", units:""},
+    {parameter:"pH", units:""},
+    {parameter:"Nitrites", units:""},
+    {parameter:"Glucose", units:"mmol/L or mg/dL"},
+    {parameter:"Proteins", units:""},
+    {parameter:"Ketones", units:"Trace (%)"},
+    {parameter:"Leucocytes", units:""},
+    {parameter:"RBCs", units:""},
+    {parameter:"Microscopy", units:"Pus Cells + Epithelial Cells"}
+  ],
+  "Pregnancy Test (hCG)":[{parameter:"Result", units:"Positive/Negative"}],
+  "High Vaginal Swab":[{parameter:"Result", units:"Positive/Negative/Inclusive"}],
+  "High Vaginal Swab C&S":[{parameter:"Result", units:""}],
+  "Gram Staining":[{parameter:"Result", units:""}],
+  "Widal Serum":[{parameter:"O Antigen", units:"Titers"},{parameter:"H Antigen", units:"Titers"}],
+  "H. Pylori Serum":[{parameter:"Result", units:"Positive/Negative"}]
+};
+
 // 🔹 Require admin login
 auth.onAuthStateChanged(async user => {
   if(!user || user.email !== "edrinehero@gmail.com"){
@@ -58,7 +164,6 @@ auth.onAuthStateChanged(async user => {
     window.location.href = "login.html";
     return;
   }
-
   loadOrders();
 });
 
@@ -67,168 +172,6 @@ document.getElementById("logoutBtn").addEventListener("click", async ()=>{
   await auth.signOut();
   window.location.href = "login.html";
 });
-
-// 🔹 Generate editable tables for ALL tests
-function generateResultsTable(testName){
-  let html = `<h4>${testName}</h4><table class="results-table"><thead><tr><th>Parameter</th><th>Units</th><th>Result</th></tr></thead><tbody>`;
-
-  switch(testName){
-    case "Urinalysis":
-      html += `
-<tr><td>Macroscopy</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>UROBILINOGEN</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>BILIRUBIN</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>SPECIFIC GRAVITY</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>pH</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>NITRITES</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>GLUCOSE</td><td><select><option>mmol/L</option><option>mg/dL</option></select></td><td contenteditable="true"></td></tr>
-<tr><td>PROTEINS</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>KETONES</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>LEUKOCYTES</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>RBCs</td><td></td><td contenteditable="true"></td></tr>
-<tr><td>Microscopy</td><td></td><td contenteditable="true"></td></tr>
-      `;
-      break;
-
-    case "HIV":
-      html += `<tr><td>HIV Result</td><td></td><td contenteditable="true">Negative / Positive / Inconclusive</td></tr>`;
-      break;
-
-    case "Hepatitis B":
-      html += `<tr><td>HBsAg</td><td></td><td contenteditable="true">Negative / Positive / Inconclusive</td></tr>`;
-      break;
-
-    case "Hepatitis C":
-      html += `<tr><td>HCV Ab</td><td></td><td contenteditable="true">Negative / Positive / Inconclusive</td></tr>`;
-      break;
-
-    case "RPR / Syphilis":
-      html += `<tr><td>RPR Result</td><td></td><td contenteditable="true">Negative / Positive / Inconclusive</td></tr>`;
-      break;
-
-    case "CBC - Complete Blood Count":
-      html += `
-<tr><td>WBC</td><td>10^3/µL</td><td contenteditable="true"></td></tr>
-<tr><td>RBC</td><td>10^6/µL</td><td contenteditable="true"></td></tr>
-<tr><td>Hemoglobin</td><td>g/dL</td><td contenteditable="true"></td></tr>
-<tr><td>Hematocrit</td><td>%</td><td contenteditable="true"></td></tr>
-<tr><td>Platelets</td><td>10^3/µL</td><td contenteditable="true"></td></tr>
-      `;
-      break;
-
-    case "Blood Glucose":
-      html += `<tr><td>Glucose</td><td><select><option>mmol/L</option><option>mg/dL</option></select></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Blood Grouping":
-      html += `<tr><td>Blood Group</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Bleeding & Clotting Test":
-      html += `
-<tr><td>PT</td><td>sec</td><td contenteditable="true"></td></tr>
-<tr><td>APTT</td><td>sec</td><td contenteditable="true"></td></tr>
-<tr><td>INR</td><td></td><td contenteditable="true"></td></tr>
-      `;
-      break;
-
-    case "Lipid Profile":
-      html += `
-<tr><td>Total Cholesterol</td><td>mg/dL</td><td contenteditable="true"></td></tr>
-<tr><td>HDL</td><td>mg/dL</td><td contenteditable="true"></td></tr>
-<tr><td>LDL</td><td>mg/dL</td><td contenteditable="true"></td></tr>
-<tr><td>Triglycerides</td><td>mg/dL</td><td contenteditable="true"></td></tr>
-      `;
-      break;
-
-    case "Liver Function Test (LFT)":
-      html += `
-<tr><td>ALT</td><td>U/L</td><td contenteditable="true"></td></tr>
-<tr><td>AST</td><td>U/L</td><td contenteditable="true"></td></tr>
-<tr><td>ALP</td><td>U/L</td><td contenteditable="true"></td></tr>
-<tr><td>Bilirubin Total</td><td>mg/dL</td><td contenteditable="true"></td></tr>
-<tr><td>Bilirubin Direct</td><td>mg/dL</td><td contenteditable="true"></td></tr>
-      `;
-      break;
-
-    case "Kidney Function Test (RFT)":
-      html += `
-<tr><td>Urea</td><td>mg/dL</td><td contenteditable="true"></td></tr>
-<tr><td>Creatinine</td><td>mg/dL</td><td contenteditable="true"></td></tr>
-<tr><td>Electrolytes Na+</td><td>mmol/L</td><td contenteditable="true"></td></tr>
-<tr><td>Electrolytes K+</td><td>mmol/L</td><td contenteditable="true"></td></tr>
-      `;
-      break;
-
-    case "PSA":
-      html += `<tr><td>PSA</td><td>ng/mL</td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "HCG Blood":
-      html += `<tr><td>hCG</td><td>mIU/mL</td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Sickling Test":
-      html += `<tr><td>Sickling Test Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "DNA":
-      html += `<tr><td>DNA Test Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Gonorrhea Test":
-      html += `<tr><td>Gonorrhea Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Chlamydia Test":
-      html += `<tr><td>Chlamydia Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Brucella Test":
-      html += `<tr><td>Brucella Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Urinalysis":
-      html += `
-<tr><td>Urinalysis Full</td><td></td><td contenteditable="true"></td></tr>
-      `;
-      break;
-
-    case "Urinalysis":
-      html += `<tr><td>Urinalysis Full</td><td></td><td contenteditable="true"></td></tr>`;  
-      break;
-
-    case "Pregnancy Test (hCG)":
-      html += `<tr><td>Pregnancy Test Result</td><td></td><td contenteditable="true">Negative / Positive</td></tr>`;
-      break;
-
-    case "High Vaginal Swab":
-      html += `<tr><td>HVS Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "High Vaginal Swab C&S":
-      html += `<tr><td>HVS C&S Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Gram Staining":
-      html += `<tr><td>Gram Staining Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Widal Serum":
-      html += `<tr><td>Widal Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    case "Rheumatoid Factor":
-      html += `<tr><td>Rheumatoid Factor Result</td><td></td><td contenteditable="true"></td></tr>`;
-      break;
-
-    default:
-      html += `<tr><td>${testName}</td><td></td><td contenteditable="true"></td></tr>`;
-  }
-
-  html += "</tbody></table>";
-  return html;
-}
 
 // 🔹 Load orders
 async function loadOrders(){
@@ -247,9 +190,20 @@ async function loadOrders(){
       const card = document.createElement("div");
       card.className = "order-card";
 
-      let tablesHtml = "";
-      order.tests.split("\n").forEach(test=>{
-        tablesHtml += generateResultsTable(test);
+      let tablesHTML = "";
+      const testList = order.tests.split("\n").map(t=>t.trim());
+      testList.forEach(testName=>{
+        const params = testParameters[testName];
+        if(!params) return;
+        tablesHTML += `<p><b>${testName}</b></p><table class="result-table"><tr><th>Parameter</th><th>Units</th><th>Result</th></tr>`;
+        params.forEach(p=>{
+          tablesHTML += `<tr>
+            <td>${p.parameter}</td>
+            <td>${p.units}</td>
+            <td><input type="text" data-param="${p.parameter}"></td>
+          </tr>`;
+        });
+        tablesHTML += `</table>`;
       });
 
       card.innerHTML = `
@@ -261,24 +215,16 @@ async function loadOrders(){
         <p><b>Payment:</b> ${order.payment}</p>
         <p><b>Location:</b> ${order.location}</p>
         <p><b>Notes:</b> ${order.notes}</p>
-        ${tablesHtml}
+        ${tablesHTML}
         <button>Upload Results</button>
       `;
 
       const btn = card.querySelector("button");
-
       btn.addEventListener("click", async ()=>{
+        const inputs = card.querySelectorAll("input[data-param]");
         const resultsObj = {};
-        const tables = card.querySelectorAll("table.results-table");
-        tables.forEach(table=>{
-          const testName = table.previousElementSibling.innerText;
-          resultsObj[testName] = {};
-          table.querySelectorAll("tbody tr").forEach(row=>{
-            const param = row.cells[0].innerText;
-            const unit = row.cells[1].querySelector("select")?.value || row.cells[1].innerText;
-            const value = row.cells[2].innerText.trim();
-            resultsObj[testName][param] = {unit,value};
-          });
+        inputs.forEach(i=>{
+          resultsObj[i.dataset.param] = i.value.trim();
         });
 
         await db.collection("results").doc(order.id).set({
@@ -300,5 +246,6 @@ async function loadOrders(){
   }
 }
 </script>
+
 </body>
 </html>
