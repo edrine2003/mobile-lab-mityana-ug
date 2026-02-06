@@ -146,13 +146,13 @@ auth.onAuthStateChanged(async user => {
 
   inboxContainer.appendChild(div);
 });
-
+   }); // 
 
   } catch(err) {
     console.error(err);
     inboxContainer.innerHTML = "<p>Failed to load results. Please try again later.</p>";
   }
-});
+}); 
 
 // 🔹 Logout
 document.getElementById("logoutBtn").addEventListener("click", async ()=> {
