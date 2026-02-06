@@ -307,7 +307,22 @@ button:hover{filter: brightness(0.98);}
         <a class="call-btn" href="tel:+256778379791">📞 Call MTN: +256 778 379 791</a>
         <a class="call-btn" href="tel:0750992939">📞 Call Airtel: 0750 992 939</a>
         <a class="call-btn" href="inbox.html">📥 Patient Inbox</a>
-   </div>
+        <!-- Admin Button (hidden by default) -->
+<div id="adminPanelBtn" style="display:none;text-align:center;margin:12px 0;">
+  <a href="admin.html" style="
+    display:inline-block;
+    padding:12px 18px;
+    border-radius:14px;
+    font-weight:800;
+    background:linear-gradient(135deg,#0ea5e9,#14b8a6);
+    color:#fff;
+    text-decoration:none;
+    box-shadow:0 10px 20px rgba(0,0,0,0.15);
+  ">
+    🧪 Open Admin Dashboard
+  </a>
+</div>
+
 
 <!-- 👤 Signed-in User Info -->
 <div id="userProfile" class="user-profile" style="display:none;">
@@ -425,6 +440,7 @@ const firebaseConfig = {
   messagingSenderId: "624002906588",
   appId: "1:624002906588:web:08b4259f90ffa9adad7719",
 };
+
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
@@ -435,6 +451,12 @@ auth.onAuthStateChanged(async (user)=>{
   if(!user){
     window.location.href = "login.html";
     return;
+  }
+
+  // 🔐 SHOW ADMIN BUTTON ONLY FOR ADMIN
+  if(user.email === "edrinehero@gmail.com"){
+    const adminBtn = document.getElementById("adminPanelBtn");
+    if(adminBtn) adminBtn.style.display = "block";
   }
 
   const profileBox = document.getElementById("userProfile");
@@ -451,18 +473,19 @@ auth.onAuthStateChanged(async (user)=>{
     locationInput.value = data.location || "";
     emailInput.value = data.email || user.email || "";
 
-    // ✅ PART 2: fill profile display
+    // 👤 Fill profile display
     document.getElementById("uName").innerText = data.fullName || "—";
     document.getElementById("uEmail").innerText = data.email || user.email;
     document.getElementById("uPhone").innerText = data.phone || "—";
     document.getElementById("uLocation").innerText = data.location || "—";
 
     profileBox.style.display = "block";
-  }else{
+  } else {
     document.getElementById("uEmail").innerText = user.email;
     profileBox.style.display = "block";
   }
 });
+
 
 // ✅ Logout button
 document.getElementById("logoutBtn").addEventListener("click", async ()=>{
@@ -727,6 +750,7 @@ Phone: ${params.phone}
 
 </body>
 </html>
+
 
 
 
