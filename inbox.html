@@ -32,10 +32,9 @@ body {
   padding: 18px;
   text-align: center;
   border-radius: 12px;
+  position: relative;
 }
-.header h2 {
-  margin: 0;
-}
+.header h2 { margin:0; }
 #logoutBtn {
   background: #ef4444;
   color: #fff;
@@ -44,8 +43,9 @@ body {
   border-radius: 999px;
   font-weight: 800;
   cursor: pointer;
-  float: right;
-  margin-top: -50px;
+  position: absolute;
+  top: 16px;
+  right: 16px;
 }
 .results {
   margin-top: 20px;
@@ -57,18 +57,9 @@ body {
   border: 1px solid rgba(15,23,42,0.12);
   margin-bottom: 12px;
 }
-.result-item b {
-  font-size: 14px;
-}
-.result-item p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: #334155;
-}
-.result-item i {
-  font-size: 11px;
-  color: #64748b;
-}
+.result-item b { font-size: 14px; }
+.result-item p { margin: 4px 0 0; font-size: 13px; color: #334155; }
+.result-item i { font-size: 11px; color: #64748b; }
 </style>
 </head>
 <body>
@@ -100,6 +91,8 @@ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+const inboxContainer = document.getElementById("inboxContainer");
+
 // 🔹 Require login
 auth.onAuthStateChanged(async user => {
   if (!user) {
@@ -107,32 +100,31 @@ auth.onAuthStateChanged(async user => {
     return;
   }
 
-  const inboxContainer = document.getElementById("inboxContainer");
-
   try {
-    const querySnapshot = await db.collection("results")
-      .where("patientEmail", "==", user.email)
-      .orderBy("createdAt", "desc")
-      .get();
+    // Listen in real-time for this patient's results
+    db.collection("results")
+      .where("patient_email", "==", user.email) // ⚠ match admin saved field
+      .orderBy("uploaded_at", "desc")           // ⚠ match timestamp field
+      .onSnapshot(snapshot => {
+        inboxContainer.innerHTML = "";
 
-    inboxContainer.innerHTML = "";
+        if (snapshot.empty) {
+          inboxContainer.innerHTML = "<p>No results uploaded yet.</p>";
+          return;
+        }
 
-    if (querySnapshot.empty) {
-      inboxContainer.innerHTML = "<p>No results uploaded yet.</p>";
-      return;
-    }
-
-    querySnapshot.forEach(doc => {
-      const data = doc.data();
-      const div = document.createElement("div");
-      div.className = "result-item";
-      div.innerHTML = `
-        <b>Tests:</b> ${data.tests}<br>
-        <b>Result:</b> ${data.resultText || "Pending"}<br>
-        <i>Uploaded on: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : "Unknown"}</i>
-      `;
-      inboxContainer.appendChild(div);
-    });
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "result-item";
+          div.innerHTML = `
+            <b>Order ID:</b> ${data.order_id}<br>
+            <b>Result:</b> ${data.results || "Pending"}<br>
+            <i>Uploaded on: ${data.uploaded_at ? new Date(data.uploaded_at.seconds * 1000).toLocaleString() : "Unknown"}</i>
+          `;
+          inboxContainer.appendChild(div);
+        });
+      });
 
   } catch(err) {
     console.error(err);
