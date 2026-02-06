@@ -11,6 +11,12 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  emailjs.init("QPXYuZG5LIiv_1x3H");
+</script>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -29,28 +35,32 @@
 *{box-sizing:border-box}
 body{
   font-family: Arial, sans-serif;
-  margin:0;
-  background:#f4f7fa;
+  margin: 0;
+  background:
+    linear-gradient(rgba(241,245,249,0.82), rgba(241,245,249,0.82)),
+    url("lab-bg.jpg") no-repeat center center fixed;
+  background-size: cover;
   color: var(--dark);
 }
-.container{max-width:900px;margin:18px auto;padding:16px;}
+.container{max-width: 900px;margin: 18px auto;padding: 16px;}
 .card{
   background: var(--card);
-  border:1px solid var(--border);
-  border-radius:18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
   box-shadow: var(--shadow);
-  overflow:hidden;
+  overflow: hidden;
 }
 .header{
-  background: linear-gradient(135deg,var(--primary),var(--primary2));
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
   color:#fff;
-  padding:18px 16px;
+  padding: 18px 16px;
   text-align:center;
+  position: relative;
 }
-.header h2{margin:0;font-size:22px;}
-.header p{margin:6px 0 0;font-size:13px;opacity:0.95;}
+.header h2{margin: 0;font-size: 22px;}
+.header p{margin: 6px 0 0;font-size: 13px;opacity: 0.95;}
 .header-actions{
-  margin-top:12px;
+  margin-top: 12px;
   display:flex;
   justify-content:center;
   gap:10px;
@@ -62,103 +72,232 @@ body{
   align-items:center;
   gap:8px;
   padding:10px 12px;
-  border-radius:999px;
-  font-weight:800;
-  font-size:13px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
   color:#fff;
-  border:1px solid rgba(255,255,255,0.35);
+  border: 1px solid rgba(255,255,255,0.35);
   background: rgba(255,255,255,0.14);
 }
 .call-btn:hover{background: rgba(255,255,255,0.22);}
-.form-body{padding:18px;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media(max-width:720px){.grid2{grid-template-columns:1fr;}}
-label{font-weight:700;font-size:13px;color: var(--dark);}
+.form-body{padding: 18px;}
+.grid2{display: grid;grid-template-columns: 1fr 1fr;gap: 12px;}
+@media(max-width:720px){.grid2{grid-template-columns: 1fr;}}
+label{font-weight: 700;font-size: 13px;color: var(--dark);}
 input,select,textarea{
   width:100%;
-  padding:12px;
-  margin:6px 0 14px;
-  border-radius:12px;
-  border:1px solid var(--border);
+  padding: 12px 12px;
+  margin: 6px 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
   background: rgba(255,255,255,0.95);
-  outline:none;
-  transition:0.2s;
+  outline: none;
+  transition: 0.2s;
 }
-input:focus,select:focus,textarea:focus{
+input:focus, select:focus, textarea:focus{
   border-color: rgba(14,165,233,0.7);
-  box-shadow:0 0 0 4px rgba(14,165,233,0.18);
+  box-shadow: 0 0 0 4px rgba(14,165,233,0.18);
 }
-small.note{display:block;margin-top:-10px;margin-bottom:12px;color: var(--muted);font-size:12px;}
-.tests-area{border:1px solid var(--border);border-radius:14px;padding:12px;background: rgba(255,255,255,0.65);}
-.category{margin-bottom:14px;}
-.cat-title{display:flex;align-items:center;justify-content: space-between;gap:10px;margin:8px 0 10px;}
-.cat-title h3{font-size:14px;margin:0;color: var(--dark);}
-.cat-title span{font-size:12px;color: var(--muted);}
-.tests-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-@media(max-width:720px){.tests-grid{grid-template-columns:1fr;}}
+small.note{
+  display:block;
+  margin-top:-10px;
+  margin-bottom:12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.tools-bar{display:flex;gap:10px;align-items:center;margin: 8px 0 12px;}
+.search{flex:1;margin:0;}
+.badge{
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(20,184,166,0.15);
+  border: 1px solid rgba(20,184,166,0.35);
+  color: #0f766e;
+  font-weight: 700;
+}
+.tests-area{
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255,255,255,0.65);
+}
+.category{margin-bottom: 14px;}
+.cat-title{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0 10px;
+}
+.cat-title h3{font-size: 14px;margin: 0;color: var(--dark);}
+.cat-title span{font-size: 12px;color: var(--muted);}
+.tests-grid{display:grid;grid-template-columns: 1fr 1fr;gap: 10px;}
+@media(max-width:720px){.tests-grid{grid-template-columns: 1fr;}}
 .test-item{
   display:flex;
-  gap:10px;
-  padding:10px;
-  border:1px solid var(--border);
-  border-radius:14px;
+  gap: 10px;
+  padding: 10px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
   background: rgba(255,255,255,0.92);
-  cursor:pointer;
-  transition:0.18s;
+  cursor: pointer;
+  transition: 0.18s;
 }
 .test-item:hover{
   transform: translateY(-1px);
   border-color: rgba(14,165,233,0.55);
-  box-shadow:0 10px 18px rgba(2,6,23,0.08);
+  box-shadow: 0 10px 18px rgba(2,6,23,0.08);
 }
-.test-item input{width:auto;margin:3px 0 0;}
-.test-name{font-weight:700;font-size:13px;margin:0;}
-.test-price{font-size:12px;color: var(--muted);margin:3px 0 0;}
-.summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
-@media(max-width:720px){.summary{grid-template-columns:1fr;}}
-.total-box{padding:12px;border-radius:14px;border:1px solid var(--border);background: rgba(14,165,233,0.08);}
-.total-box label{display:block;margin-bottom:6px;}
-.total-input{font-size:20px;font-weight:800;color:#0369a1;}
-.order-preview{padding:12px;border-radius:14px;border:1px solid var(--border);background: rgba(255,255,255,0.88);max-height:170px;overflow:auto;}
+.test-item input{width:auto;margin: 3px 0 0;}
+.test-name{font-weight: 700;font-size: 13px;margin: 0;}
+.test-price{font-size: 12px;color: var(--muted);margin: 3px 0 0;}
+.payment-details{
+  display:none;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  margin: -4px 0 12px;
+  font-size: 13px;
+}
+#mtnDetails{background: rgba(245,158,11,0.12);}
+#airtelDetails{background: rgba(239,68,68,0.10);}
+.summary{display:grid;grid-template-columns: 1fr 1fr;gap: 12px;margin-top: 6px;}
+@media(max-width:720px){.summary{grid-template-columns: 1fr;}}
+.total-box{
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(14,165,233,0.08);
+}
+.total-box label{display:block;margin-bottom: 6px;}
+.total-input{font-size: 20px;font-weight: 800;color: #0369a1;}
+.order-preview{
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.88);
+  max-height: 170px;
+  overflow: auto;
+}
 button{
-  background: linear-gradient(135deg,var(--primary),var(--primary2));
+  background: linear-gradient(135deg, var(--primary), var(--primary2));
   color:#fff;
-  padding:13px 14px;
+  padding: 13px 14px;
   border:none;
-  border-radius:14px;
+  border-radius: 14px;
   cursor:pointer;
   width:100%;
-  font-size:16px;
-  font-weight:800;
-  margin-top:12px;
-  box-shadow:0 12px 22px rgba(14,165,233,0.2);
+  font-size: 16px;
+  font-weight: 800;
+  margin-top: 12px;
+  box-shadow: 0 12px 22px rgba(14,165,233,0.2);
 }
 button:hover{filter: brightness(0.98);}
-#confirmation{text-align:center;font-weight:bold;margin-top:14px;}
+#confirmation{text-align:center;font-weight:bold;margin-top: 14px;}
 .action-row{
   display:flex;
   gap:10px;
-  margin-top:10px;
+  margin-top: 10px;
   flex-wrap: wrap;
 }
 .action-row a{
   flex:1;
-  min-width:180px;
+  min-width: 180px;
   text-decoration:none;
   text-align:center;
-  padding:12px;
-  border-radius:14px;
-  font-weight:800;
-  border:1px solid var(--border);
+  padding:12px 12px;
+  border-radius: 14px;
+  font-weight: 800;
+  border: 1px solid var(--border);
   background: rgba(255,255,255,0.88);
   color: var(--dark);
 }
-.action-row a:hover{box-shadow:0 10px 18px rgba(2,6,23,0.10);transform: translateY(-1px);}
-.footer-note{font-size:12px;color: var(--muted);text-align:center;padding:10px 0 16px;}
+.action-row a:hover{
+  box-shadow: 0 10px 18px rgba(2,6,23,0.10);
+  transform: translateY(-1px);
+}
+.footer-note{
+  font-size: 12px;
+  color: var(--muted);
+  text-align:center;
+  padding: 10px 0 16px;
+}
+/* 🔐 Logout button – hidden by default */
+#logoutBtn{
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  border: none;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 900;
+  padding: 14px 18px;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(239,68,68,0.35);
+}
+
+/* 📱 Mobile ONLY */
+#logoutBtn{
+  display: block;
+  position: fixed;
+  bottom: 20px;
+  right: 16px;
+  z-index: 9999;
+  border: none;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 900;
+  padding: 14px 18px;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(239,68,68,0.35);
+}
+
+#logoutBtn:hover{
+  filter: brightness(0.95);
+}
+
+/* 👤 Signed-in user profile */
+.user-profile{
+  margin: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(14,165,233,0.08);
+  border: 1px solid var(--border);
+}
+
+.user-profile h3{
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--dark);
+}
+
+.user-profile p{
+  margin: 4px 0;
+  font-size: 13px;
+  color: var(--dark);
+}
+</style>
+
+
+/* 📱 Mobile only */
+@media (max-width: 768px){
+  #logoutBtn{
+    display: block;
+    bottom: 20px;
+    right: 16px;
+  }
+}
+
+#logoutBtn:hover{filter:brightness(0.95);}
 </style>
 </head>
 
 <body>
+
+<button id="logoutBtn">Logout</button>
 
 <div class="container">
   <div class="card">
@@ -169,169 +308,428 @@ button:hover{filter: brightness(0.98);}
         <a class="call-btn" href="tel:+256778379791">📞 Call MTN: +256 778 379 791</a>
         <a class="call-btn" href="tel:0750992939">📞 Call Airtel: 0750 992 939</a>
       </div>
-    </div>
+   </div>
+
+<!-- 👤 Signed-in User Info -->
+<div id="userProfile" class="user-profile" style="display:none;">
+  <h3>👤 Signed in as</h3>
+  <p><b>Name:</b> <span id="uName">—</span></p>
+  <p><b>Email:</b> <span id="uEmail">—</span></p>
+  <p><b>Phone:</b> <span id="uPhone">—</span></p>
+  <p><b>Location:</b> <span id="uLocation">—</span></p>
+</div>
 
 <form id="orderForm" class="form-body">
-  <div class="grid2">
-    <div>
-      <label for="name">Full Name</label>
-      <input id="name" required placeholder="e.g. Namiyingo Joyce">
-    </div>
-    <div>
-      <label for="phone">Phone</label>
-      <input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX">
-      <small class="note">Example: 0750992939</small>
-    </div>
-    <div>
-      <label for="age">Age</label>
-      <input type="number" id="age" required placeholder="e.g. 25">
-    </div>
-    <div>
-      <label for="sex">Sex</label>
-      <select id="sex" required>
+
+
+      <div class="grid2">
+        <div>
+          <label for="name">Full Name</label>
+          <input id="name" required placeholder="e.g. Namiyingo Joyce">
+        </div>
+
+        <div>
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="e.g. name@gmail.com">
+        </div>
+
+        <div>
+          <label for="age">Age</label>
+          <input type="number" id="age" required placeholder="e.g. 25">
+        </div>
+
+        <div>
+          <label for="sex">Sex</label>
+          <select id="sex" required>
+            <option value="">-- Select --</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="phone">Phone</label>
+          <input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX">
+          <small class="note">Example: 0750992939</small>
+        </div>
+
+        <div>
+          <label for="location">Location</label>
+          <input id="location" placeholder="Address or Google Maps link" required>
+          <small class="note">Add landmark for easy pickup</small>
+        </div>
+      </div>
+
+      <label>Select Tests</label>
+
+      <div class="tools-bar">
+        <input class="search" id="searchTests" placeholder="Search test (e.g. HIV, CBC, Widal, HVS)..." />
+        <div class="badge" id="selectedCount">0 selected</div>
+      </div>
+
+      <div class="tests-area" id="testsContainer"></div>
+
+      <label for="payment">Payment Method</label>
+      <select id="payment" required>
         <option value="">-- Select --</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
+        <option>Cash on Delivery</option>
+        <option>MTN Mobile Money</option>
+        <option>Airtel Money</option>
       </select>
-    </div>
-    <div>
-      <label for="location">Location</label>
-      <input id="location" placeholder="Address or Google Maps link" required>
-    </div>
-  </div>
 
-  <label>Select Tests</label>
-  <div class="tests-area" id="testsContainer"></div>
+      <div id="mtnDetails" class="payment-details">
+        MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b>
+      </div>
 
-  <div class="summary">
-    <div class="total-box">
-      <label>Total (UGX)</label>
-      <div class="total-input" id="totalText">0</div>
-      <input id="total" readonly value="0" style="display:none">
-    </div>
-    <div class="order-preview" id="preview">No tests selected</div>
-  </div>
+      <div id="airtelDetails" class="payment-details">
+        Airtel Money: <b>0706559100 – Nambi Amina</b>
+      </div>
 
-  <button type="submit">Submit Order via WhatsApp</button>
+      <label for="notes">Notes (Optional)</label>
+      <textarea id="notes" placeholder="Any extra info e.g. fasting, preferred time, symptoms..."></textarea>
 
-  <div id="confirmation"></div>
+      <div class="summary">
+        <div class="total-box">
+          <label>Total (UGX)</label>
+          <div class="total-input" id="totalText">0</div>
+          <input id="total" readonly value="0" style="display:none">
+        </div>
 
-  <div class="action-row" id="afterActions" style="display:none;">
-    <a id="sendScreenshotBtn" href="#" target="_blank">📸 Send Screenshot of Order</a>
-    <a href="admin.html">📋 View Admin Orders</a>
-  </div>
+        <div class="order-preview" id="preview">No tests selected</div>
+      </div>
 
-  <div class="footer-note">
-    Sample collection available within Mityana & nearby areas.
-  </div>
-</form>
+      <button type="submit">Submit Order</button>
+
+      <div id="confirmation"></div>
+
+      <div class="action-row" id="afterActions" style="display:none;">
+        <a id="sendScreenshotBtn" href="#" target="_blank">📸 Send Screenshot of Order</a>
+        <a href="admin.html">📋 View Admin Orders</a>
+      </div>
+
+      <div class="footer-note">
+        Sample collection available within Mityana & nearby areas.
+      </div>
+
+    </form>
   </div>
 </div>
 
 <script>
 // ✅ Firebase init
 const firebaseConfig = {
-  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId:"mobile-lab-mityana-aeae2"
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
 };
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ✅ Require login + auto-fill all details
+auth.onAuthStateChanged(async (user)=>{
+  if(!user){
+    window.location.href = "login.html";
+    return;
+  }
+
+  const profileBox = document.getElementById("userProfile");
+
+  const doc = await db.collection("users").doc(user.uid).get();
+  if(doc.exists){
+    const data = doc.data();
+
+    // Autofill form
+    nameInput.value = data.fullName || "";
+    ageInput.value = data.age || "";
+    sexInput.value = data.sex || "";
+    phoneInput.value = data.phone || "";
+    locationInput.value = data.location || "";
+    emailInput.value = data.email || user.email || "";
+
+    // ✅ PART 2: fill profile display
+    document.getElementById("uName").innerText = data.fullName || "—";
+    document.getElementById("uEmail").innerText = data.email || user.email;
+    document.getElementById("uPhone").innerText = data.phone || "—";
+    document.getElementById("uLocation").innerText = data.location || "—";
+
+    profileBox.style.display = "block";
+  }else{
+    document.getElementById("uEmail").innerText = user.email;
+    profileBox.style.display = "block";
+  }
+});
+
+// ✅ Logout button
+document.getElementById("logoutBtn").addEventListener("click", async ()=>{
+  await auth.signOut();
+  window.location.href = "login.html";
+});
+
+// ---------- ELEMENTS ----------
+const testsContainer = document.getElementById("testsContainer");
+const totalInput = document.getElementById("total");
+const totalText = document.getElementById("totalText");
+const preview = document.getElementById("preview");
+const payment = document.getElementById("payment");
+const mtnDetails = document.getElementById("mtnDetails");
+const airtelDetails = document.getElementById("airtelDetails");
+const confirmation = document.getElementById("confirmation");
+const searchTests = document.getElementById("searchTests");
+const selectedCount = document.getElementById("selectedCount");
+
+const afterActions = document.getElementById("afterActions");
+const sendScreenshotBtn = document.getElementById("sendScreenshotBtn");
+
+// ✅ INPUTS
+const nameInput = document.getElementById("name");
+const emailInput = document.getElementById("email");
+const ageInput = document.getElementById("age");
+const sexInput = document.getElementById("sex");
+const phoneInput = document.getElementById("phone");
+const locationInput = document.getElementById("location");
+const notesInput = document.getElementById("notes");
+
+// ✅ YOUR WHATSAPP NUMBER
+const adminWhatsApp = "256750992939";
 
 // ---------- TESTS ----------
-const testCategories=[
-  {title:"Blood Tests",tests:[
-    {name:"CBC - Complete Blood Count",price:15000},
-    {name:"Blood Glucose",price:7000},
-    {name:"Blood Grouping",price:10000},
-    {name:"Bleeding & Clotting Test",price:15000},
-    {name:"malaria (b/s)",price:5000}
-  ]},
-  {title:"Infections / STIs",tests:[
-    {name:"HIV",price:7000},
-    {name:"Hepatitis B",price:10000},
-    {name:"RPR / Syphilis",price:8000}
-  ]}
+const testCategories = [
+  {
+    title: "Blood Tests",
+    tests: [
+      {name:"CBC - Complete Blood Count",price:15000},
+      {name:"Blood Glucose",price:7000},
+      {name:"Blood Grouping",price:10000},
+      {name:"Bleeding & Clotting Test",price:15000},
+      {name:"malaria ( b/s)",price:5000},
+      {name:"Electrolytes",price:50000},
+      {name:"Lipid Profile",price:40000},
+      {name:"Liver Function Test (LFT)",price:50000},
+      {name:"Kidney Function Test (RFT)",price:50000},
+      {name:"PSA",price:25000},
+      {name:"HCG Blood",price:15000},
+      {name:"Sickling Test",price:40000},
+      {name:"DNA",price:600000}
+    ]
+  },
+  {
+    title: "Infections / STIs",
+    tests: [
+      {name:"HIV",price:7000},
+      {name:"Hepatitis B",price:10000},
+      {name:"Hepatitis C",price:10000},
+      {name:"RPR / Syphilis",price:8000},
+      {name:"Gonorrhea Test",price:15000},
+      {name:"Chlamydia Test",price:15000},
+      {name:"Brucella Test",price:10000}
+    ]
+  },
+  {
+    title: "Stool / Urine",
+    tests: [
+      {name:"Urinalysis",price:8000},
+      {name:"Stool Analysis",price:15000},
+      {name:"H. Pylori Stool",price:20000},
+      {name:"Widal Stool",price:20000}
+    ]
+  },
+  {
+    title: "H. Pylori / Gastro",
+    tests: [
+      {name:"H. Pylori Serum",price:8000}
+    ]
+  },
+  {
+    title: "Women's Health",
+    tests: [
+      {name:"Pregnancy Test (hCG)",price:5000},
+      {name:"High Vaginal Swab",price:10000},
+      {name:"High Vaginal Swab C&S",price:120000},
+      {name:"Gram Staining",price:10000}
+    ]
+  },
+  {
+    title: "Widal / Febrile Illness",
+    tests: [
+      {name:"Widal Serum",price:8000}
+    ]
+  },
+  {
+    title: "Autoimmune / Others",
+    tests: [
+      {name:"Rheumatoid Factor",price:15000}
+    ]
+  }
 ];
 
-const testsContainer=document.getElementById("testsContainer");
-const totalInput=document.getElementById("total");
-const totalText=document.getElementById("totalText");
-const preview=document.getElementById("preview");
-const afterActions=document.getElementById("afterActions");
-const sendScreenshotBtn=document.getElementById("sendScreenshotBtn");
+// ---------- RENDER ----------
+function renderTests(filterText=""){
+  testsContainer.innerHTML = "";
 
-// Inputs
-const nameInput=document.getElementById("name");
-const phoneInput=document.getElementById("phone");
-const ageInput=document.getElementById("age");
-const sexInput=document.getElementById("sex");
-const locationInput=document.getElementById("location");
-
-// Admin WhatsApp
-const adminWhatsApp="256750992939";
-
-// Render tests
-function renderTests(){
-  testsContainer.innerHTML="";
   testCategories.forEach(cat=>{
-    const wrapper=document.createElement("div");
-    wrapper.className="category";
-    const title=document.createElement("div");
-    title.className="cat-title";
-    title.innerHTML=`<h3>✅ ${cat.title}</h3><span>${cat.tests.length} tests</span>`;
-    wrapper.appendChild(title);
+    const filtered = cat.tests.filter(t =>
+      t.name.toLowerCase().includes(filterText.toLowerCase())
+    );
+    if(filtered.length === 0) return;
 
-    const grid=document.createElement("div");
-    grid.className="tests-grid";
-    cat.tests.forEach(t=>{
-      const label=document.createElement("label");
-      label.className="test-item";
-      const cb=document.createElement("input");
-      cb.type="checkbox"; cb.value=t.name; cb.dataset.price=t.price; cb.onchange=updateTotal;
-      const info=document.createElement("div");
-      info.innerHTML=`<p class="test-name">${t.name}</p><p class="test-price">UGX ${t.price.toLocaleString()}</p>`;
-      label.appendChild(cb); label.appendChild(info);
+    const wrapper = document.createElement("div");
+    wrapper.className = "category";
+
+    const titleRow = document.createElement("div");
+    titleRow.className = "cat-title";
+    titleRow.innerHTML = `<h3>✅ ${cat.title}</h3><span>${filtered.length} tests</span>`;
+
+    const grid = document.createElement("div");
+    grid.className = "tests-grid";
+
+    filtered.forEach(t=>{
+      const label = document.createElement("label");
+      label.className = "test-item";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.dataset.price = t.price;
+      cb.value = t.name;
+      cb.onchange = updateTotal;
+
+      const info = document.createElement("div");
+      info.innerHTML = `
+        <p class="test-name">${t.name}</p>
+        <p class="test-price">UGX ${t.price.toLocaleString()}</p>
+      `;
+
+      label.appendChild(cb);
+      label.appendChild(info);
       grid.appendChild(label);
     });
+
+    wrapper.appendChild(titleRow);
     wrapper.appendChild(grid);
     testsContainer.appendChild(wrapper);
   });
 }
 renderTests();
 
-// Update total
 function updateTotal(){
-  let total=0; let list=[];
-  document.querySelectorAll("#testsContainer input[type='checkbox']:checked").forEach(cb=>{
-    total+=Number(cb.dataset.price);
+  let total = 0, list = [];
+  const checked = document.querySelectorAll("#testsContainer input[type='checkbox']:checked");
+
+  checked.forEach(cb=>{
+    total += Number(cb.dataset.price);
     list.push(`${cb.value} (UGX ${Number(cb.dataset.price).toLocaleString()})`);
   });
-  totalInput.value=total;
-  totalText.innerText=total.toLocaleString();
-  preview.innerHTML=list.length ? list.join("<br>") : "No tests selected";
+
+  totalInput.value = total;
+  totalText.innerText = total.toLocaleString();
+
+  selectedCount.innerText = `${checked.length} selected`;
+  preview.innerHTML = list.length ? list.join("<br>") : "No tests selected";
 }
 
-// Submit
+searchTests.addEventListener("input", (e)=>{
+  renderTests(e.target.value.trim());
+  updateTotal();
+});
+
+// ---------- PAYMENT ----------
+payment.onchange=()=>{
+  mtnDetails.style.display=payment.value==="MTN Mobile Money"?"block":"none";
+  airtelDetails.style.display=payment.value==="Airtel Money"?"block":"none";
+};
+
+// ---------- SAVE ORDER LOCAL ----------
+function saveOrder(order){
+  const key = "mobile_lab_orders";
+  const existing = JSON.parse(localStorage.getItem(key) || "[]");
+  existing.unshift(order);
+  localStorage.setItem(key, JSON.stringify(existing));
+}
+
+// ---------- SUBMIT ----------
 document.getElementById("orderForm").onsubmit=e=>{
   e.preventDefault();
-  if(Number(totalInput.value)===0){alert("Please select at least one test"); return;}
+
+  if(Number(totalInput.value) === 0){
+    alert("Please select at least one test");
+    return;
+  }
+
   const orderId="ML-"+Date.now();
-  const orderText=`Order ID: ${orderId}\nName: ${nameInput.value}\nPhone: ${phoneInput.value}\nAge: ${ageInput.value}\nSex: ${sexInput.value}\nLocation: ${locationInput.value}\nTests:\n${preview.innerText}\nTotal: UGX ${totalInput.value.toLocaleString()}`;
 
-  // WhatsApp to admin
-  window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(orderText)}`);
+  const params={
+    order_id:orderId,
+    name:nameInput.value,
+    email:emailInput.value,
+    age:ageInput.value,
+    sex:sexInput.value,
+    phone:phoneInput.value,
+    tests:preview.innerText,
+    total:"UGX " + Number(totalInput.value).toLocaleString(),
+    location:locationInput.value,
+    payment:payment.value,
+    notes:notesInput.value||"None"
+  };
 
-  // Prepare screenshot link
-  sendScreenshotBtn.href=`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent("I am sending the screenshot of my order "+orderId)}`;
-  afterActions.style.display="flex";
-  document.getElementById("confirmation").innerText="✅ Order submitted! Please send a screenshot via WhatsApp.";
-  e.target.reset();
-  preview.innerHTML="No tests selected";
-  totalInput.value="0"; totalText.innerText="0";
+  saveOrder({
+    ...params,
+    created_at: new Date().toLocaleString()
+  });
+
+  const waText=`Mobile Lab Order
+Order ID: ${orderId}
+Name: ${params.name}
+Phone: ${params.phone}
+Age: ${params.age}
+Sex: ${params.sex}
+Tests:
+${preview.innerText}
+Total: ${params.total}
+Location: ${params.location}
+Payment: ${params.payment}
+Notes: ${params.notes}`;
+
+  window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(waText)}`);
+
+  const screenshotText=`Hello Doctor Edrine,
+I have submitted my Mobile Lab Order.
+
+Order ID: ${orderId}
+Name: ${params.name}
+Phone: ${params.phone}
+
+✅ I am sending the screenshot of my order now.`;
+
+  sendScreenshotBtn.href = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(screenshotText)}`;
+
+  emailjs.send("service_sjp4zrf","lab_order",params)
+  .then(()=>{
+    confirmation.innerHTML="✅ Order submitted successfully! Please send a screenshot of your order.";
+    afterActions.style.display="flex";
+    e.target.reset();
+    preview.innerHTML="No tests selected";
+    totalInput.value="0";
+    totalText.innerText="0";
+    selectedCount.innerText="0 selected";
+    mtnDetails.style.display="none";
+    airtelDetails.style.display="none";
+    renderTests();
+  })
+  .catch(()=>{
+    confirmation.innerHTML="❌ Failed to send order";
+  });
 };
 </script>
 
 </body>
 </html>
+
+
+
+
+
