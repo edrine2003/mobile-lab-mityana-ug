@@ -100,17 +100,149 @@ auth.onAuthStateChanged(async user => {
     return;
   }
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patient Inbox – Mobile Lab Mityana</title>
+
+<meta name="description" content="View your lab results securely.">
+<meta name="theme-color" content="#0ea5e9">
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f1f5f9;
+  color: #0f172a;
+}
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 16px;
+}
+.header {
+  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+  color: #fff;
+  padding: 18px;
+  text-align: center;
+  border-radius: 12px;
+  position: relative;
+}
+.header h2 { margin:0; }
+#logoutBtn {
+  background: #ef4444;
+  color: #fff;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+.results {
+  margin-top: 20px;
+}
+.result-item {
+  background: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,0.12);
+  margin-bottom: 12px;
+}
+.result-item b { font-size: 14px; }
+.result-item p { margin: 4px 0 0; font-size: 13px; color: #334155; }
+.result-item i { font-size: 11px; color: #64748b; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h2>🧪 Patient Inbox</h2>
+    <p>View your uploaded lab results securely.</p>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <div class="results" id="inboxContainer">
+    Loading your lab results...
+  </div>
+</div>
+
+<script>
+// 🔹 Firebase init
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const inboxContainer = document.getElementById("inboxContainer");
+
+// 🔹 Require login
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
   try {
     // Listen in real-time for this patient's results
     db.collection("results")
       .where("patient_email", "==", user.email) // ⚠ match admin saved field
-      .orderBy("uploaded_at", "desc")           // ⚠ match timestamp field
+      .orderBy("createdAt", "desc")           // ⚠ match timestamp field
       .onSnapshot(snapshot => {
         inboxContainer.innerHTML = "";
 
         if (snapshot.empty) {
           inboxContainer.innerHTML = "<p>No results uploaded yet.</p>";
           return;
+        }
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "result-item";
+          div.innerHTML = `
+            <b>Order ID:</b> ${data.orderID || "—"}<br>
+    <b>Result:</b> ${data.resultsText || "Pending"}<br>
+    <i>Uploaded on: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : "Unknown"}</i>
+          `;
+          inboxContainer.appendChild(div);
+        });
+      });
+
+  } catch(err) {
+    console.error(err);
+    inboxContainer.innerHTML = "<p>Failed to load results. Please try again later.</p>";
+  }
+});
+
+// 🔹 Logout
+document.getElementById("logoutBtn").addEventListener("click", async ()=>{
+  await auth.signOut();
+  window.location.href = "login.html";
+});
+</script>
+
+</body>
+</html>
         }
 
         snapshot.forEach(doc => {
