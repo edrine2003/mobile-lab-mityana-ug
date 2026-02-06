@@ -18,9 +18,12 @@ h2{margin:0 0 16px;}
 .order-card{border:1px solid #cbd5e1;border-radius:12px;padding:12px;margin-bottom:12px;background:#fff;}
 .order-card h4{margin:0 0 6px;font-size:14px;color:#0369a1;}
 .order-card p{margin:2px 0;font-size:13px;}
-textarea{width:100%;padding:8px;margin-top:6px;border-radius:8px;border:1px solid #cbd5e1;}
+.results-table{width:100%;border-collapse:collapse;margin:8px 0;}
+.results-table th, .results-table td{border:1px solid #cbd5e1;padding:6px;font-size:13px;}
+.results-table th{background:#e0f2fe;}
 button{margin-top:6px;padding:8px 12px;border:none;background:#0ea5e9;color:#fff;border-radius:12px;cursor:pointer;}
 button:hover{filter:brightness(0.95);}
+select{padding:4px;border-radius:6px;border:1px solid #cbd5e1;}
 </style>
 </head>
 <body>
@@ -56,7 +59,6 @@ auth.onAuthStateChanged(async user => {
     return;
   }
 
-  // Load all orders
   loadOrders();
 });
 
@@ -65,6 +67,168 @@ document.getElementById("logoutBtn").addEventListener("click", async ()=>{
   await auth.signOut();
   window.location.href = "login.html";
 });
+
+// 🔹 Generate editable tables for ALL tests
+function generateResultsTable(testName){
+  let html = `<h4>${testName}</h4><table class="results-table"><thead><tr><th>Parameter</th><th>Units</th><th>Result</th></tr></thead><tbody>`;
+
+  switch(testName){
+    case "Urinalysis":
+      html += `
+<tr><td>Macroscopy</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>UROBILINOGEN</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>BILIRUBIN</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>SPECIFIC GRAVITY</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>pH</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>NITRITES</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>GLUCOSE</td><td><select><option>mmol/L</option><option>mg/dL</option></select></td><td contenteditable="true"></td></tr>
+<tr><td>PROTEINS</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>KETONES</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>LEUKOCYTES</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>RBCs</td><td></td><td contenteditable="true"></td></tr>
+<tr><td>Microscopy</td><td></td><td contenteditable="true"></td></tr>
+      `;
+      break;
+
+    case "HIV":
+      html += `<tr><td>HIV Result</td><td></td><td contenteditable="true">Negative / Positive / Inconclusive</td></tr>`;
+      break;
+
+    case "Hepatitis B":
+      html += `<tr><td>HBsAg</td><td></td><td contenteditable="true">Negative / Positive / Inconclusive</td></tr>`;
+      break;
+
+    case "Hepatitis C":
+      html += `<tr><td>HCV Ab</td><td></td><td contenteditable="true">Negative / Positive / Inconclusive</td></tr>`;
+      break;
+
+    case "RPR / Syphilis":
+      html += `<tr><td>RPR Result</td><td></td><td contenteditable="true">Negative / Positive / Inconclusive</td></tr>`;
+      break;
+
+    case "CBC - Complete Blood Count":
+      html += `
+<tr><td>WBC</td><td>10^3/µL</td><td contenteditable="true"></td></tr>
+<tr><td>RBC</td><td>10^6/µL</td><td contenteditable="true"></td></tr>
+<tr><td>Hemoglobin</td><td>g/dL</td><td contenteditable="true"></td></tr>
+<tr><td>Hematocrit</td><td>%</td><td contenteditable="true"></td></tr>
+<tr><td>Platelets</td><td>10^3/µL</td><td contenteditable="true"></td></tr>
+      `;
+      break;
+
+    case "Blood Glucose":
+      html += `<tr><td>Glucose</td><td><select><option>mmol/L</option><option>mg/dL</option></select></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Blood Grouping":
+      html += `<tr><td>Blood Group</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Bleeding & Clotting Test":
+      html += `
+<tr><td>PT</td><td>sec</td><td contenteditable="true"></td></tr>
+<tr><td>APTT</td><td>sec</td><td contenteditable="true"></td></tr>
+<tr><td>INR</td><td></td><td contenteditable="true"></td></tr>
+      `;
+      break;
+
+    case "Lipid Profile":
+      html += `
+<tr><td>Total Cholesterol</td><td>mg/dL</td><td contenteditable="true"></td></tr>
+<tr><td>HDL</td><td>mg/dL</td><td contenteditable="true"></td></tr>
+<tr><td>LDL</td><td>mg/dL</td><td contenteditable="true"></td></tr>
+<tr><td>Triglycerides</td><td>mg/dL</td><td contenteditable="true"></td></tr>
+      `;
+      break;
+
+    case "Liver Function Test (LFT)":
+      html += `
+<tr><td>ALT</td><td>U/L</td><td contenteditable="true"></td></tr>
+<tr><td>AST</td><td>U/L</td><td contenteditable="true"></td></tr>
+<tr><td>ALP</td><td>U/L</td><td contenteditable="true"></td></tr>
+<tr><td>Bilirubin Total</td><td>mg/dL</td><td contenteditable="true"></td></tr>
+<tr><td>Bilirubin Direct</td><td>mg/dL</td><td contenteditable="true"></td></tr>
+      `;
+      break;
+
+    case "Kidney Function Test (RFT)":
+      html += `
+<tr><td>Urea</td><td>mg/dL</td><td contenteditable="true"></td></tr>
+<tr><td>Creatinine</td><td>mg/dL</td><td contenteditable="true"></td></tr>
+<tr><td>Electrolytes Na+</td><td>mmol/L</td><td contenteditable="true"></td></tr>
+<tr><td>Electrolytes K+</td><td>mmol/L</td><td contenteditable="true"></td></tr>
+      `;
+      break;
+
+    case "PSA":
+      html += `<tr><td>PSA</td><td>ng/mL</td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "HCG Blood":
+      html += `<tr><td>hCG</td><td>mIU/mL</td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Sickling Test":
+      html += `<tr><td>Sickling Test Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "DNA":
+      html += `<tr><td>DNA Test Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Gonorrhea Test":
+      html += `<tr><td>Gonorrhea Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Chlamydia Test":
+      html += `<tr><td>Chlamydia Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Brucella Test":
+      html += `<tr><td>Brucella Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Urinalysis":
+      html += `
+<tr><td>Urinalysis Full</td><td></td><td contenteditable="true"></td></tr>
+      `;
+      break;
+
+    case "Urinalysis":
+      html += `<tr><td>Urinalysis Full</td><td></td><td contenteditable="true"></td></tr>`;  
+      break;
+
+    case "Pregnancy Test (hCG)":
+      html += `<tr><td>Pregnancy Test Result</td><td></td><td contenteditable="true">Negative / Positive</td></tr>`;
+      break;
+
+    case "High Vaginal Swab":
+      html += `<tr><td>HVS Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "High Vaginal Swab C&S":
+      html += `<tr><td>HVS C&S Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Gram Staining":
+      html += `<tr><td>Gram Staining Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Widal Serum":
+      html += `<tr><td>Widal Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    case "Rheumatoid Factor":
+      html += `<tr><td>Rheumatoid Factor Result</td><td></td><td contenteditable="true"></td></tr>`;
+      break;
+
+    default:
+      html += `<tr><td>${testName}</td><td></td><td contenteditable="true"></td></tr>`;
+  }
+
+  html += "</tbody></table>";
+  return html;
+}
 
 // 🔹 Load orders
 async function loadOrders(){
@@ -82,6 +246,12 @@ async function loadOrders(){
     orders.forEach(order=>{
       const card = document.createElement("div");
       card.className = "order-card";
+
+      let tablesHtml = "";
+      order.tests.split("\n").forEach(test=>{
+        tablesHtml += generateResultsTable(test);
+      });
+
       card.innerHTML = `
         <h4>Order ID: ${order.order_id}</h4>
         <p><b>Name:</b> ${order.name} | <b>Phone:</b> ${order.phone}</p>
@@ -91,32 +261,34 @@ async function loadOrders(){
         <p><b>Payment:</b> ${order.payment}</p>
         <p><b>Location:</b> ${order.location}</p>
         <p><b>Notes:</b> ${order.notes}</p>
-        <textarea placeholder="Enter results here" rows="3"></textarea>
+        ${tablesHtml}
         <button>Upload Results</button>
       `;
 
       const btn = card.querySelector("button");
-      const textarea = card.querySelector("textarea");
 
       btn.addEventListener("click", async ()=>{
-        const resultText = textarea.value.trim();
-        if(!resultText){
-          alert("Please enter results before uploading.");
-          return;
-        }
+        const resultsObj = {};
+        const tables = card.querySelectorAll("table.results-table");
+        tables.forEach(table=>{
+          const testName = table.previousElementSibling.innerText;
+          resultsObj[testName] = {};
+          table.querySelectorAll("tbody tr").forEach(row=>{
+            const param = row.cells[0].innerText;
+            const unit = row.cells[1].querySelector("select")?.value || row.cells[1].innerText;
+            const value = row.cells[2].innerText.trim();
+            resultsObj[testName][param] = {unit,value};
+          });
+        });
 
-        // Save to Firestore
         await db.collection("results").doc(order.id).set({
           order_id: order.order_id,
           patient_email: order.email,
-          results: resultText,
+          results: resultsObj,
           uploaded_at: new Date()
         });
 
         alert("✅ Results uploaded successfully!");
-
-        // Optionally: clear textarea
-        textarea.value = "";
       });
 
       ordersContainer.appendChild(card);
@@ -128,6 +300,5 @@ async function loadOrders(){
   }
 }
 </script>
-
 </body>
 </html>
