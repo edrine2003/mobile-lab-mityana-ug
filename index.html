@@ -674,7 +674,7 @@ function saveOrder(order){
 }
 
 // ---------- SUBMIT ----------
-document.getElementById("orderForm").onsubmit= async e=>{
+document.getElementById("orderForm").onsubmit = async e => {
   e.preventDefault();
 
   if(Number(totalInput.value) === 0){
@@ -682,29 +682,42 @@ document.getElementById("orderForm").onsubmit= async e=>{
     return;
   }
 
-  const orderId="ML-"+Date.now();
+  const user = auth.currentUser;
+  if(!user){
+    alert("Please log in to submit your order.");
+    return;
+  }
 
-  const params={
-    order_id:orderId,
-    name:nameInput.value,
-    email:emailInput.value,
-    age:ageInput.value,
-    sex:sexInput.value,
-    phone:phoneInput.value,
-    tests:preview.innerText,
-    total:"UGX " + Number(totalInput.value).toLocaleString(),
-    location:locationInput.value,
-    payment:payment.value,
-    notes:notesInput.value||"None"
+  const orderId = "ML-" + Date.now();
+
+  const params = {
+    order_id: orderId,
+    name: nameInput.value,
+    email: emailInput.value,
+    age: ageInput.value,
+    sex: sexInput.value,
+    phone: phoneInput.value,
+    tests: preview.innerText,
+    total: "UGX " + Number(totalInput.value).toLocaleString(),
+    location: locationInput.value,
+    payment: payment.value,
+    notes: notesInput.value || "None"
   };
 
-  // ✅ Save order to Firestore
-await db.collection("orders").doc(orderId).set({
-    ...params,
-    created_at: firebase.firestore.FieldValue.serverTimestamp()
-});
-// 🔹 WhatsApp notification to admin
-  const waText=`Mobile Lab Order
+  try {
+    // Firestore write
+    await db.collection("orders").doc(orderId).set({
+      ...params,
+      created_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(err){
+    console.error("Firestore write failed:", err);
+    alert("⚠️ Failed to submit order: " + err.message);
+    return;
+  }
+
+  // WhatsApp notification
+  const waText = `Mobile Lab Order
 Order ID: ${orderId}
 Name: ${params.name}
 Phone: ${params.phone}
@@ -719,7 +732,7 @@ Notes: ${params.notes}`;
 
   window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(waText)}`);
 
-  const screenshotText=`Hello Doctor Edrine,
+  const screenshotText = `Hello Doctor Edrine,
 I have submitted my Mobile Lab Order.
 
 Order ID: ${orderId}
@@ -730,6 +743,7 @@ Phone: ${params.phone}
 
   sendScreenshotBtn.href = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(screenshotText)}`;
 
+  // EmailJS
   emailjs.send("service_sjp4zrf","lab_order",params)
   .then(()=>{
     confirmation.innerHTML="✅ Order submitted successfully! Please send a screenshot of your order.";
@@ -751,6 +765,7 @@ Phone: ${params.phone}
 
 </body>
 </html>
+
 
 
 
