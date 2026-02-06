@@ -1,136 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inbox – Mobile Lab Mityana</title>
-<meta name="description" content="View lab results – patients and admin dashboard">
-<meta name="theme-color" content="#0ea5e9">
+<title>📥 Patient Inbox</title>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-body { font-family: Arial; margin:0; background:#f4f7fa; color:#0f172a; }
-.container { max-width:900px; margin:20px auto; padding:16px; }
-.header { text-align:center; margin-bottom:16px; }
-.card { background:#fff; border-radius:18px; padding:16px; margin-bottom:12px; box-shadow:0 8px 20px rgba(0,0,0,0.06); }
-textarea { width:100%; padding:8px; margin-top:6px; border-radius:12px; border:1px solid #cbd5e1; }
-select { width:100%; padding:8px; margin-top:6px; border-radius:12px; border:1px solid #cbd5e1; }
-button { padding:10px; background:linear-gradient(135deg,#0ea5e9,#14b8a6); color:#fff; border:none; border-radius:12px; cursor:pointer; margin-top:6px; width:100%; font-weight:700; }
-button:hover { filter: brightness(0.95); }
-.status { padding:4px 8px; border-radius:8px; font-size:13px; color:#fff; font-weight:700; }
-.status.Pending { background:#f97316; }
-.status.Completed { background:#16a34a; }
-.status.Lacking { background:#dc2626; }
-#logoutBtn { position:fixed; bottom:20px; right:16px; z-index:9999; border:none; border-radius:999px; background:#ef4444; color:#fff; font-weight:900; padding:14px 18px; cursor:pointer; box-shadow:0 10px 22px rgba(239,68,68,0.35); }
-#logoutBtn:hover { filter: brightness(0.95); }
-textarea[readonly] { background:#f0f0f0; color:#555; cursor:not-allowed; }
+body{
+  font-family: Arial;
+  background:#f8fafc;
+  padding:20px;
+}
+.result{
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+}
 </style>
 </head>
+
 <body>
 
-<div class="container">
-  <div class="header">
-    <h2>🧪 Lab Inbox</h2>
-    <p>View and manage lab orders</p>
-  </div>
-
-  <div id="ordersContainer"></div>
-
-  <button id="logoutBtn">Logout</button>
-</div>
+<h2>📥 Your Lab Results</h2>
+<div id="list">Loading...</div>
 
 <script>
-// 🔹 Firebase config
-const firebaseConfig = { 
-  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY", 
-  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com", 
-  projectId:"mobile-lab-mityana-aeae2" 
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2"
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 🔹 Admin WhatsApp
-const adminWhatsApp = "256750992939";
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    window.location.href="login.html";
+    return;
+  }
 
-auth.onAuthStateChanged(async(user)=>{
-  if(!user){ window.location.href="login.html"; return; }
-
-  const doc = await db.collection("users").doc(user.uid).get();
-  const email = doc.exists ? doc.data().email : user.email;
-  const isAdmin = email === "edrinehero@gmail.com";
-
-  renderOrders(user.uid, isAdmin);
-});
-
-function renderOrders(uid, isAdmin){
-  const ordersContainer = document.getElementById("ordersContainer");
-  ordersContainer.innerHTML = "";
-
-  let query = isAdmin ? 
-    db.collection("orders").orderBy("createdAt","desc") :
-    db.collection("orders").where("userid","==",uid).orderBy("createdAt","desc");
-
-  query.onSnapshot(snapshot=>{
-    if(snapshot.empty){ ordersContainer.innerHTML="<p>No orders found.</p>"; return; }
-
-    snapshot.forEach(doc=>{
-      const o = doc.data();
-      const card = document.createElement("div"); card.className="card";
-
-      let inner = `
-        <p><b>Order ID:</b> ${o.order_id}</p>
-        <p><b>Patient:</b> ${o.name || "—"} | ${o.phone || "—"}</p>
-        <p><b>Tests:</b><br>${o.tests || "—"}</p>
-        <p><b>Status:</b> <span class="status ${o.status||'Pending'}">${o.status||'Pending'}</span></p>
-      `;
-
-      if(isAdmin){
-        inner += `
-          <label>Results / Notes</label>
-          <textarea id="res_${doc.id}" placeholder="Enter results here">${o.resultNotes||''}</textarea>
-          <select id="status_${doc.id}">
-            <option value="Pending" ${o.status==="Pending"?"selected":""}>Pending</option>
-            <option value="Completed" ${o.status==="Completed"?"selected":""}>Completed</option>
-            <option value="Lacking" ${o.status==="Lacking"?"selected":""}>Lacking</option>
-          </select>
-          <button onclick="updateOrder('${doc.id}','${o.phone}','${o.name}')">💾 Update & Send WhatsApp</button>
-        `;
-      } else {
-        inner += `
-          <label>Results / Notes</label>
-          <textarea readonly>${o.resultNotes || 'Not available yet'}</textarea>
-        `;
+  db.collection("results")
+    .where("patientEmail","==",user.email)
+    .orderBy("createdAt","desc")
+    .onSnapshot(snapshot=>{
+      if(snapshot.empty){
+        list.innerHTML="No results yet";
+        return;
       }
 
-      card.innerHTML = inner;
-      ordersContainer.appendChild(card);
+      list.innerHTML="";
+      snapshot.forEach(doc=>{
+        const d=doc.data();
+        list.innerHTML+=`
+          <div class="result">
+            <b>${d.testName}</b><br>
+            ${d.resultText}<br>
+            <small>${d.createdAt?.toDate().toLocaleString()}</small>
+          </div>`;
+      });
     });
-  });
-}
-
-// 🔹 Admin update function
-async function updateOrder(docId, phone, name){
-  const results = document.getElementById(`res_${docId}`).value;
-  const status = document.getElementById(`status_${docId}`).value;
-
-  await db.collection("orders").doc(docId).update({ resultNotes: results, status });
-
-  const waText = `Hello ${name},\nYour lab results are ready.\nStatus: ${status}\nResults:\n${results}`;
-  window.open(`https://wa.me/256${phone.replace(/^0/,'')}?text=${encodeURIComponent(waText)}`);
-
-  alert("Updated & WhatsApp opened!");
-}
-
-// 🔹 Logout
-document.getElementById("logoutBtn").addEventListener("click", async()=>{
-  await auth.signOut();
-  window.location.href="login.html";
 });
 </script>
+
 </body>
 </html>
