@@ -123,29 +123,22 @@ document.getElementById("registerForm").onsubmit = async (e) => {
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     const uid = userCredential.user.uid;
 
-    // Save user details in Firestore (allowed by your rules)
+    // ✅ UPDATED: Save user details in Firestore (AUTO CREATES USERS)
     await db.collection("users").doc(uid).set({
       fullName: name,
       email: email,
       phone: phone,
-      created_at: new Date().toLocaleString()
+      role: "user", // 👈 IMPORTANT
+      created_at: firebase.firestore.FieldValue.serverTimestamp() // 👈 BETTER
     });
 
     alert("Account created successfully! You can now login.");
-
     window.location.href = "login.html";
 
   } catch (error) {
     console.error("Registration Error:", error);
-
     msg.style.color = "red";
-
-    if (error.code) {
-      msg.innerText = error.code + " - " + error.message;
-    } else {
-      msg.innerText = error.message;
-    }
-
+    msg.innerText = error.message || "Registration failed";
   } finally {
     btn.disabled = false;
     btn.innerText = "Register";
