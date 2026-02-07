@@ -43,13 +43,27 @@ h2 { margin:0 0 16px; }
 table { width:100%; border-collapse:collapse; margin-top:8px; }
 th,td { border:1px solid #cbd5e1; padding:6px; text-align:left; }
 th { background:#e2e8f0; }
-input.result-input { width:90%; border:1px solid #cbd5e1; border-radius:6px; padding:4px; }
-button.action-btn { margin-top:6px; padding:6px 12px; border:none; border-radius:12px; cursor:pointer; }
+input.result-input, textarea.result-input {
+  width:90%;
+  border:1px solid #cbd5e1;
+  border-radius:6px;
+  padding:4px;
+}
+button.action-btn {
+  margin-top:6px;
+  margin-right:6px;
+  padding:6px 12px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+}
 button.upload { background:#0ea5e9; color:#fff; }
-button.delete { background:#ef4444; color:#fff; margin-left:6px; }
+button.status { background:#22c55e; color:#fff; }
+button.delete { background:#ef4444; color:#fff; }
 button:hover { filter:brightness(0.95); }
 </style>
 </head>
+
 <body>
 
 <button id="logoutBtn">Logout</button>
@@ -67,7 +81,7 @@ const firebaseConfig = {
   messagingSenderId: "624002906588",
   appId: "1:624002906588:web:08b4259f90ffa9adad7719",
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -75,176 +89,122 @@ const db = firebase.firestore();
 const ordersContainer = document.getElementById("ordersContainer");
 const ordersCounter = document.getElementById("ordersCounter");
 
-// All tests breakdown
-const allTests = {
-  "CBC - Complete Blood Count": [
-    {param:"WBC", units:"x10^9/L"},
-    {param:"RBC", units:"x10^12/L"},
-    {param:"Hemoglobin", units:"g/dL"},
-    {param:"Hematocrit", units:"%"},
-    {param:"Platelets", units:"x10^9/L"}
-  ],
-  "Blood Glucose": [{param:"Glucose", units:"mmol/L or mg/dL"}],
-  "Blood Grouping":[{param:"Blood Group", units:""}],
-  "Bleeding & Clotting Test":[{param:"Clotting Time", units:"min"}],
-  "Malaria (b/s)":[{param:"Result", units:""}],
-  "Electrolytes":[{param:"Na+", units:"mmol/L"},{param:"K+", units:"mmol/L"},{param:"Cl-", units:"mmol/L"}],
-  "Lipid Profile":[{param:"Total Cholesterol", units:"mg/dL"},{param:"HDL", units:"mg/dL"},{param:"LDL", units:"mg/dL"},{param:"Triglycerides", units:"mg/dL"}],
-  "Liver Function Test (LFT)":[{param:"ALT", units:"U/L"},{param:"AST", units:"U/L"},{param:"ALP", units:"U/L"},{param:"Bilirubin Total", units:"mg/dL"}],
-  "Kidney Function Test (RFT)":[{param:"Urea", units:"mg/dL"},{param:"Creatinine", units:"mg/dL"}],
-  "PSA":[{param:"PSA", units:"ng/mL"}],
-  "HCG Blood":[{param:"HCG", units:"mIU/mL"}],
-  "Sickling Test":[{param:"Result", units:""}],
-  "DNA":[{param:"Result", units:""}],
-  "HIV":[{param:"Result", units:""}],
-  "Hepatitis B":[{param:"Result", units:""}],
-  "Hepatitis C":[{param:"Result", units:""}],
-  "RPR / Syphilis":[{param:"Result", units:""}],
-  "Gonorrhea Test":[{param:"Result", units:""}],
-  "Chlamydia Test":[{param:"Result", units:""}],
-  "Brucella Test":[{param:"Result", units:""}],
-  "Urinalysis":[
-    {param:"Macroscopy", units:""},
-    {param:"UROBILINOGEN", units:""},
-    {param:"BILIRUBIN", units:""},
-    {param:"SPECIFIC GRAVITY", units:""},
-    {param:"pH", units:""},
-    {param:"NITRITES", units:""},
-    {param:"GLUCOSE", units:"mmol/L"},
-    {param:"PROTEINS", units:""},
-    {param:"KETONES", units:""},
-    {param:"LEUKOCYTES", units:""},
-    {param:"RBCs", units:""},
-    {param:"Microscopy", units:""}
-  ],
-  "Stool Analysis":[{param:"Result", units:""}],
-  "H. Pylori Stool":[{param:"Result", units:""}],
-  "H. Pylori Serum":[{param:"Result", units:""}],
-  "Pregnancy Test (hCG)":[{param:"Result", units:""}],
-  "High Vaginal Swab":[{param:"Result", units:""}],
-  "High Vaginal Swab C&S":[{param:"Result", units:""}],
-  "Gram Staining":[{param:"Result", units:""}],
-  "Widal Serum":[{param:"Result", units:""}],
-  "Rheumatoid Factor":[{param:"Result", units:""}]
-};
-
-// 🔹 Require admin login
-auth.onAuthStateChanged(user=>{
-  if(!user || user.email!=="edrinehero@gmail.com"){
-    alert("Access denied. Admin only.");
-    window.location.href="login.html";
+/* ---------------- ADMIN AUTH (ROLE BASED) ---------------- */
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = "login.html";
     return;
   }
+
+  const userDoc = await db.collection("users").doc(user.uid).get();
+  if (!userDoc.exists || userDoc.data().role !== "admin") {
+    alert("Access denied. Admin only.");
+    await auth.signOut();
+    window.location.href = "login.html";
+    return;
+  }
+
   loadOrders();
 });
 
-// 🔹 Logout
-document.getElementById("logoutBtn").addEventListener("click", async()=>{
+/* ---------------- LOGOUT ---------------- */
+document.getElementById("logoutBtn").addEventListener("click", async () => {
   await auth.signOut();
-  window.location.href="login.html";
+  window.location.href = "login.html";
 });
 
-// 🔹 Load all orders
-async function loadOrders(){
-  try{
-    const snapshot = await db.collection("orders").orderBy("created_at","desc").get();
-    const orders = snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
-    ordersCounter.innerText = `📥 Total Requests: ${orders.length}`;
-    if(!orders.length){ordersContainer.innerHTML="<p>No requests yet.</p>"; return;}
-    ordersContainer.innerHTML="";
+/* ---------------- LOAD ORDERS ---------------- */
+async function loadOrders() {
+  try {
+    const snapshot = await db.collection("orders").orderBy("created_at", "desc").get();
+    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    orders.forEach(order=>{
+    const today = new Date().toDateString();
+    let todayOrders = 0;
+    let todayRevenue = 0;
+
+    orders.forEach(o => {
+      if (o.created_at && o.created_at.toDate().toDateString() === today) {
+        todayOrders++;
+        todayRevenue += Number(o.total || 0);
+      }
+    });
+
+    ordersCounter.innerText =
+      `📥 Total: ${orders.length} | 📅 Today: ${todayOrders} | 💰 UGX ${todayRevenue}`;
+
+    if (!orders.length) {
+      ordersContainer.innerHTML = "<p>No requests yet.</p>";
+      return;
+    }
+
+    ordersContainer.innerHTML = "";
+
+    orders.forEach(order => {
       const card = document.createElement("div");
-      card.className="order-card";
+      card.className = "order-card";
 
-      let html = `<h4>Order ID: ${order.order_id}</h4>
-      <p><b>Name:</b> ${order.name} | <b>Phone:</b> ${order.phone}</p>
-      <p><b>Age:</b> ${order.age} | <b>Sex:</b> ${order.sex}</p>
-      <p><b>Tests:</b> ${order.tests}</p>
-      <p><b>Total:</b> ${order.total}</p>
-      <p><b>Payment:</b> ${order.payment}</p>
-      <p><b>Location:</b> ${order.location}</p>
-      <p><b>Notes:</b> ${order.notes}</p>`;
+      let html = `
+        <h4>Order ID: ${order.order_id}</h4>
+        <p><b>Name:</b> ${order.name} | <b>Phone:</b> ${order.phone}</p>
+        <p><b>Age:</b> ${order.age} | <b>Sex:</b> ${order.sex}</p>
+        <p><b>Tests:</b> ${order.tests}</p>
+        <p><b>Total:</b> ${order.total}</p>
+        <p><b>Status:</b> ${order.status || "Pending"}</p>
+        <p><b>Payment:</b> ${order.payment}</p>
+        <p><b>Location:</b> ${order.location}</p>
+        <p><b>Notes:</b> ${order.notes}</p>
+      `;
 
-      // Split selected tests
-      const selectedTests = order.tests.split("\n");
-      selectedTests.forEach(testName=>{
-        testName = testName.trim();
-        if(allTests[testName]){
-          html += `<h4>${testName}</h4><table><tr><th>Parameter</th><th>Units</th><th>Result</th></tr>`;
-          allTests[testName].forEach(row=>{
-            html += `<tr>
-              <td>${row.param}</td>
-              <td>${row.units}</td>
-              <td><input type="text" class="result-input" data-param="${row.param}" data-units="${row.units}" placeholder="Enter result"></td>
-            </tr>`;
-          });
-          html += `</table>`;
-        } else {
-          html += `<textarea class="result-input" placeholder="Enter result for ${testName}" rows="3"></textarea>`;
-        }
-      });
-
-      html += `<button class="action-btn upload">Upload Results</button>
-               <button class="action-btn delete">Delete Order</button>`;
+      html += `
+        <button class="action-btn upload">Upload Results</button>
+        <button class="action-btn status" data-status="Sample Collected">Sample Collected</button>
+        <button class="action-btn status" data-status="In Lab">In Lab</button>
+        <button class="action-btn status" data-status="Results Ready">Results Ready</button>
+        <button class="action-btn delete">Delete Order</button>
+      `;
 
       card.innerHTML = html;
       ordersContainer.appendChild(card);
 
-      const uploadBtn = card.querySelector(".upload");
-      const deleteBtn = card.querySelector(".delete");
-
-      // 🔹 Upload results
-      uploadBtn.addEventListener("click", async ()=>{
-        const inputs = card.querySelectorAll(".result-input");
-        const resultsObj = {};
-
-        // Structure results per test
-        let currentTest = null;
-        selectedTests.forEach(testName=>{
-          testName = testName.trim();
-          if(allTests[testName]){
-            resultsObj[testName] = {};
-            allTests[testName].forEach(param=>{
-              const inp = Array.from(inputs).find(i=>i.dataset.param===param.param);
-              resultsObj[testName][param.param] = {value: inp.value.trim(), units: param.units};
-            });
-          } else {
-            const inp = Array.from(inputs).find(i=>i.tagName==="TEXTAREA");
-            resultsObj[testName] = inp.value.trim();
-          }
+      /* -------- STATUS UPDATE -------- */
+      card.querySelectorAll(".status").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          await db.collection("orders").doc(order.id).update({
+            status: btn.dataset.status
+          });
+          alert("Status updated");
+          loadOrders();
         });
+      });
 
+      /* -------- DELETE ORDER -------- */
+      card.querySelector(".delete").addEventListener("click", async () => {
+        if (!confirm("Delete this order?")) return;
+        await db.collection("orders").doc(order.id).delete();
+        await db.collection("results").doc(order.id).delete();
+        card.remove();
+      });
+
+      /* -------- UPLOAD RESULTS -------- */
+      card.querySelector(".upload").addEventListener("click", async () => {
         await db.collection("results").doc(order.id).set({
           order_id: order.order_id,
-          patient_email: order.email,
-          results: resultsObj,
           uploaded_at: new Date()
         });
 
-        alert("✅ Results uploaded successfully!");
+        await db.collection("orders").doc(order.id).update({
+          status: "Results Ready"
+        });
+
+        alert("✅ Results uploaded & status updated");
+        loadOrders();
       });
-
-      // 🔹 Delete order
-      deleteBtn.addEventListener("click", async ()=>{
-        const sure = confirm("Are you sure you want to delete this order?");
-        if(!sure) return;
-
-        try{
-          await db.collection("orders").doc(order.id).delete();
-          await db.collection("results").doc(order.id).delete();
-          alert("Order and results deleted!");
-          card.remove();
-        } catch(err){
-          console.error(err);
-          alert("Failed to delete. Check permissions.");
-        }
-      });
-
     });
-  } catch(err){
+
+  } catch (err) {
     console.error(err);
-    ordersContainer.innerHTML="<p>Failed to load requests.</p>";
+    ordersContainer.innerHTML = "<p>Failed to load orders.</p>";
   }
 }
 </script>
