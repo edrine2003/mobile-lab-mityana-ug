@@ -157,10 +157,16 @@ async function login(){
     msg.style.color = "green";
     msg.innerText = "Login successful. Redirecting...";
 
-    setTimeout(()=> {
-      // Make sure index.html exists in the deployed folder
-      window.location.href = "index.html";
-    }, 1000);
+    setTimeout(async () => {
+  const snap = await db.collection("users").doc(user.uid).get();
+
+  if (snap.exists && snap.data().role === "admin") {
+    window.location.href = "new_requests.html";
+  } else {
+    window.location.href = "index.html"; // patient page
+  }
+}, 1000);
+
 
   } catch(err) {
     msg.style.color = "red";
