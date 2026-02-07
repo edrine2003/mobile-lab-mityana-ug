@@ -89,125 +89,89 @@ const db = firebase.firestore();
 const ordersContainer = document.getElementById("ordersContainer");
 const ordersCounter = document.getElementById("ordersCounter");
 
-/* ---------------- ADMIN AUTH (ROLE BASED) ---------------- */
+/* ---------- ADMIN AUTH ---------- */
 auth.onAuthStateChanged(async user => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
+  if (!user) return window.location.href = "login.html";
 
   const userDoc = await db.collection("users").doc(user.uid).get();
   if (!userDoc.exists || userDoc.data().role !== "admin") {
-    alert("Access denied. Admin only.");
+    alert("Admins only");
     await auth.signOut();
-    window.location.href = "login.html";
-    return;
+    return window.location.href = "login.html";
   }
 
   loadOrders();
 });
 
-/* ---------------- LOGOUT ---------------- */
-document.getElementById("logoutBtn").addEventListener("click", async () => {
+/* ---------- LOGOUT ---------- */
+document.getElementById("logoutBtn").onclick = async () => {
   await auth.signOut();
   window.location.href = "login.html";
-});
+};
 
-/* ---------------- LOAD ORDERS ---------------- */
+/* ---------- LOAD ORDERS ---------- */
 async function loadOrders() {
-  try {
-    const snapshot = await db.collection("orders").orderBy("created_at", "desc").get();
-    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const snapshot = await db.collection("orders").orderBy("created_at", "desc").get();
+  ordersCounter.innerText = `📥 Total Orders: ${snapshot.size}`;
+  ordersContainer.innerHTML = "";
 
-    const today = new Date().toDateString();
-    let todayOrders = 0;
-    let todayRevenue = 0;
+  snapshot.forEach(doc => {
+    const order = doc.data();
+    const card = document.createElement("div");
+    card.className = "order-card";
 
-    orders.forEach(o => {
-      if (o.created_at && o.created_at.toDate().toDateString() === today) {
-        todayOrders++;
-        todayRevenue += Number(o.total || 0);
-      }
-    });
+    card.innerHTML = `
+      <h4>Order ID: ${order.order_id}</h4>
+      <p><b>Name:</b> ${order.name}</p>
+      <p><b>Tests:</b> ${order.tests}</p>
+      <p><b>Status:</b> ${order.status || "Pending"}</p>
 
-    ordersCounter.innerText =
-      `📥 Total: ${orders.length} | 📅 Today: ${todayOrders} | 💰 UGX ${todayRevenue}`;
+      <textarea class="result-input" rows="4"
+        placeholder="Enter test results here..."></textarea>
 
-    if (!orders.length) {
-      ordersContainer.innerHTML = "<p>No requests yet.</p>";
-      return;
-    }
+      <br>
+      <button class="action-btn upload">Upload Results</button>
+      <button class="action-btn status" data-s="Sample Collected">Sample Collected</button>
+      <button class="action-btn status" data-s="In Lab">In Lab</button>
+      <button class="action-btn status" data-s="Results Ready">Results Ready</button>
+    `;
 
-    ordersContainer.innerHTML = "";
-
-    orders.forEach(order => {
-      const card = document.createElement("div");
-      card.className = "order-card";
-
-      let html = `
-        <h4>Order ID: ${order.order_id}</h4>
-        <p><b>Name:</b> ${order.name} | <b>Phone:</b> ${order.phone}</p>
-        <p><b>Age:</b> ${order.age} | <b>Sex:</b> ${order.sex}</p>
-        <p><b>Tests:</b> ${order.tests}</p>
-        <p><b>Total:</b> ${order.total}</p>
-        <p><b>Status:</b> ${order.status || "Pending"}</p>
-        <p><b>Payment:</b> ${order.payment}</p>
-        <p><b>Location:</b> ${order.location}</p>
-        <p><b>Notes:</b> ${order.notes}</p>
-      `;
-
-      html += `
-        <button class="action-btn upload">Upload Results</button>
-        <button class="action-btn status" data-status="Sample Collected">Sample Collected</button>
-        <button class="action-btn status" data-status="In Lab">In Lab</button>
-        <button class="action-btn status" data-status="Results Ready">Results Ready</button>
-        <button class="action-btn delete">Delete Order</button>
-      `;
-
-      card.innerHTML = html;
-      ordersContainer.appendChild(card);
-
-      /* -------- STATUS UPDATE -------- */
-      card.querySelectorAll(".status").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          await db.collection("orders").doc(order.id).update({
-            status: btn.dataset.status
-          });
-          alert("Status updated");
-          loadOrders();
+    /* STATUS BUTTONS */
+    card.querySelectorAll(".status").forEach(btn => {
+      btn.onclick = async () => {
+        await db.collection("orders").doc(doc.id).update({
+          status: btn.dataset.s
         });
-      });
-
-      /* -------- DELETE ORDER -------- */
-      card.querySelector(".delete").addEventListener("click", async () => {
-        if (!confirm("Delete this order?")) return;
-        await db.collection("orders").doc(order.id).delete();
-        await db.collection("results").doc(order.id).delete();
-        card.remove();
-      });
-
-      /* -------- UPLOAD RESULTS -------- */
-      card.querySelector(".upload").addEventListener("click", async () => {
-        await db.collection("results").doc(order.id).set({
-          order_id: order.order_id,
-          uploaded_at: new Date()
-        });
-
-        await db.collection("orders").doc(order.id).update({
-          status: "Results Ready"
-        });
-
-        alert("✅ Results uploaded & status updated");
         loadOrders();
-      });
+      };
     });
 
-  } catch (err) {
-    console.error(err);
-    ordersContainer.innerHTML = "<p>Failed to load orders.</p>";
-  }
+    /* UPLOAD RESULTS */
+    card.querySelector(".upload").onclick = async () => {
+      const resultText = card.querySelector(".result-input").value.trim();
+      if (!resultText) return alert("Enter results first");
+
+      await db.collection("results").doc(doc.id).set({
+        order_id: order.order_id,
+        user_id: order.user_id,
+        patient_email: order.email,
+        results_text: resultText,
+        uploaded_at: new Date()
+      });
+
+      await db.collection("orders").doc(doc.id).update({
+        status: "Results Ready"
+      });
+
+      alert("✅ Results uploaded");
+      loadOrders();
+    };
+
+    ordersContainer.appendChild(card);
+  });
 }
 </script>
+
 
 </body>
 </html>
