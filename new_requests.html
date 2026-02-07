@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧪 New Requests – Mobile Lab</title>
+<meta name="theme-color" content="#0ea5e9">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+body { font-family: Arial,sans-serif; background:#f1f5f9; margin:0; padding:16px; }
+h2 { text-align:center; margin-bottom:16px; }
+#logoutBtn { position: fixed; top:16px; right:16px; background:#ef4444; color:#fff; border:none; padding:12px 16px; border-radius:999px; cursor:pointer; }
+table { width:100%; border-collapse: collapse; margin-top:16px; }
+th,td { border:1px solid #cbd5e1; padding:8px; text-align:left; }
+th { background:#e2e8f0; }
+button { padding:6px 12px; border:none; border-radius:8px; cursor:pointer; margin-right:6px; }
+button.start { background:#22c55e; color:#fff; }
+button.cancel { background:#ef4444; color:#fff; }
+</style>
+</head>
+<body>
+
+<button id="logoutBtn">Logout</button>
+<h2>🧪 New Requests</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Request Time</th>
+      <th>Client No.</th>
+      <th>Client Name</th>
+      <th>Visit Type</th>
+      <th>No. of Tests</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="requestsTable">
+    <tr><td colspan="7">Loading requests...</td></tr>
+  </tbody>
+</table>
+
+<script>
+const firebaseConfig = {
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const tableBody = document.getElementById("requestsTable");
+
+// 🔹 Admin auth
+auth.onAuthStateChanged(async user => {
+  if(!user) { window.location.href="login.html"; return; }
+  const userDoc = await db.collection("users").doc(user.uid).get();
+  if(!userDoc.exists || userDoc.data().role!=="admin") {
+    alert("Access denied"); await auth.signOut(); window.location.href="login.html"; return;
+  }
+  loadRequests();
+});
+
+document.getElementById("logoutBtn").addEventListener("click", async()=>{
+  await auth.signOut();
+  window.location.href="login.html";
+});
+
+// 🔹 Load requests
+async function loadRequests(){
+  const snapshot = await db.collection("orders")
+    .where("status","==","Pending")
+    .orderBy("created_at","asc")
+    .get();
+  const orders = snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+
+  if(!orders.length){
+    tableBody.innerHTML = '<tr><td colspan="7">No new requests</td></tr>'; return;
+  }
+
+  tableBody.innerHTML = "";
+  let count=1;
+  orders.forEach(order=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${count++}</td>
+      <td>${order.created_at?.toDate().toLocaleString()||"Unknown"}</td>
+      <td>${order.order_id}</td>
+      <td>${order.name}</td>
+      <td>${order.visit_type||"Self-Request"}</td>
+      <td>${order.tests.split("\n").length}</td>
+      <td>
+        <button class="start">Start Tests</button>
+        <button class="cancel">Cancel</button>
+      </td>
+    `;
+    tableBody.appendChild(tr);
+
+    tr.querySelector(".start").addEventListener("click", async()=>{
+      await db.collection("orders").doc(order.id).update({status:"Ongoing"});
+      alert("✅ Test started");
+      loadRequests();
+    });
+    tr.querySelector(".cancel").addEventListener("click", async()=>{
+      if(!confirm("Cancel this request?")) return;
+      await db.collection("orders").doc(order.id).update({status:"Cancelled"});
+      alert("Request cancelled");
+      loadRequests();
+    });
+  });
+}
+</script>
+</body>
+</html>
