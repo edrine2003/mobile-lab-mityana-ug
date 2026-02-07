@@ -4,27 +4,73 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register – Mobile Lab</title>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <style>
-body { font-family: Arial; display: flex; justify-content: center; padding-top: 50px; }
-form { max-width: 400px; width: 100%; background: #f5f5f5; padding: 20px; border-radius: 12px; }
-input { width: 100%; padding: 10px; margin: 6px 0 14px; border-radius: 8px; border: 1px solid #ccc; }
-button { width: 100%; padding: 12px; background: #0ea5e9; border: none; color: #fff; font-weight: bold; border-radius: 8px; cursor: pointer; }
-#msg { font-weight: bold; margin-top: 10px; text-align: center; }
+body {
+  font-family: Arial;
+  display: flex;
+  justify-content: center;
+  padding-top: 50px;
+}
+
+form {
+  max-width: 400px;
+  width: 100%;
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #0ea5e9;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+
+#msg {
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
 </style>
 </head>
+
 <body>
 
 <form id="registerForm">
   <h2>Register</h2>
+
   <input type="text" id="fullName" placeholder="Full Name" required>
   <input type="email" id="email" placeholder="Email" required>
   <input type="text" id="phone" placeholder="Phone (07XXXXXXXX)" required>
-  <input type="password" id="password" placeholder="Password" required>
+  <input type="password" id="password" placeholder="Password (min 6 characters)" required>
+
   <button type="submit">Register</button>
+
   <p>Already have an account? <a href="login.html">Login</a></p>
+
   <p id="msg"></p>
 </form>
 
@@ -38,29 +84,46 @@ const firebaseConfig = {
   messagingSenderId: "624002906588",
   appId: "1:624002906588:web:08b4259f90ffa9adad7719"
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+
 const msg = document.getElementById("msg");
+const btn = document.querySelector("button");
 
 document.getElementById("registerForm").onsubmit = async (e) => {
   e.preventDefault();
+
   const name = document.getElementById("fullName").value.trim();
   const email = document.getElementById("email").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const password = document.getElementById("password").value;
 
   try {
-    // Check if phone already exists
-    const phoneCheck = await db.collection("users").where("phone", "==", phone).get();
-    if(!phoneCheck.empty) throw new Error("Phone number already registered");
+    msg.innerText = "";
+    btn.disabled = true;
+    btn.innerText = "Registering...";
 
-    // Create user with email
+    // Validate phone number (Uganda format)
+    if (!/^07[0-9]{8}$/.test(phone)) {
+      throw new Error("Invalid phone number. Use format 07XXXXXXXX");
+    }
+
+    // Validate password
+    if (password.length < 6) {
+      throw new Error("Password must be at least 6 characters");
+    }
+
+    // Create user in Firebase Auth
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     const uid = userCredential.user.uid;
 
-    // Save extra details in Firestore
+    // Save user details in Firestore (allowed by your rules)
     await db.collection("users").doc(uid).set({
       fullName: name,
       email: email,
@@ -68,16 +131,24 @@ document.getElementById("registerForm").onsubmit = async (e) => {
       created_at: new Date().toLocaleString()
     });
 
-    // ✅ Show popup message
-    alert("✅ Account created successfully! You can now login.");
+    alert("Account created successfully! You can now login.");
 
-    // Redirect to login
     window.location.href = "login.html";
 
   } catch (error) {
-    console.error(error);
+    console.error("Registration Error:", error);
+
     msg.style.color = "red";
-    msg.innerText = error.message;
+
+    if (error.code) {
+      msg.innerText = error.code + " - " + error.message;
+    } else {
+      msg.innerText = error.message;
+    }
+
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Register";
   }
 };
 </script>
