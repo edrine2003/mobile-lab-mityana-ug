@@ -11,6 +11,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body {
@@ -111,108 +112,80 @@ body {
 </div>
 
 <script>
-// 🔹 Firebase init
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+  projectId: "mobile-lab-mityana-aeae2.firebaseapp.com",
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-const inboxContainer = document.getElementById("inboxContainer");
+const inbox = document.getElementById("inboxContainer");
 
-// 🔹 Require login
-auth.onAuthStateChanged(async user => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
+auth.onAuthStateChanged(user => {
+  if (!user) return window.location.href = "login.html";
 
-  try {
-    db.collection("results")
-      .where("patient_email", "==", user.email)
-      .orderBy("uploaded_at", "desc")
-      .onSnapshot(snapshot => {
-        inboxContainer.innerHTML = "";
-        if (snapshot.empty) {
-          inboxContainer.innerHTML = "<p>No results uploaded yet.</p>";
-          return;
+  db.collection("orders")
+    .where("user_id", "==", user.uid)
+    .onSnapshot(async snap => {
+      inbox.innerHTML = "";
+
+      if (snap.empty) {
+        inbox.innerHTML = "<p>No orders yet.</p>";
+        return;
+      }
+
+      for (const doc of snap.docs) {
+        const order = doc.data();
+        const card = document.createElement("div");
+        card.className = "result-card";
+
+        let html = `
+          <h4>Order ID: ${order.order_id}</h4>
+          <p>Status: <b>${order.status || "Pending"}</b></p>
+        `;
+
+        if (order.status === "Results Ready") {
+          const resDoc = await db.collection("results").doc(doc.id).get();
+          if (resDoc.exists) {
+            const res = resDoc.data();
+            html += `
+              <p><b>Results:</b></p>
+              <pre>${res.results_text}</pre>
+              <button class="delete-btn download">⬇ Download PDF</button>
+            `;
+          }
+        } else {
+          html += `<i>Results not ready yet</i>`;
         }
 
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const card = document.createElement("div");
-          card.className = "result-card";
+        card.innerHTML = html;
 
-          const uploadedDate = data.uploaded_at 
-            ? new Date(data.uploaded_at.seconds * 1000).toLocaleString() 
-            : "Unknown";
+        /* PDF DOWNLOAD */
+        const dl = card.querySelector(".download");
+        if (dl) {
+          dl.onclick = () => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            pdf.text(`Mobile Lab Results`, 10, 10);
+            pdf.text(res.results_text, 10, 30);
+            pdf.save(`Lab_Results_${order.order_id}.pdf`);
+          };
+        }
 
-          let html = `<h4>Order ID: ${data.order_id}</h4>
-                      <p><strong>Uploaded on:</strong> ${uploadedDate}</p>`;
-
-          // Loop through tests
-          const results = data.results;
-          if (results && typeof results === "object") {
-            Object.keys(results).forEach(testName => {
-              const testData = results[testName];
-              if (typeof testData === "object") {
-                html += `<h4>${testName}</h4><table>
-                          <tr><th>Parameter</th><th>Units</th><th>Result</th></tr>`;
-                Object.keys(testData).forEach(paramKey => {
-                  const paramData = testData[paramKey];
-                  html += `<tr>
-                            <td>${paramData.param || "N/A"}</td>
-                            <td>${paramData.units || ""}</td>
-                            <td>${paramData.result || paramData || "Pending"}</td>
-                          </tr>`;
-                });
-                html += "</table>";
-              } else {
-                html += `<p><strong>${testName}:</strong> ${testData}</p>`;
-              }
-            });
-          } else {
-            html += `<p>Results pending</p>`;
-          }
-
-          html += `<button class="delete-btn">🗑️ Delete</button>`;
-          card.innerHTML = html;
-
-          const deleteBtn = card.querySelector(".delete-btn");
-          deleteBtn.addEventListener("click", async () => {
-            const sure = confirm("Are you sure you want to delete this result?");
-            if (!sure) return;
-            try {
-              await db.collection("results").doc(doc.id).delete();
-              alert("✅ Result deleted");
-            } catch(err) {
-              console.error(err);
-              alert("Permission denied");
-            }
-          });
-
-          inboxContainer.appendChild(card);
-        });
-      });
-
-  } catch(err) {
-    console.error(err);
-    inboxContainer.innerHTML = "<p>Failed to load results. Please try again later.</p>";
-  }
+        inbox.appendChild(card);
+      }
+    });
 });
 
-// 🔹 Logout
-document.getElementById("logoutBtn").addEventListener("click", async ()=> {
+/* LOGOUT */
+document.getElementById("logoutBtn").onclick = async () => {
   await auth.signOut();
   window.location.href = "login.html";
-});
+};
 </script>
+
 
 </body>
 </html>
