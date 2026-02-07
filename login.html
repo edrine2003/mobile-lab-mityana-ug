@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login – Mobile Lab Mityana</title>
-
 <meta name="theme-color" content="#0ea5e9">
 
 <!-- Firebase SDKs -->
@@ -13,7 +12,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-/* ⬅️ NO STYLE CHANGES */
 :root{
   --primary:#0ea5e9;
   --primary2:#14b8a6;
@@ -91,7 +89,8 @@ a{color:var(--primary);text-decoration:none;font-weight:700}
 
 <div class="card">
   <div class="hero">
-    <img src="IMG-20260123-WA0007.jpg" alt="Laboratory Work">
+    <!-- Make sure this matches your deployed filename -->
+    <img src="lab-bg.jpg" alt="Laboratory Work">
     <h2>🧪 Mobile Laboratory – Mityana</h2>
     <p>Quality Diagnostics • Trusted Results</p>
     <p>📞 0750 992 939 | 0778 379 791</p>
@@ -125,12 +124,11 @@ const firebaseConfig = {
   appId: "1:624002906588:web:08b4259f90ffa9adad7719"
 };
 
-if(!firebase.apps.length){
-  firebase.initializeApp(firebaseConfig);
-}
+// Initialize Firebase
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
-const db = firebase.firestore(); // ✅ NEW
+const db = firebase.firestore();
 
 async function login(){
   const email = document.getElementById("email").value.trim();
@@ -144,7 +142,7 @@ async function login(){
     const cred = await auth.signInWithEmailAndPassword(email, password);
     const user = cred.user;
 
-    // ✅ AUTO-CREATE FIRESTORE USER (OLD ACCOUNTS FIX)
+    // Auto-create Firestore document if missing
     const ref = db.collection("users").doc(user.uid);
     const snap = await ref.get();
 
@@ -156,13 +154,17 @@ async function login(){
       });
     }
 
-    msg.style.color="green";
-    msg.innerText="Login successful. Redirecting...";
-    setTimeout(()=>{ window.location.href="index.html"; },1000);
+    msg.style.color = "green";
+    msg.innerText = "Login successful. Redirecting...";
 
-  } catch(err){
-    msg.style.color="red";
-    msg.innerText=err.message;
+    setTimeout(()=> {
+      // Make sure index.html exists in the deployed folder
+      window.location.href = "index.html";
+    }, 1000);
+
+  } catch(err) {
+    msg.style.color = "red";
+    msg.innerText = err.message;
   }
 }
 </script>
