@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧪 Ongoing Tests – Mobile Lab</title>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body { font-family: Arial,sans-serif; margin:0; padding:16px; background:#f1f5f9; color:#0f172a; }
+h2 { margin-bottom:16px; }
+#logoutBtn { position:fixed; top:16px; right:16px; background:#ef4444; color:#fff; padding:12px 16px; border:none; border-radius:999px; cursor:pointer; }
+#ordersCounter { font-weight:bold; margin-bottom:12px; }
+.order-card { border:1px solid #cbd5e1; border-radius:12px; padding:12px; margin-bottom:12px; background:#fff; }
+.order-card h4 { margin:0 0 6px; font-size:14px; color:#0369a1; }
+.order-card p { margin:2px 0; font-size:13px; }
+table { width:100%; border-collapse:collapse; margin-top:8px; }
+th,td { border:1px solid #cbd5e1; padding:6px; text-align:left; }
+th { background:#e2e8f0; }
+input.result-input { width:90%; border:1px solid #cbd5e1; border-radius:6px; padding:4px; }
+button.action-btn { margin-top:6px; margin-right:6px; padding:6px 12px; border:none; border-radius:12px; cursor:pointer; }
+button.upload { background:#0ea5e9; color:#fff; }
+button.complete { background:#22c55e; color:#fff; }
+button.delete { background:#ef4444; color:#fff; }
+button:hover { filter:brightness(0.95); }
+</style>
+</head>
+<body>
+
+<button id="logoutBtn">Logout</button>
+<h2>🧪 Ongoing Tests</h2>
+<div id="ordersCounter">Loading ongoing tests...</div>
+<div id="ordersContainer"></div>
+
+<script>
+// 🔹 Firebase init
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const ordersContainer = document.getElementById("ordersContainer");
+const ordersCounter = document.getElementById("ordersCounter");
+
+// ---------------- ADMIN AUTH ----------------
+auth.onAuthStateChanged(async user => {
+  if(!user){
+    window.location.href="login.html";
+    return;
+  }
+  const userDoc = await db.collection("users").doc(user.uid).get();
+  if(!userDoc.exists || userDoc.data().role!=="admin"){
+    alert("Access denied. Admin only.");
+    await auth.signOut();
+    window.location.href="login.html";
+    return;
+  }
+  loadOngoingTests();
+});
+
+// ---------------- LOGOUT ----------------
+document.getElementById("logoutBtn").addEventListener("click", async()=> {
+  await auth.signOut();
+  window.location.href="login.html";
+});
+
+// ---------------- TESTS DATA ----------------
+const allTests = {
+  "CBC": [
+    {param:"WBC", units:"x10^9/L", normal:"4.0-10.0"},
+    {param:"LYMPH#", units:"x10^9/L", normal:"1.0-3.0"},
+    {param:"MO#", units:"x10^9/L", normal:"0.2-0.8"},
+    {param:"GRAN#", units:"x10^9/L", normal:"2.0-7.0"},
+    {param:"LYMPH%", units:"%", normal:"20-40"},
+    {param:"MO%", units:"%", normal:"2-10"},
+    {param:"GRAN%", units:"%", normal:"50-70"},
+    {param:"RBC", units:"x10^12/L", normal:"4.5-6.0"},
+    {param:"HGB", units:"g/dL", normal:"13-18"},
+    {param:"HCT", units:"%", normal:"40-52"},
+    {param:"MCV", units:"fl", normal:"80-100"},
+    {param:"MCH", units:"pg", normal:"27-32"},
+    {param:"MCHC", units:"g/dL", normal:"32-36"},
+    {param:"RDW-CV", units:"%", normal:"11.5-14.5"},
+    {param:"PLT", units:"x10^9/L", normal:"150-450"},
+    {param:"MPV", units:"fl", normal:"7-11"},
+    {param:"PDW", units:"%", normal:"9-14"},
+    {param:"PCT", units:"%", normal:"0.22-0.24"},
+    {param:"RDW-SD", units:"fl", normal:"39-46"}
+  ],
+  "Blood Glucose":[{param:"Glucose", units:"mmol/L", normal:"3.9-5.5"}],
+  "Blood Grouping":[{param:"Blood Group", units:"", normal:"A, B, AB, O"}],
+  "Urinalysis":[
+    {param:"Color", units:"", normal:"Pale Yellow"},
+    {param:"UROBILINOGEN", units:"", normal:"Negative"},
+    {param:"BILIRUBIN", units:"", normal:"Negative"},
+    {param:"SPECIFIC GRAVITY", units:"", normal:"1.015-1.025"},
+    {param:"pH", units:"", normal:"4.5-8.0"},
+    {param:"NITRITES", units:"", normal:"Negative"},
+    {param:"GLUCOSE", units:"mmol/L", normal:"Negative"},
+    {param:"PROTEINS", units:"", normal:"Negative"},
+    {param:"KETONES", units:"", normal:"Negative"},
+    {param:"LEUKOCYTES", units:"", normal:"Negative"},
+    {param:"RBCs", units:"", normal:"Negative"},
+    {param:"Microscopy", units:"", normal:"NAD"}
+  ]
+  // Add other tests similarly
+};
+
+// ---------------- LOAD ONGOING TESTS ----------------
+async function loadOngoingTests(){
+  try{
+    const snapshot = await db.collection("orders").where("status","==","Ongoing").orderBy("created_at","asc").get();
+    const orders = snapshot.docs.map(doc=>({id:doc.id, ...doc.data()}));
+    ordersCounter.innerText = `📥 Total Ongoing Tests: ${orders.length}`;
+    if(!orders.length){ ordersContainer.innerHTML="<p>No ongoing tests.</p>"; return; }
+    ordersContainer.innerHTML="";
+
+    orders.forEach(order=>{
+      const card = document.createElement("div");
+      card.className="order-card";
+
+      let html = `<h4>Order ID: ${order.order_id}</h4>
+                  <p><b>Name:</b> ${order.name} | <b>Phone:</b> ${order.phone}</p>
+                  <p><b>Tests:</b> ${order.tests}</p>`;
+
+      const selectedTests = order.tests.split("\n");
+      selectedTests.forEach(testName=>{
+        testName = testName.trim();
+        if(allTests[testName]){
+          html += `<h4>${testName}</h4><table>
+                     <tr><th>Parameter</th><th>Units</th><th>Normal</th><th>Result</th></tr>`;
+          allTests[testName].forEach(param=>{
+            html += `<tr>
+                       <td>${param.param}</td>
+                       <td>${param.units}</td>
+                       <td>${param.normal}</td>
+                       <td><input type="text" class="result-input" data-param="${param.param}" data-units="${param.units}" data-normal="${param.normal}" placeholder="Enter result"></td>
+                     </tr>`;
+          });
+          html += `</table>`;
+        } else {
+          html += `<textarea class="result-input" placeholder="Enter result for ${testName}" rows="3"></textarea>`;
+        }
+      });
+
+      html += `<button class="action-btn complete">✅ Update Results</button>`;
+      card.innerHTML = html;
+      ordersContainer.appendChild(card);
+
+      // -------- UPDATE RESULTS --------
+      card.querySelector(".complete").addEventListener("click", async()=>{
+        const inputs = card.querySelectorAll(".result-input");
+        const resultsObj = {};
+        selectedTests.forEach(testName=>{
+          testName = testName.trim();
+          if(allTests[testName]){
+            resultsObj[testName] = {};
+            allTests[testName].forEach(param=>{
+              const inp = Array.from(inputs).find(i=>i.dataset.param===param.param);
+              resultsObj[testName][param.param] = {value: inp.value.trim(), units: param.units, normal: param.normal};
+            });
+          } else {
+            const inp = Array.from(inputs).find(i=>i.tagName==="TEXTAREA");
+            resultsObj[testName] = inp.value.trim();
+          }
+        });
+
+        // Save results
+        await db.collection("results").doc(order.id).set({
+          order_id: order.order_id,
+          patient_email: order.email,
+          results: resultsObj,
+          uploaded_at: new Date()
+        });
+
+        // Mark order completed
+        await db.collection("orders").doc(order.id).update({
+          status: "Completed"
+        });
+
+        alert("✅ Results uploaded & order marked Completed");
+        loadOngoingTests();
+      });
+
+    });
+
+  } catch(err){
+    console.error(err);
+    ordersContainer.innerHTML="<p>Failed to load ongoing tests.</p>";
+  }
+}
+</script>
+
+</body>
+</html>
