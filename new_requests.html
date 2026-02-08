@@ -90,22 +90,24 @@ document.getElementById("logoutBtn").onclick = async ()=>{
 };
 
 // 📥 Load pending requests
+<script>
 async function loadRequests(){
-  const snapshot = await db.collection("orders")
-    .where("status","==","pending")
-    .orderBy("createdAt","asc")
+  const snapshot = await db
+    .collection("orders")
+    .where("status", "==", "pending")
+    .orderBy("createdAt", "asc")
     .get();
 
-  if(snapshot.empty){
+  if (snapshot.empty) {
     tableBody.innerHTML =
-      '<tr><td colspan="7">No new requests</td></tr>';
+      `<tr><td colspan="7">No new requests</td></tr>`;
     return;
   }
 
   tableBody.innerHTML = "";
   let count = 1;
 
-  snapshot.forEach(doc=>{
+  snapshot.forEach(doc => {
     const order = doc.data();
 
     const tr = document.createElement("tr");
@@ -113,9 +115,9 @@ async function loadRequests(){
       <td>${count++}</td>
       <td>${order.createdAt?.toDate().toLocaleString() || "—"}</td>
       <td>${doc.id}</td>
-      <td>${order.name}</td>
-      <td>${order.visit_type || "Self-Request"}</td>
-      <td>${order.tests.split(",").length}</td>
+      <td>${order.name || "—"}</td>
+      <td>${order.visit_type || "Self"}</td>
+      <td>${order.tests ? order.tests.split(",").length : 0}</td>
       <td>
         <button class="start">Start</button>
         <button class="cancel">Cancel</button>
@@ -124,17 +126,15 @@ async function loadRequests(){
 
     tableBody.appendChild(tr);
 
-    // ▶ Start test
-    tr.querySelector(".start").onclick = async ()=>{
+    tr.querySelector(".start").onclick = async () => {
       await db.collection("orders").doc(doc.id).update({
         status: "ongoing"
       });
       loadRequests();
     };
 
-    // ❌ Cancel test
-    tr.querySelector(".cancel").onclick = async ()=>{
-      if(!confirm("Cancel this request?")) return;
+    tr.querySelector(".cancel").onclick = async () => {
+      if (!confirm("Cancel this request?")) return;
       await db.collection("orders").doc(doc.id).update({
         status: "cancelled"
       });
@@ -143,6 +143,5 @@ async function loadRequests(){
   });
 }
 </script>
-
 </body>
 </html>
