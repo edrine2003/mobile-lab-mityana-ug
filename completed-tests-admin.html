@@ -2,256 +2,174 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧪 Completed Tests – Admin</title>
-<meta name="description" content="View and manage all completed lab results">
-<meta name="theme-color" content="#0ea5e9">
+<title>Completed Results | Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 16px;
-  background: #f1f5f9;
-  color: #0f172a;
-}
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.header h2 { margin:0; }
-#logoutBtn {
-  background:#ef4444;
-  color:#fff;
-  padding:12px 18px;
-  border:none;
-  border-radius:999px;
-  cursor:pointer;
-  font-weight:800;
-}
-.results-container {
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-.result-card {
-  background:#fff;
-  padding:16px;
-  border-radius:12px;
-  border:1px solid rgba(15,23,42,0.12);
-}
-.result-card h4 { margin:0 0 8px; color:#0369a1; }
-.result-card table {
-  width:100%;
-  border-collapse:collapse;
-  margin-bottom:8px;
-}
-.result-card th, .result-card td {
-  border:1px solid #cbd5e1;
-  padding:6px 8px;
-  text-align:left;
-}
-.result-card th { background:#e2e8f0; }
-button.action-btn {
-  margin-top:6px;
-  margin-right:6px;
-  padding:6px 12px;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-}
-button.edit { background:#0ea5e9; color:#fff; }
-button.delete { background:#ef4444; color:#fff; }
-button.pdf { background:#22c55e; color:#fff; }
-button:hover { filter:brightness(0.95); }
-input.result-input { width:90%; border:1px solid #cbd5e1; border-radius:6px; padding:4px; }
+body{font-family:Arial;background:#f4f6f8;padding:20px}
+.result-card{background:#fff;padding:15px;margin:15px 0;border-radius:6px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:6px}
+th{background:#eee}
+input{width:100%}
+button{margin-right:5px;padding:6px 10px}
 </style>
 </head>
+
 <body>
 
-<div class="header">
-  <h2>🧪 Completed Tests – Admin</h2>
-  <button id="logoutBtn">Logout</button>
-</div>
-
-<div class="results-container" id="resultsContainer">
-  Loading completed tests...
-</div>
+<h2>Completed Test Results (Admin)</h2>
+<button id="logoutBtn">Logout</button>
+<div id="resultsContainer">Loading…</div>
 
 <script>
-const firebaseConfig = {
+/* 🔥 Firebase */
+firebase.initializeApp({
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
-};
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  storageBucket: "mobile-lab-mityana-aeae2.appspot.com",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719"
+});
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-const resultsContainer = document.getElementById("resultsContainer");
+const box = document.getElementById("resultsContainer");
 
-// ---------------- NORMAL RANGES ----------------
-const normalRanges = {
-  "WBC":"4-10 x10^9/L","LYMPH#":"1-3 x10^9/L","MO#":"0.2-0.8 x10^9/L","GRAN#":"2-8 x10^9/L",
-  "LYMPH%":"20-40%","MO%":"2-10%","GRAN%":"50-70%","RBC":"4-6 x10^12/L","HGB":"12-16 g/dL",
-  "HCT":"36-48%","MCV":"80-100 fl","MCH":"27-33 pg","MCHC":"32-36 g/dL","RDW-CV":"11-15%",
-  "PLT":"150-400 x10^9/L","MPV":"7-11 fl","PDW":"9-14%","PCT":"0.1-0.5%","RDW-SD":"39-46 fl",
-  "UROBILINOGEN":"Negative","BILIRUBIN":"Negative","SPECIFIC GRAVITY":"1.005-1.030","pH":"4.5-8",
-  "NITRITES":"Negative","GLUCOSE":"Negative","PROTEINS":"Negative","KETONES":"Negative",
-  "LEUKOCYTES":"Negative","RBCs":"Negative","Microscopy":"Normal","Blood Glucose":"70-110 mg/dL",
-  "Blood Grouping":"—","Bleeding & Clotting Test":"—","Malaria":"Negative","Electrolytes":"Normal",
-  "Lipid Profile":"Normal","LFT":"Normal","RFT":"Normal","PSA":"<4 ng/mL","HCG":"—","Sickling":"Negative",
-  "DNA":"—","HIV":"Negative","Hepatitis B":"Negative","Hepatitis C":"Negative","RPR":"Negative",
-  "Gonorrhea":"Negative","Chlamydia":"Negative","Brucella":"Negative","Urinalysis":"Normal",
-  "Stool Analysis":"Normal","H. Pylori Stool":"Negative","Widal Stool":"Negative",
-  "H. Pylori Serum":"Negative","Pregnancy Test":"Negative","HVS":"Normal","HVS C&S":"Normal",
-  "Gram Staining":"Normal","Widal Serum":"Negative","Rheumatoid Factor":"Negative"
-};
-
-// ---------------- ADMIN AUTH ----------------
+/* 🔐 Auth */
 auth.onAuthStateChanged(async user=>{
-  if(!user){
-    window.location.href="login.html";
-    return;
-  }
-
-  const userDoc = await db.collection("users").doc(user.uid).get();
-  if(!userDoc.exists || userDoc.data().role!=="admin"){
-    alert("Access denied. Admin only.");
+  if(!user) return location.href="login.html";
+  const u = await db.collection("users").doc(user.uid).get();
+  if(!u.exists || u.data().role!=="admin"){
     await auth.signOut();
-    window.location.href="login.html";
+    return location.href="login.html";
+  }
+  loadResults();
+});
+
+document.getElementById("logoutBtn").onclick=()=>auth.signOut();
+
+/* 🔁 NORMALIZE RESULTS FORMAT */
+function normalizeResults(data){
+  let r = data.results || data.tests || {};
+  let normalized = {};
+
+  Object.keys(r).forEach(test=>{
+    if(typeof r[test] === "object" && !Array.isArray(r[test])){
+      normalized[test] = {};
+      Object.keys(r[test]).forEach(param=>{
+        const v = r[test][param];
+        normalized[test][param] =
+          typeof v === "object"
+            ? { value:v.value||"", units:v.units||"" }
+            : { value:v, units:"" };
+      });
+    }
+  });
+
+  if(!Object.keys(normalized).length && Object.keys(r).length){
+    normalized["General Test"] = {};
+    Object.keys(r).forEach(p=>{
+      normalized["General Test"][p]={ value:r[p], units:"" };
+    });
+  }
+
+  return normalized;
+}
+
+/* 📥 LOAD RESULTS */
+async function loadResults(){
+  box.innerHTML="";
+  const snap = await db.collection("orders")
+    .where("status","==","completed")
+    .get();
+
+  if(snap.empty){
+    box.innerHTML="<p>No completed results</p>";
     return;
   }
 
-  loadCompletedResults();
-});
+  for(const o of snap.docs){
+    const rs = await db.collection("results").doc(o.id).get();
+    if(!rs.exists) continue;
 
-// ---------------- LOGOUT ----------------
-document.getElementById("logoutBtn").addEventListener("click", async()=>{
-  await auth.signOut();
-  window.location.href="login.html";
-});
+    let data = rs.data();
+    let results = normalizeResults(data);
 
-// ---------------- LOAD COMPLETED RESULTS ----------------
-async function loadCompletedResults(){
-  try{
-    const snapshot = await db.collection("results").orderBy("uploaded_at","desc").get();
+    const card = document.createElement("div");
+    card.className="result-card";
 
-    if(snapshot.empty){
-      resultsContainer.innerHTML="<p>No completed results.</p>";
-      return;
-    }
+    let html = `<h4>Order: ${o.id}</h4>
+                <p>Patient: ${data.patient_email||"N/A"}</p>`;
 
-    resultsContainer.innerHTML="";
-
-    snapshot.forEach(doc=>{
-      const data = doc.data();
-      const card = document.createElement("div");
-      card.className="result-card";
-
-      const uploadedDate = data.uploaded_at ? new Date(data.uploaded_at.seconds*1000).toLocaleString() : "Unknown";
-
-      let html = `<h4>Order ID: ${data.order_id}</h4>
-                  <p><strong>Patient:</strong> ${data.patient_email}</p>
-                  <p><strong>Uploaded on:</strong> ${uploadedDate}</p>`;
-
-      // Loop through all test results
-      const results = data.results;
-      if(results && typeof results==="object"){
-        Object.keys(results).forEach(testName=>{
-          const testData = results[testName];
-          html+=`<h4>${testName}</h4><table>
-                  <tr><th>Parameter</th><th>Units</th><th>Result</th><th>Normal Range</th></tr>`;
-          if(typeof testData==="object"){
-            Object.keys(testData).forEach(param=>{
-              const p = testData[param];
-              html+=`<tr>
-                      <td>${param}</td>
-                      <td>${p.units||""}</td>
-                      <td><input class="result-input" value="${p.value||""}" data-test="${testName}" data-param="${param}"></td>
-                      <td>${normalRanges[param]||""}</td>
-                     </tr>`;
-            });
-          } else {
-            html+=`<tr><td colspan="4">${testData}</td></tr>`;
-          }
-          html+="</table>";
-        });
-      }else{
-        html+="<p>No results data</p>";
-      }
-
-      html+=`<button class="action-btn edit">Update Results</button>
-             <button class="action-btn pdf">Download PDF</button>
-             <button class="action-btn delete">Delete Result</button>`;
-
-      card.innerHTML=html;
-      resultsContainer.appendChild(card);
-
-      // Update results
-      card.querySelector(".edit").addEventListener("click", async ()=>{
-        const inputs = card.querySelectorAll(".result-input");
-        const updatedResults={};
-        inputs.forEach(i=>{
-          if(!updatedResults[i.dataset.test]) updatedResults[i.dataset.test]={};
-          updatedResults[i.dataset.test][i.dataset.param]={value:i.value, units:normalRanges[i.dataset.param]||""};
-        });
-        await db.collection("results").doc(doc.id).update({results:updatedResults});
-        alert("✅ Results updated successfully!");
+    Object.keys(results).forEach(test=>{
+      html+=`<h4>${test}</h4><table>
+      <tr><th>Parameter</th><th>Units</th><th>Value</th></tr>`;
+      Object.keys(results[test]).forEach(p=>{
+        const v = results[test][p];
+        html+=`
+        <tr>
+          <td>${p}</td>
+          <td>${v.units}</td>
+          <td><input data-test="${test}" data-param="${p}" data-units="${v.units}" value="${v.value}"></td>
+        </tr>`;
       });
-
-      // Download PDF
-      card.querySelector(".pdf").addEventListener("click", ()=>{
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        pdf.setFontSize(12);
-        let y=10;
-        pdf.text(`Order ID: ${data.order_id}`,10,y); y+=6;
-        pdf.text(`Patient: ${data.patient_email}`,10,y); y+=6;
-        pdf.text(`Uploaded: ${uploadedDate}`,10,y); y+=8;
-
-        Object.keys(results).forEach(testName=>{
-          pdf.text(testName,10,y); y+=6;
-          const testData = results[testName];
-          if(typeof testData==="object"){
-            Object.keys(testData).forEach(param=>{
-              const p = testData[param];
-              pdf.text(`${param} | ${p.units||""} | ${p.value||""} | ${normalRanges[param]||""}`,10,y);
-              y+=6;
-            });
-            y+=4;
-          } else {
-            pdf.text(`${testName}: ${testData}`,10,y);
-            y+=6;
-          }
-        });
-        pdf.save(`Result_${data.order_id}.pdf`);
-      });
-
-      // Delete result
-      card.querySelector(".delete").addEventListener("click", async ()=>{
-        if(!confirm("Are you sure you want to delete this result?")) return;
-        await db.collection("results").doc(doc.id).delete();
-        card.remove();
-        alert("✅ Result deleted");
-      });
-
+      html+="</table>";
     });
 
-  }catch(err){
-    console.error(err);
-    resultsContainer.innerHTML="<p>Failed to load completed results.</p>";
+    html+=`
+      <button class="save">Update</button>
+      <button class="pdf">PDF</button>
+      <button class="del">Delete</button>
+    `;
+
+    card.innerHTML=html;
+    box.appendChild(card);
+
+    /* ✏ UPDATE */
+    card.querySelector(".save").onclick=async()=>{
+      let updated={};
+      card.querySelectorAll("input").forEach(i=>{
+        updated[i.dataset.test]??={};
+        updated[i.dataset.test][i.dataset.param]={
+          value:i.value,
+          units:i.dataset.units
+        };
+      });
+      await db.collection("results").doc(o.id).update({results:updated});
+      results=updated;
+      alert("Updated");
+    };
+
+    /* 📄 PDF */
+    card.querySelector(".pdf").onclick=()=>{
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF();
+      let y=10;
+      pdf.text(`Order ${o.id}`,10,y);y+=8;
+      Object.keys(results).forEach(t=>{
+        pdf.text(t,10,y);y+=6;
+        Object.keys(results[t]).forEach(p=>{
+          const r=results[t][p];
+          pdf.text(`${p}: ${r.value} ${r.units}`,10,y);
+          y+=6;
+        });
+      });
+      pdf.save(`Result_${o.id}.pdf`);
+    };
+
+    /* 🗑 DELETE */
+    card.querySelector(".del").onclick=async()=>{
+      if(!confirm("Delete result?"))return;
+      await db.collection("results").doc(o.id).delete();
+      await db.collection("orders").doc(o.id).update({status:"ongoing"});
+      card.remove();
+    };
   }
 }
 </script>
