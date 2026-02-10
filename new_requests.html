@@ -132,7 +132,7 @@ function setStatus(status){
 async function loadRequests(){
   const snapshot = await db.collection("orders")
     .where("status","==",currentStatus)
-    .orderBy("created_at","desc")
+    .orderBy("created_At","desc")
     .get();
 
   if(snapshot.empty){
@@ -145,7 +145,7 @@ async function loadRequests(){
 
   snapshot.forEach(doc=>{
     const o = doc.data();
-    const tests = o.tests ? o.tests.split("\n") : [];
+    const tests = o.tests ? o.tests.split(",") : [];
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
