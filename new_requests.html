@@ -133,26 +133,43 @@ async function start(id){
 }
 
 async function openResults(id){
- currentOrderId=id;
- const snap=await db.collection("orders").doc(id).get();
- currentTests=snap.data().tests;
- document.getElementById("modalTitle").innerText="Enter Results";
+  currentOrderId = id;
 
- const area=document.getElementById("testsArea");
- area.innerHTML="";
- currentTests.forEach((t,i)=>{
-  area.innerHTML+=`
-   <b>${t.name}</b>
-   <input placeholder="Result" value="${t.result||""}" 
-     oninput="currentTests[${i}].result=this.value">
-   <input placeholder="Unit" value="${t.unit||""}"
-     oninput="currentTests[${i}].unit=this.value">
-   <input placeholder="Reference" value="${t.reference||""}"
-     oninput="currentTests[${i}].reference=this.value">
-   <hr>`;
- });
- document.getElementById("resultModal").style.display="flex";
+  const snap = await db.collection("orders").doc(id).get();
+  let rawTests = snap.data().tests;
+
+  // ✅ FIX: convert old string tests to objects
+  if (typeof rawTests === "string") {
+    currentTests = rawTests.split(",").map(t => ({
+      name: t.trim(),
+      result: "",
+      unit: "",
+      reference: ""
+    }));
+  } else {
+    currentTests = rawTests;
+  }
+
+  document.getElementById("modalTitle").innerText = "Enter Test Results";
+  const area = document.getElementById("testsArea");
+  area.innerHTML = "";
+
+  currentTests.forEach((t, i) => {
+    area.innerHTML += `
+      <b>${t.name}</b>
+      <input placeholder="Result" value="${t.result || ""}"
+        oninput="currentTests[${i}].result=this.value">
+      <input placeholder="Unit" value="${t.unit || ""}"
+        oninput="currentTests[${i}].unit=this.value">
+      <input placeholder="Reference Range" value="${t.reference || ""}"
+        oninput="currentTests[${i}].reference=this.value">
+      <hr>
+    `;
+  });
+
+  document.getElementById("resultModal").style.display = "flex";
 }
+
 
 async function saveResults(){
  const allDone=currentTests.every(t=>t.result);
