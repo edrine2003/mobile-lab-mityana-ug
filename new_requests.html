@@ -131,9 +131,9 @@ function setStatus(status){
 // 📥 Load requests
 async function loadRequests(){
   const snapshot = await db.collection("orders")
-    .where("status","==",currentStatus)
-    .orderBy("created_At","desc")
-    .get();
+  .where("status", "==", currentStatus)
+  .orderBy("createdAt", "desc") // ✅ EXACT match
+  .get();
 
   if(snapshot.empty){
     tableBody.innerHTML = `<tr><td colspan="8">No ${currentStatus} requests</td></tr>`;
@@ -150,7 +150,7 @@ async function loadRequests(){
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${count++}</td>
-      <td>${o.created_at?.toDate().toLocaleString() || "—"}</td>
+      <td>${o.createdAt ? o.createdAt.toDate().toLocaleString() : "—"}</td>
       <td>${doc.id}</td>
       <td>${o.name || "—"}</td>
       <td>${o.visit_type || "Self"}</td>
