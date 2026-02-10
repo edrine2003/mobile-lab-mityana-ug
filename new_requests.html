@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧪 New Requests – Mobile Lab</title>
+<title>🧪 Admin Requests – Mobile Lab</title>
 <meta name="theme-color" content="#0ea5e9">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -12,7 +12,8 @@
 
 <style>
 body { font-family: Arial,sans-serif; background:#f1f5f9; margin:0; padding:16px; }
-h2 { text-align:center; margin-bottom:16px; }
+h2 { text-align:center; margin-bottom:12px; }
+
 #logoutBtn {
   position: fixed;
   top:16px;
@@ -20,38 +21,66 @@ h2 { text-align:center; margin-bottom:16px; }
   background:#ef4444;
   color:#fff;
   border:none;
-  padding:12px 16px;
+  padding:10px 14px;
   border-radius:999px;
   cursor:pointer;
 }
-table { width:100%; border-collapse: collapse; margin-top:16px; background:#fff; }
+
+.filters {
+  text-align:center;
+  margin-bottom:12px;
+}
+.filters button {
+  margin:4px;
+  padding:8px 14px;
+  border:none;
+  border-radius:20px;
+  cursor:pointer;
+  background:#e5e7eb;
+}
+.filters button.active {
+  background:#0ea5e9;
+  color:#fff;
+}
+
+table { width:100%; border-collapse: collapse; background:#fff; }
 th,td { border:1px solid #cbd5e1; padding:8px; text-align:left; }
 th { background:#e2e8f0; }
-button { padding:6px 12px; border:none; border-radius:8px; cursor:pointer; margin-right:6px; }
+
 button.start { background:#22c55e; color:#fff; }
 button.cancel { background:#ef4444; color:#fff; }
+button.view { background:#6366f1; color:#fff; }
+
+button { padding:6px 10px; border:none; border-radius:8px; cursor:pointer; margin-right:4px; }
 </style>
 </head>
 <body>
 
 <button id="logoutBtn">Logout</button>
-<h2>🧪 New Requests</h2>
+<h2>🧪 Lab Requests</h2>
+
+<div class="filters">
+  <button onclick="setStatus('pending')" class="active" id="btn-pending">Pending</button>
+  <button onclick="setStatus('ongoing')" id="btn-ongoing">Ongoing</button>
+  <button onclick="setStatus('completed')" id="btn-completed">Completed</button>
+</div>
 
 <table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Request Time</th>
-      <th>Order ID</th>
-      <th>Client Name</th>
-      <th>Visit Type</th>
-      <th>No. of Tests</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody id="requestsTable">
-    <tr><td colspan="7">Loading requests...</td></tr>
-  </tbody>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Request Time</th>
+  <th>Order ID</th>
+  <th>Client</th>
+  <th>Visit</th>
+  <th>No. Tests</th>
+  <th>View Tests</th>
+  <th>Actions</th>
+</tr>
+</thead>
+<tbody id="requestsTable">
+<tr><td colspan="8">Loading…</td></tr>
+</tbody>
 </table>
 
 <script>
@@ -65,6 +94,8 @@ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const tableBody = document.getElementById("requestsTable");
+
+let currentStatus = "pending";
 
 // 🔐 Admin check
 auth.onAuthStateChanged(async user => {
@@ -89,58 +120,71 @@ document.getElementById("logoutBtn").onclick = async ()=>{
   window.location.href="login.html";
 };
 
-// 📥 Load pending requests
+// 🔁 Status switch
+function setStatus(status){
+  currentStatus = status;
+  document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
+  document.getElementById("btn-"+status).classList.add("active");
+  loadRequests();
+}
+
+// 📥 Load requests
 async function loadRequests(){
-  const snapshot = await db
-    .collection("orders")
-    .where("status", "==", "pending")
-    .orderBy("createdAt", "asc")
+  const snapshot = await db.collection("orders")
+    .where("status","==",currentStatus)
+    .orderBy("created_at","desc")
     .get();
 
-  if (snapshot.empty) {
-    tableBody.innerHTML =
-      `<tr><td colspan="7">No new requests</td></tr>`;
+  if(snapshot.empty){
+    tableBody.innerHTML = `<tr><td colspan="8">No ${currentStatus} requests</td></tr>`;
     return;
   }
 
   tableBody.innerHTML = "";
   let count = 1;
 
-  snapshot.forEach(doc => {
-    const order = doc.data();
+  snapshot.forEach(doc=>{
+    const o = doc.data();
+    const tests = o.tests ? o.tests.split("\n") : [];
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${count++}</td>
-      <td>${order.createdAt?.toDate().toLocaleString() || "—"}</td>
+      <td>${o.created_at?.toDate().toLocaleString() || "—"}</td>
       <td>${doc.id}</td>
-      <td>${order.name || "—"}</td>
-      <td>${order.visit_type || "Self"}</td>
-      <td>${order.tests ? order.tests.split(",").length : 0}</td>
+      <td>${o.name || "—"}</td>
+      <td>${o.visit_type || "Self"}</td>
+      <td>${tests.length}</td>
+      <td><button class="view">View</button></td>
       <td>
-        <button class="start">Start</button>
-        <button class="cancel">Cancel</button>
+        ${currentStatus==="pending" ? `<button class="start">Start</button>` : ``}
+        ${currentStatus!=="completed" ? `<button class="cancel">Cancel</button>` : ``}
       </td>
     `;
 
     tableBody.appendChild(tr);
 
-    tr.querySelector(".start").onclick = async () => {
-      await db.collection("orders").doc(doc.id).update({
-        status: "ongoing"
-      });
-      loadRequests();
+    tr.querySelector(".view").onclick = ()=>{
+      alert("Tests:\n\n" + tests.join("\n"));
     };
 
-    tr.querySelector(".cancel").onclick = async () => {
-      if (!confirm("Cancel this request?")) return;
-      await db.collection("orders").doc(doc.id).update({
-        status: "cancelled"
-      });
-      loadRequests();
-    };
+    if(currentStatus==="pending"){
+      tr.querySelector(".start").onclick = async ()=>{
+        await db.collection("orders").doc(doc.id).update({ status:"ongoing" });
+        loadRequests();
+      };
+    }
+
+    if(currentStatus!=="completed"){
+      tr.querySelector(".cancel").onclick = async ()=>{
+        if(!confirm("Cancel this request?")) return;
+        await db.collection("orders").doc(doc.id).update({ status:"cancelled" });
+        loadRequests();
+      };
+    }
   });
 }
 </script>
+
 </body>
 </html>
