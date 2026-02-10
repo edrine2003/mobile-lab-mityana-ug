@@ -705,10 +705,15 @@ document.getElementById("orderForm").onsubmit = async e => {
 
   try {
     // Firestore write
-    await db.collection("orders").doc(orderId).set({
-      ...params,
-      created_at: firebase.firestore.FieldValue.serverTimestamp()
-    });
+   await db.collection("orders").doc(orderId).set({
+  ...params,
+
+  // 🔑 REQUIRED FOR ADMIN DASHBOARD
+  userId: user.uid,
+  status: "pending",
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
+
   } catch(err){
     console.error("Firestore write failed:", err);
     alert("⚠️ Failed to submit order: " + err.message);
@@ -764,6 +769,7 @@ Phone: ${params.phone}
 
 </body>
 </html>
+
 
 
 
