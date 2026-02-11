@@ -105,12 +105,14 @@ async function loadOngoing(){
         results[tests[i].trim()] = el.value.trim();
       });
 
-      await db.collection("results").doc(doc.id).set({
-        order_id: doc.id,
-        patient_email: o.email,
-        results,
-        uploaded_at: firebase.firestore.FieldValue.serverTimestamp()
-      });
+    await db.collection("results").doc(doc.id).set({
+  order_id: doc.id,
+  userId: o.userId,
+  patient_email: o.email,
+  results,
+  uploaded_at: firebase.firestore.FieldValue.serverTimestamp()
+});
+
 
       await db.collection("orders").doc(doc.id).update({
         status: "completed"
