@@ -34,96 +34,128 @@ const firebaseConfig = {
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId: "mobile-lab-mityana-aeae2"
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 const ordersContainer = document.getElementById("ordersContainer");
 const ordersCounter = document.getElementById("ordersCounter");
 
-// 🔐 Admin auth
-auth.onAuthStateChanged(async user=>{
-  if(!user){ location.href="login.html"; return; }
-
-  const snap = await db.collection("users").doc(user.uid).get();
-  if(!snap.exists || snap.data().role!=="admin"){
-    alert("Access denied");
-    await auth.signOut();
-    location.href="login.html";
+// 🔐 Admin authentication
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    location.href = "login.html";
     return;
   }
+
+  const snap = await db.collection("users").doc(user.uid).get();
+
+  if (!snap.exists || snap.data().role !== "admin") {
+    alert("Access denied");
+    await auth.signOut();
+    location.href = "login.html";
+    return;
+  }
+
   loadOngoing();
 });
 
-document.getElementById("logoutBtn").onclick = async()=>{
+document.getElementById("logoutBtn").onclick = async () => {
   await auth.signOut();
-  location.href="login.html";
+  location.href = "login.html";
 };
 
 // 📥 Load ongoing tests
-async function loadOngoing(){
-  const snap = await db.collection("orders")
-    .where("status","==","ongoing")
-    .orderBy("createdAt","asc")
-    .get();
+async function loadOngoing() {
+  try {
+    const snap = await db.collection("orders")
+      .where("status", "==", "ongoing")
+      .orderBy("createdAt", "asc")
+      .get();
 
-  if(snap.empty){
-    ordersCounter.innerText = "No ongoing tests";
+    if (snap.empty) {
+      ordersCounter.innerText = "No ongoing tests";
+      ordersContainer.innerHTML = "";
+      return;
+    }
+
+    ordersCounter.innerText = `Ongoing Tests: ${snap.size}`;
     ordersContainer.innerHTML = "";
-    return;
-  }
 
-  ordersCounter.innerText = `Ongoing Tests: ${snap.size}`;
-  ordersContainer.innerHTML = "";
+    snap.forEach(doc => {
+      const o = doc.data();
+      const card = document.createElement("div");
+      card.className = "order-card";
 
-  snap.forEach(doc=>{
-    const o = doc.data();
-    const card = document.createElement("div");
-    card.className = "order-card";
-
-    let html = `
-      <h4>Order ID: ${doc.id}</h4>
-      <p><b>Name:</b> ${o.name} | <b>Phone:</b> ${o.phone}</p>
-      <p><b>Tests:</b> ${o.tests}</p>
-    `;
-
-    const tests = o.tests.split(",");
-    tests.forEach(t=>{
-      html += `
-        <p><b>${t.trim()}</b></p>
-        <textarea class="result-input" placeholder="Enter result for ${t.trim()}"></textarea>
+      let html = `
+        <h4>Order ID: ${doc.id}</h4>
+        <p><b>Name:</b> ${o.name || ""} | <b>Phone:</b> ${o.phone || ""}</p>
+        <p><b>Tests:</b> ${o.tests || ""}</p>
       `;
+
+      const tests = o.tests ? o.tests.split(",") : [];
+
+      tests.forEach(t => {
+        html += `
+          <p><b>${t.trim()}</b></p>
+          <textarea class="result-input" placeholder="Enter result for ${t.trim()}"></textarea>
+        `;
+      });
+
+      html += `<button class="complete">Save & Complete</button>`;
+      card.innerHTML = html;
+      ordersContainer.appendChild(card);
+
+      card.querySelector(".complete").onclick = async () => {
+
+        const results = {};
+        let hasEmpty = false;
+
+        card.querySelectorAll(".result-input").forEach((el, i) => {
+          const value = el.value.trim();
+          if (!value) hasEmpty = true;
+          results[tests[i].trim()] = value;
+        });
+
+        if (hasEmpty) {
+          alert("Please enter all test results before completing.");
+          return;
+        }
+
+        try {
+
+          // 🔥 IMPORTANT: user_id MUST match rules
+          await db.collection("results").doc(doc.id).set({
+            order_id: doc.id,
+            user_id: o.user_id, // MUST match orders field
+            patient_email: o.email || "",
+            results: results,
+            status: "completed",
+            uploaded_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          await db.collection("orders").doc(doc.id).update({
+            status: "completed"
+          });
+
+          alert("Results saved & test completed");
+          loadOngoing();
+
+        } catch (error) {
+          console.error("Error saving results:", error);
+          alert("Failed to save results. Check console.");
+        }
+      };
     });
 
-    html += `<button class="complete">Save & Complete</button>`;
-    card.innerHTML = html;
-    ordersContainer.appendChild(card);
-
-    card.querySelector(".complete").onclick = async()=>{
-      const results = {};
-      card.querySelectorAll(".result-input").forEach((el,i)=>{
-        results[tests[i].trim()] = el.value.trim();
-      });
-
-    await db.collection("results").doc(doc.id).set({
-  order_id: doc.id,
-  userId: o.userId,
-  patient_email: o.email,
-  results,
-  uploaded_at: firebase.firestore.FieldValue.serverTimestamp()
-});
-
-
-      await db.collection("orders").doc(doc.id).update({
-        status: "completed"
-      });
-
-      alert("Results saved & test completed");
-      loadOngoing();
-    };
-  });
+  } catch (error) {
+    console.error("Load error:", error);
+    ordersCounter.innerText = "Error loading tests.";
+  }
 }
 </script>
+
 
 </body>
 </html>
