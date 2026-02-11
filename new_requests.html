@@ -3,188 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧪 Admin Lab Panel</title>
+<title>🧪 New Requests – Mobile Lab</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-body{font-family:Arial;background:#f1f5f9;padding:16px}
-h2{text-align:center}
-button{padding:6px 10px;border:none;border-radius:8px;cursor:pointer}
-.start{background:#22c55e;color:#fff}
-.view{background:#6366f1;color:#fff}
-.save{background:#0ea5e9;color:#fff}
-.filters{text-align:center;margin-bottom:12px}
-.filters button{margin:4px;padding:8px 14px;border-radius:20px}
-.filters .active{background:#0ea5e9;color:#fff}
-table{width:100%;border-collapse:collapse;background:#fff}
-th,td{border:1px solid #cbd5e1;padding:8px}
-.modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.4);
-  display:none;align-items:center;justify-content:center
+body { font-family: Arial,sans-serif; background:#f1f5f9; margin:0; padding:16px; }
+h2 { text-align:center; margin-bottom:16px; }
+
+#logoutBtn {
+  position: fixed;
+  top:16px;
+  right:16px;
+  background:#ef4444;
+  color:#fff;
+  border:none;
+  padding:10px 14px;
+  border-radius:999px;
+  cursor:pointer;
 }
-.modal-content{
-  background:#fff;padding:20px;border-radius:12px;
-  width:95%;max-width:500px
-}
-input,textarea{width:100%;padding:6px;margin:4px 0}
+
+table { width:100%; border-collapse: collapse; background:#fff; }
+th,td { border:1px solid #cbd5e1; padding:8px; text-align:left; }
+th { background:#e2e8f0; }
+
+button.start { background:#22c55e; color:#fff; }
+button.cancel { background:#ef4444; color:#fff; }
+
+button { padding:6px 10px; border:none; border-radius:8px; cursor:pointer; margin-right:4px; }
 </style>
 </head>
-
 <body>
 
-<h2>🧪 Lab Requests</h2>
-
-<div class="filters">
-  <button onclick="setStatus('pending')" class="active" id="btn-pending">Pending</button>
-  <button onclick="setStatus('ongoing')" id="btn-ongoing">Ongoing</button>
-  <button onclick="setStatus('completed')" id="btn-completed">Completed</button>
-</div>
+<button id="logoutBtn">Logout</button>
+<h2>🧪 Pending Requests</h2>
 
 <table>
 <thead>
 <tr>
-<th>#</th><th>Time</th><th>Order</th><th>Name</th><th>Tests</th><th>Actions</th>
+  <th>#</th>
+  <th>Time</th>
+  <th>Order ID</th>
+  <th>Client</th>
+  <th>Tests</th>
+  <th>Actions</th>
 </tr>
 </thead>
-<tbody id="table"></tbody>
+<tbody id="requestsTable">
+<tr><td colspan="6">Loading...</td></tr>
+</tbody>
 </table>
 
-<!-- RESULT MODAL -->
-<div class="modal" id="resultModal">
-  <div class="modal-content">
-    <h3 id="modalTitle"></h3>
-    <div id="testsArea"></div>
-    <button class="save" onclick="saveResults()">Save Results</button>
-    <button onclick="closeModal()">Close</button>
-  </div>
-</div>
-
 <script>
-const firebaseConfig={
- apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
- authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
- projectId:"mobile-lab-mityana-aeae2"
+const firebaseConfig = {
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
 };
-firebase.initializeApp(firebaseConfig);
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-const table=document.getElementById("table");
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-let currentStatus="pending";
-let currentOrderId="";
-let currentTests=[];
+const auth = firebase.auth();
+const db = firebase.firestore();
+const tableBody = document.getElementById("requestsTable");
 
-// 🔐 ADMIN CHECK
-auth.onAuthStateChanged(async user=>{
- if(!user) return location="login.html";
- const snap=await db.collection("users").doc(user.uid).get();
- if(!snap.exists||snap.data().role!=="admin"){
-   alert("Access denied"); auth.signOut(); location="login.html";
- }
- load();
-});
 
-function setStatus(s){
- currentStatus=s;
- document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
- document.getElementById("btn-"+s).classList.add("active");
- load();
-}
-
-async function load(){
- const q=await db.collection("orders")
-  .where("status","==",currentStatus)
-  .orderBy("createdAt","desc")
-  .get();
-
- table.innerHTML="";
- if(q.empty){
-  table.innerHTML=`<tr><td colspan="6">No ${currentStatus} requests</td></tr>`;
-  return;
- }
-
- let i=1;
- q.forEach(doc=>{
-  const o=doc.data();
-  const tests=Array.isArray(o.tests)?o.tests:o.tests.split(",").map(t=>({name:t,result:""}));
-
-  table.innerHTML+=`
-   <tr>
-    <td>${i++}</td>
-    <td>${o.createdAt.toDate().toLocaleString()}</td>
-    <td>${doc.id}</td>
-    <td>${o.name}</td>
-    <td>${tests.length}</td>
-    <td>
-     ${currentStatus==="pending"?`<button class="start" onclick="start('${doc.id}')">Start</button>`:""}
-     ${currentStatus==="ongoing"?`<button class="view" onclick="openResults('${doc.id}')">Enter Results</button>`:""}
-    </td>
-   </tr>`;
- });
-}
-
-async function start(id){
- await db.collection("orders").doc(id).update({status:"ongoing"});
- load();
-}
-
-async function openResults(id){
-  currentOrderId = id;
-
-  const snap = await db.collection("orders").doc(id).get();
-  let rawTests = snap.data().tests;
-
-  // ✅ FIX: convert old string tests to objects
-  if (typeof rawTests === "string") {
-    currentTests = rawTests.split(",").map(t => ({
-      name: t.trim(),
-      result: "",
-      unit: "",
-      reference: ""
-    }));
-  } else {
-    currentTests = rawTests;
+// 🔐 ADMIN AUTH CHECK
+auth.onAuthStateChanged(async user => {
+  if(!user){
+    window.location.href="login.html";
+    return;
   }
 
-  document.getElementById("modalTitle").innerText = "Enter Test Results";
-  const area = document.getElementById("testsArea");
-  area.innerHTML = "";
+  const snap = await db.collection("users").doc(user.uid).get();
+  if(!snap.exists || snap.data().role !== "admin"){
+    alert("Access denied");
+    await auth.signOut();
+    window.location.href="login.html";
+    return;
+  }
 
-  currentTests.forEach((t, i) => {
-    area.innerHTML += `
-      <b>${t.name}</b>
-      <input placeholder="Result" value="${t.result || ""}"
-        oninput="currentTests[${i}].result=this.value">
-      <input placeholder="Unit" value="${t.unit || ""}"
-        oninput="currentTests[${i}].unit=this.value">
-      <input placeholder="Reference Range" value="${t.reference || ""}"
-        oninput="currentTests[${i}].reference=this.value">
-      <hr>
+  loadPending();
+});
+
+document.getElementById("logoutBtn").onclick = async ()=>{
+  await auth.signOut();
+  window.location.href="login.html";
+};
+
+
+// 📥 LOAD ONLY PENDING
+async function loadPending(){
+
+  const snapshot = await db.collection("orders")
+    .where("status","==","pending")
+    .orderBy("createdAt","asc")
+    .get();
+
+  if(snapshot.empty){
+    tableBody.innerHTML =
+      `<tr><td colspan="6">No pending requests</td></tr>`;
+    return;
+  }
+
+  tableBody.innerHTML = "";
+  let count = 1;
+
+  snapshot.forEach(doc=>{
+    const o = doc.data();
+
+    const testsCount = o.tests
+      ? o.tests.split("|").length   // IMPORTANT: using |
+      : 0;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${count++}</td>
+      <td>${o.createdAt?.toDate().toLocaleString() || "—"}</td>
+      <td>${doc.id}</td>
+      <td>${o.name || "—"}</td>
+      <td>${testsCount}</td>
+      <td>
+        <button class="start">Start</button>
+        <button class="cancel">Cancel</button>
+      </td>
     `;
+
+    tableBody.appendChild(tr);
+
+    // ▶ START TEST
+    tr.querySelector(".start").onclick = async ()=>{
+
+      await db.collection("orders").doc(doc.id).update({
+        status:"ongoing"
+      });
+
+      // 🔥 REDIRECT TO ONGOING PAGE
+      window.location.href = "ongoing_tests.html";
+    };
+
+    // ❌ CANCEL TEST
+    tr.querySelector(".cancel").onclick = async ()=>{
+      if(!confirm("Cancel this request?")) return;
+
+      await db.collection("orders").doc(doc.id).update({
+        status:"cancelled"
+      });
+
+      loadPending();
+    };
+
   });
-
-  document.getElementById("resultModal").style.display = "flex";
-}
-
-
-async function saveResults(){
- const allDone=currentTests.every(t=>t.result);
- await db.collection("orders").doc(currentOrderId).update({
-  tests:currentTests,
-  status: allDone ? "completed" : "ongoing",
-  completedAt: allDone ? firebase.firestore.FieldValue.serverTimestamp() : null
- });
- closeModal();
- load();
-}
-
-function closeModal(){
- document.getElementById("resultModal").style.display="none";
 }
 </script>
+
 </body>
 </html>
