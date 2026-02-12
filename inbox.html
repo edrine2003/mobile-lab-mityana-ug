@@ -126,9 +126,6 @@ const inbox = document.getElementById("inboxContainer");
 auth.onAuthStateChanged(user => {
   if (!user) return window.location.href = "login.html";
 
- auth.onAuthStateChanged(user => {
-  if (!user) return window.location.href = "login.html";
-
   db.collection("results")
     .where("patientEmail", "==", user.email)
     .orderBy("createdAt", "desc")
