@@ -33,12 +33,42 @@ button.start { background:#22c55e; color:#fff; }
 button.cancel { background:#ef4444; color:#fff; }
 
 button { padding:6px 10px; border:none; border-radius:8px; cursor:pointer; margin-right:4px; }
+
+/* 🔀 ADMIN NAV BUTTONS (ADDED ONLY) */
+.admin-nav{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin:20px 0;
+}
+
+.admin-nav button{
+  padding:10px 16px;
+  border:none;
+  border-radius:999px;
+  cursor:pointer;
+  background:#e5e7eb;
+  font-weight:600;
+}
+
+.admin-nav button.active{
+  background:#0ea5e9;
+  color:white;
+}
 </style>
 </head>
 <body>
 
 <button id="logoutBtn">Logout</button>
+
 <h2>🧪 Pending Requests</h2>
+
+<!-- 🔀 NAVIGATION BUTTONS (ADDED ONLY) -->
+<div class="admin-nav">
+  <button class="active">Pending</button>
+  <button onclick="goPage('ongoing_tests.html')">Ongoing Tests</button>
+  <button onclick="goPage('completed_tests.html')">Completed Tests</button>
+</div>
 
 <table>
 <thead>
@@ -115,7 +145,7 @@ async function loadPending(){
     const o = doc.data();
 
     const testsCount = o.tests
-      ? o.tests.split("|").length   // IMPORTANT: using |
+      ? o.tests.split("|").length
       : 0;
 
     const tr = document.createElement("tr");
@@ -140,7 +170,6 @@ async function loadPending(){
         status:"ongoing"
       });
 
-      // 🔥 REDIRECT TO ONGOING PAGE
       window.location.href = "ongoing_tests.html";
     };
 
@@ -156,6 +185,11 @@ async function loadPending(){
     };
 
   });
+}
+
+/* 🔀 PAGE NAV FUNCTION (ADDED ONLY) */
+function goPage(page){
+  window.location.href = page;
 }
 </script>
 
