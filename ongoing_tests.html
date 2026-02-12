@@ -149,8 +149,9 @@ async function loadOngoing() {
             status: "completed"
           });
 
-          alert("Results saved & test completed successfully.");
-          loadOngoing();
+         alert("Results saved & test completed successfully.");
+window.location.href = "completed_tests.html";
+
 
         } catch (error) {
           console.error("Error saving results:", error);
