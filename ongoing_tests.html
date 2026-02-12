@@ -12,13 +12,11 @@
 <style>
 body { font-family: Arial,sans-serif; margin:0; padding:16px; background:#f1f5f9; }
 #logoutBtn { position:fixed; top:16px; right:16px; background:#ef4444; color:#fff; padding:12px 16px; border:none; border-radius:999px; cursor:pointer; }
-.order-card { background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:12px; margin-bottom:12px; }
+.order-card { background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px; box-shadow:0 4px 10px rgba(0,0,0,0.05); }
 h4 { margin:8px 0; color:#0369a1; }
-table { width:100%; border-collapse:collapse; margin-top:6px; }
-th,td { border:1px solid #cbd5e1; padding:6px; }
-th { background:#e2e8f0; }
-input.result-input { width:100%; padding:4px; }
-button.complete { margin-top:10px; background:#22c55e; color:#fff; border:none; padding:8px 14px; border-radius:10px; cursor:pointer; }
+textarea.result-input { width:100%; padding:8px; margin-top:6px; border-radius:8px; border:1px solid #cbd5e1; resize:vertical; }
+button.complete { margin-top:12px; background:#22c55e; color:#fff; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:bold; }
+button.complete:hover { background:#16a34a; }
 </style>
 </head>
 <body>
@@ -42,16 +40,16 @@ const db = firebase.firestore();
 const ordersContainer = document.getElementById("ordersContainer");
 const ordersCounter = document.getElementById("ordersCounter");
 
-// 🔐 Admin authentication
+// 🔐 Admin Authentication
 auth.onAuthStateChanged(async user => {
   if (!user) {
     location.href = "login.html";
     return;
   }
 
-  const snap = await db.collection("users").doc(user.uid).get();
+  const userDoc = await db.collection("users").doc(user.uid).get();
 
-  if (!snap.exists || snap.data().role !== "admin") {
+  if (!userDoc.exists || userDoc.data().role !== "admin") {
     alert("Access denied");
     await auth.signOut();
     location.href = "login.html";
@@ -85,13 +83,21 @@ async function loadOngoing() {
 
     snap.forEach(doc => {
       const o = doc.data();
+
+      // Safety check for old orders
+      if (!o.userId) {
+        console.warn("Order missing userId:", doc.id);
+        return;
+      }
+
       const card = document.createElement("div");
       card.className = "order-card";
 
       let html = `
         <h4>Order ID: ${doc.id}</h4>
-        <p><b>Name:</b> ${o.name || ""} | <b>Phone:</b> ${o.phone || ""}</p>
-        <p><b>Tests:</b> ${o.tests || ""}</p>
+        <p><b>Name:</b> ${o.name || ""}</p>
+        <p><b>Phone:</b> ${o.phone || ""}</p>
+        <p><b>Email:</b> ${o.email || ""}</p>
       `;
 
       const tests = o.tests ? o.tests.split(",") : [];
@@ -112,7 +118,9 @@ async function loadOngoing() {
         const results = {};
         let hasEmpty = false;
 
-        card.querySelectorAll(".result-input").forEach((el, i) => {
+        const inputs = card.querySelectorAll(".result-input");
+
+        inputs.forEach((el, i) => {
           const value = el.value.trim();
           if (!value) hasEmpty = true;
           results[tests[i].trim()] = value;
@@ -125,21 +133,23 @@ async function loadOngoing() {
 
         try {
 
-          // 🔥 IMPORTANT: user_id MUST match rules
+          // ✅ Save results properly
           await db.collection("results").doc(doc.id).set({
             order_id: doc.id,
-            user_id: o.user_id, // MUST match orders field
+            userId: o.userId, // 🔥 CORRECT FIELD
             patient_email: o.email || "",
+            patient_name: o.name || "",
             results: results,
             status: "completed",
             uploaded_at: firebase.firestore.FieldValue.serverTimestamp()
           });
 
+          // ✅ Update order status
           await db.collection("orders").doc(doc.id).update({
             status: "completed"
           });
 
-          alert("Results saved & test completed");
+          alert("Results saved & test completed successfully.");
           loadOngoing();
 
         } catch (error) {
@@ -155,7 +165,6 @@ async function loadOngoing() {
   }
 }
 </script>
-
 
 </body>
 </html>
