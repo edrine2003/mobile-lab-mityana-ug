@@ -126,9 +126,57 @@ const inbox = document.getElementById("inboxContainer");
 auth.onAuthStateChanged(user => {
   if (!user) return window.location.href = "login.html";
 
-  db.collection("orders")
-    .where("user_id", "==", user.uid)
-    .onSnapshot(async snap => {
+ auth.onAuthStateChanged(user => {
+  if (!user) return window.location.href = "login.html";
+
+  db.collection("results")
+    .where("patientEmail", "==", user.email)
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+
+      inbox.innerHTML = "";
+
+      if (snapshot.empty) {
+        inbox.innerHTML = "<p>No results yet.</p>";
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const res = doc.data();
+        const card = document.createElement("div");
+        card.className = "result-card";
+
+        let html = `
+          <h4>🧪 Test Results</h4>
+          <p><b>Tests:</b> ${res.tests || "—"}</p>
+        `;
+
+        if (res.results) {
+          Object.keys(res.results).forEach(test => {
+            html += `<h4>${test}</h4><table>
+              <tr><th>Parameter</th><th>Units</th><th>Value</th></tr>`;
+
+            Object.keys(res.results[test]).forEach(p => {
+              const v = res.results[test][p];
+              html += `
+                <tr>
+                  <td>${p}</td>
+                  <td>${v.units}</td>
+                  <td>${v.value}</td>
+                </tr>`;
+            });
+
+            html += `</table>`;
+          });
+        }
+
+        html += `<i>${res.createdAt?.toDate().toLocaleString() || ""}</i>`;
+        card.innerHTML = html;
+        inbox.appendChild(card);
+      });
+    });
+});
+
       inbox.innerHTML = "";
 
       if (snap.empty) {
