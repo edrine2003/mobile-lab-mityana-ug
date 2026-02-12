@@ -4,234 +4,166 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🧪 Patient Inbox – Mobile Lab</title>
-<meta name="description" content="View your lab results securely.">
-<meta name="theme-color" content="#0ea5e9">
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #f1f5f9;
-  color: #0f172a;
+body{font-family:Arial;background:#f1f5f9;margin:0}
+.container{max-width:900px;margin:20px auto;padding:16px}
+.header{
+  background:linear-gradient(135deg,#0ea5e9,#14b8a6);
+  color:#fff;padding:18px;border-radius:14px;
+  position:relative;text-align:center
 }
-.container {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 16px;
+#logoutBtn{
+  position:absolute;right:16px;top:16px;
+  background:#ef4444;color:#fff;border:none;
+  padding:10px 16px;border-radius:999px;cursor:pointer
 }
-.header {
-  background: linear-gradient(135deg, #0ea5e9, #14b8a6);
-  color: #fff;
-  padding: 18px;
-  text-align: center;
-  border-radius: 12px;
-  position: relative;
+.badge{
+  background:#ef4444;color:white;
+  padding:4px 10px;border-radius:999px;
+  font-size:12px;font-weight:700;
+  margin-left:8px
 }
-.header h2 { margin:0; }
-.header p { margin: 6px 0 0; font-size: 14px; opacity: 0.9; }
-#logoutBtn {
-  background: #ef4444;
-  color: #fff;
-  padding: 12px 18px;
-  border: none;
-  border-radius: 999px;
-  font-weight: 800;
-  cursor: pointer;
-  position: absolute;
-  top: 16px;
-  right: 16px;
+.result-card{
+  background:#fff;padding:16px;margin-top:20px;
+  border-radius:14px;border:1px solid #cbd5e1
 }
-.results {
-  margin-top: 20px;
+.result-card h4{margin:0 0 8px;color:#0369a1}
+table{width:100%;border-collapse:collapse;margin-bottom:10px}
+th,td{border:1px solid #cbd5e1;padding:6px}
+th{background:#e2e8f0}
+button{
+  padding:8px 12px;border:none;
+  border-radius:8px;cursor:pointer;
+  margin-right:6px
 }
-.result-card {
-  background: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(15,23,42,0.12);
-  margin-bottom: 20px;
-}
-.result-card h4 {
-  margin: 0 0 10px;
-  color: #0369a1;
-}
-.result-card table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 12px;
-}
-.result-card th, .result-card td {
-  border: 1px solid #cbd5e1;
-  padding: 6px 8px;
-  text-align: left;
-}
-.result-card th {
-  background: #e2e8f0;
-}
-.result-card p {
-  margin: 4px 0;
-  font-size: 13px;
-  color: #334155;
-}
-.result-card i {
-  font-size: 11px;
-  color: #64748b;
-}
-.delete-btn {
-  background: #ef4444;
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.delete-btn:hover {
-  filter: brightness(0.9);
-}
+.download{background:#0ea5e9;color:white}
 </style>
 </head>
-<body>
 
+<body>
 <div class="container">
+
   <div class="header">
-    <h2>🧪 Patient Inbox</h2>
-    <p>View your uploaded lab results securely.</p>
+    <h2>
+      🧪 Patient Inbox
+      <span id="newBadge" class="badge" style="display:none">NEW</span>
+    </h2>
+    <p>Your lab results appear instantly once ready</p>
     <button id="logoutBtn">Logout</button>
   </div>
 
-  <div class="results" id="inboxContainer">
-    Loading your lab results...
-  </div>
+  <div id="inbox">Loading results…</div>
+
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2.firebaseapp.com",
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+firebase.initializeApp({
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+});
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-const inbox = document.getElementById("inboxContainer");
+const auth=firebase.auth();
+const db=firebase.firestore();
+const inbox=document.getElementById("inbox");
+const badge=document.getElementById("newBadge");
 
-auth.onAuthStateChanged(user => {
-  if (!user) return window.location.href = "login.html";
+let lastSeen = localStorage.getItem("lastSeenResult") || 0;
+let whatsappSent = localStorage.getItem("whatsappSent") || "";
+
+auth.onAuthStateChanged(user=>{
+  if(!user) return location.href="login.html";
 
   db.collection("results")
-    .where("patientEmail", "==", user.email)
-    .orderBy("createdAt", "desc")
-    .onSnapshot(snapshot => {
+    .where("patientEmail","==",user.email)
+    .orderBy("createdAt","desc")
+    .onSnapshot(snapshot=>{
+      inbox.innerHTML="";
 
-      inbox.innerHTML = "";
-
-      if (snapshot.empty) {
-        inbox.innerHTML = "<p>No results yet.</p>";
+      if(snapshot.empty){
+        inbox.innerHTML="<p>No results yet.</p>";
         return;
       }
 
-      snapshot.forEach(doc => {
-        const res = doc.data();
-        const card = document.createElement("div");
-        card.className = "result-card";
+      snapshot.forEach(doc=>{
+        const r=doc.data();
+        const ts=r.createdAt?.toMillis()||0;
 
-        let html = `
-          <h4>🧪 Test Results</h4>
-          <p><b>Tests:</b> ${res.tests || "—"}</p>
-        `;
+        if(ts > lastSeen){
+          badge.style.display="inline-block";
+          lastSeen=ts;
+          localStorage.setItem("lastSeenResult",ts);
 
-        if (res.results) {
-          Object.keys(res.results).forEach(test => {
-            html += `<h4>${test}</h4><table>
-              <tr><th>Parameter</th><th>Units</th><th>Value</th></tr>`;
-
-            Object.keys(res.results[test]).forEach(p => {
-              const v = res.results[test][p];
-              html += `
-                <tr>
-                  <td>${p}</td>
-                  <td>${v.units}</td>
-                  <td>${v.value}</td>
-                </tr>`;
-            });
-
-            html += `</table>`;
-          });
+          if(whatsappSent !== doc.id){
+            const msg = encodeURIComponent(
+              "🧪 Your lab results are ready. Please open your Mobile Lab inbox to view them."
+            );
+            window.open(`https://wa.me/?text=${msg}`,"_blank");
+            localStorage.setItem("whatsappSent",doc.id);
+          }
         }
 
-        html += `<i>${res.createdAt?.toDate().toLocaleString() || ""}</i>`;
-        card.innerHTML = html;
+        const card=document.createElement("div");
+        card.className="result-card";
+
+        let html=`<h4>🧪 Test Results</h4>`;
+
+        Object.keys(r.results||{}).forEach(test=>{
+          html+=`<h4>${test}</h4><table>
+            <tr><th>Parameter</th><th>Units</th><th>Value</th></tr>`;
+          Object.keys(r.results[test]).forEach(p=>{
+            const v=r.results[test][p];
+            html+=`
+              <tr>
+                <td>${p}</td>
+                <td>${v.units}</td>
+                <td>${v.value}</td>
+              </tr>`;
+          });
+          html+=`</table>`;
+        });
+
+        html+=`
+          <button class="download">⬇ Download PDF</button>
+          <div style="font-size:12px;color:#64748b">
+            ${r.createdAt?.toDate().toLocaleString()}
+          </div>
+        `;
+
+        card.innerHTML=html;
         inbox.appendChild(card);
+
+        card.querySelector(".download").onclick=()=>{
+          const {jsPDF}=window.jspdf;
+          const pdf=new jsPDF();
+          let y=10;
+          pdf.text("Mobile Lab Results",10,y);y+=8;
+
+          Object.keys(r.results||{}).forEach(t=>{
+            pdf.text(t,10,y);y+=6;
+            Object.keys(r.results[t]).forEach(p=>{
+              const v=r.results[t][p];
+              pdf.text(`${p}: ${v.value} ${v.units}`,10,y);
+              y+=6;
+            });
+          });
+
+          pdf.save("Lab_Results.pdf");
+        };
       });
     });
 });
 
-      inbox.innerHTML = "";
-
-      if (snap.empty) {
-        inbox.innerHTML = "<p>No orders yet.</p>";
-        return;
-      }
-
-      for (const doc of snap.docs) {
-        const order = doc.data();
-        const card = document.createElement("div");
-        card.className = "result-card";
-
-        let html = `
-          <h4>Order ID: ${order.order_id}</h4>
-          <p>Status: <b>${order.status || "Pending"}</b></p>
-        `;
-
-        if (order.status === "Results Ready") {
-          const resDoc = await db.collection("results").doc(doc.id).get();
-          if (resDoc.exists) {
-            const res = resDoc.data();
-            html += `
-              <p><b>Results:</b></p>
-              <pre>${res.results_text}</pre>
-              <button class="delete-btn download">⬇ Download PDF</button>
-            `;
-          }
-        } else {
-          html += `<i>Results not ready yet</i>`;
-        }
-
-        card.innerHTML = html;
-
-        /* PDF DOWNLOAD */
-        const dl = card.querySelector(".download");
-        if (dl) {
-          dl.onclick = () => {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF();
-            pdf.text(`Mobile Lab Results`, 10, 10);
-            pdf.text(res.results_text, 10, 30);
-            pdf.save(`Lab_Results_${order.order_id}.pdf`);
-          };
-        }
-
-        inbox.appendChild(card);
-      }
-    });
-});
-
-/* LOGOUT */
-document.getElementById("logoutBtn").onclick = async () => {
+document.getElementById("logoutBtn").onclick=async()=>{
   await auth.signOut();
-  window.location.href = "login.html";
+  location.href="login.html";
 };
 </script>
-
-
 </body>
 </html>
-
