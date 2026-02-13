@@ -1,117 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💬 Patient Chat – Mobile Lab</title>
-
+<title>💬 Chat with Doctor – Mobile Lab</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
-body { font-family: Arial,sans-serif; margin:0; padding:0; background:#f1f5f9; display:flex; flex-direction:column; height:100vh; }
-header { background:#0369a1; color:white; padding:16px; text-align:center; font-size:18px; }
-#chatContainer { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
-.message { max-width:70%; padding:10px 14px; border-radius:12px; word-wrap:break-word; }
-.patient { background:#22c55e; color:white; align-self:flex-end; }
-.doctor { background:#0ea5e9; color:white; align-self:flex-start; }
-#inputArea { display:flex; padding:12px; border-top:1px solid #ccc; background:white; }
-#messageInput { flex:1; padding:10px; border:1px solid #ccc; border-radius:12px; outline:none; }
-#sendBtn { padding:10px 16px; margin-left:8px; background:#0369a1; color:white; border:none; border-radius:12px; cursor:pointer; }
-#sendBtn:hover { background:#0ea5f2; }
+body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
+h2{color:#0369a1;}
+#chatBox{height:400px;overflow-y:auto;border:1px solid #ccc;background:#fff;padding:10px;border-radius:12px;margin-bottom:10px;}
+.message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;}
+.sent{background:#0ea5e9;color:#fff;margin-left:auto;}
+.received{background:#e2e8f0;margin-right:auto;}
+#msgInput{width:80%;padding:8px;border-radius:8px;border:1px solid #ccc;}
+#sendBtn{padding:8px 12px;border:none;border-radius:8px;background:#10b981;color:white;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<header>💬 Chat with Your Doctor</header>
-<div id="chatContainer"></div>
-<div id="inputArea">
-  <input type="text" id="messageInput" placeholder="Type your message..." />
-  <button id="sendBtn">Send</button>
-</div>
+<h2>💬 Chat with Doctor</h2>
+<div id="chatBox">Loading messages...</div>
+<input type="text" id="msgInput" placeholder="Type your message...">
+<button id="sendBtn">Send</button>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2"
-};
-
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+firebase.initializeApp({
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+});
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-
-const chatContainer = document.getElementById("chatContainer");
-const messageInput = document.getElementById("messageInput");
+const chatBox = document.getElementById("chatBox");
+const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
-let chatRef;
-let patientName = "";
-let patientId = "";
+const doctorId = "ADMIN_DOCTOR_UID"; // replace with your admin UID
 
-// Authenticate patient
-auth.onAuthStateChanged(async user=>{
+auth.onAuthStateChanged(user=>{
   if(!user) return location.href="login.html";
 
-  patientId = user.uid;
-
-  // Optional: fetch patient name
-  const userDoc = await db.collection("users").doc(user.uid).get();
-  patientName = userDoc.exists ? userDoc.data().name : "Patient";
-
-  // Check if chat exists
-  chatRef = db.collection("chats").doc(patientId);
-  const chatDoc = await chatRef.get();
-  if(!chatDoc.exists){
-    await chatRef.set({
-      patientId: patientId,
-      patientName: patientName,
-      lastMessage: "",
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  }
-
-  // Listen for messages in real-time
-  chatRef.collection("messages").orderBy("timestamp","asc")
+  // Real-time messages
+  db.collection("chats")
+    .where("receiverId","==",user.uid)  // messages sent to this patient
+    .orderBy("timestamp","asc")
     .onSnapshot(snapshot=>{
-      chatContainer.innerHTML = "";
-      snapshot.forEach(doc=>{
-        const m = doc.data();
+      chatBox.innerHTML = "";
+      snapshot.docs.forEach(doc=>{
+        const msg = doc.data();
         const div = document.createElement("div");
-        div.className = "message " + (m.senderId === patientId ? "patient" : "doctor");
-        div.textContent = m.senderName + ": " + m.message;
-        chatContainer.appendChild(div);
+        div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
+        div.innerText = msg.message;
+        chatBox.appendChild(div);
       });
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+  // Fetch patient sent messages too
+  db.collection("chats")
+    .where("senderId","==",user.uid)
+    .orderBy("timestamp","asc")
+    .onSnapshot(snapshot=>{
+      snapshot.docs.forEach(doc=>{
+        const msg = doc.data();
+        const div = document.createElement("div");
+        div.className = "message sent";
+        div.innerText = msg.message;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
     });
 });
 
 // Send message
 sendBtn.onclick = async ()=>{
-  const text = messageInput.value.trim();
+  const user = auth.currentUser;
+  if(!user) return;
+  const text = msgInput.value.trim();
   if(!text) return;
 
-  try{
-    await chatRef.collection("messages").add({
-      senderId: patientId,
-      senderName: patientName,
-      message: text,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Update last message
-    await chatRef.update({
-      lastMessage: text,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    messageInput.value = "";
-  }catch(err){
-    console.error(err);
-    alert("Failed to send message.");
-  }
+  await db.collection("chats").add({
+    senderId: user.uid,
+    receiverId: doctorId,
+    message: text,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    status: "unread"
+  });
+
+  msgInput.value = "";
 };
 </script>
-
 </body>
 </html>
