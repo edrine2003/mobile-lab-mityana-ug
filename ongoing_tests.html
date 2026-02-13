@@ -29,6 +29,8 @@ button.complete:hover { background:#16a34a; }
 <h2>🧪 Ongoing Tests</h2>
 <div id="ordersCounter">Loading...</div>
 <div id="ordersContainer"></div>
+<button id="chatBtn" style="position:fixed;top:16px;right:100px;background:#0ea5e9;color:#fff;padding:12px 16px;border:none;border-radius:999px;cursor:pointer;">💬 Chat</button>
+
 
 <script>
 const firebaseConfig = {
@@ -61,6 +63,10 @@ document.getElementById("logoutBtn").onclick = async ()=>{
   await auth.signOut();
   location.href="login.html";
 };
+  document.getElementById("chatBtn").onclick = ()=>{
+  window.location.href = "patient_chat.html";
+};
+
 
 // All test names (full list)
 const allTests=[
