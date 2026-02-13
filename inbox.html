@@ -13,32 +13,32 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
-h2{color:#0369a1;}
-.card{background:#fff;padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid #ccc;}
-button{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:white;cursor:pointer;}
-table{width:100%;border-collapse:collapse;margin-top:10px;}
-th,td{border:1px solid #ccc;padding:6px;}
-th{background:#e2e8f0;}
-.contact{margin-bottom:15px;background:#e0f2fe;padding:12px;border-radius:10px;}
-.welcome{margin-bottom:15px;padding:12px;background:#d1fae5;border-left:6px solid #10b981;}
+body {font-family:Arial,sans-serif; background:#f1f5f9; margin:0; padding:20px;}
+h2 {color:#0369a1;}
+.card {background:#fff; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #ccc;}
+button {padding:8px 14px; border:none; border-radius:8px; background:#0ea5e9; color:white; cursor:pointer;}
+table {width:100%; border-collapse:collapse; margin-top:10px;}
+th, td {border:1px solid #ccc; padding:6px;}
+th {background:#e2e8f0;}
+.contact {margin-bottom:15px; background:#e0f2fe; padding:12px; border-radius:10px;}
+.welcome {margin-bottom:15px; padding:12px; background:#d1fae5; border-left:6px solid #10b981;}
 
 /* Chat panel styles */
-#chatBtn{margin-bottom:16px; padding:10px 16px; background:#0ea5e9; color:white; border:none; border-radius:8px; cursor:pointer;}
-#chatPanel{display:none; position:fixed; bottom:20px; right:20px; width:350px; max-height:500px; background:white; border:1px solid #cbd5e1; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2); flex-direction:column; z-index:9999;}
-#chatPanelHeader{background:#0369a1; color:white; padding:12px; text-align:center; font-weight:bold;}
-#chatMessages{flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column;}
-#chatInputDiv{display:flex; border-top:1px solid #cbd5e1;}
-#chatInput{flex:1; border:none; padding:10px; outline:none;}
-#chatSend{padding:10px 16px; background:#22c55e; color:white; border:none; cursor:pointer;}
+#chatBtn {margin-bottom:16px; padding:10px 16px; background:#0ea5e9; color:white; border:none; border-radius:8px; cursor:pointer;}
+#chatPanel {display:none; position:fixed; bottom:20px; right:20px; width:350px; max-height:500px; background:white; border:1px solid #cbd5e1; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2); flex-direction:column; z-index:9999;}
+#chatPanelHeader {background:#0369a1; color:white; padding:12px; text-align:center; font-weight:bold;}
+#chatMessages {flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column;}
+#chatInputDiv {display:flex; border-top:1px solid #cbd5e1;}
+#chatInput {flex:1; border:none; padding:10px; outline:none;}
+#chatSend {padding:10px 16px; background:#22c55e; color:white; border:none; cursor:pointer;}
 </style>
 </head>
 
 <body>
 
 <div class="welcome">
-  <h3>Mobile Lab Mityana🧪</h3>
-  <p>We are glad to have you here. Your lab results are always available and safe.</p>
+  <h3>Welcome to Little Hearts Mobile Lab 🧪</h3>
+  <p>Your lab results are always available and safe.</p>
 </div>
 
 <div class="contact">
@@ -83,8 +83,8 @@ const chatSend = document.getElementById("chatSend");
 
 let userId, userName;
 
-auth.onAuthStateChanged(async user=>{
-  if(!user) return location.href="login.html";
+auth.onAuthStateChanged(async user => {
+  if(!user) return location.href = "login.html";
 
   userId = user.uid;
 
@@ -94,13 +94,12 @@ auth.onAuthStateChanged(async user=>{
 
   // Load lab results
   db.collection("results")
-    .where("userId","==",user.uid)
-    .orderBy("uploaded_at","desc")
-    .onSnapshot(async snapshot=>{
-      inbox.innerHTML="";
-
-      if(snapshot.empty){
-        inbox.innerHTML="<p>No results yet.</p>";
+    .where("userId", "==", userId)
+    .orderBy("uploaded_at", "desc")
+    .onSnapshot(async snapshot => {
+      inbox.innerHTML = "";
+      if(snapshot.empty) {
+        inbox.innerHTML = "<p>No results yet.</p>";
         return;
       }
 
@@ -109,14 +108,14 @@ auth.onAuthStateChanged(async user=>{
         let age = "N/A";
 
         if(r.order_id){
-          try{
+          try {
             const orderSnap = await db.collection("orders").doc(r.order_id).get();
             if(orderSnap.exists && orderSnap.data().age) age = orderSnap.data().age;
-          }catch(e){ console.warn("Could not fetch age:", e);}
+          } catch(e){ console.warn("Could not fetch age:", e); }
         }
 
         const card = document.createElement("div");
-        card.className="card";
+        card.className = "card";
 
         let html = `
           <h3>${r.patient_name || "Patient"}</h3>
@@ -140,25 +139,25 @@ auth.onAuthStateChanged(async user=>{
         inbox.appendChild(card);
 
         card.querySelector(".download").onclick = async () => {
-          try{
+          try {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF("p","mm","a4");
             let y = 20;
 
-            pdf.setFillColor(14,165,233); 
+            pdf.setFillColor(14,165,233);
             pdf.rect(0,0,210,25,"F");
             pdf.setFontSize(20);
             pdf.setTextColor(255,255,255);
             pdf.text("LITTLE HEARTS LAB",105,17,{align:"center"});
             y = 35;
 
-            try{
+            try {
               const img = new Image();
               img.src = "logo.png";
-              await new Promise(res=>img.onload=res);
+              await new Promise(res => img.onload = res);
               pdf.addImage(img,"PNG",80,y,50,50);
               y += 55;
-            }catch(e){ console.warn("Logo missing, skipping");}
+            } catch(e) { console.warn("Logo missing, skipping"); }
 
             pdf.setDrawColor(0);
             pdf.setFillColor(230,245,255);
@@ -202,56 +201,58 @@ auth.onAuthStateChanged(async user=>{
             pdf.text("Thank you for choosing Little Hearts Lab! Stay healthy. 🌿",105,y,{align:"center"});
 
             pdf.save(`Patient_${r.patient_name || doc.id}.pdf`);
-          }catch(err){
-            console.error("PDF generation failed:",err);
+          } catch(err) {
+            console.error("PDF generation failed:", err);
             alert("Something went wrong. Please contact the lab.");
           }
         };
       }
     });
 
-  // Load patient chat messages
-  // Load patient chat messages
-db.collection("chats")
-  .where("patientId", "==", userId)
-  .orderBy("timestamp")
-  .onSnapshot(snapshot => {
-    chatMessages.innerHTML = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.patientId !== userId && data.senderId !== userId) return;
+  // -------------------------
+  // Load chat messages
+  // -------------------------
+  db.collection("chats")
+    .where("patientId", "==", userId)
+    .orderBy("timestamp")
+    .onSnapshot(snapshot => {
+      chatMessages.innerHTML = "";
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const msgDiv = document.createElement("div");
+        msgDiv.textContent = data.senderName + ": " + data.text;
+        msgDiv.style.margin = "6px 0";
+        msgDiv.style.padding = "8px 12px";
+        msgDiv.style.borderRadius = "12px";
+        msgDiv.style.maxWidth = "80%";
+        msgDiv.style.wordWrap = "break-word";
 
-      const msgDiv = document.createElement("div");
-      msgDiv.textContent = data.senderName + ": " + data.text;
-      msgDiv.style.margin = "6px 0";
-      msgDiv.style.padding = "8px 12px";
-      msgDiv.style.borderRadius = "12px";
-      msgDiv.style.maxWidth = "80%";
-      msgDiv.style.wordWrap = "break-word";
+        if(data.senderId === userId){
+          msgDiv.style.background = "#0ea5e9";
+          msgDiv.style.color = "white";
+          msgDiv.style.alignSelf = "flex-end";
+        } else {
+          msgDiv.style.background = "#f1f5f9";
+          msgDiv.style.border = "1px solid #ccc";
+          msgDiv.style.alignSelf = "flex-start";
+        }
 
-      if (data.senderId === userId) {
-        msgDiv.style.background = "#0ea5e9";
-        msgDiv.style.color = "white";
-        msgDiv.style.alignSelf = "flex-end";
-      } else {
-        msgDiv.style.background = "#f1f5f9";
-        msgDiv.style.border = "1px solid #ccc";
-        msgDiv.style.alignSelf = "flex-start";
-      }
-
-      chatMessages.appendChild(msgDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
     });
-  });
-  });
+});
 
-
+// -------------------------
 // Chat toggle
+// -------------------------
 chatBtn.onclick = () => {
   chatPanel.style.display = chatPanel.style.display === "none" ? "flex" : "none";
 };
 
+// -------------------------
 // Send chat message
+// -------------------------
 chatSend.onclick = async () => {
   const text = chatInput.value.trim();
   if(!text) return;
@@ -267,7 +268,5 @@ chatSend.onclick = async () => {
   chatInput.value = "";
 };
 </script>
-
 </body>
 </html>
-
