@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🧪 Patient Inbox – Mobile Lab</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -11,53 +10,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{font-family:Arial;background:#f1f5f9;margin:0}
-.container{max-width:1000px;margin:20px auto;padding:16px}
-.header{
-  background:linear-gradient(135deg,#0ea5e9,#14b8a6);
-  color:#fff;padding:18px;border-radius:14px;
-  position:relative;text-align:center
-}
-#logoutBtn{
-  position:absolute;right:16px;top:16px;
-  background:#ef4444;color:#fff;border:none;
-  padding:10px 16px;border-radius:999px;cursor:pointer
-}
-.result-card{
-  background:#fff;padding:20px;margin-top:20px;
-  border-radius:14px;border:1px solid #cbd5e1
-}
-.result-card h3{margin:0;color:#0369a1}
+body{font-family:Arial;background:#f1f5f9;margin:0;padding:20px}
+.card{background:#fff;padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid #ccc}
+button{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:white;cursor:pointer}
 table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}
+th,td{border:1px solid #ccc;padding:6px}
 th{background:#e2e8f0}
-button{
-  padding:8px 14px;border:none;
-  border-radius:8px;cursor:pointer;margin-top:10px
-}
-.download{background:#0ea5e9;color:white}
-.info{
-  background:#f8fafc;padding:10px;
-  border-radius:8px;margin-top:10px;
-  font-size:14px
-}
 </style>
 </head>
 
 <body>
-<div class="container">
 
-  <div class="header">
-    <h2>🧪 Patient Lab Results</h2>
-    <p>Your results appear once verified by laboratory</p>
-    <button id="logoutBtn">Logout</button>
-  </div>
-
-  <div id="inbox">Loading results...</div>
-
-</div>
+<h2>🧪 Your Lab Results</h2>
+<div id="inbox">Loading...</div>
 
 <script>
+
 firebase.initializeApp({
   apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -71,14 +39,16 @@ const inbox = document.getElementById("inbox");
 auth.onAuthStateChanged(user=>{
   if(!user) return location.href="login.html";
 
+  // 🔥 MATCH YOUR REAL DATABASE STRUCTURE
   db.collection("results")
-    .where("patientEmail","==",user.email)
-    .orderBy("createdAt","desc")
+    .where("userId","==",user.uid)
+    .orderBy("uploaded_at","desc")
     .onSnapshot(snapshot=>{
+
       inbox.innerHTML="";
 
       if(snapshot.empty){
-        inbox.innerHTML="<p>No results available.</p>";
+        inbox.innerHTML="<p>No results yet.</p>";
         return;
       }
 
@@ -86,146 +56,77 @@ auth.onAuthStateChanged(user=>{
         const r = doc.data();
 
         const card=document.createElement("div");
-        card.className="result-card";
+        card.className="card";
 
-        let html=`
-          <h3>${r.patientName || "Patient Name"}</h3>
-          <div class="info">
-            <b>Sex:</b> ${r.patientSex || "-"} |
-            <b>Age:</b> ${r.patientAge || "-"} |
-            <b>Email:</b> ${r.patientEmail}
-          </div>
+        let html = `
+          <h3>${r.patient_name || "Patient"}</h3>
+          <p><b>Email:</b> ${r.patient_email || ""}</p>
         `;
 
-        Object.keys(r.results||{}).forEach(test=>{
-          html+=`<h4>${test}</h4>
-          <table>
-            <tr>
-              <th>Parameter</th>
-              <th>Result</th>
-              <th>Units</th>
-            </tr>`;
-
-          Object.keys(r.results[test]).forEach(p=>{
-            const v=r.results[test][p];
-            html+=`
+        // SIMPLE RESULTS STRUCTURE
+        Object.entries(r.results || {}).forEach(([test,value])=>{
+          html += `
+            <table>
               <tr>
-                <td>${p}</td>
-                <td>${v.value}</td>
-                <td>${v.units}</td>
-              </tr>`;
-          });
-
-          html+=`</table>`;
+                <th>Test</th>
+                <th>Result</th>
+              </tr>
+              <tr>
+                <td>${test}</td>
+                <td>${value}</td>
+              </tr>
+            </table>
+          `;
         });
 
-        html+=`<button class="download">⬇ Download PDF</button>`;
+        html += `<br><button class="download">Download PDF</button>`;
 
-        card.innerHTML=html;
+        card.innerHTML = html;
         inbox.appendChild(card);
 
-        // ===== PDF DOWNLOAD =====
-        card.querySelector(".download").onclick=async()=>{
+        // ===== PDF GENERATOR =====
+        card.querySelector(".download").onclick = async ()=>{
 
-          const {jsPDF}=window.jspdf;
-          const pdf=new jsPDF("p","mm","a4");
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF("p","mm","a4");
 
-          let y=20;
-
-          // LOGO
-          const logo=new Image();
-          logo.src="logo.png";
-          await new Promise(resolve=>{
-            logo.onload=resolve;
-          });
-          pdf.addImage(logo,"PNG",15,10,30,30);
+          let y = 20;
 
           // HEADER
           pdf.setFontSize(18);
-          pdf.text("MOBILE LAB SERVICES",105,20,{align:"center"});
-          pdf.setFontSize(11);
-          pdf.text("Mityana, Uganda",105,28,{align:"center"});
+          pdf.text("MOBILE LAB SERVICES",105,y,{align:"center"});
+          y+=10;
 
-          y=50;
-
-          // WATERMARK
-          pdf.setTextColor(230);
-          pdf.setFontSize(60);
-          pdf.text("MOBILE LAB",105,170,{angle:45,align:"center"});
-          pdf.setTextColor(0);
           pdf.setFontSize(12);
+          pdf.text("Mityana, Uganda",105,y,{align:"center"});
+          y+=15;
 
           // PATIENT DETAILS
-          pdf.text("Name: "+(r.patientName||"-"),20,y); y+=8;
-          pdf.text("Sex: "+(r.patientSex||"-"),20,y); y+=8;
-          pdf.text("Age: "+(r.patientAge||"-"),20,y); y+=8;
-          pdf.text("Report Date: "+new Date().toLocaleDateString(),20,y); y+=12;
+          pdf.text("Patient Name: "+(r.patient_name||""),20,y); y+=8;
+          pdf.text("Email: "+(r.patient_email||""),20,y); y+=12;
 
-          // REFERENCE RANGES
-          const ranges={
-            "WBC":"4–11 x10^9/L",
-            "RBC":"4.5–5.9 x10^12/L",
-            "Hemoglobin":"12–17 g/dL",
-            "Platelets":"150–400 x10^9/L",
-            "Glucose":"70–110 mg/dL",
-            "PSA":"0–4 ng/mL"
-          };
-
-          Object.keys(r.results||{}).forEach(test=>{
-            pdf.setFontSize(14);
-            pdf.text(test,20,y);
-            y+=8;
-            pdf.setFontSize(11);
-
-            Object.keys(r.results[test]).forEach(param=>{
-              const v=r.results[test][param];
-              const ref=ranges[param]||"Normal";
-              pdf.text(param,20,y);
-              pdf.text(v.value+" "+v.units,80,y);
-              pdf.text(ref,140,y);
-              y+=8;
-
-              if(y>270){
-                pdf.addPage();
-                y=20;
-              }
-            });
-
-            y+=6;
-          });
-
-          // INTERPRETATION
           pdf.setFontSize(13);
-          pdf.text("Clinical Interpretation:",20,y);
-          y+=8;
+          pdf.text("Results:",20,y); y+=8;
+
           pdf.setFontSize(11);
 
-          pdf.text(
-            pdf.splitTextToSize(
-              "Results should be interpreted in clinical context. Consult your healthcare provider for medical advice.",
-              170
-            ),
-            20,
-            y
-          );
+          Object.entries(r.results || {}).forEach(([test,value])=>{
+            pdf.text(test + ": " + value,20,y);
+            y+=8;
+          });
 
-          y+=25;
-          pdf.text("__________________________",20,y);
-          y+=6;
-          pdf.text("Dr. Edrine Junior Kelvin",20,y);
-          y+=6;
-          pdf.text("Laboratory Technologist",20,y);
+          y+=20;
 
-          pdf.save("MobileLab_Result.pdf");
+          pdf.text("_________________________",20,y);
+          y+=6;
+          pdf.text("Laboratory Officer",20,y);
+
+          pdf.save("Lab_Result_"+doc.id+".pdf");
         };
       });
     });
 });
-
-document.getElementById("logoutBtn").onclick=async()=>{
-  await auth.signOut();
-  location.href="login.html";
-};
 </script>
+
 </body>
 </html>
