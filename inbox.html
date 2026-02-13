@@ -212,6 +212,7 @@ auth.onAuthStateChanged(async user=>{
 
   // Load patient chat messages
   db.collection("chats")
+    .where(patientId", "==" userId)
     .orderBy("timestamp")
     .onSnapshot(snapshot=>{
       chatMessages.innerHTML = "";
