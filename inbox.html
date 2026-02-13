@@ -12,7 +12,7 @@
 
 <style>
 body{font-family:Arial;background:#f1f5f9;margin:0}
-.container{max-width:900px;margin:20px auto;padding:16px}
+.container{max-width:1000px;margin:20px auto;padding:16px}
 .header{
   background:linear-gradient(135deg,#0ea5e9,#14b8a6);
   color:#fff;padding:18px;border-radius:14px;
@@ -23,26 +23,24 @@ body{font-family:Arial;background:#f1f5f9;margin:0}
   background:#ef4444;color:#fff;border:none;
   padding:10px 16px;border-radius:999px;cursor:pointer
 }
-.badge{
-  background:#ef4444;color:white;
-  padding:4px 10px;border-radius:999px;
-  font-size:12px;font-weight:700;
-  margin-left:8px
-}
 .result-card{
-  background:#fff;padding:16px;margin-top:20px;
+  background:#fff;padding:20px;margin-top:20px;
   border-radius:14px;border:1px solid #cbd5e1
 }
-.result-card h4{margin:0 0 8px;color:#0369a1}
-table{width:100%;border-collapse:collapse;margin-bottom:10px}
-th,td{border:1px solid #cbd5e1;padding:6px}
+.result-card h3{margin:0;color:#0369a1}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #cbd5e1;padding:8px;text-align:left}
 th{background:#e2e8f0}
 button{
-  padding:8px 12px;border:none;
-  border-radius:8px;cursor:pointer;
-  margin-right:6px
+  padding:8px 14px;border:none;
+  border-radius:8px;cursor:pointer;margin-top:10px
 }
 .download{background:#0ea5e9;color:white}
+.info{
+  background:#f8fafc;padding:10px;
+  border-radius:8px;margin-top:10px;
+  font-size:14px
+}
 </style>
 </head>
 
@@ -50,15 +48,12 @@ button{
 <div class="container">
 
   <div class="header">
-    <h2>
-      🧪 Patient Inbox
-      <span id="newBadge" class="badge" style="display:none">NEW</span>
-    </h2>
-    <p>Your lab results appear instantly once ready</p>
+    <h2>🧪 Patient Lab Results</h2>
+    <p>Your results appear once verified by laboratory</p>
     <button id="logoutBtn">Logout</button>
   </div>
 
-  <div id="inbox">Loading results…</div>
+  <div id="inbox">Loading results...</div>
 
 </div>
 
@@ -69,13 +64,9 @@ firebase.initializeApp({
   projectId:"mobile-lab-mityana-aeae2"
 });
 
-const auth=firebase.auth();
-const db=firebase.firestore();
-const inbox=document.getElementById("inbox");
-const badge=document.getElementById("newBadge");
-
-let lastSeen = localStorage.getItem("lastSeenResult") || 0;
-let whatsappSent = localStorage.getItem("whatsappSent") || "";
+const auth = firebase.auth();
+const db = firebase.firestore();
+const inbox = document.getElementById("inbox");
 
 auth.onAuthStateChanged(user=>{
   if(!user) return location.href="login.html";
@@ -87,74 +78,145 @@ auth.onAuthStateChanged(user=>{
       inbox.innerHTML="";
 
       if(snapshot.empty){
-        inbox.innerHTML="<p>No results yet.</p>";
+        inbox.innerHTML="<p>No results available.</p>";
         return;
       }
 
       snapshot.forEach(doc=>{
-        const r=doc.data();
-        const ts=r.createdAt?.toMillis()||0;
-
-        if(ts > lastSeen){
-          badge.style.display="inline-block";
-          lastSeen=ts;
-          localStorage.setItem("lastSeenResult",ts);
-
-          if(whatsappSent !== doc.id){
-            const msg = encodeURIComponent(
-              "🧪 Your lab results are ready. Please open your Mobile Lab inbox to view them."
-            );
-            window.open(`https://wa.me/?text=${msg}`,"_blank");
-            localStorage.setItem("whatsappSent",doc.id);
-          }
-        }
+        const r = doc.data();
 
         const card=document.createElement("div");
         card.className="result-card";
 
-        let html=`<h4>🧪 Test Results</h4>`;
+        let html=`
+          <h3>${r.patientName || "Patient Name"}</h3>
+          <div class="info">
+            <b>Sex:</b> ${r.patientSex || "-"} |
+            <b>Age:</b> ${r.patientAge || "-"} |
+            <b>Email:</b> ${r.patientEmail}
+          </div>
+        `;
 
         Object.keys(r.results||{}).forEach(test=>{
-          html+=`<h4>${test}</h4><table>
-            <tr><th>Parameter</th><th>Units</th><th>Value</th></tr>`;
+          html+=`<h4>${test}</h4>
+          <table>
+            <tr>
+              <th>Parameter</th>
+              <th>Result</th>
+              <th>Units</th>
+            </tr>`;
+
           Object.keys(r.results[test]).forEach(p=>{
             const v=r.results[test][p];
             html+=`
               <tr>
                 <td>${p}</td>
-                <td>${v.units}</td>
                 <td>${v.value}</td>
+                <td>${v.units}</td>
               </tr>`;
           });
+
           html+=`</table>`;
         });
 
-        html+=`
-          <button class="download">⬇ Download PDF</button>
-          <div style="font-size:12px;color:#64748b">
-            ${r.createdAt?.toDate().toLocaleString()}
-          </div>
-        `;
+        html+=`<button class="download">⬇ Download PDF</button>`;
 
         card.innerHTML=html;
         inbox.appendChild(card);
 
-        card.querySelector(".download").onclick=()=>{
-          const {jsPDF}=window.jspdf;
-          const pdf=new jsPDF();
-          let y=10;
-          pdf.text("Mobile Lab Results",10,y);y+=8;
+        // ===== PDF DOWNLOAD =====
+        card.querySelector(".download").onclick=async()=>{
 
-          Object.keys(r.results||{}).forEach(t=>{
-            pdf.text(t,10,y);y+=6;
-            Object.keys(r.results[t]).forEach(p=>{
-              const v=r.results[t][p];
-              pdf.text(`${p}: ${v.value} ${v.units}`,10,y);
-              y+=6;
+          const {jsPDF}=window.jspdf;
+          const pdf=new jsPDF("p","mm","a4");
+
+          let y=20;
+
+          // LOGO
+          const logo=new Image();
+          logo.src="logo.png";
+          await new Promise(resolve=>{
+            logo.onload=resolve;
+          });
+          pdf.addImage(logo,"PNG",15,10,30,30);
+
+          // HEADER
+          pdf.setFontSize(18);
+          pdf.text("MOBILE LAB SERVICES",105,20,{align:"center"});
+          pdf.setFontSize(11);
+          pdf.text("Mityana, Uganda",105,28,{align:"center"});
+
+          y=50;
+
+          // WATERMARK
+          pdf.setTextColor(230);
+          pdf.setFontSize(60);
+          pdf.text("MOBILE LAB",105,170,{angle:45,align:"center"});
+          pdf.setTextColor(0);
+          pdf.setFontSize(12);
+
+          // PATIENT DETAILS
+          pdf.text("Name: "+(r.patientName||"-"),20,y); y+=8;
+          pdf.text("Sex: "+(r.patientSex||"-"),20,y); y+=8;
+          pdf.text("Age: "+(r.patientAge||"-"),20,y); y+=8;
+          pdf.text("Report Date: "+new Date().toLocaleDateString(),20,y); y+=12;
+
+          // REFERENCE RANGES
+          const ranges={
+            "WBC":"4–11 x10^9/L",
+            "RBC":"4.5–5.9 x10^12/L",
+            "Hemoglobin":"12–17 g/dL",
+            "Platelets":"150–400 x10^9/L",
+            "Glucose":"70–110 mg/dL",
+            "PSA":"0–4 ng/mL"
+          };
+
+          Object.keys(r.results||{}).forEach(test=>{
+            pdf.setFontSize(14);
+            pdf.text(test,20,y);
+            y+=8;
+            pdf.setFontSize(11);
+
+            Object.keys(r.results[test]).forEach(param=>{
+              const v=r.results[test][param];
+              const ref=ranges[param]||"Normal";
+              pdf.text(param,20,y);
+              pdf.text(v.value+" "+v.units,80,y);
+              pdf.text(ref,140,y);
+              y+=8;
+
+              if(y>270){
+                pdf.addPage();
+                y=20;
+              }
             });
+
+            y+=6;
           });
 
-          pdf.save("Lab_Results.pdf");
+          // INTERPRETATION
+          pdf.setFontSize(13);
+          pdf.text("Clinical Interpretation:",20,y);
+          y+=8;
+          pdf.setFontSize(11);
+
+          pdf.text(
+            pdf.splitTextToSize(
+              "Results should be interpreted in clinical context. Consult your healthcare provider for medical advice.",
+              170
+            ),
+            20,
+            y
+          );
+
+          y+=25;
+          pdf.text("__________________________",20,y);
+          y+=6;
+          pdf.text("Dr. Edrine Junior Kelvin",20,y);
+          y+=6;
+          pdf.text("Laboratory Technologist",20,y);
+
+          pdf.save("MobileLab_Result.pdf");
         };
       });
     });
