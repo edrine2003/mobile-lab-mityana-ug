@@ -4,22 +4,38 @@
 <meta charset="UTF-8">
 <title>🧪 Patient Inbox – Mobile Lab</title>
 
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{font-family:Arial;background:#f1f5f9;margin:0;padding:20px}
-.card{background:#fff;padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid #ccc}
-button{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:white;cursor:pointer}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #ccc;padding:6px}
-th{background:#e2e8f0}
+body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
+h2{color:#0369a1;}
+.card{background:#fff;padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid #ccc;}
+button{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:white;cursor:pointer;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+th,td{border:1px solid #ccc;padding:6px;}
+th{background:#e2e8f0;}
+.contact{margin-bottom:15px;background:#e0f2fe;padding:12px;border-radius:10px;}
+.welcome{margin-bottom:15px;padding:12px;background:#d1fae5;border-left:6px solid #10b981;}
 </style>
 </head>
 
 <body>
+
+<div class="welcome">
+  <h3>Welcome to Mobile Lab Mityana 🧪</h3>
+  <p>We are glad to have you here. Your lab results are always available and safe.</p>
+</div>
+
+<div class="contact">
+  <p><b>Contact Us:</b> +256 778 379 591 | Email: edrinehero@gmail.com</p>
+  <p><i>Remember: Regular checkups keep you healthy! 🌿</i></p>
+</div>
 
 <h2>🧪 Your Lab Results</h2>
 <div id="inbox">Loading...</div>
@@ -41,7 +57,7 @@ auth.onAuthStateChanged(user=>{
   db.collection("results")
     .where("userId","==",user.uid)
     .orderBy("uploaded_at","desc")
-    .onSnapshot(snapshot=>{
+    .onSnapshot(async snapshot=>{
 
       inbox.innerHTML="";
 
@@ -50,20 +66,27 @@ auth.onAuthStateChanged(user=>{
         return;
       }
 
-      snapshot.forEach(doc=>{
+      for(const doc of snapshot.docs){
         const r = doc.data();
+        let age = "N/A";
 
-        const card=document.createElement("div");
+        // Fetch age from orders collection
+        if(r.order_id){
+          const orderSnap = await db.collection("orders").doc(r.order_id).get();
+          if(orderSnap.exists && orderSnap.data().age) age = orderSnap.data().age;
+        }
+
+        const card = document.createElement("div");
         card.className="card";
 
         let html = `
           <h3>${r.patient_name || "Patient"}</h3>
           <p><b>Email:</b> ${r.patient_email || ""}</p>
-          <p><b>Age:</b> ${r.age || ""}</p>
+          <p><b>Age:</b> ${age}</p>
           <p><b>Client Number:</b> ${r.order_id || doc.id}</p>
+          <p><b>Date:</b> ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}</p>
         `;
 
-        // Display tests in a table
         if(r.results){
           html += `
             <table>
@@ -85,50 +108,74 @@ auth.onAuthStateChanged(user=>{
         card.innerHTML = html;
         inbox.appendChild(card);
 
-        // ===== PDF GENERATOR =====
-        card.querySelector(".download").onclick = async ()=>{
+        card.querySelector(".download").onclick = async () => {
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF("p","mm","a4");
           let y = 20;
 
+          // HEADER BAR
+          pdf.setFillColor(14, 165, 233); 
+          pdf.rect(0, 0, 210, 25, "F");
+          pdf.setFontSize(20);
+          pdf.setTextColor(255,255,255);
+          pdf.text("MOBILE LAB", 105,17,{align:"center"});
+
+          y = 35;
+
           // LOGO
           const img = new Image();
-          img.src = "logo.png"; // make sure logo.png is in same folder
+          img.src = "logo.png";
           await new Promise(res=>img.onload=res);
           pdf.addImage(img, "PNG", 80, y, 50, 50);
-          y += 60;
+          y += 55;
 
-          // HEADER
-          pdf.setFontSize(18);
-          pdf.text("MOBILE LAB SERVICES",105,y,{align:"center"});
-          y += 10;
+          // PATIENT INFO BOX
+          pdf.setDrawColor(0);
+          pdf.setFillColor(230,245,255);
+          pdf.roundedRect(15, y, 180, 45, 5, 5, "F");
           pdf.setFontSize(12);
-          pdf.text("Mityana, Uganda",105,y,{align:"center"});
-          y += 15;
+          pdf.setTextColor(0);
+          pdf.text(`Patient Name: ${r.patient_name || "N/A"}`, 20, y + 10);
+          pdf.text(`Email: ${r.patient_email || "N/A"}`, 20, y + 18);
+          pdf.text(`Age: ${age}`, 20, y + 26);
+          pdf.text(`Client No.: ${r.order_id || doc.id}`, 120, y + 10);
+          pdf.text(`Date: ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}`, 120, y + 18);
+          y += 55;
 
-          // PATIENT DETAILS
+          // TESTS TABLE HEADER
+          pdf.setFillColor(14,165,233);
+          pdf.setTextColor(255);
           pdf.setFontSize(12);
-          pdf.text("Patient Name: " + (r.patient_name||""),20,y); y+=8;
-          pdf.text("Email: " + (r.patient_email||""),20,y); y+=8;
-          pdf.text("Age: " + (r.age||""),20,y); y+=8;
-          pdf.text("Client Number: " + (r.order_id||doc.id),20,y); y+=12;
+          pdf.rect(15, y, 180, 8, "F");
+          pdf.text("Test", 20, y + 6);
+          pdf.text("Result", 150, y + 6);
+          y += 8;
 
-          pdf.setFontSize(13);
-          pdf.text("Tests & Results:",20,y); y+=8;
+          // TESTS ROWS
           pdf.setFontSize(11);
+          pdf.setTextColor(0);
+          let rowToggle = false;
+          Object.entries(r.results || {}).forEach(([test,value])=>{
+            pdf.setFillColor(rowToggle ? 245:255, rowToggle ? 245:255, rowToggle ? 245:255);
+            pdf.rect(15, y, 180, 8, "F");
+            pdf.text(test, 20, y + 6);
+            pdf.text(value, 150, y + 6);
+            y += 8;
+            rowToggle = !rowToggle;
+          });
 
-          if(r.results){
-            Object.entries(r.results).forEach(([test,value])=>{
-              pdf.text(`${test}: ${value}`,20,y);
-              y += 8;
-            });
-          }
+          y += 15;
+          pdf.setFontSize(12);
+          pdf.setTextColor(14,165,233);
+          pdf.text("Prepared by Edrine, Labtech",105,y,{align:"center"});
+          y += 7;
+          pdf.setFontSize(10);
+          pdf.setTextColor(50);
+          pdf.text("Thank you for choosing Mobile Lab Mityana! Stay healthy. 🌿",105,y,{align:"center"});
 
-          y += 20;
-          pdf.text("Prepared by Edrine, Labtech",20,y);
           pdf.save(`Patient_${r.patient_name || doc.id}.pdf`);
         };
-      });
+      }
     });
 });
 </script>
