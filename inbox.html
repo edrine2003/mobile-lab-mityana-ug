@@ -28,12 +28,12 @@ th{background:#e2e8f0;}
 <body>
 
 <div class="welcome">
-  <h3>Welcome to Mobile Lab Mityana 🧪</h3>
+  <h3>Welcome to Little Hearts Mobile Lab 🧪</h3>
   <p>We are glad to have you here. Your lab results are always available and safe.</p>
 </div>
 
 <div class="contact">
-  <p><b>Contact Us:</b> +256 778 379 591 | Email: edrinehero@gmail.com</p>
+  <p><b>Contact Us:</b> +256 763 885 073 | Email: edrinehero@gmail.com</p>
   <p><i>Remember: Regular checkups keep you healthy! 🌿</i></p>
 </div>
 
@@ -70,10 +70,12 @@ auth.onAuthStateChanged(user=>{
         const r = doc.data();
         let age = "N/A";
 
-        // Fetch age from orders collection
+        // Safe fetch age from orders collection
         if(r.order_id){
-          const orderSnap = await db.collection("orders").doc(r.order_id).get();
-          if(orderSnap.exists && orderSnap.data().age) age = orderSnap.data().age;
+          try{
+            const orderSnap = await db.collection("orders").doc(r.order_id).get();
+            if(orderSnap.exists && orderSnap.data().age) age = orderSnap.data().age;
+          }catch(e){ console.warn("Could not fetch age:", e);}
         }
 
         const card = document.createElement("div");
@@ -81,25 +83,18 @@ auth.onAuthStateChanged(user=>{
 
         let html = `
           <h3>${r.patient_name || "Patient"}</h3>
-          <p><b>Email:</b> ${r.patient_email || ""}</p>
+          <p><b>Email:</b> ${r.patient_email || "N/A"}</p>
           <p><b>Age:</b> ${age}</p>
           <p><b>Client Number:</b> ${r.order_id || doc.id}</p>
           <p><b>Date:</b> ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}</p>
         `;
 
-        if(r.results){
-          html += `
-            <table>
-              <thead>
-                <tr>
-                  <th>Test</th>
-                  <th>Result</th>
-                </tr>
-              </thead>
-              <tbody>
-          `;
-          Object.entries(r.results).forEach(([test,value])=>{
-            html += `<tr><td>${test}</td><td>${value}</td></tr>`;
+        // Display tests table safely
+        const results = r.results && typeof r.results === "object" ? r.results : {};
+        if(Object.keys(results).length > 0){
+          html += `<table><thead><tr><th>Test</th><th>Result</th></tr></thead><tbody>`;
+          Object.entries(results).forEach(([test,value])=>{
+            html += `<tr><td>${test || "Unknown Test"}</td><td>${value || "N/A"}</td></tr>`;
           });
           html += `</tbody></table>`;
         }
@@ -108,72 +103,79 @@ auth.onAuthStateChanged(user=>{
         card.innerHTML = html;
         inbox.appendChild(card);
 
+        // PDF Generation (safe & stylish)
         card.querySelector(".download").onclick = async () => {
-          const { jsPDF } = window.jspdf;
-          const pdf = new jsPDF("p","mm","a4");
-          let y = 20;
+          try{
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p","mm","a4");
+            let y = 20;
 
-          // HEADER BAR
-          pdf.setFillColor(14, 165, 233); 
-          pdf.rect(0, 0, 210, 25, "F");
-          pdf.setFontSize(20);
-          pdf.setTextColor(255,255,255);
-          pdf.text("MOBILE LAB", 105,17,{align:"center"});
+            // HEADER BAR
+            pdf.setFillColor(14,165,233); 
+            pdf.rect(0,0,210,25,"F");
+            pdf.setFontSize(20);
+            pdf.setTextColor(255,255,255);
+            pdf.text("LITTLE HEARTS LAB",105,17,{align:"center"});
+            y = 35;
 
-          y = 35;
+            // LOGO
+            try{
+              const img = new Image();
+              img.src = "logo.png";
+              await new Promise(res=>img.onload=res);
+              pdf.addImage(img,"PNG",80,y,50,50);
+              y += 55;
+            }catch(e){ console.warn("Logo missing, skipping");}
 
-          // LOGO
-          const img = new Image();
-          img.src = "logo.png";
-          await new Promise(res=>img.onload=res);
-          pdf.addImage(img, "PNG", 80, y, 50, 50);
-          y += 55;
+            // PATIENT INFO BOX
+            pdf.setDrawColor(0);
+            pdf.setFillColor(230,245,255);
+            pdf.roundedRect(15,y,180,45,5,5,"F");
+            pdf.setFontSize(12);
+            pdf.setTextColor(0);
+            pdf.text(`Patient Name: ${r.patient_name || "N/A"}`,20,y+10);
+            pdf.text(`Email: ${r.patient_email || "N/A"}`,20,y+18);
+            pdf.text(`Age: ${age}`,20,y+26);
+            pdf.text(`Client No.: ${r.order_id || doc.id}`,120,y+10);
+            pdf.text(`Date: ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}`,120,y+18);
+            y += 55;
 
-          // PATIENT INFO BOX
-          pdf.setDrawColor(0);
-          pdf.setFillColor(230,245,255);
-          pdf.roundedRect(15, y, 180, 45, 5, 5, "F");
-          pdf.setFontSize(12);
-          pdf.setTextColor(0);
-          pdf.text(`Patient Name: ${r.patient_name || "N/A"}`, 20, y + 10);
-          pdf.text(`Email: ${r.patient_email || "N/A"}`, 20, y + 18);
-          pdf.text(`Age: ${age}`, 20, y + 26);
-          pdf.text(`Client No.: ${r.order_id || doc.id}`, 120, y + 10);
-          pdf.text(`Date: ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}`, 120, y + 18);
-          y += 55;
-
-          // TESTS TABLE HEADER
-          pdf.setFillColor(14,165,233);
-          pdf.setTextColor(255);
-          pdf.setFontSize(12);
-          pdf.rect(15, y, 180, 8, "F");
-          pdf.text("Test", 20, y + 6);
-          pdf.text("Result", 150, y + 6);
-          y += 8;
-
-          // TESTS ROWS
-          pdf.setFontSize(11);
-          pdf.setTextColor(0);
-          let rowToggle = false;
-          Object.entries(r.results || {}).forEach(([test,value])=>{
-            pdf.setFillColor(rowToggle ? 245:255, rowToggle ? 245:255, rowToggle ? 245:255);
-            pdf.rect(15, y, 180, 8, "F");
-            pdf.text(test, 20, y + 6);
-            pdf.text(value, 150, y + 6);
+            // TESTS TABLE HEADER
+            pdf.setFillColor(14,165,233);
+            pdf.setTextColor(255);
+            pdf.setFontSize(12);
+            pdf.rect(15,y,180,8,"F");
+            pdf.text("Test",20,y+6);
+            pdf.text("Result",150,y+6);
             y += 8;
-            rowToggle = !rowToggle;
-          });
 
-          y += 15;
-          pdf.setFontSize(12);
-          pdf.setTextColor(14,165,233);
-          pdf.text("Prepared by Edrine, Labtech",105,y,{align:"center"});
-          y += 7;
-          pdf.setFontSize(10);
-          pdf.setTextColor(50);
-          pdf.text("Thank you for choosing Mobile Lab Mityana! Stay healthy. 🌿",105,y,{align:"center"});
+            // TESTS ROWS
+            pdf.setFontSize(11);
+            pdf.setTextColor(0);
+            let rowToggle = false;
+            Object.entries(results).forEach(([test,value])=>{
+              pdf.setFillColor(rowToggle?245:255,rowToggle?245:255,rowToggle?245:255);
+              pdf.rect(15,y,180,8,"F");
+              pdf.text(test||"Unknown Test",20,y+6);
+              pdf.text(value||"N/A",150,y+6);
+              y += 8;
+              rowToggle = !rowToggle;
+            });
 
-          pdf.save(`Patient_${r.patient_name || doc.id}.pdf`);
+            y += 15;
+            pdf.setFontSize(12);
+            pdf.setTextColor(14,165,233);
+            pdf.text("Prepared by Edrine, Labtech",105,y,{align:"center"});
+            y += 7;
+            pdf.setFontSize(10);
+            pdf.setTextColor(50);
+            pdf.text("Thank you for choosing Little Hearts Lab! Stay healthy. 🌿",105,y,{align:"center"});
+
+            pdf.save(`Patient_${r.patient_name || doc.id}.pdf`);
+          }catch(err){
+            console.error("PDF generation failed:",err);
+            alert("Something went wrong. Please contact the lab.");
+          }
         };
       }
     });
