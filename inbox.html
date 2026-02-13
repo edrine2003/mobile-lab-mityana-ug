@@ -37,7 +37,7 @@ th{background:#e2e8f0;}
 <body>
 
 <div class="welcome">
-  <h3>Welcome to Little Hearts Mobile Lab 🧪</h3>
+  <h3>Mobile Lab Mityana🧪</h3>
   <p>We are glad to have you here. Your lab results are always available and safe.</p>
 </div>
 
@@ -211,36 +211,39 @@ auth.onAuthStateChanged(async user=>{
     });
 
   // Load patient chat messages
-  db.collection("chats")
-    .where(patientId", "==" userId)
-    .orderBy("timestamp")
-    .onSnapshot(snapshot=>{
-      chatMessages.innerHTML = "";
-      snapshot.forEach(doc=>{
-        const data = doc.data();
-        if(data.patientId !== userId && data.senderId !== userId) return;
+  // Load patient chat messages
+db.collection("chats")
+  .where("patientId", "==", userId)
+  .orderBy("timestamp")
+  .onSnapshot(snapshot => {
+    chatMessages.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.patientId !== userId && data.senderId !== userId) return;
 
-        const msgDiv = document.createElement("div");
-        msgDiv.textContent = data.senderName + ": " + data.text;
-        msgDiv.style.margin = "6px 0";
-        msgDiv.style.padding = "8px 12px";
-        msgDiv.style.borderRadius = "12px";
-        msgDiv.style.maxWidth = "80%";
-        msgDiv.style.wordWrap = "break-word";
-        if(data.senderId === userId){
-          msgDiv.style.background = "#0ea5e9";
-          msgDiv.style.color = "white";
-          msgDiv.style.alignSelf = "flex-end";
-        } else {
-          msgDiv.style.background = "#f1f5f9";
-          msgDiv.style.border = "1px solid #ccc";
-          msgDiv.style.alignSelf = "flex-start";
-        }
-        chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      });
+      const msgDiv = document.createElement("div");
+      msgDiv.textContent = data.senderName + ": " + data.text;
+      msgDiv.style.margin = "6px 0";
+      msgDiv.style.padding = "8px 12px";
+      msgDiv.style.borderRadius = "12px";
+      msgDiv.style.maxWidth = "80%";
+      msgDiv.style.wordWrap = "break-word";
+
+      if (data.senderId === userId) {
+        msgDiv.style.background = "#0ea5e9";
+        msgDiv.style.color = "white";
+        msgDiv.style.alignSelf = "flex-end";
+      } else {
+        msgDiv.style.background = "#f1f5f9";
+        msgDiv.style.border = "1px solid #ccc";
+        msgDiv.style.alignSelf = "flex-start";
+      }
+
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     });
-});
+  });
+
 
 // Chat toggle
 chatBtn.onclick = () => {
