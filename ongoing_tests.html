@@ -8,13 +8,17 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body { font-family: Arial,sans-serif; margin:0; padding:16px; background:#f1f5f9; }
 #logoutBtn { position:fixed; top:16px; right:16px; background:#ef4444; color:#fff; padding:12px 16px; border:none; border-radius:999px; cursor:pointer; }
 .order-card { background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px; box-shadow:0 4px 10px rgba(0,0,0,0.05); }
 h4 { margin:8px 0; color:#0369a1; }
-textarea.result-input { width:100%; padding:8px; margin-top:6px; border-radius:8px; border:1px solid #cbd5e1; resize:vertical; }
+textarea.result-input, select.result-input { width:100%; padding:8px; margin-top:6px; border-radius:8px; border:1px solid #cbd5e1; resize:vertical; }
+table { width:100%; border-collapse: collapse; margin-top:8px; }
+th, td { border:1px solid #ccc; padding:6px; text-align:center; }
+th { background:#e2e8f0; }
 button.complete { margin-top:12px; background:#22c55e; color:#fff; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:bold; }
 button.complete:hover { background:#16a34a; }
 </style>
@@ -40,128 +44,267 @@ const db = firebase.firestore();
 const ordersContainer = document.getElementById("ordersContainer");
 const ordersCounter = document.getElementById("ordersCounter");
 
-// 🔐 Admin Authentication
-auth.onAuthStateChanged(async user => {
-  if (!user) {
-    location.href = "login.html";
-    return;
-  }
+// Define test options
+const testOptions = {
+  "Blood Grouping":["A","B","AB","O"],
+  "malaria (b/s)": ["Positive","Negative","Inconclusive"],
+  "HIV":["Positive","Negative","Inconclusive"],
+  "Hepatitis B":["Positive","Negative","Inconclusive"],
+  "Hepatitis C":["Positive","Negative","Inconclusive"],
+  "RPR / Syphilis":["Positive","Negative","Inconclusive"],
+  "Gonorrhea Test":["Positive","Negative","Inconclusive"],
+  "Chlamydia Test":["Positive","Negative","Inconclusive"],
+  "Brucella Test":["Positive","Negative","Inconclusive"],
+  "HCG Blood":["Positive","Negative","Inconclusive"],
+  "Sickling Test":["Positive","Negative"],
+  "Pregnancy Test (hCG)":["Positive","Negative","Inconclusive"],
+  "H. Pylori Stool":["Positive","Negative","Inconclusive"],
+  "Widal Stool":["Positive","Negative","Inconclusive"],
+  "H. Pylori Serum":["Positive","Negative","Inconclusive"]
+};
+
+// Admin Authentication
+auth.onAuthStateChanged(async user=>{
+  if(!user) return location.href="login.html";
 
   const userDoc = await db.collection("users").doc(user.uid).get();
-
-  if (!userDoc.exists || userDoc.data().role !== "admin") {
+  if(!userDoc.exists || userDoc.data().role!=="admin"){
     alert("Access denied");
     await auth.signOut();
-    location.href = "login.html";
+    location.href="login.html";
     return;
   }
-
   loadOngoing();
 });
 
-document.getElementById("logoutBtn").onclick = async () => {
+document.getElementById("logoutBtn").onclick = async ()=>{
   await auth.signOut();
-  location.href = "login.html";
+  location.href="login.html";
 };
 
-// 📥 Load ongoing tests
-// 📥 Load ongoing tests
-async function loadOngoing() {
-  try {
+// Load ongoing tests
+async function loadOngoing(){
+  try{
     const snap = await db.collection("orders")
-      .where("status", "==", "ongoing")
-      .orderBy("createdAt", "asc")
+      .where("status","==","ongoing")
+      .orderBy("createdAt","asc")
       .get();
 
-    if (snap.empty) {
-      ordersCounter.innerText = "No ongoing tests";
-      ordersContainer.innerHTML = "";
+    if(snap.empty){
+      ordersCounter.innerText="No ongoing tests";
+      ordersContainer.innerHTML="";
       return;
     }
 
-    ordersCounter.innerText = `Ongoing Tests: ${snap.size}`;
-    ordersContainer.innerHTML = "";
+    ordersCounter.innerText=`Ongoing Tests: ${snap.size}`;
+    ordersContainer.innerHTML="";
 
-    snap.forEach(doc => {
+    snap.forEach(doc=>{
       const o = doc.data();
-
-      if (!o.userId) {
-        console.warn("Order missing userId:", doc.id);
-        return;
-      }
+      if(!o.userId) return;
 
       const card = document.createElement("div");
-      card.className = "order-card";
+      card.className="order-card";
 
-      let html = `
+      let html=`
         <h4>Order ID: ${doc.id}</h4>
-        <p><b>Name:</b> ${o.name || ""}</p>
-        <p><b>Phone:</b> ${o.phone || ""}</p>
-        <p><b>Email:</b> ${o.email || ""}</p>
+        <p><b>Name:</b> ${o.name||""}</p>
+        <p><b>Age:</b> ${o.age||""}</p>
+        <p><b>Phone:</b> ${o.phone||""}</p>
+        <p><b>Email:</b> ${o.email||""}</p>
       `;
 
-      // 🔧 Repair: Split by comma only if it's followed by a non-digit (prevents splitting numbers like 10,000)
       const tests = o.tests ? o.tests.split(/,(?=\D)/) : [];
 
-      tests.forEach(t => {
-        html += `
-          <p><b>${t.trim()}</b></p>
-          <textarea class="result-input" placeholder="Enter result for ${t.trim()}"></textarea>
-        `;
+      tests.forEach(t=>{
+        const testName = t.trim();
+
+        // Structured CBC table
+        if(testName==="CBC – Complete Blood Count"){
+          html+=`<p><b>${testName}</b></p>
+            <table id="cbc-table-${doc.id}">
+              <thead>
+                <tr>
+                  <th>#</th><th>Parameter</th><th>Units</th><th>Result</th><th>Range</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${["WBC","RBC","Hemoglobin","Hematocrit","MCV","MCH","MCHC","Platelets"].map((param,i)=>`
+                  <tr>
+                    <td>${i+1}</td>
+                    <td>${param}</td>
+                    <td><input type="text" class="result-input" placeholder="Units"></td>
+                    <td><input type="text" class="result-input" placeholder="Result"></td>
+                    <td><input type="text" class="result-input" placeholder="Range"></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`;
+        }
+        // Structured Urinalysis table
+        else if(testName==="Urinalysis"){
+          html+=`<p><b>${testName}</b></p>
+            <table id="urine-table-${doc.id}">
+              <thead>
+                <tr>
+                  <th>#</th><th>Parameter</th><th>Result</th><th>Units</th><th>Range</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${["Macroscopy","UROBILINOGEN","BILIRUBIN","SPECIFIC GRAVITY","pH","NITRITES","GLUCOSE","PROTEINS","KETONES","LUEKOCYTES","RBCs","Microscopy"].map((param,i)=>`
+                  <tr>
+                    <td>${i+1}</td>
+                    <td>${param}</td>
+                    <td><input type="text" class="result-input" placeholder="Result"></td>
+                    <td><input type="text" class="result-input" placeholder="Units"></td>
+                    <td><input type="text" class="result-input" placeholder="Range"></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`;
+        }
+        else{
+          const opt = testOptions[testName]||[];
+          html+=`<p><b>${testName}</b></p>`;
+          if(opt.length>0){
+            html+=`<select class="result-input">
+                     <option value="">Select result</option>
+                     ${opt.map(v=>`<option value="${v}">${v}</option>`).join('')}
+                   </select>`;
+          }else{
+            html+=`<textarea class="result-input" placeholder="Enter result for ${testName}"></textarea>`;
+          }
+        }
       });
 
-      html += `<button class="complete">Save & Complete</button>`;
-      card.innerHTML = html;
+      html+=`<button class="complete">Save & Complete & Generate PDF</button>`;
+      card.innerHTML=html;
       ordersContainer.appendChild(card);
 
-      card.querySelector(".complete").onclick = async () => {
-        const results = {};
-        let hasEmpty = false;
+      card.querySelector(".complete").onclick=async ()=>{
+        const results={};
+        let hasEmpty=false;
 
-        const inputs = card.querySelectorAll(".result-input");
+        // Gather inputs
+        // CBC table
+        const cbcRows = card.querySelectorAll(`#cbc-table-${doc.id} tbody tr`);
+        if(cbcRows.length>0){
+          results["CBC – Complete Blood Count"]=Array.from(cbcRows).map(r=>{
+            const cells=r.querySelectorAll("input");
+            if(!cells[1].value||!cells[2].value) hasEmpty=true;
+            return { test: r.cells[1].innerText, units: cells[0].value, result: cells[1].value, range: cells[2].value };
+          });
+        }
 
-        inputs.forEach((el, i) => {
-          const value = el.value.trim();
-          if (!value) hasEmpty = true;
-          results[tests[i].trim()] = value;
+        // Urinalysis table
+        const urineRows = card.querySelectorAll(`#urine-table-${doc.id} tbody tr`);
+        if(urineRows.length>0){
+          results["Urinalysis"]=Array.from(urineRows).map(r=>{
+            const cells=r.querySelectorAll("input");
+            if(!cells[0].value||!cells[1].value) hasEmpty=true;
+            return { test: r.cells[1].innerText, result: cells[0].value, units: cells[1].value, range: cells[2].value };
+          });
+        }
+
+        // Other tests
+        const otherInputs = card.querySelectorAll("textarea.result-input, select.result-input");
+        otherInputs.forEach((el)=>{
+          if(el.tagName==="SELECT") results[el.previousSibling.textContent.trim()] = el.value;
+          else results[el.previousSibling.textContent.trim()] = el.value.trim();
+          if(!el.value) hasEmpty=true;
         });
 
-        if (hasEmpty) {
-          alert("Please enter all test results before completing.");
+        if(hasEmpty){
+          alert("Please fill all results.");
           return;
         }
 
-        try {
+        try{
           await db.collection("results").doc(doc.id).set({
             order_id: doc.id,
             userId: o.userId,
-            patient_email: o.email || "",
-            patient_name: o.name || "",
+            patient_email: o.email||"",
+            patient_name: o.name||"",
+            patient_age: o.age||"",
             results: results,
-            status: "completed",
+            status:"completed",
             uploaded_at: firebase.firestore.FieldValue.serverTimestamp()
           });
 
-          await db.collection("orders").doc(doc.id).update({
-            status: "completed"
-          });
+          await db.collection("orders").doc(doc.id).update({ status:"completed" });
 
-          alert("Results saved & test completed successfully.");
-          window.location.href = "completed_tests.html";
+          alert("Results saved & PDF generated.");
 
-        } catch (error) {
-          console.error("Error saving results:", error);
+          // Generate PDF
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF("p","mm","a4");
+          let y=20;
+
+          // Logo
+          const logo = new Image();
+          logo.src="logo.png"; // ensure logo.png exists
+          logo.onload=()=>{
+            pdf.addImage(logo, "PNG", 15, y, 40, 15);
+            pdf.setFontSize(18);
+            pdf.text("MOBILE LAB SERVICES",105,y+10,{align:"center"});
+            y+=25;
+            pdf.setFontSize(12);
+            pdf.text("Mityana, Uganda",105,y,{align:"center"});
+            y+=15;
+
+            // Patient info
+            pdf.setFontSize(13);
+            pdf.text(`Patient Name: ${o.name}`,20,y); y+=8;
+            pdf.text(`Age: ${o.age||""}`,20,y); y+=8;
+            pdf.text(`Email: ${o.email||""}`,20,y); y+=12;
+            pdf.text("Results:",20,y); y+=8;
+
+            pdf.setFontSize(11);
+
+            // Helper to render table arrays
+            Object.entries(results).forEach(([key,val])=>{
+              pdf.setFontSize(12);
+              pdf.setTextColor(14,165,233);
+              pdf.text(key,20,y); y+=7;
+              pdf.setFontSize(11);
+              pdf.setTextColor(0);
+
+              if(Array.isArray(val)){
+                // Table style
+                val.forEach((row,index)=>{
+                  pdf.text(`${index+1}. ${row.test} - Result: ${row.result} ${row.units||''} (Range: ${row.range||''})`,20,y);
+                  y+=7;
+                  if(y>280){ pdf.addPage(); y=20; }
+                });
+              } else {
+                pdf.text(`Result: ${val}`,20,y); y+=7;
+                if(y>280){ pdf.addPage(); y=20; }
+              }
+            });
+
+            y+=10;
+            pdf.setDrawColor(0);
+            pdf.line(20,y,100,y); y+=6;
+            pdf.text("Laboratory Officer: Edrine Labtech",20,y); y+=12;
+            pdf.text("Contact: +256763885073 | Email: edrinehero@gmail.com",20,y); y+=7;
+            pdf.text("Welcome to Little Hearts Sanctuary Mobile Lab. We ensure accurate results promptly!",20,y);
+
+            pdf.save(`Lab_Result_${doc.id}.pdf`);
+            window.location.href="completed_tests.html";
+          };
+
+        }catch(err){
+          console.error(err);
           alert("Failed to save results. Check console.");
         }
       };
     });
 
-  } catch (error) {
-    console.error("Load error:", error);
-    ordersCounter.innerText = "Error loading tests.";
+  }catch(err){
+    console.error(err);
+    ordersCounter.innerText="Error loading tests.";
   }
 }
-
 </script>
 
 </body>
