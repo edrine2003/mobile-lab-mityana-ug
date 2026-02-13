@@ -65,6 +65,7 @@ document.getElementById("logoutBtn").onclick = async () => {
 };
 
 // 📥 Load ongoing tests
+// 📥 Load ongoing tests
 async function loadOngoing() {
   try {
     const snap = await db.collection("orders")
@@ -84,7 +85,6 @@ async function loadOngoing() {
     snap.forEach(doc => {
       const o = doc.data();
 
-      // Safety check for old orders
       if (!o.userId) {
         console.warn("Order missing userId:", doc.id);
         return;
@@ -100,7 +100,8 @@ async function loadOngoing() {
         <p><b>Email:</b> ${o.email || ""}</p>
       `;
 
-      const tests = o.tests ? o.tests.split(",") : [];
+      // 🔧 Repair: Split by comma only if it's followed by a non-digit (prevents splitting numbers like 10,000)
+      const tests = o.tests ? o.tests.split(/,(?=\D)/) : [];
 
       tests.forEach(t => {
         html += `
@@ -114,7 +115,6 @@ async function loadOngoing() {
       ordersContainer.appendChild(card);
 
       card.querySelector(".complete").onclick = async () => {
-
         const results = {};
         let hasEmpty = false;
 
@@ -132,11 +132,9 @@ async function loadOngoing() {
         }
 
         try {
-
-          // ✅ Save results properly
           await db.collection("results").doc(doc.id).set({
             order_id: doc.id,
-            userId: o.userId, // 🔥 CORRECT FIELD
+            userId: o.userId,
             patient_email: o.email || "",
             patient_name: o.name || "",
             results: results,
@@ -144,14 +142,12 @@ async function loadOngoing() {
             uploaded_at: firebase.firestore.FieldValue.serverTimestamp()
           });
 
-          // ✅ Update order status
           await db.collection("orders").doc(doc.id).update({
             status: "completed"
           });
 
-         alert("Results saved & test completed successfully.");
-window.location.href = "completed_tests.html";
-
+          alert("Results saved & test completed successfully.");
+          window.location.href = "completed_tests.html";
 
         } catch (error) {
           console.error("Error saving results:", error);
@@ -165,6 +161,7 @@ window.location.href = "completed_tests.html";
     ordersCounter.innerText = "Error loading tests.";
   }
 }
+
 </script>
 
 </body>
