@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>💬 Doctor Inbox – Mobile Lab</title>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
+h2{color:#0369a1;}
+#patientsList{width:25%; float:left; border-right:1px solid #cbd5e1; height:90vh; overflow-y:auto; background:white; padding:10px; border-radius:12px;}
+#patientsList div{padding:10px; margin-bottom:5px; border-radius:8px; cursor:pointer; border:1px solid #ccc;}
+#patientsList div.active{background:#0ea5e9; color:white;}
+#chatPanel{width:70%; float:right; height:90vh; display:flex; flex-direction:column; background:white; border-radius:12px; border:1px solid #cbd5e1; padding:10px;}
+#chatMessages{flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column;}
+#chatInputDiv{display:flex; border-top:1px solid #cbd5e1;}
+#chatInput{flex:1; border:none; padding:10px; outline:none;}
+#chatSend{padding:10px 16px; background:#22c55e; color:white; border:none; cursor:pointer;}
+</style>
+</head>
+
+<body>
+
+<h2>💬 Doctor Inbox – Mobile Lab</h2>
+<div id="patientsList">Loading patients...</div>
+<div id="chatPanel" style="display:none;">
+  <div id="chatMessages"></div>
+  <div id="chatInputDiv">
+    <input type="text" id="chatInput" placeholder="Type a message...">
+    <button id="chatSend">Send</button>
+  </div>
+</div>
+
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const patientsListEl = document.getElementById("patientsList");
+const chatPanel = document.getElementById("chatPanel");
+const chatMessages = document.getElementById("chatMessages");
+const chatInput = document.getElementById("chatInput");
+const chatSend = document.getElementById("chatSend");
+
+let doctorId, doctorName;
+let selectedPatientId = null;
+
+// Authenticate doctor/admin
+auth.onAuthStateChanged(async user=>{
+  if(!user) return location.href="login.html";
+  doctorId = user.uid;
+
+  const docSnap = await db.collection("users").doc(doctorId).get();
+  doctorName = docSnap.data().name || "Doctor";
+
+  loadPatients();
+});
+
+// Load all patients who have sent messages
+async function loadPatients(){
+  const snapshot = await db.collection("chats").orderBy("timestamp").get();
+  const patients = {};
+  snapshot.forEach(doc=>{
+    const data = doc.data();
+    patients[data.patientId] = data.senderName || "Patient";
+  });
+
+  patientsListEl.innerHTML = "";
+  if(Object.keys(patients).length === 0){
+    patientsListEl.innerHTML = "<p>No patients have messaged yet.</p>";
+    return;
+  }
+
+  Object.entries(patients).forEach(([id,name])=>{
+    const div = document.createElement("div");
+    div.textContent = name;
+    div.onclick = ()=>selectPatient(id, div);
+    patientsListEl.appendChild(div);
+  });
+}
+
+// Select patient to chat
+function selectPatient(patientId, divEl){
+  selectedPatientId = patientId;
+
+  // Highlight selected patient
+  Array.from(patientsListEl.children).forEach(d=>d.classList.remove("active"));
+  divEl.classList.add("active");
+
+  chatPanel.style.display = "flex";
+
+  // Load chat messages in real-time
+  db.collection("chats")
+    .orderBy("timestamp")
+    .onSnapshot(snapshot=>{
+      chatMessages.innerHTML = "";
+      snapshot.forEach(doc=>{
+        const data = doc.data();
+        if(data.patientId !== selectedPatientId) return;
+
+        const msgDiv = document.createElement("div");
+        msgDiv.textContent = data.senderName + ": " + data.text;
+        msgDiv.style.margin = "6px 0";
+        msgDiv.style.padding = "8px 12px";
+        msgDiv.style.borderRadius = "12px";
+        msgDiv.style.maxWidth = "80%";
+        msgDiv.style.wordWrap = "break-word";
+
+        if(data.senderId === doctorId){
+          msgDiv.style.background = "#0ea5e9";
+          msgDiv.style.color = "white";
+          msgDiv.style.alignSelf = "flex-end";
+        } else {
+          msgDiv.style.background = "#f1f5f9";
+          msgDiv.style.border = "1px solid #ccc";
+          msgDiv.style.alignSelf = "flex-start";
+        }
+
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
+    });
+}
+
+// Send message to patient
+chatSend.onclick = async ()=>{
+  const text = chatInput.value.trim();
+  if(!text || !selectedPatientId) return;
+
+  await db.collection("chats").add({
+    text,
+    patientId: selectedPatientId,
+    senderId: doctorId,
+    senderName: doctorName,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  chatInput.value = "";
+};
+</script>
+
+</body>
+</html>
