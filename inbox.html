@@ -25,7 +25,6 @@ th{background:#e2e8f0}
 <div id="inbox">Loading...</div>
 
 <script>
-
 firebase.initializeApp({
   apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -39,7 +38,6 @@ const inbox = document.getElementById("inbox");
 auth.onAuthStateChanged(user=>{
   if(!user) return location.href="login.html";
 
-  // 🔥 MATCH YOUR REAL DATABASE STRUCTURE
   db.collection("results")
     .where("userId","==",user.uid)
     .orderBy("uploaded_at","desc")
@@ -61,67 +59,74 @@ auth.onAuthStateChanged(user=>{
         let html = `
           <h3>${r.patient_name || "Patient"}</h3>
           <p><b>Email:</b> ${r.patient_email || ""}</p>
+          <p><b>Age:</b> ${r.age || ""}</p>
+          <p><b>Client Number:</b> ${r.order_id || doc.id}</p>
         `;
 
-        // SIMPLE RESULTS STRUCTURE
-        Object.entries(r.results || {}).forEach(([test,value])=>{
+        // Display tests in a table
+        if(r.results){
           html += `
             <table>
-              <tr>
-                <th>Test</th>
-                <th>Result</th>
-              </tr>
-              <tr>
-                <td>${test}</td>
-                <td>${value}</td>
-              </tr>
-            </table>
+              <thead>
+                <tr>
+                  <th>Test</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody>
           `;
-        });
+          Object.entries(r.results).forEach(([test,value])=>{
+            html += `<tr><td>${test}</td><td>${value}</td></tr>`;
+          });
+          html += `</tbody></table>`;
+        }
 
         html += `<br><button class="download">Download PDF</button>`;
-
         card.innerHTML = html;
         inbox.appendChild(card);
 
         // ===== PDF GENERATOR =====
         card.querySelector(".download").onclick = async ()=>{
-
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF("p","mm","a4");
-
           let y = 20;
+
+          // LOGO
+          const img = new Image();
+          img.src = "logo.png"; // make sure logo.png is in same folder
+          await new Promise(res=>img.onload=res);
+          pdf.addImage(img, "PNG", 80, y, 50, 50);
+          y += 60;
 
           // HEADER
           pdf.setFontSize(18);
           pdf.text("MOBILE LAB SERVICES",105,y,{align:"center"});
-          y+=10;
-
+          y += 10;
           pdf.setFontSize(12);
           pdf.text("Mityana, Uganda",105,y,{align:"center"});
-          y+=15;
+          y += 15;
 
           // PATIENT DETAILS
-          pdf.text("Patient Name: "+(r.patient_name||""),20,y); y+=8;
-          pdf.text("Email: "+(r.patient_email||""),20,y); y+=12;
+          pdf.setFontSize(12);
+          pdf.text("Patient Name: " + (r.patient_name||""),20,y); y+=8;
+          pdf.text("Email: " + (r.patient_email||""),20,y); y+=8;
+          pdf.text("Age: " + (r.age||""),20,y); y+=8;
+          pdf.text("Client Number: " + (r.order_id||doc.id),20,y); y+=12;
 
           pdf.setFontSize(13);
-          pdf.text("Results:",20,y); y+=8;
-
+          pdf.text("Tests & Results:",20,y); y+=8;
           pdf.setFontSize(11);
 
-          Object.entries(r.results || {}).forEach(([test,value])=>{
-            pdf.text(test + ": " + value,20,y);
-            y+=8;
-          });
+          if(r.results){
+            Object.entries(r.results).forEach(([test,value])=>{
+              pdf.text(`${test}: ${value}`,20,y);
+              y += 8;
+            });
+          }
 
-          y+=20;
-
-          pdf.text("_________________________",20,y);
-          y+=6;
-          pdf.text("Laboratory Officer",20,y);
-
-          pdf.save("Lab_Result_"+doc.id+".pdf");
+          y += 20;
+          pdf.text("Prepared by Edrine, Labtech",20,y);
+          pdf.save(`Patient_${r.patient_name || doc.id}.pdf`);
         };
       });
     });
