@@ -265,7 +265,6 @@ chatSend.onclick = async () => {
     text,
     patientId: userId,
     senderId: userId,
-    senderName: userName,
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
 
