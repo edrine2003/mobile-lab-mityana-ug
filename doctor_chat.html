@@ -13,8 +13,8 @@ h2{color:#0369a1;margin-bottom:15px;}
 #patientsList{height:200px;overflow-y:auto;}
 .patientItem{padding:8px;border-bottom:1px solid #eee;cursor:pointer;}
 .patientItem:hover{background:#e0f2fe;}
-#chatBox{height:400px;overflow-y:auto;}
-.message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;}
+#chatBox{height:400px;overflow-y:auto;display:flex;flex-direction:column;}
+.message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;word-wrap:break-word;}
 .sent{background:#0ea5e9;color:#fff;margin-left:auto;}
 .received{background:#e2e8f0;margin-right:auto;}
 #msgInput{width:80%;padding:8px;border-radius:8px;border:1px solid #ccc;}
@@ -50,48 +50,55 @@ const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
 let selectedPatient = null;
+let adminName = "Admin";
 
-auth.onAuthStateChanged(async admin=>{
+auth.onAuthStateChanged(async admin => {
   if(!admin) return location.href="login.html";
   const adminId = admin.uid;
 
   // Fetch all unique patients
   db.collection("chats")
-  .orderBy("timestamp", "desc")
-  .onSnapshot(snapshot => {
-      const patients = {};
+    .orderBy("timestamp", "desc")
+    .onSnapshot(async snapshot => {
+      const patientIds = {};
       snapshot.docs.forEach(doc => {
-          const data = doc.data();
-          data.participants.forEach(p => {
-              if (p !== adminId) patients[p] = true;
-          });
+        const data = doc.data();
+        data.participants.forEach(p => { if(p !== adminId) patientIds[p] = true; });
       });
 
       patientsList.innerHTML = "";
-      Object.keys(patients).forEach(uid => {
-          const div = document.createElement("div");
-          div.className = "patientItem";
-          div.innerText = uid; // you can fetch name from users collection if you want
-          div.onclick = () => selectPatient(uid);
-          patientsList.appendChild(div);
-      });
-  });
+      for(const uid of Object.keys(patientIds)){
+        // Fetch patient name from users collection
+        let name = uid;
+        try{
+          const userDoc = await db.collection("users").doc(uid).get();
+          if(userDoc.exists && userDoc.data().name) name = userDoc.data().name;
+        }catch(e){ console.warn("Could not fetch patient name:", e);}
+        
+        const div = document.createElement("div");
+        div.className = "patientItem";
+        div.innerText = name;
+        div.onclick = () => selectPatient(uid, name);
+        patientsList.appendChild(div);
+      }
+    });
 });
 
-function selectPatient(patientId){
+function selectPatient(patientId, patientName){
   selectedPatient = patientId;
   chatBox.innerHTML = "Loading messages...";
 
   db.collection("chats")
-    .where("participants","array-contains", selectedPatient)
+    .where("participants","array-contains", patientId)
     .orderBy("timestamp","asc")
     .onSnapshot(snapshot=>{
       chatBox.innerHTML = "";
       snapshot.docs.forEach(doc=>{
         const msg = doc.data();
         const div = document.createElement("div");
+        const sender = msg.senderName || (msg.senderId === auth.currentUser.uid ? adminName : patientName || msg.senderId);
         div.className = "message " + (msg.senderId === auth.currentUser.uid ? "sent" : "received");
-        div.innerText = msg.text || msg.message;
+        div.innerText = sender + ": " + (msg.text || msg.message || "");
         chatBox.appendChild(div);
 
         // Mark patient messages as read
@@ -103,7 +110,7 @@ function selectPatient(patientId){
     });
 }
 
-sendBtn.onclick = async ()=>{
+sendBtn.onclick = async () => {
   if(!selectedPatient) return alert("Select a patient first!");
   const text = msgInput.value.trim();
   if(!text) return;
@@ -111,6 +118,7 @@ sendBtn.onclick = async ()=>{
   await db.collection("chats").add({
     text,
     senderId: auth.currentUser.uid,
+    senderName: adminName,
     receiverId: selectedPatient,
     participants: [auth.currentUser.uid, selectedPatient],
     status: "unread",
