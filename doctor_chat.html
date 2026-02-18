@@ -2,14 +2,18 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>💬 Patient Inbox – Mobile Lab Admin</title>
+<title>💬 Admin Inbox – Mobile Lab</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
-h2{color:#0369a1;}
-#chatBox{height:500px;overflow-y:auto;border:1px solid #ccc;background:#fff;padding:10px;border-radius:12px;margin-bottom:10px;}
+h2{color:#0369a1;margin-bottom:15px;}
+#patientsList, #chatBox{background:#fff;border:1px solid #ccc;border-radius:12px;padding:10px;margin-bottom:15px;}
+#patientsList{height:200px;overflow-y:auto;}
+.patientItem{padding:8px;border-bottom:1px solid #eee;cursor:pointer;}
+.patientItem:hover{background:#e0f2fe;}
+#chatBox{height:400px;overflow-y:auto;}
 .message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;}
 .sent{background:#0ea5e9;color:#fff;margin-left:auto;}
 .received{background:#e2e8f0;margin-right:auto;}
@@ -19,64 +23,102 @@ h2{color:#0369a1;}
 </head>
 <body>
 
-<h2>💬 Patient Inbox</h2>
-<div id="chatBox">Loading messages...</div>
+<h2>💬 Admin Inbox</h2>
+
+<div id="patientsList">Loading patients...</div>
+<div id="chatBox">Select a patient to start chat</div>
 <input type="text" id="msgInput" placeholder="Type your message...">
 <button id="sendBtn">Send</button>
 
 <script>
-firebase.initializeApp({
-  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId:"mobile-lab-mityana-aeae2"
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+  measurementId: "G-RWW6TCR0CD"
+};
+firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+const patientsList = document.getElementById("patientsList");
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
-const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // Admin UID
+let selectedPatient = null;
 
-auth.onAuthStateChanged(user=>{
-  if(!user) return location.href="login.html";
+auth.onAuthStateChanged(async admin=>{
+  if(!admin) return location.href="login.html";
+  const adminId = admin.uid;
 
-  // Load all messages where admin is a participant
+  // Fetch all unique patients
   db.collection("chats")
-    .where("participants","array-contains",adminId)
+    .orderBy("timestamp","desc")
+    .onSnapshot(snapshot=>{
+      const patients = {};
+      snapshot.docs.forEach(doc=>{
+        const data = doc.data();
+        data.participants.forEach(p=>{
+          if(p !== adminId) patients[p] = true;
+        });
+      });
+      patientsList.innerHTML = "";
+      Object.keys(patients).forEach(uid=>{
+        const div = document.createElement("div");
+        div.className = "patientItem";
+        div.innerText = uid; // Later you can replace UID with patient name from users collection
+        div.onclick = ()=>selectPatient(uid);
+        patientsList.appendChild(div);
+      });
+    });
+});
+
+function selectPatient(patientId){
+  selectedPatient = patientId;
+  chatBox.innerHTML = "Loading messages...";
+
+  // Listen to messages with this patient
+  db.collection("chats")
+    .where("participants","array-contains", selectedPatient)
     .orderBy("timestamp","asc")
     .onSnapshot(snapshot=>{
-      chatBox.innerHTML="";
+      chatBox.innerHTML = "";
       snapshot.docs.forEach(doc=>{
         const msg = doc.data();
         const div = document.createElement("div");
-        div.className="message "+(msg.senderId===adminId?"sent":"received");
-        div.innerText=msg.message;
+        div.className = "message " + (msg.senderId === auth.currentUser.uid ? "sent" : "received");
+        div.innerText = msg.message;
         chatBox.appendChild(div);
+
+        // Mark as read if message is to admin
+        if(msg.receiverId === auth.currentUser.uid && msg.status === "unread"){
+          doc.ref.update({status:"read"});
+        }
       });
       chatBox.scrollTop = chatBox.scrollHeight;
     });
+}
 
-  // Send reply (optional)
-  sendBtn.onclick = async ()=>{
-    const text = msgInput.value.trim();
-    if(!text) return;
-
-    // Prompt to select patient UID
-    const patientId = prompt("Enter patient UID to send message:");
-
-    await db.collection("chats").add({
-      senderId: adminId,
-      receiverId: patientId,
-      participants: [adminId, patientId],
-      message: text,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      status: "unread"
-    });
-    msgInput.value="";
-  };
-});
+sendBtn.onclick = async ()=>{
+  if(!selectedPatient) return alert("Select a patient first!");
+  const text = msgInput.value.trim();
+  if(!text) return;
+  await db.collection("chats").add({
+    senderId: auth.currentUser.uid,
+    receiverId: selectedPatient,
+    participants: [auth.currentUser.uid, selectedPatient],
+    message: text,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    status: "unread"
+  });
+  msgInput.value = "";
+};
 </script>
+
 </body>
 </html>
