@@ -120,7 +120,7 @@ auth.onAuthStateChanged(async user => {
         card.className="card";
 
         let html = `
-          <h3>${r.patient_name || "Patient"}</h3>
+          <h3>${r.patient_name || userName}</h3>
           <p><b>Email:</b> ${r.patient_email || "N/A"}</p>
           <p><b>Age:</b> ${age}</p>
           <p><b>Client Number:</b> ${r.order_id || doc.id}</p>
@@ -167,7 +167,7 @@ auth.onAuthStateChanged(async user => {
             pdf.roundedRect(15,y,180,45,5,5,"F");
             pdf.setFontSize(12);
             pdf.setTextColor(0);
-            pdf.text(`Patient Name: ${r.patient_name || "N/A"}`,20,y+10);
+            pdf.text(`Patient Name: ${r.patient_name || userName}`,20,y+10);
             pdf.text(`Email: ${r.patient_email || "N/A"}`,20,y+18);
             pdf.text(`Age: ${age}`,20,y+26);
             pdf.text(`Client No.: ${r.order_id || doc.id}`,120,y+10);
@@ -220,25 +220,18 @@ auth.onAuthStateChanged(async user => {
       chatMessages.innerHTML = "";
       snapshot.forEach(doc=>{
         const data = doc.data();
-
+        const sender = data.senderName || (data.senderId === userId ? userName : "Admin");
         const msgDiv = document.createElement("div");
-        msgDiv.textContent = data.senderName + ": " + data.text;
+        msgDiv.textContent = sender + ": " + (data.text || "");
         msgDiv.style.margin = "6px 0";
         msgDiv.style.padding = "8px 12px";
         msgDiv.style.borderRadius = "12px";
         msgDiv.style.maxWidth = "80%";
         msgDiv.style.wordWrap = "break-word";
-
-        if(data.senderId === userId){
-          msgDiv.style.background = "#0ea5e9";
-          msgDiv.style.color = "white";
-          msgDiv.style.alignSelf = "flex-end";
-        } else {
-          msgDiv.style.background = "#f1f5f9";
-          msgDiv.style.border = "1px solid #ccc";
-          msgDiv.style.alignSelf = "flex-start";
-        }
-
+        msgDiv.style.alignSelf = (data.senderId === userId) ? "flex-end" : "flex-start";
+        msgDiv.style.background = (data.senderId === userId) ? "#0ea5e9" : "#f1f5f9";
+        msgDiv.style.color = (data.senderId === userId) ? "white" : "black";
+        if(data.senderId !== userId) msgDiv.style.border = "1px solid #ccc";
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       });
