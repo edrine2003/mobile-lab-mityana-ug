@@ -3,9 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>💬 Admin Inbox – Mobile Lab</title>
+
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <style>
 body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
 h2{color:#0369a1;margin-bottom:15px;}
@@ -16,7 +19,7 @@ h2{color:#0369a1;margin-bottom:15px;}
 #chatBox{height:400px;overflow-y:auto;display:flex;flex-direction:column;}
 .message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;word-wrap:break-word;}
 .sent{background:#0ea5e9;color:#fff;margin-left:auto;}
-.received{background:#e2e8f0;margin-right:auto;}
+.received{background:#f1f5f9;margin-right:auto;border:1px solid #ccc;}
 #msgInput{width:80%;padding:8px;border-radius:8px;border:1px solid #ccc;}
 #sendBtn{padding:8px 12px;border:none;border-radius:8px;background:#10b981;color:white;cursor:pointer;}
 </style>
@@ -26,18 +29,16 @@ h2{color:#0369a1;margin-bottom:15px;}
 <h2>💬 Admin Inbox</h2>
 <div id="patientsList">Loading patients...</div>
 <div id="chatBox">Select a patient to start chat</div>
-<input type="text" id="msgInput" placeholder="Type your message...">
-<button id="sendBtn">Send</button>
+<div style="display:flex;">
+  <input type="text" id="msgInput" placeholder="Type your message...">
+  <button id="sendBtn">Send</button>
+</div>
 
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
-  measurementId: "G-RWW6TCR0CD"
+  projectId: "mobile-lab-mityana-aeae2"
 };
 firebase.initializeApp(firebaseConfig);
 
@@ -52,7 +53,7 @@ const sendBtn = document.getElementById("sendBtn");
 let selectedPatient = null;
 let adminName = "Admin";
 
-auth.onAuthStateChanged(async admin => {
+auth.onAuthStateChanged(async admin=>{
   if(!admin) return location.href="login.html";
   const adminId = admin.uid;
 
@@ -60,45 +61,60 @@ auth.onAuthStateChanged(async admin => {
   db.collection("chats")
     .orderBy("timestamp", "desc")
     .onSnapshot(async snapshot => {
-      const patientIds = {};
+      const patients = {};
       snapshot.docs.forEach(doc => {
         const data = doc.data();
-        data.participants.forEach(p => { if(p !== adminId) patientIds[p] = true; });
+        data.participants.forEach(p => {
+          if (p !== adminId) patients[p] = true;
+        });
       });
 
+      // Fetch patient names
+      const patientEntries = await Promise.all(
+        Object.keys(patients).map(async uid => {
+          try {
+            const doc = await db.collection("users").doc(uid).get();
+            return [uid, doc.exists ? doc.data()?.name || uid : uid];
+          } catch(e) {
+            return [uid, uid];
+          }
+        })
+      );
+
       patientsList.innerHTML = "";
-      for(const uid of Object.keys(patientIds)){
-        // Fetch patient name from users collection
-        let name = uid;
-        try{
-          const userDoc = await db.collection("users").doc(uid).get();
-          if(userDoc.exists && userDoc.data().name) name = userDoc.data().name;
-        }catch(e){ console.warn("Could not fetch patient name:", e);}
-        
+      patientEntries.forEach(([uid,name])=>{
         const div = document.createElement("div");
         div.className = "patientItem";
-        div.innerText = name;
+        div.innerText = name; // display patient name
         div.onclick = () => selectPatient(uid, name);
         patientsList.appendChild(div);
-      }
+      });
     });
 });
 
-function selectPatient(patientId, patientName){
-  selectedPatient = patientId;
+function selectPatient(uid, name){
+  selectedPatient = uid;
   chatBox.innerHTML = "Loading messages...";
 
   db.collection("chats")
-    .where("participants","array-contains", patientId)
+    .where("participants","array-contains", selectedPatient)
     .orderBy("timestamp","asc")
     .onSnapshot(snapshot=>{
       chatBox.innerHTML = "";
       snapshot.docs.forEach(doc=>{
         const msg = doc.data();
+        let sender;
+        if(msg.senderName && msg.senderName.trim() !== ""){
+          sender = msg.senderName;
+        } else if(msg.senderId === selectedPatient){
+          sender = name;
+        } else {
+          sender = adminName;
+        }
+
         const div = document.createElement("div");
-        const sender = msg.senderName || (msg.senderId === auth.currentUser.uid ? adminName : patientName || msg.senderId);
         div.className = "message " + (msg.senderId === auth.currentUser.uid ? "sent" : "received");
-        div.innerText = sender + ": " + (msg.text || msg.message || "");
+        div.innerText = `${sender}: ${msg.text || ""}`;
         chatBox.appendChild(div);
 
         // Mark patient messages as read
@@ -110,21 +126,26 @@ function selectPatient(patientId, patientName){
     });
 }
 
-sendBtn.onclick = async () => {
+sendBtn.onclick = async ()=>{
   if(!selectedPatient) return alert("Select a patient first!");
   const text = msgInput.value.trim();
   if(!text) return;
 
-  await db.collection("chats").add({
-    text,
-    senderId: auth.currentUser.uid,
-    senderName: adminName,
-    receiverId: selectedPatient,
-    participants: [auth.currentUser.uid, selectedPatient],
-    status: "unread",
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  msgInput.value = "";
+  try{
+    await db.collection("chats").add({
+      text,
+      senderId: auth.currentUser.uid,
+      senderName: adminName,
+      receiverId: selectedPatient,
+      participants: [auth.currentUser.uid, selectedPatient],
+      status: "unread",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    msgInput.value = "";
+  }catch(err){
+    console.error("Message send failed:",err);
+    alert("Could not send message. Try again.");
+  }
 };
 </script>
 
