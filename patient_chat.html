@@ -48,25 +48,25 @@ auth.onAuthStateChanged(user=>{
   if(!user) return location.href="login.html";
 
   // Real-time messages for this patient
-  db.collection("chats")
-    .where("participants","array-contains", user.uid)
-    .orderBy("timestamp","asc")
-    .onSnapshot(snapshot=>{
+ db.collection("chats")
+  .where("participants", "array-contains", user.uid)
+  .orderBy("timestamp", "asc")
+  .onSnapshot(snapshot => {
       chatBox.innerHTML = "";
-      snapshot.docs.forEach(doc=>{
-        const msg = doc.data();
-        const div = document.createElement("div");
-        div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
-        div.innerText = msg.text || msg.message;
-        chatBox.appendChild(div);
+      snapshot.docs.forEach(doc => {
+          const msg = doc.data();
+          const div = document.createElement("div");
+          div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
+          div.innerText = msg.message;
+          chatBox.appendChild(div);
 
-        // Mark admin messages as read
-        if(msg.receiverId === user.uid && msg.status === "unread"){
-          doc.ref.update({status:"read"});
-        }
+          // mark as read if message is to this patient
+          if(msg.receiverId === user.uid && msg.status === "unread"){
+              doc.ref.update({status: "read"});
+          }
       });
       chatBox.scrollTop = chatBox.scrollHeight;
-    });
+  });
 });
 
 sendBtn.onclick = async ()=>{
