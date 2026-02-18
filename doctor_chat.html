@@ -2,30 +2,25 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>💬 Patient Chats – Mobile Lab Admin</title>
+<title>💬 Patient Inbox – Mobile Lab Admin</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
-body { font-family: Arial,sans-serif; background:#f1f5f9; margin:0; padding:20px; }
-h2 { color:#0369a1; }
-#patientSelect { margin-bottom:10px; padding:8px; border-radius:8px; border:1px solid #ccc; }
-#chatBox { height:500px; overflow-y:auto; border:1px solid #ccc; background:#fff; padding:10px; border-radius:12px; margin-bottom:10px; }
-.message { padding:6px 10px; margin:5px 0; border-radius:12px; max-width:70%; }
-.sent { background:#0ea5e9; color:#fff; margin-left:auto; }
-.received { background:#e2e8f0; margin-right:auto; }
-#msgInput { width:80%; padding:8px; border-radius:8px; border:1px solid #ccc; }
-#sendBtn { padding:8px 12px; border:none; border-radius:8px; background:#10b981; color:white; cursor:pointer; }
+body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
+h2{color:#0369a1;}
+#chatBox{height:500px;overflow-y:auto;border:1px solid #ccc;background:#fff;padding:10px;border-radius:12px;margin-bottom:10px;}
+.message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;}
+.sent{background:#0ea5e9;color:#fff;margin-left:auto;}
+.received{background:#e2e8f0;margin-right:auto;}
+#msgInput{width:80%;padding:8px;border-radius:8px;border:1px solid #ccc;}
+#sendBtn{padding:8px 12px;border:none;border-radius:8px;background:#10b981;color:white;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<h2>💬 Patient Chats</h2>
-<select id="patientSelect">
-  <option value="">Select a patient...</option>
-</select>
-
-<div id="chatBox">Select a patient to start chatting</div>
+<h2>💬 Patient Inbox</h2>
+<div id="chatBox">Loading messages...</div>
 <input type="text" id="msgInput" placeholder="Type your message...">
 <button id="sendBtn">Send</button>
 
@@ -41,75 +36,47 @@ const db = firebase.firestore();
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
-const patientSelect = document.getElementById("patientSelect");
 
-const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // your admin UID
-let selectedPatient = null;
-let unsubscribe = null;
+const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // Admin UID
 
-auth.onAuthStateChanged(async admin => {
-  if(!admin) return location.href="login.html";
+auth.onAuthStateChanged(user=>{
+  if(!user) return location.href="login.html";
 
-  // Fetch list of patients
-  const patientsSnapshot = await db.collection("users")
-    .where("role","==","patient")
-    .get();
-
-  patientsSnapshot.docs.forEach(doc => {
-    const option = document.createElement("option");
-    option.value = doc.id;
-    option.innerText = doc.data().name || doc.id;
-    patientSelect.appendChild(option);
-  });
-});
-
-// When doctor selects a patient
-patientSelect.onchange = () => {
-  selectedPatient = patientSelect.value;
-  if(!selectedPatient) {
-    chatBox.innerHTML = "Select a patient to start chatting";
-    if(unsubscribe) unsubscribe();
-    return;
-  }
-
-  if(unsubscribe) unsubscribe();
-
-  // Listen for messages between doctor and selected patient
-  unsubscribe = db.collection("chats")
-    .where("participants", "array-contains", adminId)
-    .orderBy("timestamp", "asc")
-    .onSnapshot(snapshot => {
-      chatBox.innerHTML = "";
-      snapshot.docs.forEach(doc => {
+  // Load all messages where admin is a participant
+  db.collection("chats")
+    .where("participants","array-contains",adminId)
+    .orderBy("timestamp","asc")
+    .onSnapshot(snapshot=>{
+      chatBox.innerHTML="";
+      snapshot.docs.forEach(doc=>{
         const msg = doc.data();
-        if(msg.participants.includes(selectedPatient)){
-          const div = document.createElement("div");
-          div.className = "message " + (msg.senderId === adminId ? "sent" : "received");
-          div.innerText = msg.message;
-          chatBox.appendChild(div);
-        }
+        const div = document.createElement("div");
+        div.className="message "+(msg.senderId===adminId?"sent":"received");
+        div.innerText=msg.message;
+        chatBox.appendChild(div);
       });
       chatBox.scrollTop = chatBox.scrollHeight;
     });
-};
 
-// Send message to selected patient
-sendBtn.onclick = async () => {
-  if(!selectedPatient) return alert("Select a patient first");
-  const text = msgInput.value.trim();
-  if(!text) return;
+  // Send reply (optional)
+  sendBtn.onclick = async ()=>{
+    const text = msgInput.value.trim();
+    if(!text) return;
 
-  await db.collection("chats").add({
-    senderId: adminId,
-    receiverId: selectedPatient,
-    participants: [adminId, selectedPatient],
-    message: text,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    status: "unread"
-  });
+    // Prompt to select patient UID
+    const patientId = prompt("Enter patient UID to send message:");
 
-  msgInput.value = "";
-};
+    await db.collection("chats").add({
+      senderId: adminId,
+      receiverId: patientId,
+      participants: [adminId, patientId],
+      message: text,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      status: "unread"
+    });
+    msgInput.value="";
+  };
+});
 </script>
 </body>
 </html>
