@@ -2,38 +2,36 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>💬 Chat with Admin – Mobile Lab</title>
+<title>💬 Chat with Admin</title>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <style>
-body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
-h2{color:#0369a1;margin-bottom:15px;}
-#chatBox{height:400px;overflow-y:auto;background:#fff;border:1px solid #ccc;border-radius:12px;padding:10px;margin-bottom:10px;}
+body{font-family:Arial;background:#f1f5f9;padding:20px;}
+#chatBox{height:400px;overflow-y:auto;background:#fff;border-radius:12px;padding:10px;margin-bottom:10px;}
 .message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;}
 .sent{background:#0ea5e9;color:#fff;margin-left:auto;}
 .received{background:#e2e8f0;margin-right:auto;}
-#msgInput{width:80%;padding:8px;border-radius:8px;border:1px solid #ccc;}
-#sendBtn{padding:8px 12px;border:none;border-radius:8px;background:#10b981;color:white;cursor:pointer;}
 </style>
 </head>
 <body>
 
 <h2>💬 Chat with Admin</h2>
-<div id="chatBox">Loading messages...</div>
-<input type="text" id="msgInput" placeholder="Type your message...">
+
+<div id="chatBox"></div>
+
+<input type="text" id="msgInput" placeholder="Type message">
 <button id="sendBtn">Send</button>
 
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
-  measurementId: "G-RWW6TCR0CD"
+  projectId: "mobile-lab-mityana-aeae2"
 };
+
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
@@ -43,28 +41,26 @@ const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
-const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // your admin UID
+const adminUID = "DvmwZiewijWX8IBvKY5yF12ECqk1";
 
 auth.onAuthStateChanged(user=>{
   if(!user) return location.href="login.html";
 
-  // Real-time chat messages
+  const chatId = [adminUID, user.uid].sort().join("_");
+
   db.collection("chats")
-    .where("participants","array-contains", user.uid)
-    .orderBy("timestamp","asc")
+    .doc(chatId)
+    .collection("messages")
+    .orderBy("timestamp")
     .onSnapshot(snapshot=>{
       chatBox.innerHTML = "";
-      snapshot.docs.forEach(doc=>{
+      snapshot.forEach(doc=>{
         const msg = doc.data();
         const div = document.createElement("div");
-        div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
-        div.innerText = msg.message;
+        div.className = "message " + 
+          (msg.senderId === user.uid ? "sent" : "received");
+        div.innerText = msg.text;
         chatBox.appendChild(div);
-
-        // Mark as read if message is to this patient
-        if(msg.receiverId === user.uid && msg.status === "unread"){
-          doc.ref.update({status:"read"});
-        }
       });
       chatBox.scrollTop = chatBox.scrollHeight;
     });
@@ -75,18 +71,23 @@ sendBtn.onclick = async ()=>{
   if(!text) return;
 
   const user = auth.currentUser;
-  if(!user) return;
+  const chatId = [adminUID, user.uid].sort().join("_");
+  const chatRef = db.collection("chats").doc(chatId);
 
-  await db.collection("chats").add({
-    senderId: user.uid,
-    receiverId: adminId,
-    participants: [user.uid, adminId],
-    message: text,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    status: "unread"
+  await chatRef.set({
+    participants:[adminUID,user.uid],
+    lastMessage:text,
+    lastTimestamp:firebase.firestore.FieldValue.serverTimestamp()
+  },{merge:true});
+
+  await chatRef.collection("messages").add({
+    senderId:user.uid,
+    text:text,
+    timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+    status:"unread"
   });
 
-  msgInput.value = "";
+  msgInput.value="";
 };
 </script>
 
