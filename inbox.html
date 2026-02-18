@@ -81,10 +81,8 @@ const chatMessages = document.getElementById("chatMessages");
 const chatInput = document.getElementById("chatInput");
 const chatSend = document.getElementById("chatSend");
 
-// Admin UID (update this to your real admin UID)
-const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1";
-
 let userId, userName;
+const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // fixed admin ID
 
 auth.onAuthStateChanged(async user => {
   if(!user) return location.href="login.html";
@@ -216,13 +214,12 @@ auth.onAuthStateChanged(async user => {
 
   // Load patient chat messages
   db.collection("chats")
-    .where("patientId","==",userId)
+    .where("participants","array-contains",userId)
     .orderBy("timestamp")
     .onSnapshot(snapshot=>{
       chatMessages.innerHTML = "";
       snapshot.forEach(doc=>{
         const data = doc.data();
-        if(data.patientId !== userId && data.senderId !== userId) return;
 
         const msgDiv = document.createElement("div");
         msgDiv.textContent = data.senderName + ": " + data.text;
@@ -253,23 +250,27 @@ chatBtn.onclick = () => {
   chatPanel.style.display = chatPanel.style.display === "none" ? "flex" : "none";
 };
 
-// Send chat message (FIXED)
+// Send chat message
 chatSend.onclick = async () => {
   const text = chatInput.value.trim();
   if(!text) return;
 
-  await db.collection("chats").add({
-    text,
-    patientId: userId,
-    senderId: userId,
-    senderName: userName || "Patient",
-    receiverId: adminId,
-    participants: [userId, adminId],
-    status: "unread",
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  chatInput.value = "";
+  try{
+    await db.collection("chats").add({
+      text,
+      patientId: userId,
+      senderId: userId,
+      senderName: userName || "Patient",
+      receiverId: adminId,
+      participants: [userId, adminId],
+      status: "unread",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    chatInput.value = "";
+  }catch(err){
+    console.error("Chat send failed:", err);
+    alert("Could not send message. Please contact the lab.");
+  }
 };
 </script>
 
