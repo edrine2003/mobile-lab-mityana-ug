@@ -2,40 +2,43 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>💬 Admin Inbox</title>
-
+<title>💬 Admin Inbox – Mobile Lab</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
-body{font-family:Arial;background:#f1f5f9;padding:20px;}
-#patientsList{height:200px;overflow-y:auto;background:#fff;padding:10px;border-radius:12px;margin-bottom:10px;}
-#chatBox{height:400px;overflow-y:auto;background:#fff;padding:10px;border-radius:12px;margin-bottom:10px;}
+body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
+h2{color:#0369a1;margin-bottom:15px;}
+#patientsList, #chatBox{background:#fff;border:1px solid #ccc;border-radius:12px;padding:10px;margin-bottom:15px;}
+#patientsList{height:200px;overflow-y:auto;}
+.patientItem{padding:8px;border-bottom:1px solid #eee;cursor:pointer;}
+.patientItem:hover{background:#e0f2fe;}
+#chatBox{height:400px;overflow-y:auto;}
 .message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;}
 .sent{background:#0ea5e9;color:#fff;margin-left:auto;}
 .received{background:#e2e8f0;margin-right:auto;}
-.patientItem{padding:6px;border-bottom:1px solid #eee;cursor:pointer;}
-.patientItem:hover{background:#e0f2fe;}
+#msgInput{width:80%;padding:8px;border-radius:8px;border:1px solid #ccc;}
+#sendBtn{padding:8px 12px;border:none;border-radius:8px;background:#10b981;color:white;cursor:pointer;}
 </style>
 </head>
 <body>
 
 <h2>💬 Admin Inbox</h2>
-
-<div id="patientsList"></div>
-<div id="chatBox"></div>
-
-<input type="text" id="msgInput" placeholder="Type reply">
+<div id="patientsList">Loading patients...</div>
+<div id="chatBox">Select a patient to start chat</div>
+<input type="text" id="msgInput" placeholder="Type your message...">
 <button id="sendBtn">Send</button>
 
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2"
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+  measurementId: "G-RWW6TCR0CD"
 };
-
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
@@ -46,72 +49,73 @@ const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
-let selectedChatId=null;
+let selectedPatient = null;
 
-auth.onAuthStateChanged(admin=>{
+auth.onAuthStateChanged(async admin=>{
   if(!admin) return location.href="login.html";
+  const adminId = admin.uid;
 
+  // Fetch all unique patients
   db.collection("chats")
-    .where("participants","array-contains",admin.uid)
-    .orderBy("lastTimestamp","desc")
+    .orderBy("timestamp","desc")
     .onSnapshot(snapshot=>{
-      patientsList.innerHTML="";
-      snapshot.forEach(doc=>{
-        const chatId=doc.id;
-        const data=doc.data();
-        const patientUID=chatId.replace(admin.uid+"_","");
-
-        const div=document.createElement("div");
-        div.className="patientItem";
-        div.innerHTML=`<b>${patientUID}</b><br><small>${data.lastMessage||""}</small>`;
-        div.onclick=()=>openChat(chatId);
+      const patients = {};
+      snapshot.docs.forEach(doc=>{
+        const data = doc.data();
+        data.participants.forEach(p=>{
+          if(p !== adminId) patients[p] = true;
+        });
+      });
+      patientsList.innerHTML = "";
+      Object.keys(patients).forEach(uid=>{
+        const div = document.createElement("div");
+        div.className = "patientItem";
+        div.innerText = uid; // Replace with actual patient name if available
+        div.onclick = ()=>selectPatient(uid);
         patientsList.appendChild(div);
       });
     });
 });
 
-function openChat(chatId){
-  selectedChatId=chatId;
+function selectPatient(patientId){
+  selectedPatient = patientId;
+  chatBox.innerHTML = "Loading messages...";
 
   db.collection("chats")
-    .doc(chatId)
-    .collection("messages")
-    .orderBy("timestamp")
+    .where("participants","array-contains", selectedPatient)
+    .orderBy("timestamp","asc")
     .onSnapshot(snapshot=>{
-      chatBox.innerHTML="";
-      snapshot.forEach(doc=>{
-        const msg=doc.data();
-        const div=document.createElement("div");
-        div.className="message "+
-          (msg.senderId===auth.currentUser.uid?"sent":"received");
-        div.innerText=msg.text;
+      chatBox.innerHTML = "";
+      snapshot.docs.forEach(doc=>{
+        const msg = doc.data();
+        const div = document.createElement("div");
+        div.className = "message " + (msg.senderId === auth.currentUser.uid ? "sent" : "received");
+        div.innerText = msg.text || msg.message;
         chatBox.appendChild(div);
+
+        // Mark patient messages as read
+        if(msg.receiverId === auth.currentUser.uid && msg.status === "unread"){
+          doc.ref.update({status:"read"});
+        }
       });
-      chatBox.scrollTop=chatBox.scrollHeight;
+      chatBox.scrollTop = chatBox.scrollHeight;
     });
 }
 
-sendBtn.onclick=async()=>{
-  if(!selectedChatId) return alert("Select patient first");
-
-  const text=msgInput.value.trim();
+sendBtn.onclick = async ()=>{
+  if(!selectedPatient) return alert("Select a patient first!");
+  const text = msgInput.value.trim();
   if(!text) return;
 
-  const chatRef=db.collection("chats").doc(selectedChatId);
-
-  await chatRef.update({
-    lastMessage:text,
-    lastTimestamp:firebase.firestore.FieldValue.serverTimestamp()
+  await db.collection("chats").add({
+    text,
+    senderId: auth.currentUser.uid,
+    receiverId: selectedPatient,
+    participants: [auth.currentUser.uid, selectedPatient],
+    status: "unread",
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
-
-  await chatRef.collection("messages").add({
-    senderId:auth.currentUser.uid,
-    text:text,
-    timestamp:firebase.firestore.FieldValue.serverTimestamp(),
-    status:"unread"
-  });
-
-  msgInput.value="";
+  msgInput.value = "";
 };
 </script>
 
