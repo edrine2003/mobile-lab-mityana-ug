@@ -57,24 +57,25 @@ auth.onAuthStateChanged(async admin=>{
 
   // Fetch all unique patients
   db.collection("chats")
-    .orderBy("timestamp","desc")
-    .onSnapshot(snapshot=>{
+  .orderBy("timestamp", "desc")
+  .onSnapshot(snapshot => {
       const patients = {};
-      snapshot.docs.forEach(doc=>{
-        const data = doc.data();
-        data.participants.forEach(p=>{
-          if(p !== adminId) patients[p] = true;
-        });
+      snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          data.participants.forEach(p => {
+              if (p !== adminId) patients[p] = true;
+          });
       });
+
       patientsList.innerHTML = "";
-      Object.keys(patients).forEach(uid=>{
-        const div = document.createElement("div");
-        div.className = "patientItem";
-        div.innerText = uid; // Replace with actual patient name if available
-        div.onclick = ()=>selectPatient(uid);
-        patientsList.appendChild(div);
+      Object.keys(patients).forEach(uid => {
+          const div = document.createElement("div");
+          div.className = "patientItem";
+          div.innerText = uid; // you can fetch name from users collection if you want
+          div.onclick = () => selectPatient(uid);
+          patientsList.appendChild(div);
       });
-    });
+  });
 });
 
 function selectPatient(patientId){
