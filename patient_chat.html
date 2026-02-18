@@ -37,7 +37,7 @@ const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
-const doctorId = "ADMIN_DOCTOR_UID"; // Replace with your doctor UID
+const doctorId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // admin UID
 
 auth.onAuthStateChanged(user => {
   if(!user) return location.href="login.html";
@@ -50,7 +50,6 @@ auth.onAuthStateChanged(user => {
       chatBox.innerHTML = "";
       snapshot.docs.forEach(doc => {
         const msg = doc.data();
-        // Only show messages between this patient and doctor
         if(msg.participants.includes(doctorId)){
           const div = document.createElement("div");
           div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
@@ -62,10 +61,11 @@ auth.onAuthStateChanged(user => {
     });
 });
 
-// Send message
+// Send message to doctor
 sendBtn.onclick = async () => {
   const user = auth.currentUser;
-  if(!user) return;
+  if(!user) return alert("You must be logged in to send a message");
+
   const text = msgInput.value.trim();
   if(!text) return;
 
