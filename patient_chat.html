@@ -37,49 +37,42 @@ const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
-const doctorId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // admin UID
+const doctorId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // Admin UID
 
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(user=>{
   if(!user) return location.href="login.html";
 
-  // Listen for all messages between patient and doctor
+  // Real-time messages where patient is a participant
   db.collection("chats")
-    .where("participants", "array-contains", user.uid)
+    .where("participants","array-contains",user.uid)
     .orderBy("timestamp","asc")
-    .onSnapshot(snapshot => {
-      chatBox.innerHTML = "";
-      snapshot.docs.forEach(doc => {
+    .onSnapshot(snapshot=>{
+      chatBox.innerHTML="";
+      snapshot.docs.forEach(doc=>{
         const msg = doc.data();
-        if(msg.participants.includes(doctorId)){
-          const div = document.createElement("div");
-          div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
-          div.innerText = msg.message;
-          chatBox.appendChild(div);
-        }
+        const div = document.createElement("div");
+        div.className="message "+(msg.senderId===user.uid?"sent":"received");
+        div.innerText=msg.message;
+        chatBox.appendChild(div);
       });
       chatBox.scrollTop = chatBox.scrollHeight;
     });
+
+  // Send message
+  sendBtn.onclick = async ()=>{
+    const text = msgInput.value.trim();
+    if(!text) return;
+    await db.collection("chats").add({
+      senderId: user.uid,
+      receiverId: doctorId,
+      participants: [user.uid, doctorId],
+      message: text,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      status: "unread"
+    });
+    msgInput.value="";
+  };
 });
-
-// Send message to doctor
-sendBtn.onclick = async () => {
-  const user = auth.currentUser;
-  if(!user) return alert("You must be logged in to send a message");
-
-  const text = msgInput.value.trim();
-  if(!text) return;
-
-  await db.collection("chats").add({
-    senderId: user.uid,
-    receiverId: doctorId,
-    participants: [user.uid, doctorId],
-    message: text,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    status: "unread"
-  });
-
-  msgInput.value = "";
-};
 </script>
 </body>
 </html>
