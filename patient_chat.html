@@ -37,45 +37,33 @@ const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
-const doctorId = "ADMIN_DOCTOR_UID"; // replace with your admin UID
+const doctorId = "ADMIN_DOCTOR_UID"; // Replace with your doctor UID
 
-auth.onAuthStateChanged(user=>{
+auth.onAuthStateChanged(user => {
   if(!user) return location.href="login.html";
 
-  // Real-time messages
+  // Listen for all messages between patient and doctor
   db.collection("chats")
-    .where("receiverId","==",user.uid)  // messages sent to this patient
+    .where("participants", "array-contains", user.uid)
     .orderBy("timestamp","asc")
-    .onSnapshot(snapshot=>{
+    .onSnapshot(snapshot => {
       chatBox.innerHTML = "";
-      snapshot.docs.forEach(doc=>{
+      snapshot.docs.forEach(doc => {
         const msg = doc.data();
-        const div = document.createElement("div");
-        div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
-        div.innerText = msg.message;
-        chatBox.appendChild(div);
+        // Only show messages between this patient and doctor
+        if(msg.participants.includes(doctorId)){
+          const div = document.createElement("div");
+          div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
+          div.innerText = msg.message;
+          chatBox.appendChild(div);
+        }
       });
       chatBox.scrollTop = chatBox.scrollHeight;
-    });
-
-  // Fetch patient sent messages too
-  db.collection("chats")
-    .where("senderId","==",user.uid)
-    .orderBy("timestamp","asc")
-    .onSnapshot(snapshot=>{
-      snapshot.docs.forEach(doc=>{
-        const msg = doc.data();
-        const div = document.createElement("div");
-        div.className = "message sent";
-        div.innerText = msg.message;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
     });
 });
 
 // Send message
-sendBtn.onclick = async ()=>{
+sendBtn.onclick = async () => {
   const user = auth.currentUser;
   if(!user) return;
   const text = msgInput.value.trim();
@@ -84,6 +72,7 @@ sendBtn.onclick = async ()=>{
   await db.collection("chats").add({
     senderId: user.uid,
     receiverId: doctorId,
+    participants: [user.uid, doctorId],
     message: text,
     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     status: "unread"
