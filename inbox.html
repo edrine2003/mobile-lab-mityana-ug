@@ -81,6 +81,9 @@ const chatMessages = document.getElementById("chatMessages");
 const chatInput = document.getElementById("chatInput");
 const chatSend = document.getElementById("chatSend");
 
+// Admin UID (update this to your real admin UID)
+const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1";
+
 let userId, userName;
 
 auth.onAuthStateChanged(async user => {
@@ -146,7 +149,6 @@ auth.onAuthStateChanged(async user => {
             const pdf = new jsPDF("p","mm","a4");
             let y = 20;
 
-            // Header
             pdf.setFillColor(14,165,233); 
             pdf.rect(0,0,210,25,"F");
             pdf.setFontSize(20);
@@ -154,7 +156,6 @@ auth.onAuthStateChanged(async user => {
             pdf.text("LITTLE HEARTS LAB",105,17,{align:"center"});
             y = 35;
 
-            // Optional logo
             try {
               const img = new Image();
               img.src = "logo.png";
@@ -163,7 +164,6 @@ auth.onAuthStateChanged(async user => {
               y += 55;
             } catch(e){ console.warn("Logo missing, skipping"); }
 
-            // Patient info
             pdf.setDrawColor(0);
             pdf.setFillColor(230,245,255);
             pdf.roundedRect(15,y,180,45,5,5,"F");
@@ -176,7 +176,6 @@ auth.onAuthStateChanged(async user => {
             pdf.text(`Date: ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}`,120,y+18);
             y += 55;
 
-            // Table header
             pdf.setFillColor(14,165,233);
             pdf.setTextColor(255);
             pdf.setFontSize(12);
@@ -185,7 +184,6 @@ auth.onAuthStateChanged(async user => {
             pdf.text("Result",150,y+6);
             y += 8;
 
-            // Table rows
             pdf.setFontSize(11);
             pdf.setTextColor(0);
             let rowToggle = false;
@@ -198,7 +196,6 @@ auth.onAuthStateChanged(async user => {
               rowToggle = !rowToggle;
             });
 
-            // Footer
             y += 15;
             pdf.setFontSize(12);
             pdf.setTextColor(14,165,233);
@@ -256,7 +253,7 @@ chatBtn.onclick = () => {
   chatPanel.style.display = chatPanel.style.display === "none" ? "flex" : "none";
 };
 
-// Send chat message
+// Send chat message (FIXED)
 chatSend.onclick = async () => {
   const text = chatInput.value.trim();
   if(!text) return;
@@ -265,6 +262,10 @@ chatSend.onclick = async () => {
     text,
     patientId: userId,
     senderId: userId,
+    senderName: userName || "Patient",
+    receiverId: adminId,
+    participants: [userId, adminId],
+    status: "unread",
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
 
