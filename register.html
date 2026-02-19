@@ -14,23 +14,32 @@ body {
   font-family: Arial;
   display: flex;
   justify-content: center;
-  padding-top: 50px;
+  padding-top: 30px;
+  background: #e0f2fe;
 }
 
 form {
-  max-width: 400px;
+  max-width: 450px;
   width: 100%;
   background: #f5f5f5;
-  padding: 20px;
+  padding: 25px;
   border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-input {
+form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #0ea5e9;
+}
+
+input, select {
   width: 100%;
   padding: 10px;
   margin: 6px 0 14px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  font-size: 14px;
 }
 
 button {
@@ -49,6 +58,10 @@ button:disabled {
   cursor: not-allowed;
 }
 
+small {
+  font-size: 12px;
+}
+
 #msg {
   font-weight: bold;
   margin-top: 10px;
@@ -60,22 +73,55 @@ button:disabled {
 <body>
 
 <form id="registerForm">
-  <h2>Register</h2>
+  <h2>Register – Mobile Lab Mityana</h2>
 
+  <!-- Basic Info -->
   <input type="text" id="fullName" placeholder="Full Name" required>
   <input type="email" id="email" placeholder="Email" required>
   <input type="text" id="phone" placeholder="Phone (07XXXXXXXX)" required>
+  <small style="color: green;">
+    Preferably register using a phone number connected to WhatsApp for faster communication.
+  </small>
   <input type="password" id="password" placeholder="Password (min 6 characters)" required>
+
+  <!-- Emergency Contact -->
+  <input type="text" id="emergencyContact" placeholder="Emergency Contact Phone" required>
+
+  <!-- Location -->
+  <input type="text" id="district" value="Mityana District" readonly>
+  <select id="subcounty" required>
+    <option value="">Select Sub-County</option>
+    <option value="Mityana Town Council">Mityana Town Council</option>
+    <option value="Busunju">Busunju</option>
+    <option value="Bulera">Bulera</option>
+    <option value="Kikandwa">Kikandwa</option>
+    <option value="Malangala">Malangala</option>
+    <option value="Kalangaalo">Kalangaalo</option>
+    <option value="Zigoti">Zigoti</option>
+    <option value="Ssekanyonyi">Ssekanyonyi</option>
+    <option value="Namungo">Namungo</option>
+  </select>
+  <input type="text" id="parish" placeholder="Parish / Trading Centre" required>
+
+  <!-- Profile Completion Flag -->
+  <input type="hidden" id="profileComplete" value="true">
+
+  <!-- Optional Medical History (secure upgrade later) -->
+  <!--
+  <label>Medical History (optional)</label>
+  <input type="text" id="diabetes" placeholder="Diabetes (Yes/No)">
+  <input type="text" id="hypertension" placeholder="Hypertension (Yes/No)">
+  <input type="text" id="allergies" placeholder="Allergies">
+  <input type="text" id="hivStatus" placeholder="HIV Status (Private)">
+  -->
 
   <button type="submit">Register</button>
 
   <p>Already have an account? <a href="login.html">Login</a></p>
-
   <p id="msg"></p>
 </form>
 
 <script>
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -99,40 +145,45 @@ const btn = document.querySelector("button");
 document.getElementById("registerForm").onsubmit = async (e) => {
   e.preventDefault();
 
-  const name = document.getElementById("fullName").value.trim();
+  const fullName = document.getElementById("fullName").value.trim();
   const email = document.getElementById("email").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const password = document.getElementById("password").value;
+  const emergencyContact = document.getElementById("emergencyContact").value.trim();
+  const district = document.getElementById("district").value; // Fixed
+  const subcounty = document.getElementById("subcounty").value;
+  const parish = document.getElementById("parish").value;
+  const profileComplete = true;
 
   try {
     msg.innerText = "";
     btn.disabled = true;
     btn.innerText = "Registering...";
 
-    // Validate phone number (Uganda format)
-    if (!/^07[0-9]{8}$/.test(phone)) {
-      throw new Error("Invalid phone number. Use format 07XXXXXXXX");
-    }
+    // Validation
+    if (!/^07[0-9]{8}$/.test(phone)) throw new Error("Invalid phone number. Use format 07XXXXXXXX");
+    if (!/^07[0-9]{8}$/.test(emergencyContact)) throw new Error("Invalid emergency contact. Use format 07XXXXXXXX");
+    if (password.length < 6) throw new Error("Password must be at least 6 characters");
 
-    // Validate password
-    if (password.length < 6) {
-      throw new Error("Password must be at least 6 characters");
-    }
-
-    // Create user in Firebase Auth
+    // Create user
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     const uid = userCredential.user.uid;
 
-    // ✅ UPDATED: Save user details in Firestore (AUTO CREATES USERS)
+    // Save to Firestore
     await db.collection("users").doc(uid).set({
-      fullName: name,
-      email: email,
-      phone: phone,
-      role: "user", // 👈 IMPORTANT
-      created_at: firebase.firestore.FieldValue.serverTimestamp() // 👈 BETTER
+      fullName,
+      email,
+      phone,
+      emergencyContact,
+      district,
+      subcounty,
+      parish,
+      profileComplete,
+      role: "user",
+      created_at: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    alert("Account created successfully! You can now login.");
+    alert("Account created successfully! ✅ You can now login.");
     window.location.href = "login.html";
 
   } catch (error) {
