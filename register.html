@@ -11,46 +11,67 @@
 
 <style>
 body {
-  font-family: Arial;
+  font-family: 'Segoe UI', Arial, sans-serif;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #e0f2fe, #ffffff);
   padding-top: 30px;
-  background: #e0f2fe;
 }
 
 form {
-  max-width: 450px;
+  max-width: 500px;
   width: 100%;
-  background: #f5f5f5;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
 form h2 {
   text-align: center;
-  margin-bottom: 20px;
   color: #0ea5e9;
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 10px;
+  display: block;
 }
 
 input, select {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin: 6px 0 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ccc;
   font-size: 14px;
 }
 
+input:focus, select:focus {
+  border-color: #0ea5e9;
+  outline: none;
+  box-shadow: 0 0 6px #0ea5e9;
+}
+
 button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background: #0ea5e9;
   border: none;
   color: #fff;
   font-weight: bold;
-  border-radius: 8px;
+  font-size: 16px;
+  border-radius: 10px;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #0284c7;
 }
 
 button:disabled {
@@ -58,14 +79,28 @@ button:disabled {
   cursor: not-allowed;
 }
 
-small {
-  font-size: 12px;
-}
-
 #msg {
   font-weight: bold;
   margin-top: 10px;
   text-align: center;
+}
+
+fieldset {
+  border: 1px solid #0ea5e9;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+legend {
+  padding: 0 10px;
+  font-weight: bold;
+  color: #0ea5e9;
+}
+
+small {
+  font-size: 12px;
+  color: green;
 }
 </style>
 </head>
@@ -79,13 +114,16 @@ small {
   <input type="text" id="fullName" placeholder="Full Name" required>
   <input type="email" id="email" placeholder="Email" required>
   <input type="text" id="phone" placeholder="Phone (07XXXXXXXX)" required>
-  <small style="color: green;">
-    Preferably register using a phone number connected to WhatsApp for faster communication.
-  </small>
+  <small>Preferably register using a phone number connected to WhatsApp for faster communication.</small>
   <input type="password" id="password" placeholder="Password (min 6 characters)" required>
 
   <!-- Emergency Contact -->
   <input type="text" id="emergencyContact" placeholder="Emergency Contact Phone" required>
+
+  <!-- Date of Birth and Age -->
+  <label for="dob">Date of Birth</label>
+  <input type="date" id="dob" required>
+  <input type="text" id="age" placeholder="Age" readonly>
 
   <!-- Location -->
   <input type="text" id="district" value="Mityana District" readonly>
@@ -103,17 +141,17 @@ small {
   </select>
   <input type="text" id="parish" placeholder="Parish / Trading Centre" required>
 
+  <!-- Emergency / Medical History -->
+  <fieldset>
+    <legend>Emergency Diseases / Medical History</legend>
+    <label><input type="checkbox" id="diabetes"> Diabetes</label>
+    <label><input type="checkbox" id="hypertension"> Hypertension</label>
+    <label><input type="checkbox" id="allergies"> Allergies</label>
+    <label><input type="checkbox" id="hivStatus"> HIV Positive</label>
+  </fieldset>
+
   <!-- Profile Completion Flag -->
   <input type="hidden" id="profileComplete" value="true">
-
-  <!-- Optional Medical History (secure upgrade later) -->
-  <!--
-  <label>Medical History (optional)</label>
-  <input type="text" id="diabetes" placeholder="Diabetes (Yes/No)">
-  <input type="text" id="hypertension" placeholder="Hypertension (Yes/No)">
-  <input type="text" id="allergies" placeholder="Allergies">
-  <input type="text" id="hivStatus" placeholder="HIV Status (Private)">
-  -->
 
   <button type="submit">Register</button>
 
@@ -122,6 +160,7 @@ small {
 </form>
 
 <script>
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -131,16 +170,21 @@ const firebaseConfig = {
   appId: "1:624002906588:web:08b4259f90ffa9adad7719"
 };
 
-// Initialize Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-
 const msg = document.getElementById("msg");
 const btn = document.querySelector("button");
+
+// Auto calculate age
+document.getElementById("dob").addEventListener("change", () => {
+  const dob = new Date(document.getElementById("dob").value);
+  if (!dob) return;
+  const diff = Date.now() - dob.getTime();
+  const age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+  document.getElementById("age").value = age;
+});
 
 document.getElementById("registerForm").onsubmit = async (e) => {
   e.preventDefault();
@@ -150,17 +194,26 @@ document.getElementById("registerForm").onsubmit = async (e) => {
   const phone = document.getElementById("phone").value.trim();
   const password = document.getElementById("password").value;
   const emergencyContact = document.getElementById("emergencyContact").value.trim();
-  const district = document.getElementById("district").value; // Fixed
+  const dob = document.getElementById("dob").value;
+  const age = document.getElementById("age").value;
+  const district = document.getElementById("district").value;
   const subcounty = document.getElementById("subcounty").value;
   const parish = document.getElementById("parish").value;
   const profileComplete = true;
+
+  const medicalHistory = {
+    diabetes: document.getElementById("diabetes").checked,
+    hypertension: document.getElementById("hypertension").checked,
+    allergies: document.getElementById("allergies").checked,
+    hivStatus: document.getElementById("hivStatus").checked
+  };
 
   try {
     msg.innerText = "";
     btn.disabled = true;
     btn.innerText = "Registering...";
 
-    // Validation
+    // Validate phone
     if (!/^07[0-9]{8}$/.test(phone)) throw new Error("Invalid phone number. Use format 07XXXXXXXX");
     if (!/^07[0-9]{8}$/.test(emergencyContact)) throw new Error("Invalid emergency contact. Use format 07XXXXXXXX");
     if (password.length < 6) throw new Error("Password must be at least 6 characters");
@@ -175,10 +228,13 @@ document.getElementById("registerForm").onsubmit = async (e) => {
       email,
       phone,
       emergencyContact,
+      dob,
+      age,
       district,
       subcounty,
       parish,
       profileComplete,
+      medicalHistory,
       role: "user",
       created_at: firebase.firestore.FieldValue.serverTimestamp()
     });
