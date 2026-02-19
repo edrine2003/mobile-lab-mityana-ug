@@ -57,7 +57,7 @@ auth.onAuthStateChanged(user=>{
           const msg = doc.data();
           const div = document.createElement("div");
           div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
-          div.innerText = msg.message;
+          div.innerText = msg.text;
           chatBox.appendChild(div);
 
           // mark as read if message is to this patient
