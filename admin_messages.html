@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Messages – Mobile Lab Mityana</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f7fb;
+}
+
+/* Sidebar */
+.sidebar{
+  width:230px;
+  height:100vh;
+  background:#1e3c72;
+  color:white;
+  position:fixed;
+  padding:20px;
+}
+
+.sidebar h2{
+  margin-bottom:30px;
+}
+
+.sidebar a{
+  display:block;
+  color:white;
+  text-decoration:none;
+  margin:15px 0;
+}
+
+.main{
+  margin-left:250px;
+  padding:20px;
+}
+
+.patient-card{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  cursor:pointer;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+.patient-card:hover{
+  background:#eef4ff;
+}
+
+.chat-box{
+  background:white;
+  height:400px;
+  overflow-y:auto;
+  padding:10px;
+  border-radius:10px;
+  margin-top:20px;
+}
+
+.message{
+  margin:8px 0;
+}
+
+.unread{
+  color:red;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>🧪 Admin</h2>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="patients.html">Patients</a>
+  <a href="results.html">Results</a>
+  <a href="admin_messages.html"><b>Messages</b></a>
+</div>
+
+<div class="main">
+
+<h2>📩 Patient Messages</h2>
+
+<div id="patientsList"></div>
+
+<h3 id="chatTitle"></h3>
+<div class="chat-box" id="chatBox"></div>
+
+<br>
+<input type="text" id="replyInput" placeholder="Type reply...">
+<button onclick="sendReply()">Send</button>
+
+</div>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let adminUser;
+let selectedPatient = null;
+
+// AUTH CHECK
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    alert("Login required");
+    return;
+  }
+  adminUser = user;
+  loadChats();
+});
+
+// LOAD CHAT LIST
+function loadChats(){
+
+  db.collection("chats").onSnapshot(snapshot=>{
+
+    const container = document.getElementById("patientsList");
+    container.innerHTML="";
+
+    snapshot.forEach(doc=>{
+
+      const patientId = doc.id;
+
+      db.collection("users").doc(patientId).get().then(userDoc=>{
+
+        if(!userDoc.exists) return;
+
+        const userData = userDoc.data();
+
+        const card = document.createElement("div");
+        card.className="patient-card";
+        card.innerHTML = `
+          <b>${userData.fullName}</b><br>
+          <small>${userData.phone || ""}</small>
+        `;
+
+        card.onclick = ()=> openChat(patientId, userData.fullName);
+        container.appendChild(card);
+
+      });
+
+    });
+
+  });
+
+}
+
+// OPEN CHAT
+function openChat(patientId, name){
+
+  selectedPatient = patientId;
+  document.getElementById("chatTitle").innerText="Chat with "+name;
+
+  db.collection("chats")
+    .doc(patientId)
+    .collection("messages")
+    .orderBy("timestamp")
+    .onSnapshot(snapshot=>{
+
+      const box = document.getElementById("chatBox");
+      box.innerHTML="";
+
+      snapshot.forEach(doc=>{
+        const data = doc.data();
+
+        box.innerHTML += `
+          <div class="message">
+            <b>${data.senderName || "Unknown"}</b>: ${data.text}
+          </div>
+        `;
+      });
+
+      box.scrollTop = box.scrollHeight;
+    });
+
+}
+
+// SEND REPLY
+async function sendReply(){
+
+  const text = document.getElementById("replyInput").value;
+  if(!text || !selectedPatient) return;
+
+  await db.collection("chats")
+    .doc(selectedPatient)
+    .collection("messages")
+    .add({
+      text: text,
+      senderId: adminUser.uid,
+      senderName: "Doctor",
+      patientId: selectedPatient,
+      receiverId: selectedPatient,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      status: "read"
+    });
+
+  document.getElementById("replyInput").value="";
+}
+
+</script>
+
+</body>
+</html>
