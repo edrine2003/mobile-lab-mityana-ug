@@ -3,310 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register – Mobile Lab Mityana</title>
+<title>Mobile Lab – Mityana Registration</title>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <style>
-body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: linear-gradient(to bottom, #e0f7ff, #ffffff);
-  display: flex;
-  justify-content: center;
-  padding: 30px 10px;
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0284c7,#0ea5e9);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
 }
-
-/* Form container */
-form {
-  width: 100%;
-  max-width: 600px;
+.card{
+  width:100%;
+  max-width:600px;
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 25px 60px rgba(0,0,0,0.2);
 }
-
-/* Card sections */
-.card {
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 25px 30px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  transition: transform 0.3s;
+h2{text-align:center;margin-bottom:5px;}
+.subtitle{text-align:center;color:#666;font-size:14px;margin-bottom:15px;}
+input,select{
+  width:100%;
+  padding:12px;
+  margin:6px 0 14px;
+  border-radius:10px;
+  border:1px solid #ccc;
 }
-
-.card:hover {
-  transform: translateY(-2px);
+input:focus,select:focus{
+  border-color:#0ea5e9;
+  outline:none;
 }
-
-.card h3 {
-  margin-top: 0;
-  color: #0ea5e9;
-  margin-bottom: 15px;
-  font-size: 22px;
-  border-bottom: 1px solid #0ea5e9;
-  padding-bottom: 5px;
+button{
+  width:100%;
+  padding:14px;
+  background:#0ea5e9;
+  border:none;
+  color:white;
+  font-weight:bold;
+  border-radius:10px;
+  cursor:pointer;
 }
-
-/* Inputs and selects */
-input, select {
-  width: 100%;
-  padding: 12px 15px;
-  margin: 8px 0 14px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  transition: 0.3s;
+button:hover{background:#0284c7;}
+.note{
+  font-size:13px;
+  background:#e0f2fe;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:15px;
 }
-
-input:focus, select:focus {
-  border-color: #0ea5e9;
-  box-shadow: 0 0 8px #0ea5e9;
-  outline: none;
+.checkbox{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:15px;
 }
-
-/* Buttons */
-button {
-  width: 100%;
-  padding: 15px;
-  background: #0ea5e9;
-  color: #fff;
-  font-weight: bold;
-  font-size: 16px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-button:hover { background: #0284c7; }
-button:disabled { background: gray; cursor: not-allowed; }
-
-/* Profile pic preview */
-#preview {
-  display: block;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 0 auto 15px;
-  border: 3px solid #0ea5e9;
-}
-
-/* Small text & consent */
-small { font-size: 12px; color: green; }
-label.consent { display: flex; align-items: center; margin-top: 5px; }
-label.consent input { margin-right: 8px; }
-
-/* Fieldset style */
-fieldset {
-  border: 1px solid #0ea5e9;
-  border-radius: 12px;
-  padding: 15px 20px;
-  margin-bottom: 15px;
-}
-
-legend {
-  font-weight: bold;
-  color: #0ea5e9;
-}
-
-/* Message */
-#msg {
-  text-align: center;
-  font-weight: bold;
-  margin-top: 10px;
-}
+#msg{text-align:center;font-weight:bold;}
 </style>
 </head>
 <body>
 
+<div class="card">
+
+<h2>🧪 Mobile Lab Registration</h2>
+<div class="subtitle">Serving Mityana District Only</div>
+
+<div class="note">
+📱 Please register using a WhatsApp number for faster communication.
+</div>
+
 <form id="registerForm">
 
-  <!-- Profile Picture Card -->
-  <div class="card">
-    <h3>Profile Picture</h3>
-    <input type="file" id="profilePic" accept="image/*">
-    <img id="preview" alt="Profile Preview">
-  </div>
+<input type="text" id="fullName" placeholder="Full Name" required>
+<input type="email" id="email" placeholder="Email" required>
+<input type="text" id="phone" placeholder="Phone (07XXXXXXXX)" required>
 
-  <!-- Personal Info Card -->
-  <div class="card">
-    <h3>Personal Info</h3>
-    <input type="text" id="fullName" placeholder="Full Name" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="text" id="phone" placeholder="Phone (07XXXXXXXX)" required>
-    <small>Preferably a WhatsApp-enabled phone for fast notifications.</small>
-    <input type="password" id="password" placeholder="Password (min 6 chars)" required>
-    <input type="text" id="emergencyContact" placeholder="Emergency Contact Phone" required>
-    <label for="dob">Date of Birth</label>
-    <input type="date" id="dob" required>
-    <input type="text" id="age" placeholder="Age" readonly>
-    <input type="text" id="ageGroup" placeholder="Age Group" readonly>
-  </div>
+<select id="nationality" required>
+<option value="">Nationality</option>
+<option>Ugandan</option>
+<option>Other</option>
+</select>
 
-  <!-- Location Card -->
-  <div class="card">
-    <h3>Location</h3>
-    <input type="text" id="district" value="Mityana District" readonly>
-    <select id="subcounty" required>
-      <option value="">Select Sub-County</option>
-      <option value="Mityana Town Council">Mityana Town Council</option>
-      <option value="Busunju">Busunju</option>
-      <option value="Bulera">Bulera</option>
-      <option value="Kikandwa">Kikandwa</option>
-      <option value="Malangala">Malangala</option>
-      <option value="Kalangaalo">Kalangaalo</option>
-      <option value="Zigoti">Zigoti</option>
-      <option value="Ssekanyonyi">Ssekanyonyi</option>
-      <option value="Namungo">Namungo</option>
-    </select>
-    <select id="parish" required>
-      <option value="">Select Parish / Trading Centre</option>
-    </select>
-  </div>
+<label>Date of Birth</label>
+<input type="date" id="dob" required>
+<input type="number" id="age" placeholder="Age (Auto)" readonly>
 
-  <!-- Medical History Card -->
-  <div class="card">
-    <h3>Emergency Diseases / Medical History</h3>
-    <fieldset>
-      <label><input type="checkbox" id="diabetes"> Diabetes</label>
-      <label><input type="checkbox" id="hypertension"> Hypertension</label>
-      <label><input type="checkbox" id="allergies"> Allergies</label>
-      <label><input type="checkbox" id="hivStatus"> HIV Positive</label>
-    </fieldset>
-    <label class="consent"><input type="checkbox" id="consent" required> I consent to store my medical data for lab purposes.</label>
-  </div>
+<input type="text" value="Mityana District" readonly>
 
-  <button type="submit">Register</button>
-  <p style="text-align:center;margin-top:10px;">Already have an account? <a href="login.html">Login</a></p>
-  <p id="msg"></p>
+<select id="subcounty" required>
+<option value="">Select Subcounty</option>
+<option value="Mityana Town Council">Mityana Town Council</option>
+<option value="Busunju">Busunju</option>
+<option value="Bulera">Bulera</option>
+<option value="Kikandwa">Kikandwa</option>
+<option value="Malangala">Malangala</option>
+</select>
+
+<select id="parish" required>
+<option value="">Select Parish</option>
+</select>
+
+<input type="date" id="pickupDate" required>
+<input type="time" id="pickupTime" required>
+
+<div class="checkbox">
+<input type="checkbox" id="emergency">
+<label for="emergency">Emergency Case</label>
+</div>
+
+<label>Profile Picture (Optional)</label>
+<input type="file" id="profilePic" accept="image/*">
+
+<input type="password" id="password" placeholder="Password (min 6 characters)" required>
+
+<button type="submit">Create Account</button>
+
+<p id="msg"></p>
+
 </form>
+</div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719"
+const firebaseConfig={
+  apiKey:"YOUR_KEY",
+  authDomain:"YOUR_DOMAIN",
+  projectId:"YOUR_PROJECT_ID",
+  storageBucket:"YOUR_STORAGE_BUCKET"
 };
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
+const auth=firebase.auth();
+const db=firebase.firestore();
+const storage=firebase.storage();
 
-const msg = document.getElementById("msg");
-const btn = document.querySelector("button");
-
-// Profile Pic Preview
-const profilePicInput = document.getElementById("profilePic");
-const preview = document.getElementById("preview");
-profilePicInput.addEventListener("change", e => {
-  const file = e.target.files[0];
-  if(file){
-    const reader = new FileReader();
-    reader.onload = () => { preview.src = reader.result; preview.style.display="block"; };
-    reader.readAsDataURL(file);
-  } else { preview.src=""; preview.style.display="none"; }
+const dob=document.getElementById("dob");
+const age=document.getElementById("age");
+dob.addEventListener("change",()=>{
+  const birth=new Date(dob.value);
+  const diff=Date.now()-birth.getTime();
+  const ageDate=new Date(diff);
+  age.value=Math.abs(ageDate.getUTCFullYear()-1970);
 });
 
-// DOB → Age & Age Group
-document.getElementById("dob").addEventListener("change", () => {
-  const dob = new Date(document.getElementById("dob").value);
-  if (!dob) return;
-  const diff = Date.now() - dob.getTime();
-  const age = Math.floor(diff/(1000*60*60*24*365.25));
-  document.getElementById("age").value = age;
-  let ageGroup = "Adult";
-  if(age<18) ageGroup="Child";
-  else if(age>=60) ageGroup="Senior";
-  document.getElementById("ageGroup").value = ageGroup;
-});
-
-// Sub-County → Parish
-const parishOptions = {
-  "Mityana Town Council":["Kiyinda","Busimbi","Nakibanga","Ttamu Division"],
-  "Busunju":["Busunju Central","Kahumulo","Kibanda","Lutoboka"],
-  "Bulera":["Bulera Central","Kikandwa","Nsumba"],
-  "Kikandwa":["Kikandwa Parish 1","Kikandwa Parish 2"],
-  "Malangala":["Malangala 1","Malangala 2"],
-  "Kalangaalo":["Kalangaalo 1","Kalangaalo 2"],
-  "Zigoti":["Zigoti 1","Zigoti 2"],
-  "Ssekanyonyi":["Ssekanyonyi 1","Ssekanyonyi 2"],
-  "Namungo":["Namungo 1","Namungo 2"]
+const parishData={
+"Mityana Town Council":["Central","Nakibanga","Ttamu"],
+"Busunju":["Busunju Central","Kasaalu"],
+"Bulera":["Bulera","Kigalama"],
+"Kikandwa":["Kikandwa","Kisita"],
+"Malangala":["Malangala","Kibibi"]
 };
-document.getElementById("subcounty").addEventListener("change", () => {
-  const sub = document.getElementById("subcounty").value;
-  const parish = document.getElementById("parish");
-  parish.innerHTML = '<option value="">Select Parish / Trading Centre</option>';
-  if(parishOptions[sub]) parishOptions[sub].forEach(p=>{
-    const opt=document.createElement("option"); opt.value=p; opt.innerText=p;
-    parish.appendChild(opt);
+
+const subcounty=document.getElementById("subcounty");
+const parish=document.getElementById("parish");
+
+subcounty.addEventListener("change",()=>{
+  parish.innerHTML="<option value=''>Select Parish</option>";
+  parishData[subcounty.value]?.forEach(p=>{
+    parish.innerHTML+=`<option>${p}</option>`;
   });
 });
 
-// Form Submit
-document.getElementById("registerForm").onsubmit = async e => {
-  e.preventDefault();
-  const fullName=document.getElementById("fullName").value.trim();
-  const email=document.getElementById("email").value.trim();
-  const phone=document.getElementById("phone").value.trim();
-  const password=document.getElementById("password").value;
-  const emergencyContact=document.getElementById("emergencyContact").value.trim();
-  const dob=document.getElementById("dob").value;
-  const age=document.getElementById("age").value;
-  const ageGroup=document.getElementById("ageGroup").value;
-  const district=document.getElementById("district").value;
-  const subcounty=document.getElementById("subcounty").value;
-  const parish=document.getElementById("parish").value;
-  const profileComplete=true;
-  const consent=document.getElementById("consent").checked;
+function generatePatientID(){
+  return "MLM-"+Math.floor(100000+Math.random()*900000);
+}
 
-  const medicalHistory = {
-    diabetes: document.getElementById("diabetes").checked,
-    hypertension: document.getElementById("hypertension").checked,
-    allergies: document.getElementById("allergies").checked,
-    hivStatus: document.getElementById("hivStatus").checked
-  };
+document.getElementById("registerForm").onsubmit=async(e)=>{
+e.preventDefault();
 
-  if(!consent){ alert("You must consent to store medical data."); return; }
+try{
+const name=fullName.value.trim();
+const email=email.value.trim();
+const phone=phone.value.trim();
+const nationality=nationality.value;
+const sub=subcounty.value;
+const par=parish.value;
+const emergency=emergency.checked;
+const pickupDate=pickupDate.value;
+const pickupTime=pickupTime.value;
+const password=password.value;
 
-  try {
-    msg.innerText=""; btn.disabled=true; btn.innerText="Registering...";
-    if(!/^07[0-9]{8}$/.test(phone)) throw new Error("Invalid phone number");
-    if(!/^07[0-9]{8}$/.test(emergencyContact)) throw new Error("Invalid emergency contact");
-    if(password.length<6) throw new Error("Password must be at least 6 chars");
+if(!/^07[0-9]{8}$/.test(phone))
+throw new Error("Use valid Ugandan number");
 
-    const userCredential = await auth.createUserWithEmailAndPassword(email,password);
-    const uid = userCredential.user.uid;
+const userCred=await auth.createUserWithEmailAndPassword(email,password);
+const uid=userCred.user.uid;
 
-    // Profile Pic
-    let profilePicURL="";
-    if(profilePicInput.files[0]){
-      const file=profilePicInput.files[0];
-      const storageRef=storage.ref();
-      const fileRef=storageRef.child(`profilePics/${uid}_${file.name}`);
-      await fileRef.put(file);
-      profilePicURL = await fileRef.getDownloadURL();
-    }
+let photoURL="";
+const file=document.getElementById("profilePic").files[0];
+if(file){
+  const ref=storage.ref("profiles/"+uid);
+  await ref.put(file);
+  photoURL=await ref.getDownloadURL();
+}
 
-    // Firestore
-    await db.collection("users").doc(uid).set({
-      fullName,email,phone,emergencyContact,dob,age,ageGroup,district,subcounty,parish,
-      profileComplete,medicalHistory,profilePicURL,role:"user",
-      created_at: firebase.firestore.FieldValue.serverTimestamp()
-    });
+navigator.geolocation.getCurrentPosition(async(pos)=>{
+  const patientID=generatePatientID();
 
-    alert("Account created successfully! ✅ You can now login.");
-    window.location.href="login.html";
+  await db.collection("users").doc(uid).set({
+    patientID,
+    fullName:name,
+    email,
+    phone,
+    nationality,
+    dob:dob.value,
+    age:age.value,
+    district:"Mityana District",
+    subcounty:sub,
+    parish:par,
+    emergency,
+    pickupDate,
+    pickupTime,
+    photoURL,
+    latitude:pos.coords.latitude,
+    longitude:pos.coords.longitude,
+    role:"user",
+    created_at:firebase.firestore.FieldValue.serverTimestamp()
+  });
 
-  } catch(err){
-    console.error(err); msg.style.color="red"; msg.innerText=err.message||"Registration failed";
-  } finally{ btn.disabled=false; btn.innerText="Register"; }
+  alert("Registration successful!");
+  window.location.href="login.html";
+});
+
+}catch(err){
+msg.style.color="red";
+msg.innerText=err.message;
+}
 };
 </script>
 
