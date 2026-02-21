@@ -2,182 +2,122 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>💬 Admin Inbox – Mobile Lab</title>
+<title>Doctor Inbox – Mobile Lab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
-h2{color:#0369a1;margin-bottom:15px;}
-#patientsList, #chatBox{background:#fff;border:1px solid #ccc;border-radius:12px;padding:10px;margin-bottom:15px;}
-#patientsList{height:200px;overflow-y:auto;}
-.patientItem{padding:8px;border-bottom:1px solid #eee;cursor:pointer;}
-.patientItem:hover{background:#e0f2fe;}
-#chatBox{height:400px;overflow-y:auto;display:flex;flex-direction:column;}
-.message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;word-wrap:break-word;}
-.sent{background:#0ea5e9;color:#fff;margin-left:auto;}
-.received{background:#f1f5f9;margin-right:auto;border:1px solid #ccc;}
-#msgInput{width:80%;padding:8px;border-radius:8px;border:1px solid #ccc;}
-#sendBtn{padding:8px 12px;border:none;border-radius:8px;background:#10b981;color:white;cursor:pointer;}
+body{font-family:Arial;background:#f4f6f9;margin:0;padding:20px;}
+.patient{padding:10px;background:white;margin-bottom:10px;border-radius:8px;cursor:pointer;}
+.chat{background:white;padding:10px;border-radius:8px;height:50vh;overflow-y:auto;}
 </style>
 </head>
+
 <body>
 
-<h2>💬 Admin Inbox</h2>
-<div id="patientsList">Loading patients...</div>
-<div id="chatBox">Select a patient to start chat</div>
-<div style="display:flex;">
-  <input type="text" id="msgInput" placeholder="Type your message...">
-  <button id="sendBtn">Send</button>
-</div>
+<h2>👨‍⚕ Doctor Chat Dashboard</h2>
+
+<div id="patients"></div>
+
+<h3 id="chatTitle"></h3>
+<div class="chat" id="chatBox"></div>
+<br>
+<input type="text" id="replyInput" placeholder="Reply...">
+<button onclick="sendReply()">Send</button>
 
 <script>
+
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId: "mobile-lab-mityana-aeae2"
 };
 
-if(!firebase.apps.length){
-  firebase.initializeApp(firebaseConfig);
-}
-
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const patientsList = document.getElementById("patientsList");
-const chatBox = document.getElementById("chatBox");
-const msgInput = document.getElementById("msgInput");
-const sendBtn = document.getElementById("sendBtn");
-
 let selectedPatient = null;
-let adminName = "Doctor";
+let doctorUser = null;
 
-auth.onAuthStateChanged(async admin=>{
-  if(!admin) return location.href="login.html";
+// AUTH
+auth.onAuthStateChanged(async user=>{
+  if(!user) return;
 
-  const adminId = admin.uid;
-
-  // Load only chats involving this admin
-  db.collection("chats")
-    .where("participants","array-contains", adminId)
-    .orderBy("timestamp","desc")
-    .onSnapshot(async snapshot => {
-
-      const patients = {};
-
-      snapshot.forEach(doc=>{
-        const data = doc.data();
-        data.participants.forEach(p=>{
-          if(p !== adminId){
-            patients[p] = true;
-          }
-        });
-      });
-
-      patientsList.innerHTML = "";
-
-      for(const uid of Object.keys(patients)){
-        let displayName = uid;
-
-        try{
-          const userDoc = await db.collection("users").doc(uid).get();
-          if(userDoc.exists){
-            displayName = userDoc.data().fullName || uid;
-          }
-        }catch(e){
-          console.log("Name fetch error", e);
-        }
-
-        const div = document.createElement("div");
-        div.className = "patientItem";
-        div.innerText = displayName;
-        div.onclick = ()=> selectPatient(uid, displayName);
-        patientsList.appendChild(div);
-      }
-    });
+  doctorUser = user;
+  loadPatients();
 });
 
+// LOAD PATIENTS
+function loadPatients(){
 
-function selectPatient(uid, patientName){
+  db.collection("chats").onSnapshot(snapshot=>{
+    const container = document.getElementById("patients");
+    container.innerHTML="";
 
-  selectedPatient = uid;
-  chatBox.innerHTML = "Loading messages...";
+    snapshot.forEach(doc=>{
+      const patientId = doc.id;
 
-  db.collection("chats")
-    .where("participants","array-contains", auth.currentUser.uid)
-    .orderBy("timestamp","asc")
-    .onSnapshot(snapshot=>{
-
-      chatBox.innerHTML = "";
-
-      snapshot.forEach(doc=>{
-
-        const msg = doc.data();
-
-        // Only show messages between admin and selected patient
-        if(!msg.participants.includes(selectedPatient)) return;
-
-        // FIX: Safe sender name
-        let sender;
-        if(msg.senderName && msg.senderName.trim() !== ""){
-          sender = msg.senderName;
-        }else if(msg.senderId === selectedPatient){
-          sender = patientName;
-        }else{
-          sender = "Doctor";
-        }
+      db.collection("users").doc(patientId).get().then(userDoc=>{
+        const userData = userDoc.data();
 
         const div = document.createElement("div");
-        div.className = "message " +
-          (msg.senderId === auth.currentUser.uid ? "sent" : "received");
+        div.className="patient";
+        div.innerHTML = "👤 "+userData.fullName;
+        div.onclick = ()=> openChat(patientId,userData.fullName);
+        container.appendChild(div);
+      });
+    });
+  });
+}
 
-        div.innerText = sender + ": " + (msg.text || "");
+// OPEN CHAT
+function openChat(patientId,name){
+  selectedPatient = patientId;
+  document.getElementById("chatTitle").innerText="Chat with "+name;
 
-        chatBox.appendChild(div);
+  db.collection("chats")
+    .doc(patientId)
+    .collection("messages")
+    .orderBy("timestamp")
+    .onSnapshot(snapshot=>{
+      const box=document.getElementById("chatBox");
+      box.innerHTML="";
 
-        // Mark as read
-        if(msg.receiverId === auth.currentUser.uid && msg.status === "unread"){
-          doc.ref.update({status:"read"});
-        }
+      snapshot.forEach(doc=>{
+        const data=doc.data();
+        box.innerHTML += "<p><b>"+data.senderName+"</b>: "+data.text+"</p>";
       });
 
-      chatBox.scrollTop = chatBox.scrollHeight;
+      box.scrollTop=box.scrollHeight;
     });
 }
 
+// SEND REPLY
+async function sendReply(){
 
-sendBtn.onclick = async ()=>{
+  const text=document.getElementById("replyInput").value;
+  if(!text || !selectedPatient) return;
 
-  if(!selectedPatient){
-    alert("Select a patient first!");
-    return;
-  }
-
-  const text = msgInput.value.trim();
-  if(!text) return;
-
-  try{
-    await db.collection("chats").add({
-      text,
-      senderId: auth.currentUser.uid,
-      senderName: "Doctor",
-      receiverId: selectedPatient,
-      participants: [auth.currentUser.uid, selectedPatient],
-      status: "unread",
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  await db.collection("chats")
+    .doc(selectedPatient)
+    .collection("messages")
+    .add({
+      text:text,
+      senderId:doctorUser.uid,
+      senderName:"Doctor",
+      patientId:selectedPatient,
+      receiverId:selectedPatient,
+      timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+      status:"read"
     });
 
-    msgInput.value = "";
+  document.getElementById("replyInput").value="";
+}
 
-  }catch(err){
-    console.error(err);
-    alert("Message failed.");
-  }
-};
 </script>
 
 </body>
