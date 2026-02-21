@@ -40,7 +40,10 @@ const firebaseConfig = {
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId: "mobile-lab-mityana-aeae2"
 };
-firebase.initializeApp(firebaseConfig);
+
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
 
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -51,83 +54,109 @@ const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 
 let selectedPatient = null;
-let adminName = "Admin";
+let adminName = "Doctor";
 
 auth.onAuthStateChanged(async admin=>{
   if(!admin) return location.href="login.html";
+
   const adminId = admin.uid;
 
-  // Fetch all unique patients
+  // Load only chats involving this admin
   db.collection("chats")
-    .orderBy("timestamp", "desc")
+    .where("participants","array-contains", adminId)
+    .orderBy("timestamp","desc")
     .onSnapshot(async snapshot => {
+
       const patients = {};
-      snapshot.docs.forEach(doc => {
+
+      snapshot.forEach(doc=>{
         const data = doc.data();
-        data.participants.forEach(p => {
-          if (p !== adminId) patients[p] = true;
+        data.participants.forEach(p=>{
+          if(p !== adminId){
+            patients[p] = true;
+          }
         });
       });
 
-      // Fetch patient names
-      const patientEntries = await Promise.all(
-        Object.keys(patients).map(async uid => {
-          try {
-            const doc = await db.collection("users").doc(uid).get();
-            return [uid, doc.exists ? doc.data()?.name || uid : uid];
-          } catch(e) {
-            return [uid, uid];
-          }
-        })
-      );
-
       patientsList.innerHTML = "";
-      patientEntries.forEach(([uid,name])=>{
+
+      for(const uid of Object.keys(patients)){
+        let displayName = uid;
+
+        try{
+          const userDoc = await db.collection("users").doc(uid).get();
+          if(userDoc.exists){
+            displayName = userDoc.data().fullName || uid;
+          }
+        }catch(e){
+          console.log("Name fetch error", e);
+        }
+
         const div = document.createElement("div");
         div.className = "patientItem";
-        div.innerText = name; // display patient name
-        div.onclick = () => selectPatient(uid, name);
+        div.innerText = displayName;
+        div.onclick = ()=> selectPatient(uid, displayName);
         patientsList.appendChild(div);
-      });
+      }
     });
 });
 
-function selectPatient(uid, name){
+
+function selectPatient(uid, patientName){
+
   selectedPatient = uid;
   chatBox.innerHTML = "Loading messages...";
 
- db.collection("chats")
-  .where("participants", "array-contains", auth.currentUser.uid)
-  .orderBy("timestamp","asc")
-  .onSnapshot(snapshot=>{
+  db.collection("chats")
+    .where("participants","array-contains", auth.currentUser.uid)
+    .orderBy("timestamp","asc")
+    .onSnapshot(snapshot=>{
+
       chatBox.innerHTML = "";
 
-      snapshot.docs.forEach(doc=>{
-          const msg = doc.data();
+      snapshot.forEach(doc=>{
 
-          // Only show messages between this admin and selected patient
-          if(!msg.participants.includes(selectedPatient)) return;
+        const msg = doc.data();
 
-          const div = document.createElement("div");
-          div.className = "message " +
-              (msg.senderId === auth.currentUser.uid ? "sent" : "received");
+        // Only show messages between admin and selected patient
+        if(!msg.participants.includes(selectedPatient)) return;
 
-          div.innerText = msg.senderName + ": " + (msg.text || "");
+        // FIX: Safe sender name
+        let sender;
+        if(msg.senderName && msg.senderName.trim() !== ""){
+          sender = msg.senderName;
+        }else if(msg.senderId === selectedPatient){
+          sender = patientName;
+        }else{
+          sender = "Doctor";
+        }
 
-          chatBox.appendChild(div);
+        const div = document.createElement("div");
+        div.className = "message " +
+          (msg.senderId === auth.currentUser.uid ? "sent" : "received");
 
-          // Mark as read
-          if(msg.receiverId === auth.currentUser.uid && msg.status === "unread"){
-              doc.ref.update({status:"read"});
-          }
+        div.innerText = sender + ": " + (msg.text || "");
+
+        chatBox.appendChild(div);
+
+        // Mark as read
+        if(msg.receiverId === auth.currentUser.uid && msg.status === "unread"){
+          doc.ref.update({status:"read"});
+        }
       });
 
       chatBox.scrollTop = chatBox.scrollHeight;
-  });
+    });
 }
 
+
 sendBtn.onclick = async ()=>{
-  if(!selectedPatient) return alert("Select a patient first!");
+
+  if(!selectedPatient){
+    alert("Select a patient first!");
+    return;
+  }
+
   const text = msgInput.value.trim();
   if(!text) return;
 
@@ -135,16 +164,18 @@ sendBtn.onclick = async ()=>{
     await db.collection("chats").add({
       text,
       senderId: auth.currentUser.uid,
-      senderName: adminName,
+      senderName: "Doctor",
       receiverId: selectedPatient,
       participants: [auth.currentUser.uid, selectedPatient],
       status: "unread",
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
+
     msgInput.value = "";
+
   }catch(err){
-    console.error("Message send failed:",err);
-    alert("Could not send message. Try again.");
+    console.error(err);
+    alert("Message failed.");
   }
 };
 </script>
