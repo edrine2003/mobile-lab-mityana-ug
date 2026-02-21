@@ -2,93 +2,158 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>💬 Chat with Admin – Mobile Lab</title>
+<title>Patient Chat – Mobile Lab Mityana</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <style>
-body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;}
-h2{color:#0369a1;margin-bottom:15px;}
-#chatBox{height:400px;overflow-y:auto;background:#fff;border:1px solid #ccc;border-radius:12px;padding:10px;margin-bottom:10px;}
-.message{padding:6px 10px;margin:5px 0;border-radius:12px;max-width:70%;}
-.sent{background:#0ea5e9;color:#fff;margin-left:auto;}
-.received{background:#e2e8f0;margin-right:auto;}
-#msgInput{width:80%;padding:8px;border-radius:8px;border:1px solid #ccc;}
-#sendBtn{padding:8px 12px;border:none;border-radius:8px;background:#10b981;color:white;cursor:pointer;}
+body{
+  font-family: Arial;
+  background: linear-gradient(to right,#0f2027,#203a43,#2c5364);
+  color:white;
+  margin:0;
+  padding:20px;
+}
+
+.chat-box{
+  background:white;
+  color:black;
+  height:60vh;
+  overflow-y:auto;
+  padding:10px;
+  border-radius:12px;
+}
+
+input{
+  width:75%;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  padding:10px 15px;
+  background:#00c6ff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.msg{
+  margin:8px 0;
+  padding:8px;
+  border-radius:8px;
+}
+
+.me{
+  background:#d4f8d4;
+  text-align:right;
+}
+
+.doctor{
+  background:#f1f1f1;
+}
 </style>
 </head>
+
 <body>
 
-<h2>💬 Chat with Admin</h2>
-<div id="chatBox">Loading messages...</div>
-<input type="text" id="msgInput" placeholder="Type your message...">
-<button id="sendBtn">Send</button>
+<h2>🧪 Mobile Lab Mityana – Chat Doctor</h2>
+
+<div class="chat-box" id="chatBox"></div>
+
+<br>
+<input type="text" id="messageInput" placeholder="Type message...">
+<button onclick="sendMessage()">Send</button>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
-  measurementId: "G-RWW6TCR0CD"
-};
-firebase.initializeApp(firebaseConfig);
 
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2"
+};
+
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const chatBox = document.getElementById("chatBox");
-const msgInput = document.getElementById("msgInput");
-const sendBtn = document.getElementById("sendBtn");
-const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // Admin UID
+let currentUser;
+let userData;
+let chatId;
 
-auth.onAuthStateChanged(user=>{
-  if(!user) return location.href="login.html";
+// AUTH
+auth.onAuthStateChanged(async user=>{
+  if(!user){
+    alert("Login first");
+    return;
+  }
 
-  // Real-time messages for this patient
- db.collection("chats")
-  .where("participants", "array-contains", user.uid)
-  .orderBy("timestamp", "asc")
-  .onSnapshot(snapshot => {
-      chatBox.innerHTML = "";
-      snapshot.docs.forEach(doc => {
-          const msg = doc.data();
-          const div = document.createElement("div");
-          div.className = "message " + (msg.senderId === user.uid ? "sent" : "received");
-          div.innerText = msg.text;
-          chatBox.appendChild(div);
+  currentUser = user;
 
-          // mark as read if message is to this patient
-          if(msg.receiverId === user.uid && msg.status === "unread"){
-              doc.ref.update({status: "read"});
-          }
-      });
-      chatBox.scrollTop = chatBox.scrollHeight;
-  });
+  // GET REAL USER DATA
+  const snap = await db.collection("users").doc(user.uid).get();
+  userData = snap.data();
+
+  chatId = user.uid; // ONE CHAT PER PATIENT
+
+  loadMessages();
 });
 
-sendBtn.onclick = async ()=>{
-  const text = msgInput.value.trim();
+// SEND MESSAGE
+async function sendMessage(){
+
+  const text = document.getElementById("messageInput").value;
   if(!text) return;
 
-  const user = auth.currentUser;
-  const userName = user.displayName || "Patient";
-
-  await db.collection("chats").add({
-    text,
-    patientId: user.uid,
-    senderId: user.uid,
-    senderName: userName,
-    receiverId: adminId,
-    participants: [user.uid, adminId],
-    status: "unread",
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  await db.collection("chats").doc(chatId).collection("messages").add({
+    text: text,
+    senderId: currentUser.uid,
+    senderName: userData.fullName,   // ✅ REAL NAME
+    patientId: currentUser.uid,
+    receiverId: "DvmwZiewijWX8IBvKY5yF12ECqk1",    // put doctor UID
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    status: "unread"
   });
 
-  msgInput.value = "";
-};
+  document.getElementById("messageInput").value="";
+}
+
+// LOAD MESSAGES
+function loadMessages(){
+
+  db.collection("chats")
+    .doc(chatId)
+    .collection("messages")
+    .orderBy("timestamp")
+    .onSnapshot(snapshot=>{
+
+      const box = document.getElementById("chatBox");
+      box.innerHTML="";
+
+      snapshot.forEach(doc=>{
+        const data = doc.data();
+
+        const div = document.createElement("div");
+        div.classList.add("msg");
+
+        if(data.senderId === currentUser.uid){
+          div.classList.add("me");
+        } else {
+          div.classList.add("doctor");
+        }
+
+        div.innerHTML = "<b>"+data.senderName+"</b><br>"+data.text;
+        box.appendChild(div);
+      });
+
+      box.scrollTop = box.scrollHeight;
+    });
+}
+
 </script>
 
 </body>
