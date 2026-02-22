@@ -12,10 +12,14 @@
 <style>
 body{
   font-family: Arial;
-  background: linear-gradient(to right,#0f2027,#203a43,#2c5364);
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:white;
   margin:0;
   padding:20px;
+}
+
+h2{
+  text-align:center;
 }
 
 .chat-box{
@@ -23,38 +27,48 @@ body{
   color:black;
   height:60vh;
   overflow-y:auto;
-  padding:10px;
-  border-radius:12px;
+  padding:15px;
+  border-radius:15px;
+  box-shadow:0 0 15px rgba(0,0,0,0.3);
 }
 
 input{
-  width:75%;
-  padding:10px;
-  border-radius:8px;
+  width:70%;
+  padding:12px;
+  border-radius:10px;
   border:none;
+  outline:none;
 }
 
 button{
-  padding:10px 15px;
+  padding:12px 18px;
   background:#00c6ff;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
   cursor:pointer;
+  font-weight:bold;
 }
 
 .msg{
-  margin:8px 0;
-  padding:8px;
-  border-radius:8px;
+  margin:10px 0;
+  padding:10px;
+  border-radius:12px;
+  max-width:70%;
 }
 
 .me{
-  background:#d4f8d4;
+  background:#c8f7c5;
+  margin-left:auto;
   text-align:right;
 }
 
 .doctor{
   background:#f1f1f1;
+}
+
+.row{
+  display:flex;
+  gap:10px;
 }
 </style>
 </head>
@@ -66,8 +80,11 @@ button{
 <div class="chat-box" id="chatBox"></div>
 
 <br>
-<input type="text" id="messageInput" placeholder="Type message...">
-<button onclick="sendMessage()">Send</button>
+
+<div class="row">
+  <input type="text" id="messageInput" placeholder="Type message...">
+  <button onclick="sendMessage()">Send</button>
+</div>
 
 <script>
 
@@ -84,45 +101,55 @@ const db = firebase.firestore();
 let currentUser;
 let userData;
 let chatId;
+const adminUID = "DvmwZiewijWX8IBvKY5yF12ECqk1";
 
-// AUTH
 auth.onAuthStateChanged(async user=>{
   if(!user){
     alert("Login first");
+    window.location.href="login.html";
     return;
   }
 
   currentUser = user;
+  chatId = user.uid;
 
-  // GET REAL USER DATA
-  const snap = await db.collection("users").doc(user.uid).get();
-  userData = snap.data();
-
-  chatId = user.uid; // ONE CHAT PER PATIENT
+  try{
+    const snap = await db.collection("users").doc(user.uid).get();
+    userData = snap.exists ? snap.data() : {};
+  }catch(err){
+    console.error("User fetch error:",err);
+  }
 
   loadMessages();
 });
 
-// SEND MESSAGE
 async function sendMessage(){
 
-  const text = document.getElementById("messageInput").value;
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
   if(!text) return;
 
-  await db.collection("chats").doc(chatId).collection("messages").add({
-    text: text,
-    senderId: currentUser.uid,
-    senderName: userData.fullName,   // ✅ REAL NAME
-    patientId: currentUser.uid,
-    receiverId: "DvmwZiewijWX8IBvKY5yF12ECqk1",    // put doctor UID
-    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    status: "unread"
-  });
+  try{
+    await db.collection("chats")
+      .doc(chatId)
+      .collection("messages")
+      .add({
+        text: text,
+        senderId: currentUser.uid,
+        senderName: userData?.fullName || "Patient",
+        patientId: currentUser.uid,
+        receiverId: adminUID,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        status: "unread"
+      });
 
-  document.getElementById("messageInput").value="";
+    input.value="";
+  }catch(err){
+    console.error("Send error:",err);
+    alert("Message failed. Check rules.");
+  }
 }
 
-// LOAD MESSAGES
 function loadMessages(){
 
   db.collection("chats")
@@ -146,7 +173,7 @@ function loadMessages(){
           div.classList.add("doctor");
         }
 
-        div.innerHTML = "<b>"+data.senderName+"</b><br>"+data.text;
+        div.innerHTML = "<b>"+ (data.senderName || "User") +"</b><br>"+ data.text;
         box.appendChild(div);
       });
 
