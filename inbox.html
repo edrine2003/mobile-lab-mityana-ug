@@ -4,12 +4,10 @@
 <meta charset="UTF-8">
 <title>🧪 Patient Inbox – Mobile Lab</title>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -22,18 +20,15 @@ th,td{border:1px solid #ccc;padding:6px;}
 th{background:#e2e8f0;}
 .contact{margin-bottom:15px;background:#e0f2fe;padding:12px;border-radius:10px;}
 .welcome{margin-bottom:15px;padding:12px;background:#d1fae5;border-left:6px solid #10b981;}
-
-/* Chat panel styles */
-#chatBtn{margin-bottom:16px; padding:10px 16px; background:#0ea5e9; color:white; border:none; border-radius:8px; cursor:pointer;}
-#chatPanel{display:none; position:fixed; bottom:20px; right:20px; width:350px; max-height:500px; background:white; border:1px solid #cbd5e1; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2); flex-direction:column; z-index:9999;}
-#chatPanelHeader{background:#0369a1; color:white; padding:12px; text-align:center; font-weight:bold;}
-#chatMessages{flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column;}
-#chatInputDiv{display:flex; border-top:1px solid #cbd5e1;}
-#chatInput{flex:1; border:none; padding:10px; outline:none;}
-#chatSend{padding:10px 16px; background:#22c55e; color:white; border:none; cursor:pointer;}
+#chatBtn{margin-bottom:16px;padding:10px 16px;background:#0ea5e9;color:white;border:none;border-radius:8px;cursor:pointer;}
+#chatPanel{display:none;position:fixed;bottom:20px;right:20px;width:350px;max-height:500px;background:white;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.2);flex-direction:column;z-index:9999;}
+#chatPanelHeader{background:#0369a1;color:white;padding:12px;text-align:center;font-weight:bold;}
+#chatMessages{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;}
+#chatInputDiv{display:flex;border-top:1px solid #cbd5e1;}
+#chatInput{flex:1;border:none;padding:10px;outline:none;}
+#chatSend{padding:10px 16px;background:#22c55e;color:white;border:none;cursor:pointer;}
 </style>
 </head>
-
 <body>
 
 <div class="welcome">
@@ -48,10 +43,8 @@ th{background:#e2e8f0;}
 
 <h2>🧪 Your Lab Results</h2>
 
-<!-- Chat Button -->
 <button id="chatBtn">💬 Chat with Doctor</button>
 
-<!-- Chat Panel -->
 <div id="chatPanel">
   <div id="chatPanelHeader">💬 Chat with Doctor</div>
   <div id="chatMessages"></div>
@@ -74,7 +67,6 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const inbox = document.getElementById("inbox");
 
-// Chat elements
 const chatBtn = document.getElementById("chatBtn");
 const chatPanel = document.getElementById("chatPanel");
 const chatMessages = document.getElementById("chatMessages");
@@ -82,22 +74,20 @@ const chatInput = document.getElementById("chatInput");
 const chatSend = document.getElementById("chatSend");
 
 let userId, userName;
-const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1"; // fixed admin ID
+const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1";
 
-auth.onAuthStateChanged(async user => {
+auth.onAuthStateChanged(async user=>{
   if(!user) return location.href="login.html";
 
   userId = user.uid;
 
-  // Fetch patient name
   const userDoc = await db.collection("users").doc(userId).get();
-  userName = userDoc.data()?.name || "Patient";
+  userName = userDoc.exists ? userDoc.data().fullName : "Patient";
 
-  // Load lab results
   db.collection("results")
     .where("userId","==",userId)
     .orderBy("uploaded_at","desc")
-    .onSnapshot(async snapshot => {
+    .onSnapshot(async snapshot=>{
       inbox.innerHTML="";
 
       if(snapshot.empty){
@@ -112,14 +102,18 @@ auth.onAuthStateChanged(async user => {
         if(r.order_id){
           try{
             const orderSnap = await db.collection("orders").doc(r.order_id).get();
-            if(orderSnap.exists && orderSnap.data().age) age = orderSnap.data().age;
-          }catch(e){ console.warn("Could not fetch age:", e);}
+            if(orderSnap.exists && orderSnap.data().age){
+              age = orderSnap.data().age;
+            }
+          }catch(e){
+            console.warn("Could not fetch age:",e);
+          }
         }
 
-        const card = document.createElement("div");
+        const card=document.createElement("div");
         card.className="card";
 
-        let html = `
+        let html=`
           <h3>${r.patient_name || "Patient"}</h3>
           <p><b>Email:</b> ${r.patient_email || "N/A"}</p>
           <p><b>Age:</b> ${age}</p>
@@ -127,164 +121,150 @@ auth.onAuthStateChanged(async user => {
           <p><b>Date:</b> ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}</p>
         `;
 
-        const results = r.results && typeof r.results === "object" ? r.results : {};
-        if(Object.keys(results).length > 0){
-          html += `<table><thead><tr><th>Test</th><th>Result</th></tr></thead><tbody>`;
+        const results=(r.results && typeof r.results==="object")?r.results:{};
+
+        if(Object.keys(results).length>0){
+          html+=`<table><thead><tr><th>Test</th><th>Result</th></tr></thead><tbody>`;
           Object.entries(results).forEach(([test,value])=>{
-            html += `<tr><td>${test || "Unknown Test"}</td><td>${value || "N/A"}</td></tr>`;
+            html+=`<tr><td>${test||"Unknown Test"}</td><td>${value||"N/A"}</td></tr>`;
           });
-          html += `</tbody></table>`;
+          html+=`</tbody></table>`;
         }
 
-        html += `<br><button class="download">Download PDF</button>`;
-        card.innerHTML = html;
+        html+=`<br><button class="download">Download PDF</button>`;
+        card.innerHTML=html;
         inbox.appendChild(card);
 
-        // PDF download
-        card.querySelector(".download").onclick = async () => {
-          try {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF("p","mm","a4");
-            let y = 20;
+        card.querySelector(".download").onclick=async()=>{
+          const { jsPDF } = window.jspdf;
+          const pdf=new jsPDF("p","mm","a4");
+          let y=20;
 
-            pdf.setFillColor(14,165,233); 
-            pdf.rect(0,0,210,25,"F");
-            pdf.setFontSize(20);
-            pdf.setTextColor(255,255,255);
-            pdf.text("LITTLE HEARTS LAB",105,17,{align:"center"});
-            y = 35;
+          pdf.setFillColor(14,165,233);
+          pdf.rect(0,0,210,25,"F");
+          pdf.setFontSize(20);
+          pdf.setTextColor(255,255,255);
+          pdf.text("LITTLE HEARTS LAB",105,17,{align:"center"});
+          y=35;
 
-            try {
-              const img = new Image();
-              img.src = "logo.png";
-              await new Promise(res => img.onload = res);
-              pdf.addImage(img,"PNG",80,y,50,50);
-              y += 55;
-            } catch(e){ console.warn("Logo missing, skipping"); }
-
-            pdf.setDrawColor(0);
-            pdf.setFillColor(230,245,255);
-            pdf.roundedRect(15,y,180,45,5,5,"F");
-            pdf.setFontSize(12);
-            pdf.setTextColor(0);
-            pdf.text(`Patient Name: ${r.patient_name || "N/A"}`,20,y+10);
-            pdf.text(`Email: ${r.patient_email || "N/A"}`,20,y+18);
-            pdf.text(`Age: ${age}`,20,y+26);
-            pdf.text(`Client No.: ${r.order_id || doc.id}`,120,y+10);
-            pdf.text(`Date: ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}`,120,y+18);
-            y += 55;
-
-            pdf.setFillColor(14,165,233);
-            pdf.setTextColor(255);
-            pdf.setFontSize(12);
-            pdf.rect(15,y,180,8,"F");
-            pdf.text("Test",20,y+6);
-            pdf.text("Result",150,y+6);
-            y += 8;
-
-            pdf.setFontSize(11);
-            pdf.setTextColor(0);
-            let rowToggle = false;
-            Object.entries(results).forEach(([test,value])=>{
-              pdf.setFillColor(rowToggle?245:255,rowToggle?245:255,rowToggle?245:255);
-              pdf.rect(15,y,180,8,"F");
-              pdf.text(test||"Unknown Test",20,y+6);
-              pdf.text(value||"N/A",150,y+6);
-              y += 8;
-              rowToggle = !rowToggle;
-            });
-
-            y += 15;
-            pdf.setFontSize(12);
-            pdf.setTextColor(14,165,233);
-            pdf.text("Prepared by Edrine, Labtech",105,y,{align:"center"});
-            y += 7;
-            pdf.setFontSize(10);
-            pdf.setTextColor(50);
-            pdf.text("Thank you for choosing Little Hearts Lab! Stay healthy. 🌿",105,y,{align:"center"});
-
-            pdf.save(`Patient_${r.patient_name || doc.id}.pdf`);
-          } catch(err) {
-            console.error("PDF generation failed:",err);
-            alert("Something went wrong. Please contact the lab.");
+          try{
+            const img=new Image();
+            img.src="logo.png";
+            await new Promise(res=>img.onload=res);
+            pdf.addImage(img,"PNG",80,y,50,50);
+            y+=55;
+          }catch(e){
+            console.warn("Logo missing, skipping");
           }
+
+          pdf.setFillColor(230,245,255);
+          pdf.roundedRect(15,y,180,45,5,5,"F");
+          pdf.setFontSize(12);
+          pdf.setTextColor(0);
+          pdf.text(`Patient Name: ${r.patient_name||"N/A"}`,20,y+10);
+          pdf.text(`Email: ${r.patient_email||"N/A"}`,20,y+18);
+          pdf.text(`Age: ${age}`,20,y+26);
+          pdf.text(`Client No.: ${r.order_id||doc.id}`,120,y+10);
+          pdf.text(`Date: ${r.uploaded_at?new Date(r.uploaded_at.toDate()).toLocaleDateString():"N/A"}`,120,y+18);
+          y+=55;
+
+          pdf.setFillColor(14,165,233);
+          pdf.setTextColor(255);
+          pdf.rect(15,y,180,8,"F");
+          pdf.text("Test",20,y+6);
+          pdf.text("Result",150,y+6);
+          y+=8;
+
+          pdf.setFontSize(11);
+          pdf.setTextColor(0);
+          let rowToggle=false;
+
+          Object.entries(results).forEach(([test,value])=>{
+            pdf.setFillColor(rowToggle?245:255,rowToggle?245:255,rowToggle?245:255);
+            pdf.rect(15,y,180,8,"F");
+            pdf.text(test||"Unknown Test",20,y+6);
+            pdf.text(value||"N/A",150,y+6);
+            y+=8;
+            rowToggle=!rowToggle;
+          });
+
+          y+=15;
+          pdf.setFontSize(12);
+          pdf.setTextColor(14,165,233);
+          pdf.text("Prepared by Edrine, Labtech",105,y,{align:"center"});
+          y+=7;
+          pdf.setFontSize(10);
+          pdf.setTextColor(50);
+          pdf.text("Thank you for choosing Little Hearts Lab! Stay healthy. 🌿",105,y,{align:"center"});
+
+          pdf.save(`Patient_${r.patient_name||doc.id}.pdf`);
         };
       }
     });
 
-  // Load patient chat messages
   db.collection("chats")
     .where("participants","array-contains",userId)
     .orderBy("timestamp")
-    .onSnapshot(snapshot => {
-      chatMessages.innerHTML = "";
+    .onSnapshot(snapshot=>{
+      chatMessages.innerHTML="";
 
-      snapshot.forEach(doc => {
-        const data = doc.data();
+      snapshot.forEach(doc=>{
+        const data=doc.data();
 
-        // Fix undefined sender names
         let sender;
-        if(data.senderName && data.senderName.trim() !== "") {
-          sender = data.senderName;
-        } else if(data.senderId === userId) {
-          sender = userName || "Patient";
-        } else {
-          sender = "Admin";
+        if(data.senderName && data.senderName.trim()!==""){
+          sender=data.senderName;
+        }else if(data.senderId===userId){
+          sender=userName||"Patient";
+        }else{
+          sender="Admin";
         }
 
-        const msgDiv = document.createElement("div");
-        msgDiv.textContent = `${sender}: ${data.text || ""}`;
-        msgDiv.style.margin = "6px 0";
-        msgDiv.style.padding = "8px 12px";
-        msgDiv.style.borderRadius = "12px";
-        msgDiv.style.maxWidth = "80%";
-        msgDiv.style.wordWrap = "break-word";
+        const msgDiv=document.createElement("div");
+        msgDiv.textContent=`${sender}: ${data.text||""}`;
+        msgDiv.style.margin="6px 0";
+        msgDiv.style.padding="8px 12px";
+        msgDiv.style.borderRadius="12px";
+        msgDiv.style.maxWidth="80%";
+        msgDiv.style.wordWrap="break-word";
 
-        if(data.senderId === userId){
-          msgDiv.style.background = "#0ea5e9";
-          msgDiv.style.color = "white";
-          msgDiv.style.alignSelf = "flex-end";
-        } else {
-          msgDiv.style.background = "#f1f5f9";
-          msgDiv.style.border = "1px solid #ccc";
-          msgDiv.style.color = "black";
-          msgDiv.style.alignSelf = "flex-start";
+        if(data.senderId===userId){
+          msgDiv.style.background="#0ea5e9";
+          msgDiv.style.color="white";
+          msgDiv.style.alignSelf="flex-end";
+        }else{
+          msgDiv.style.background="#f1f5f9";
+          msgDiv.style.border="1px solid #ccc";
+          msgDiv.style.alignSelf="flex-start";
         }
 
         chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatMessages.scrollTop=chatMessages.scrollHeight;
       });
     });
 });
 
-// Chat toggle
-chatBtn.onclick = () => {
-  chatPanel.style.display = chatPanel.style.display === "none" ? "flex" : "none";
+chatBtn.onclick=()=>{
+  chatPanel.style.display=chatPanel.style.display==="none"?"flex":"none";
 };
 
-// Send chat message
-chatSend.onclick = async () => {
-  const text = chatInput.value.trim();
+chatSend.onclick=async()=>{
+  const text=chatInput.value.trim();
   if(!text) return;
 
-  try{
-    await db.collection("chats").add({
-      text,
-      patientId: userId,
-      senderId: userId,
-      senderName: userName || "Patient",
-      receiverId: adminId,
-      participants: [userId, adminId],
-      status: "unread",
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    chatInput.value = "";
-  }catch(err){
-    console.error("Chat send failed:", err);
-    alert("Could not send message. Please contact the lab.");
-  }
+  await db.collection("chats").add({
+    text,
+    patientId:userId,
+    senderId:userId,
+    senderName:userName||"Patient",
+    receiverId:adminId,
+    participants:[userId,adminId],
+    status:"unread",
+    timestamp:firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  chatInput.value="";
 };
 </script>
-
 </body>
 </html>
