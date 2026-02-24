@@ -65,7 +65,7 @@ button:hover{background:#0284c7;}
   gap:10px;
   margin-bottom:15px;
 }
-#msg{text-align:center;font-weight:bold;}
+#msg{text-align:center;font-weight:bold;margin-top:10px;}
 </style>
 </head>
 <body>
@@ -131,27 +131,37 @@ button:hover{background:#0284c7;}
 </div>
 
 <script>
-const firebaseConfig={
-  apiKey:"YOUR_KEY",
-  authDomain:"YOUR_DOMAIN",
-  projectId:"YOUR_PROJECT_ID",
-  storageBucket:"YOUR_STORAGE_BUCKET"
+
+// ✅ YOUR REAL FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId: "624002906588",
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+  measurementId: "G-RWW6TCR0CD"
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+firebase.initializeApp(firebaseConfig);
 
 const auth=firebase.auth();
 const db=firebase.firestore();
 const storage=firebase.storage();
+const msg=document.getElementById("msg");
 
-const dob=document.getElementById("dob");
-const age=document.getElementById("age");
-dob.addEventListener("change",()=>{
-  const birth=new Date(dob.value);
+// Auto Age Calculation
+const dobInput=document.getElementById("dob");
+const ageInput=document.getElementById("age");
+
+dobInput.addEventListener("change",()=>{
+  const birth=new Date(dobInput.value);
   const diff=Date.now()-birth.getTime();
   const ageDate=new Date(diff);
-  age.value=Math.abs(ageDate.getUTCFullYear()-1970);
+  ageInput.value=Math.abs(ageDate.getUTCFullYear()-1970);
 });
 
+// Parish dropdown
 const parishData={
 "Mityana Town Council":["Central","Nakibanga","Ttamu"],
 "Busunju":["Busunju Central","Kasaalu"],
@@ -176,23 +186,29 @@ function generatePatientID(){
 
 document.getElementById("registerForm").onsubmit=async(e)=>{
 e.preventDefault();
+msg.style.color="red";
+msg.innerText="";
 
 try{
-const name=fullName.value.trim();
-const email=email.value.trim();
-const phone=phone.value.trim();
-const nationality=nationality.value;
+
+const fullName=document.getElementById("fullName").value.trim();
+const userEmail=document.getElementById("email").value.trim();
+const phone=document.getElementById("phone").value.trim();
+const nationality=document.getElementById("nationality").value;
 const sub=subcounty.value;
 const par=parish.value;
-const emergency=emergency.checked;
-const pickupDate=pickupDate.value;
-const pickupTime=pickupTime.value;
-const password=password.value;
+const emergency=document.getElementById("emergency").checked;
+const pickupDate=document.getElementById("pickupDate").value;
+const pickupTime=document.getElementById("pickupTime").value;
+const password=document.getElementById("password").value;
 
 if(!/^07[0-9]{8}$/.test(phone))
-throw new Error("Use valid Ugandan number");
+throw new Error("Use valid Ugandan number (07XXXXXXXX)");
 
-const userCred=await auth.createUserWithEmailAndPassword(email,password);
+if(password.length<6)
+throw new Error("Password must be at least 6 characters");
+
+const userCred=await auth.createUserWithEmailAndPassword(userEmail,password);
 const uid=userCred.user.uid;
 
 let photoURL="";
@@ -203,39 +219,44 @@ if(file){
   photoURL=await ref.getDownloadURL();
 }
 
+// GPS
 navigator.geolocation.getCurrentPosition(async(pos)=>{
-  const patientID=generatePatientID();
 
-  await db.collection("users").doc(uid).set({
-    patientID,
-    fullName:name,
-    email,
-    phone,
-    nationality,
-    dob:dob.value,
-    age:age.value,
-    district:"Mityana District",
-    subcounty:sub,
-    parish:par,
-    emergency,
-    pickupDate,
-    pickupTime,
-    photoURL,
-    latitude:pos.coords.latitude,
-    longitude:pos.coords.longitude,
-    role:"user",
-    created_at:firebase.firestore.FieldValue.serverTimestamp()
-  });
+await db.collection("users").doc(uid).set({
+  patientID:generatePatientID(),
+  fullName,
+  email:userEmail,
+  phone,
+  nationality,
+  dob:dobInput.value,
+  age:ageInput.value,
+  district:"Mityana District",
+  subcounty:sub,
+  parish:par,
+  emergency,
+  pickupDate,
+  pickupTime,
+  photoURL,
+  latitude:pos.coords.latitude,
+  longitude:pos.coords.longitude,
+  role:"user",
+  created_at:firebase.firestore.FieldValue.serverTimestamp()
+});
 
-  alert("Registration successful!");
-  window.location.href="login.html";
+msg.style.color="green";
+msg.innerText="Registration successful!";
+setTimeout(()=>window.location.href="login.html",1500);
+
+},()=>{
+msg.innerText="Please allow GPS location.";
 });
 
 }catch(err){
-msg.style.color="red";
 msg.innerText=err.message;
 }
+
 };
+
 </script>
 
 </body>
