@@ -3,92 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard – Mobile Lab</title>
+<title>📊 Dashboard – Mobile Lab</title>
 <link rel="stylesheet" href="dashboard.css">
-
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f1f5f9;
-    margin: 0;
-    padding: 0;
-}
-header {
-    background: #0369a1;
-    color: white;
-    padding: 20px;
-    text-align: center;
-}
-h1 {
-    margin: 0;
-}
-.dashboard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-.card {
-    background: #fff;
-    border-radius: 12px;
-    text-align: center;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-}
-.card:hover {
-    transform: translateY(-5px);
-}
-.card img {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 12px;
-}
-.card h3 {
-    margin: 8px 0 0 0;
-    color: #0369a1;
-}
-.card p {
-    margin: 5px 0 0 0;
-    color: #333;
-}
+body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:0;}
+header{background:#0369a1;color:white;padding:20px;text-align:center;}
+header h1{margin:0;font-size:24px;}
+nav{display:flex;justify-content:center;gap:20px;background:#e2e8f0;padding:12px;flex-wrap:wrap;}
+nav a{display:flex;align-items:center;gap:8px;padding:10px 16px;background:white;border-radius:10px;text-decoration:none;color:#0369a1;font-weight:bold;transition:0.3s;}
+nav a:hover{background:#0ea5e9;color:white;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:20px;}
+.card{background:white;padding:20px;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,0.1);text-align:center;transition:0.3s;cursor:pointer;position:relative;}
+.card:hover{box-shadow:0 6px 12px rgba(0,0,0,0.15);}
+.card img{width:64px;height:64px;margin-bottom:12px;}
+.badge{position:absolute;top:10px;right:10px;background:#ef4444;color:white;font-weight:bold;padding:4px 8px;border-radius:12px;font-size:12px;}
+.logout{position:fixed;top:20px;right:20px;padding:10px 16px;background:#ef4444;color:white;border:none;border-radius:8px;cursor:pointer;}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🧪 Mobile Lab Dashboard</h1>
+  <h1>Welcome to Mobile Lab Dashboard</h1>
+  <p id="userWelcome">Loading user...</p>
 </header>
 
-<div class="dashboard">
-  <!-- Orders Card -->
-  <div class="card">
+<button class="logout" onclick="logout()">Logout</button>
+
+<nav>
+  <a href="new_requests.html"><img src="icons/order.png" alt="Orders">New Orders</a>
+  <a href="ongoing_tests.html"><img src="icons/results.png" alt="Ongoing Tests">Ongoing Tests</a>
+  <a href="completed_tests.html"><img src="icons/results.png" alt="Completed Tests">Completed Tests</a>
+  <a href="inbox.html"><img src="icons/profile.png" alt="Inbox">Inbox</a>
+  <a href="profile.html"><img src="icons/profile.png" alt="Profile">Profile</a>
+  <a href="contact.html"><img src="icons/contact.png" alt="Contact">Contact</a>
+</nav>
+
+<div class="cards">
+  <div class="card" id="totalOrders">
+    <span class="badge" id="ordersCount">0</span>
     <img src="icons/order.png" alt="Orders">
-    <h3>Orders</h3>
-    <p>View and create lab orders</p>
+    <h3>Total Orders</h3>
   </div>
-
-  <!-- Results Card -->
-  <div class="card">
-    <img src="icons/results.png" alt="Results">
-    <h3>Results</h3>
-    <p>Check completed lab results</p>
+  <div class="card" id="ongoingTests">
+    <span class="badge" id="ongoingCount">0</span>
+    <img src="icons/results.png" alt="Ongoing">
+    <h3>Ongoing Tests</h3>
   </div>
-
-  <!-- Profile Card -->
-  <div class="card">
-    <img src="icons/profile.png" alt="Profile">
-    <h3>Profile</h3>
-    <p>Update your personal info</p>
+  <div class="card" id="completedTests">
+    <span class="badge" id="completedCount">0</span>
+    <img src="icons/results.png" alt="Completed">
+    <h3>Completed Tests</h3>
   </div>
-
-  <!-- Contact Card -->
-  <div class="card">
-    <img src="icons/contact.png" alt="Contact">
-    <h3>Contact</h3>
-    <p>Get in touch with support</p>
+  <div class="card" id="messages">
+    <span class="badge" id="messageCount">0</span>
+    <img src="icons/profile.png" alt="Messages">
+    <h3>Unread Messages</h3>
   </div>
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let userId, userName;
+
+auth.onAuthStateChanged(async user=>{
+  if(!user) return location.href="login.html";
+  userId = user.uid;
+
+  const doc = await db.collection("users").doc(userId).get();
+  userName = doc.exists ? doc.data().fullName : "User";
+  document.getElementById("userWelcome").textContent = `Hello, ${userName}!`;
+
+  // Load counts dynamically
+  db.collection("orders").get().then(snap=>{
+    document.getElementById("ordersCount").textContent = snap.size;
+  });
+  db.collection("ongoing_tests").get().then(snap=>{
+    document.getElementById("ongoingCount").textContent = snap.size;
+  });
+  db.collection("results").get().then(snap=>{
+    document.getElementById("completedCount").textContent = snap.size;
+  });
+  db.collection("chats").where("participants","array-contains",userId).get().then(snap=>{
+    document.getElementById("messageCount").textContent = snap.size;
+  });
+});
+
+// Make cards clickable
+document.getElementById("totalOrders").onclick = ()=>location.href="new_requests.html";
+document.getElementById("ongoingTests").onclick = ()=>location.href="ongoing_tests.html";
+document.getElementById("completedTests").onclick = ()=>location.href="completed_tests.html";
+document.getElementById("messages").onclick = ()=>location.href="inbox.html";
+
+function logout(){
+  auth.signOut().then(()=>location.href="login.html");
+}
+</script>
 
 </body>
 </html>
