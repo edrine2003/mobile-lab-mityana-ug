@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patient Dashboard – Mobile Lab</title>
+<link rel="stylesheet" href="dashboard.css">
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<header>
+  <img src="logo.png" alt="Logo" style="height:50px; vertical-align: middle;">
+  <h1 style="display:inline-block; margin-left:10px;">Welcome, <span id="patientName">Patient</span>!</h1>
+  <button id="logoutBtn">Logout</button>
+</header>
+
+<div class="dashboard-container">
+  <div class="card" onclick="navigate('index.html')">
+    <img src="icons/order.png" alt="Order" width="50">
+    <h3>Order Lab Test</h3>
+  </div>
+  <div class="card" onclick="navigate('inbox.html')">
+    <img src="icons/results.png" alt="Results" width="50">
+    <h3>View My Results</h3>
+  </div>
+  <div class="card" onclick="navigate('register.html')">
+    <img src="icons/profile.png" alt="Profile" width="50">
+    <h3>Update Profile</h3>
+  </div>
+  <div class="card" onclick="navigate('patient_chat.html')">
+    <img src="icons/contact.png" alt="Contact" width="50">
+    <h3>Contact Lab</h3>
+  </div>
+</div>
+
+<script>
+  // -------- Firebase Config --------
+  const firebaseConfig = {
+    apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+    authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+    projectId: "mobile-lab-mityana-aeae2",
+    storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
+    messagingSenderId: "624002906588",
+    appId: "1:624002906588:web:08b4259f90ffa9adad7719",
+    measurementId: "G-RWW6TCR0CD"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // -------- Auth Check --------
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      const name = user.displayName || user.email;
+      document.getElementById('patientName').innerText = name;
+    } else {
+      window.location.href = 'login.html';
+    }
+  });
+
+  // -------- Logout --------
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    auth.signOut().then(() => window.location.href='login.html');
+  });
+
+  // -------- Navigate to pages --------
+  function navigate(page) {
+    window.location.href = page;
+  }
+</script>
+
+</body>
+</html>
