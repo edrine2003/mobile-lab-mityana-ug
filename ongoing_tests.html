@@ -159,6 +159,21 @@ async function loadOngoing(){
       card.querySelector(".complete").onclick=async ()=>{
         const results={};
         let hasEmpty=false;
+        
+        // Delete Order
+card.querySelector(".delete").onclick = async () => {
+  const confirmDelete = confirm("Are you sure you want to delete this test?");
+  if(!confirmDelete) return;
+
+  try{
+    await db.collection("orders").doc(doc.id).delete();
+    alert("Test deleted successfully.");
+    loadOngoing(); // refresh list
+  }catch(err){
+    console.error(err);
+    alert("Failed to delete test.");
+  }
+};
 
         // CBC
         const cbcRows=card.querySelectorAll(`#cbc-${doc.id} tbody tr`);
