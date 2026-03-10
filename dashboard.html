@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Patient Dashboard</title>
+<title>Mobile Lab Patient Dashboard</title>
 
 <style>
 
 body{
-font-family:Arial;
+font-family:Arial, sans-serif;
 margin:0;
 background:#f1f5f9;
 }
+
+/* HEADER */
 
 header{
 background:#0369a1;
@@ -27,9 +30,11 @@ margin:0;
 }
 
 #userWelcome{
-margin-top:5px;
 display:block;
+margin-top:6px;
 }
+
+/* DASHBOARD GRID */
 
 .dashboard{
 display:grid;
@@ -38,6 +43,8 @@ gap:20px;
 padding:30px;
 }
 
+/* CARD STYLE */
+
 .card{
 background:white;
 padding:25px;
@@ -45,7 +52,7 @@ border-radius:12px;
 box-shadow:0 4px 10px rgba(0,0,0,0.1);
 text-align:center;
 cursor:pointer;
-transition:0.2s;
+transition:0.25s;
 }
 
 .card:hover{
@@ -54,18 +61,25 @@ transform:scale(1.05);
 
 .card img{
 width:70px;
-margin-bottom:12px;
+margin-bottom:10px;
 }
+
+.card h3{
+margin:0;
+color:#0369a1;
+}
+
+/* LOGOUT BUTTON */
 
 .logout{
 position:fixed;
 top:20px;
 right:20px;
-padding:10px 15px;
-border:none;
-border-radius:8px;
 background:#ef4444;
 color:white;
+border:none;
+padding:10px 15px;
+border-radius:8px;
 cursor:pointer;
 }
 
@@ -117,9 +131,11 @@ cursor:pointer;
 <script>
 
 const firebaseConfig = {
+
 apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
 authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
 projectId:"mobile-lab-mityana-aeae2"
+
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -127,11 +143,15 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+/* CHECK LOGIN */
+
 auth.onAuthStateChanged(async user=>{
 
 if(!user){
+
 location.href="login.html";
 return;
+
 }
 
 const doc = await db.collection("users").doc(user.uid).get();
@@ -139,35 +159,49 @@ const doc = await db.collection("users").doc(user.uid).get();
 let name="User";
 
 if(doc.exists){
+
 name = doc.data().fullName;
+
 }
 
 document.getElementById("userWelcome").innerText="Welcome "+name;
 
 });
 
-/* REDIRECTION */
+/* DASHBOARD REDIRECTS */
 
 document.getElementById("orderCard").onclick=()=>{
-location.href="new_requests.html";
+
+location.href="index.html";
+
 };
 
 document.getElementById("resultsCard").onclick=()=>{
+
 location.href="inbox.html";
+
 };
 
 document.getElementById("contactCard").onclick=()=>{
+
 location.href="patient_chat.html";
+
 };
 
 document.getElementById("profileCard").onclick=()=>{
+
 location.href="profile.html";
+
 };
+
+/* LOGOUT */
 
 function logout(){
 
 auth.signOut().then(()=>{
+
 location.href="login.html";
+
 });
 
 }
@@ -175,4 +209,5 @@ location.href="login.html";
 </script>
 
 </body>
+
 </html>
