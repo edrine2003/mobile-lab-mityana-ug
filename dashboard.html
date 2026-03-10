@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Mobile Lab Dashboard</title>
+<title>Patient Dashboard</title>
 
 <style>
 
@@ -14,8 +14,6 @@ font-family:Arial;
 margin:0;
 background:#f1f5f9;
 }
-
-/* HEADER */
 
 header{
 background:#0369a1;
@@ -33,16 +31,12 @@ margin-top:5px;
 display:block;
 }
 
-/* GRID */
-
 .dashboard{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:20px;
 padding:30px;
 }
-
-/* CARDS */
 
 .card{
 background:white;
@@ -60,16 +54,8 @@ transform:scale(1.05);
 
 .card img{
 width:70px;
-margin-bottom:10px;
+margin-bottom:12px;
 }
-
-.count{
-font-size:28px;
-font-weight:bold;
-color:#0369a1;
-}
-
-/* LOGOUT */
 
 .logout{
 position:fixed;
@@ -101,32 +87,24 @@ cursor:pointer;
 
 <div class="dashboard">
 
-<div class="card" id="ordersCard">
+<div class="card" id="orderCard">
 <img src="icons/order.png">
-<h3>Orders</h3>
-<div class="count" id="ordersCount">0</div>
-</div>
-
-<div class="card" id="ongoingCard">
-<img src="icons/results.png">
-<h3>Ongoing Tests</h3>
-<div class="count" id="ongoingCount">0</div>
+<h3>Order a Test</h3>
 </div>
 
 <div class="card" id="resultsCard">
 <img src="icons/results.png">
 <h3>Results</h3>
-<div class="count" id="completedCount">0</div>
-</div>
-
-<div class="card" id="profileCard">
-<img src="icons/profile.png">
-<h3>Profile</h3>
 </div>
 
 <div class="card" id="contactCard">
 <img src="icons/contact.png">
 <h3>Contact Lab</h3>
+</div>
+
+<div class="card" id="profileCard">
+<img src="icons/profile.png">
+<h3>Profile</h3>
 </div>
 
 </div>
@@ -149,10 +127,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let userId;
-
-/* CHECK LOGIN */
-
 auth.onAuthStateChanged(async user=>{
 
 if(!user){
@@ -160,59 +134,35 @@ location.href="login.html";
 return;
 }
 
-userId=user.uid;
-
-/* GET USER NAME */
-
-const doc=await db.collection("users").doc(userId).get();
+const doc = await db.collection("users").doc(user.uid).get();
 
 let name="User";
 
 if(doc.exists){
-name=doc.data().fullName;
+name = doc.data().fullName;
 }
 
 document.getElementById("userWelcome").innerText="Welcome "+name;
-
-/* LOAD COUNTS */
-
-db.collection("orders").get().then(snap=>{
-document.getElementById("ordersCount").innerText=snap.size;
-});
-
-db.collection("ongoing_tests").get().then(snap=>{
-document.getElementById("ongoingCount").innerText=snap.size;
-});
-
-db.collection("results").get().then(snap=>{
-document.getElementById("completedCount").innerText=snap.size;
-});
 
 });
 
 /* REDIRECTION */
 
-document.getElementById("ordersCard").onclick=()=>{
+document.getElementById("orderCard").onclick=()=>{
 location.href="new_requests.html";
 };
 
-document.getElementById("ongoingCard").onclick=()=>{
-location.href="ongoing_tests.html";
+document.getElementById("resultsCard").onclick=()=>{
+location.href="inbox.html";
 };
 
-document.getElementById("resultsCard").onclick=()=>{
-location.href="completed_tests.html";
+document.getElementById("contactCard").onclick=()=>{
+location.href="patient_chat.html";
 };
 
 document.getElementById("profileCard").onclick=()=>{
 location.href="profile.html";
 };
-
-document.getElementById("contactCard").onclick=()=>{
-location.href="contact.html";
-};
-
-/* LOGOUT */
 
 function logout(){
 
