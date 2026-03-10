@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Patient Profile</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f1f5f9;
+}
+
+header{
+background:#0369a1;
+color:white;
+padding:20px;
+text-align:center;
+}
+
+.container{
+max-width:500px;
+margin:auto;
+background:white;
+margin-top:30px;
+padding:25px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.profile-pic{
+text-align:center;
+margin-bottom:20px;
+}
+
+.profile-pic img{
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+}
+
+.profile-pic input{
+margin-top:10px;
+}
+
+label{
+display:block;
+margin-top:10px;
+font-weight:bold;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:5px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+margin-top:20px;
+padding:12px;
+width:100%;
+background:#0369a1;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.back{
+background:#64748b;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h2>👤 My Profile</h2>
+
+</header>
+
+<div class="container">
+
+<div class="profile-pic">
+
+<img id="photoPreview" src="logo.png">
+
+<br>
+
+<input type="file" id="photoInput">
+
+</div>
+
+<label>Full Name</label>
+<input type="text" id="fullName">
+
+<label>Sex</label>
+<select id="sex">
+<option value="">Select</option>
+<option>Male</option>
+<option>Female</option>
+</select>
+
+<label>Date of Birth</label>
+<input type="date" id="dob">
+
+<label>Phone Number</label>
+<input type="text" id="phone">
+
+<label>Email</label>
+<input type="email" id="email">
+
+<label>Address</label>
+<input type="text" id="address">
+
+<button onclick="saveProfile()">Save Changes</button>
+
+<button class="back" onclick="goBack()">Back to Dashboard</button>
+
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
+
+apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+projectId:"mobile-lab-mityana-aeae2"
+
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let userId;
+
+/* LOAD USER PROFILE */
+
+auth.onAuthStateChanged(async user=>{
+
+if(!user){
+
+location.href="login.html";
+return;
+
+}
+
+userId=user.uid;
+
+const doc=await db.collection("users").doc(userId).get();
+
+if(doc.exists){
+
+const data=doc.data();
+
+document.getElementById("fullName").value=data.fullName||"";
+document.getElementById("sex").value=data.sex||"";
+document.getElementById("dob").value=data.dob||"";
+document.getElementById("phone").value=data.phone||"";
+document.getElementById("email").value=data.email||"";
+document.getElementById("address").value=data.address||"";
+
+}
+
+});
+
+/* SAVE PROFILE */
+
+function saveProfile(){
+
+const data={
+
+fullName:document.getElementById("fullName").value,
+sex:document.getElementById("sex").value,
+dob:document.getElementById("dob").value,
+phone:document.getElementById("phone").value,
+email:document.getElementById("email").value,
+address:document.getElementById("address").value
+
+};
+
+db.collection("users").doc(userId).update(data)
+
+.then(()=>{
+
+alert("Profile updated successfully");
+
+});
+
+}
+
+/* PHOTO PREVIEW */
+
+document.getElementById("photoInput").addEventListener("change",function(){
+
+const file=this.files[0];
+
+if(file){
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+
+document.getElementById("photoPreview").src=e.target.result;
+
+}
+
+reader.readAsDataURL(file);
+
+}
+
+});
+
+function goBack(){
+
+location.href="dashboard.html";
+
+}
+
+</script>
+
+</body>
+
+</html>
