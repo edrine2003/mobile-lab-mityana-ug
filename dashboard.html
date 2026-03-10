@@ -10,9 +10,9 @@
 <style>
 
 body{
-font-family:Arial, sans-serif;
+font-family:Arial;
 margin:0;
-background:#f4f6f9;
+background:#f1f5f9;
 }
 
 /* HEADER */
@@ -20,93 +20,66 @@ background:#f4f6f9;
 header{
 background:#0369a1;
 color:white;
-padding:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+padding:20px;
+text-align:center;
 }
 
 header h2{
 margin:0;
 }
 
-.top-buttons button{
-margin-left:10px;
-padding:6px 12px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-font-weight:bold;
+#userWelcome{
+margin-top:5px;
+display:block;
 }
 
-.logout{
-background:#ef4444;
-color:white;
-}
+/* GRID */
 
-/* STATS */
-
-.stats{
+.dashboard{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 gap:20px;
-padding:20px;
+padding:30px;
 }
+
+/* CARDS */
 
 .card{
 background:white;
 padding:25px;
 border-radius:12px;
-box-shadow:0 3px 8px rgba(0,0,0,0.1);
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
 text-align:center;
 cursor:pointer;
 transition:0.2s;
 }
 
 .card:hover{
-transform:scale(1.03);
+transform:scale(1.05);
 }
 
-.card h3{
-margin:10px 0;
+.card img{
+width:70px;
+margin-bottom:10px;
 }
 
 .count{
-font-size:30px;
+font-size:28px;
 font-weight:bold;
 color:#0369a1;
 }
 
-/* STATUS COLORS */
+/* LOGOUT */
 
-.pending{
-border-left:6px solid orange;
-}
-
-.success{
-border-left:6px solid green;
-}
-
-.alert{
-border-left:6px solid red;
-}
-
-/* QUICK ACTIONS */
-
-.actions{
-padding:20px;
-display:flex;
-gap:15px;
-flex-wrap:wrap;
-}
-
-.actions button{
-padding:12px 20px;
+.logout{
+position:fixed;
+top:20px;
+right:20px;
+padding:10px 15px;
 border:none;
 border-radius:8px;
-background:#0ea5e9;
+background:#ef4444;
 color:white;
-font-weight:bold;
 cursor:pointer;
 }
 
@@ -119,58 +92,45 @@ cursor:pointer;
 <header>
 
 <h2>🧪 Mobile Lab Mityana</h2>
-
-<div class="top-buttons">
-<span id="userWelcome"></span>
-<button onclick="location.href='inbox.html'">💬 Messages</button>
-<button class="logout" onclick="logout()">Logout</button>
-</div>
+<span id="userWelcome">Loading...</span>
 
 </header>
 
-<section class="stats">
+<button class="logout" onclick="logout()">Logout</button>
+
+
+<div class="dashboard">
 
 <div class="card" id="ordersCard">
-<h3>🧾 Orders</h3>
+<img src="icons/order.png">
+<h3>Orders</h3>
 <div class="count" id="ordersCount">0</div>
 </div>
 
-<div class="card pending" id="ongoingCard">
-<h3>🧪 Ongoing Tests</h3>
+<div class="card" id="ongoingCard">
+<img src="icons/results.png">
+<h3>Ongoing Tests</h3>
 <div class="count" id="ongoingCount">0</div>
 </div>
 
-<div class="card success" id="resultsCard">
-<h3>📄 Completed Results</h3>
+<div class="card" id="resultsCard">
+<img src="icons/results.png">
+<h3>Results</h3>
 <div class="count" id="completedCount">0</div>
 </div>
 
-<div class="card alert" id="messagesCard">
-<h3>💬 Messages</h3>
-<div class="count" id="messageCount">0</div>
+<div class="card" id="profileCard">
+<img src="icons/profile.png">
+<h3>Profile</h3>
 </div>
 
-</section>
+<div class="card" id="contactCard">
+<img src="icons/contact.png">
+<h3>Contact Lab</h3>
+</div>
 
-<section class="actions">
+</div>
 
-<button onclick="location.href='new_requests.html'">
-➕ New Lab Requests
-</button>
-
-<button onclick="location.href='ongoing_tests.html'">
-🔬 Track Tests
-</button>
-
-<button onclick="location.href='completed_tests.html'">
-📥 View Results
-</button>
-
-<button onclick="location.href='profile.html'">
-👤 Profile
-</button>
-
-</section>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -191,7 +151,7 @@ const db = firebase.firestore();
 
 let userId;
 
-/* AUTH CHECK */
+/* CHECK LOGIN */
 
 auth.onAuthStateChanged(async user=>{
 
@@ -200,19 +160,19 @@ location.href="login.html";
 return;
 }
 
-userId = user.uid;
+userId=user.uid;
 
-/* LOAD USER NAME */
+/* GET USER NAME */
 
-const userDoc = await db.collection("users").doc(userId).get();
+const doc=await db.collection("users").doc(userId).get();
 
-let name = "User";
+let name="User";
 
-if(userDoc.exists){
-name = userDoc.data().fullName;
+if(doc.exists){
+name=doc.data().fullName;
 }
 
-document.getElementById("userWelcome").innerText="Hello "+name;
+document.getElementById("userWelcome").innerText="Welcome "+name;
 
 /* LOAD COUNTS */
 
@@ -228,16 +188,9 @@ db.collection("results").get().then(snap=>{
 document.getElementById("completedCount").innerText=snap.size;
 });
 
-db.collection("chats")
-.where("participants","array-contains",userId)
-.get()
-.then(snap=>{
-document.getElementById("messageCount").innerText=snap.size;
 });
 
-});
-
-/* CARD REDIRECTION */
+/* REDIRECTION */
 
 document.getElementById("ordersCard").onclick=()=>{
 location.href="new_requests.html";
@@ -251,8 +204,12 @@ document.getElementById("resultsCard").onclick=()=>{
 location.href="completed_tests.html";
 };
 
-document.getElementById("messagesCard").onclick=()=>{
-location.href="inbox.html";
+document.getElementById("profileCard").onclick=()=>{
+location.href="profile.html";
+};
+
+document.getElementById("contactCard").onclick=()=>{
+location.href="contact.html";
 };
 
 /* LOGOUT */
