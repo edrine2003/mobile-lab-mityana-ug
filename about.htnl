@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>About Mobile Lab Mityana</title>
+
+<style>
+
+body{
+font-family:Arial, sans-serif;
+margin:0;
+background:#f1f5f9;
+}
+
+header{
+background:#0369a1;
+color:white;
+padding:25px;
+text-align:center;
+}
+
+header h1{
+margin:0;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:30px;
+}
+
+.card{
+background:white;
+padding:25px;
+margin-bottom:20px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+h2{
+color:#0369a1;
+}
+
+ul{
+line-height:1.8;
+}
+
+button{
+margin-top:20px;
+padding:12px 20px;
+background:#0369a1;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+footer{
+text-align:center;
+padding:20px;
+color:#555;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>🧪 Mobile Lab Mityana</h1>
+<p>Quality Laboratory Services at Your Convenience</p>
+
+</header>
+
+
+<div class="container">
+
+<div class="card">
+
+<h2>About Us</h2>
+
+<p>
+Mobile Lab Mityana is a digital laboratory service designed to make medical testing easier,
+faster, and more accessible. Our system allows patients to order laboratory tests online,
+receive results digitally, and communicate directly with laboratory professionals.
+</p>
+
+<p>
+Our goal is to improve healthcare access by bringing laboratory services closer to the
+community, reducing waiting times, and ensuring accurate diagnostic services.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Our Mission</h2>
+
+<p>
+To provide reliable, fast, and accessible laboratory diagnostic services using modern
+technology while maintaining the highest standards of medical professionalism.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Our Vision</h2>
+
+<p>
+To become a trusted digital laboratory platform that connects patients and healthcare
+providers through efficient and innovative diagnostic solutions.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h2>Services We Offer</h2>
+
+<ul>
+<li>Blood Tests</li>
+<li>Malaria Testing</li>
+<li>HIV Testing</li>
+<li>Urine Analysis</li>
+<li>Diagnostic Lab Reports</li>
+<li>Online Result Delivery</li>
+<li>Direct Communication with Lab Professionals</li>
+</ul>
+
+</div>
+
+
+<div class="card">
+
+<h2>Contact Information</h2>
+
+<p><strong>Location:</strong> Mityana, Uganda</p>
+<p><strong>Service:</strong> Mobile Laboratory Testing</p>
+<p><strong>Email:</strong> edrinehero@gmail.com</p>
+<p><strong>Mobile Money:</strong> +256763885073</p>
+
+</div>
+
+<button onclick="location.href='dashboard.html'">
+⬅ Back to Dashboard
+</button>
+
+</div>
+
+
+<footer>
+
+© 2026 Mobile Lab Mityana. All rights reserved.
+
+</footer>
+
+</body>
+</html>
