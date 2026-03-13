@@ -23,6 +23,17 @@ padding:20px;
 text-align:center;
 }
 
+header h2{
+margin:0;
+}
+
+#userName{
+display:block;
+margin-top:5px;
+font-size:14px;
+opacity:0.9;
+}
+
 .container{
 max-width:500px;
 margin:auto;
@@ -43,6 +54,7 @@ width:120px;
 height:120px;
 border-radius:50%;
 object-fit:cover;
+border:3px solid #0369a1;
 }
 
 .profile-pic input{
@@ -51,7 +63,7 @@ margin-top:10px;
 
 label{
 display:block;
-margin-top:10px;
+margin-top:12px;
 font-weight:bold;
 }
 
@@ -89,6 +101,7 @@ margin-top:10px;
 <header>
 
 <h2>👤 My Profile</h2>
+<span id="userName">Loading...</span>
 
 </header>
 
@@ -121,7 +134,7 @@ margin-top:10px;
 <input type="text" id="phone">
 
 <label>Email</label>
-<input type="email" id="email">
+<input type="email" id="email" disabled>
 
 <label>Address</label>
 <input type="text" id="address">
@@ -132,14 +145,9 @@ margin-top:10px;
 
 </div>
 
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-<script>
-
-const firebaseConfig = {
 
 <script>
 
@@ -156,7 +164,7 @@ const db = firebase.firestore();
 
 let userId;
 
-/* LOAD USER PROFILE */
+/* LOAD PROFILE */
 
 auth.onAuthStateChanged(async user=>{
 
@@ -181,10 +189,15 @@ document.getElementById("dob").value = data.dob || "";
 document.getElementById("phone").value = data.phone || "";
 document.getElementById("address").value = data.address || "";
 
+document.getElementById("userName").innerText = data.fullName || user.email;
+
+}else{
+
+document.getElementById("userName").innerText = user.email;
+
 }
 
 });
-
 
 /* SAVE PROFILE */
 
@@ -205,12 +218,13 @@ db.collection("users").doc(userId).set(data,{merge:true})
 
 .then(()=>{
 
+document.getElementById("userName").innerText=data.fullName;
+
 alert("Profile updated successfully");
 
 });
 
 }
-
 
 /* PHOTO PREVIEW */
 
@@ -223,7 +237,9 @@ if(file){
 const reader=new FileReader();
 
 reader.onload=function(e){
+
 document.getElementById("photoPreview").src=e.target.result;
+
 }
 
 reader.readAsDataURL(file);
@@ -232,12 +248,12 @@ reader.readAsDataURL(file);
 
 });
 
-
 function goBack(){
 location.href="dashboard.html";
 }
 
 </script>
+
 </body>
 
 </html>
