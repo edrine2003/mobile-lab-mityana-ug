@@ -141,10 +141,12 @@ margin-top:10px;
 
 const firebaseConfig = {
 
+<script>
+
+const firebaseConfig = {
 apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
 authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
 projectId:"mobile-lab-mityana-aeae2"
-
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -159,47 +161,47 @@ let userId;
 auth.onAuthStateChanged(async user=>{
 
 if(!user){
-
 location.href="login.html";
 return;
-
 }
 
-userId=user.uid;
+userId = user.uid;
 
-const doc=await db.collection("users").doc(userId).get();
+document.getElementById("email").value = user.email;
+
+const doc = await db.collection("users").doc(userId).get();
 
 if(doc.exists){
 
-const data=doc.data();
+const data = doc.data();
 
-document.getElementById("fullName").value=data.fullName||"";
-document.getElementById("sex").value=data.sex||"";
-document.getElementById("dob").value=data.dob||"";
-document.getElementById("phone").value=data.phone||"";
-document.getElementById("email").value=data.email||"";
-document.getElementById("address").value=data.address||"";
+document.getElementById("fullName").value = data.fullName || "";
+document.getElementById("sex").value = data.sex || "";
+document.getElementById("dob").value = data.dob || "";
+document.getElementById("phone").value = data.phone || "";
+document.getElementById("address").value = data.address || "";
 
 }
 
 });
 
+
 /* SAVE PROFILE */
 
 function saveProfile(){
 
-const data={
+const data = {
 
 fullName:document.getElementById("fullName").value,
 sex:document.getElementById("sex").value,
 dob:document.getElementById("dob").value,
 phone:document.getElementById("phone").value,
-email:document.getElementById("email").value,
-address:document.getElementById("address").value
+address:document.getElementById("address").value,
+email:auth.currentUser.email
 
 };
 
-db.collection("users").doc(userId).update(data)
+db.collection("users").doc(userId).set(data,{merge:true})
 
 .then(()=>{
 
@@ -208,6 +210,7 @@ alert("Profile updated successfully");
 });
 
 }
+
 
 /* PHOTO PREVIEW */
 
@@ -220,9 +223,7 @@ if(file){
 const reader=new FileReader();
 
 reader.onload=function(e){
-
 document.getElementById("photoPreview").src=e.target.result;
-
 }
 
 reader.readAsDataURL(file);
@@ -231,14 +232,12 @@ reader.readAsDataURL(file);
 
 });
 
+
 function goBack(){
-
 location.href="dashboard.html";
-
 }
 
 </script>
-
 </body>
 
 </html>
