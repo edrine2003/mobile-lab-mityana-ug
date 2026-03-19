@@ -3,32 +3,27 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Patient Chat</title>
-<link rel="stylesheet" href="styles.css">
 
 <style>
+body { font-family: Arial; background: #f4f6f8; }
 .chat-box {
-    height: 300px;
+    height: 350px;
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 10px;
-    background: #fff;
+    background: white;
 }
-
-.message {
-    margin: 5px 0;
-    padding: 8px;
-    border-radius: 8px;
-}
-
+.message { margin: 5px; padding: 8px; border-radius: 8px; }
 .patient { background: #d1e7dd; text-align: right; }
 .doctor { background: #f8d7da; text-align: left; }
-
-.input-area {
-    display: flex;
-    gap: 5px;
-    margin-top: 10px;
-}
+.controls { display: flex; gap: 5px; margin-top: 10px; }
 </style>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
 </head>
 
 <body>
@@ -37,60 +32,128 @@
 
 <div class="chat-box" id="chatBox"></div>
 
-<div class="input-area">
+<div class="controls">
     <input type="text" id="messageInput" placeholder="Type message...">
     <input type="file" id="fileInput">
     <button onclick="sendMessage()">Send</button>
 </div>
 
+<div class="controls">
+    <button onclick="startRecording()">🎤 Start</button>
+    <button onclick="stopRecording()">⏹ Stop</button>
+</div>
+
 <script>
-let chat = [];
+// 🔥 REPLACE WITH YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2",
+  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app"
+};
 
-function renderChat() {
-    const box = document.getElementById("chatBox");
-    box.innerHTML = "";
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-    chat.forEach(msg => {
+// UNIQUE PATIENT CHAT ID
+let chatId = localStorage.getItem("chatId");
+if (!chatId) {
+    chatId = "patient_" + Date.now();
+    localStorage.setItem("chatId", chatId);
+}
+
+const chatBox = document.getElementById("chatBox");
+
+// REAL-TIME LISTENER
+db.collection("chats").doc(chatId)
+.collection("messages")
+.orderBy("timestamp")
+.onSnapshot(snapshot => {
+    chatBox.innerHTML = "";
+
+    snapshot.forEach(doc => {
+        const msg = doc.data();
         const div = document.createElement("div");
         div.className = "message " + msg.sender;
 
-        if(msg.type === "text"){
-            div.innerText = msg.message;
+        if (msg.type === "text") {
+            div.innerText = msg.text;
         }
-        else if(msg.type === "image"){
-            div.innerHTML = `<img src="${msg.file}" width="100">`;
+        else if (msg.type === "image") {
+            div.innerHTML = `<img src="${msg.fileUrl}" width="120">`;
+        }
+        else if (msg.type === "audio") {
+            div.innerHTML = `<audio controls src="${msg.fileUrl}"></audio>`;
         }
 
-        box.appendChild(div);
+        chatBox.appendChild(div);
     });
 
-    box.scrollTop = box.scrollHeight;
-}
+    chatBox.scrollTop = chatBox.scrollHeight;
+});
 
-function sendMessage() {
+// SEND MESSAGE
+async function sendMessage() {
     const input = document.getElementById("messageInput");
     const fileInput = document.getElementById("fileInput");
 
-    if(fileInput.files.length > 0){
-        const file = URL.createObjectURL(fileInput.files[0]);
+    let data = {
+        sender: "patient",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
 
-        chat.push({
-            sender: "patient",
-            type: "image",
-            file: file
-        });
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const ref = storage.ref("chatFiles/" + Date.now() + "_" + file.name);
+        await ref.put(file);
+        const url = await ref.getDownloadURL();
+
+        data.type = file.type.startsWith("audio") ? "audio" : "image";
+        data.fileUrl = url;
     } else {
-        chat.push({
-            sender: "patient",
-            type: "text",
-            message: input.value
-        });
+        data.type = "text";
+        data.text = input.value;
     }
+
+    await db.collection("chats").doc(chatId)
+    .collection("messages").add(data);
 
     input.value = "";
     fileInput.value = "";
+}
 
-    renderChat();
+// 🎤 AUDIO RECORDING
+let recorder, chunks = [];
+
+async function startRecording() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = new MediaRecorder(stream);
+
+    recorder.ondataavailable = e => chunks.push(e.data);
+
+    recorder.onstop = async () => {
+        const blob = new Blob(chunks);
+        chunks = [];
+
+        const ref = storage.ref("chatAudio/" + Date.now() + ".webm");
+        await ref.put(blob);
+        const url = await ref.getDownloadURL();
+
+        await db.collection("chats").doc(chatId)
+        .collection("messages").add({
+            sender: "patient",
+            type: "audio",
+            fileUrl: url,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    };
+
+    recorder.start();
+}
+
+function stopRecording() {
+    recorder.stop();
 }
 </script>
 
