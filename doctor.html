@@ -2,30 +2,35 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Doctor Chat</title>
+<title>Doctor Dashboard</title>
 
 <style>
+body { font-family: Arial; }
 .container { display: flex; }
 .sidebar {
     width: 30%;
     border-right: 1px solid #ccc;
 }
+.patient {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
 .chat-area {
     width: 70%;
     padding: 10px;
 }
-.patient-item {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-}
 .chat-box {
-    height: 300px;
+    height: 350px;
     overflow-y: auto;
     border: 1px solid #ccc;
     padding: 10px;
 }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 </head>
 
 <body>
@@ -33,72 +38,88 @@
 <h2>Doctor Inbox</h2>
 
 <div class="container">
-    
-    <div class="sidebar" id="patientsList"></div>
 
-    <div class="chat-area">
-        <div class="chat-box" id="chatBox"></div>
+<div class="sidebar" id="patientsList"></div>
 
-        <input type="text" id="replyInput" placeholder="Reply...">
-        <button onclick="sendReply()">Send</button>
-    </div>
+<div class="chat-area">
+    <div class="chat-box" id="chatBox"></div>
+    <input type="text" id="replyInput">
+    <button onclick="sendReply()">Send</button>
+</div>
 
 </div>
 
 <script>
-let chats = {
-    "patient1": [
-        { sender: "patient", message: "Hello doctor" }
-    ],
-    "patient2": [
-        { sender: "patient", message: "I have headache" }
-    ]
+// SAME CONFIG HERE
+const firebaseConfig = {
+  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId: "mobile-lab-mityana-aeae2"
 };
 
-let currentPatient = null;
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-// Load patients
-function loadPatients(){
+let currentChat = null;
+
+// LOAD PATIENTS
+db.collection("chats").onSnapshot(snapshot => {
     const list = document.getElementById("patientsList");
+    list.innerHTML = "";
 
-    Object.keys(chats).forEach(id => {
+    snapshot.forEach(doc => {
         const div = document.createElement("div");
-        div.className = "patient-item";
-        div.innerText = id;
-        div.onclick = () => openChat(id);
+        div.className = "patient";
+        div.innerText = doc.id;
+        div.onclick = () => openChat(doc.id);
         list.appendChild(div);
     });
-}
+});
 
-function openChat(id){
-    currentPatient = id;
-    renderChat();
-}
+// OPEN CHAT
+function openChat(chatId) {
+    currentChat = chatId;
 
-function renderChat(){
-    const box = document.getElementById("chatBox");
-    box.innerHTML = "";
+    db.collection("chats").doc(chatId)
+    .collection("messages")
+    .orderBy("timestamp")
+    .onSnapshot(snapshot => {
+        const box = document.getElementById("chatBox");
+        box.innerHTML = "";
 
-    chats[currentPatient].forEach(msg => {
-        const div = document.createElement("div");
-        div.innerText = msg.sender + ": " + msg.message;
-        box.appendChild(div);
+        snapshot.forEach(doc => {
+            const msg = doc.data();
+            const div = document.createElement("div");
+
+            if (msg.type === "text") {
+                div.innerText = msg.sender + ": " + msg.text;
+            }
+            else if (msg.type === "image") {
+                div.innerHTML = `<img src="${msg.fileUrl}" width="100">`;
+            }
+            else if (msg.type === "audio") {
+                div.innerHTML = `<audio controls src="${msg.fileUrl}"></audio>`;
+            }
+
+            box.appendChild(div);
+        });
     });
 }
 
-function sendReply(){
+// SEND REPLY
+async function sendReply() {
     const input = document.getElementById("replyInput");
 
-    chats[currentPatient].push({
+    await db.collection("chats").doc(currentChat)
+    .collection("messages").add({
         sender: "doctor",
-        message: input.value
+        type: "text",
+        text: input.value,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     input.value = "";
-    renderChat();
 }
-
-loadPatients();
 </script>
 
 </body>
