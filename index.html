@@ -777,7 +777,7 @@ Phone: ${params.phone}
 
 // 👇 ADD THIS FUNCTION BELOW YOUR EXISTING CODE
 async function sendScreenshotToWhatsApp(orderId){
-  const card = document.querySelector(".summary"); // captures whole form
+  const card = document.querySelector(".card"); // captures whole form
 
   const canvas = await html2canvas(card);
   const image = canvas.toDataURL("image/png");
