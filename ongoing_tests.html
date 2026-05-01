@@ -11,7 +11,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-
 body{
 font-family:Arial;
 margin:0;
@@ -84,7 +83,6 @@ th{background:#e2e8f0;}
 .complete{background:#22c55e;color:white;margin-top:12px;}
 .delete{background:#ef4444;color:white;margin-left:10px;}
 .whatsapp{background:#25D366;color:white;margin-left:10px;}
-
 </style>
 </head>
 
@@ -97,7 +95,6 @@ th{background:#e2e8f0;}
 <button id="chatBtn">💬 Chat</button>
 <button id="logoutBtn">Logout</button>
 </div>
-
 </header>
 
 <input id="search" placeholder="Search patient name or phone">
@@ -113,7 +110,7 @@ authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
 projectId:"mobile-lab-mityana-aeae2"
 };
 
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth=firebase.auth();
 const db=firebase.firestore();
@@ -160,14 +157,14 @@ location.href="patient_chat.html";
 };
 
 
-/* LOAD ORDERS */
+/* LOAD ORDERS (REAL-TIME) */
 
-async function loadOrders(){
+function loadOrders(){
 
-const snap=await db.collection("orders")
+db.collection("orders")
 .where("status","==","ongoing")
 .orderBy("createdAt","asc")
-.get();
+.onSnapshot(snap=>{
 
 allOrders=[];
 
@@ -178,6 +175,11 @@ allOrders.push({id:d.id,...d.data()});
 counter.innerText=`Ongoing Tests: ${allOrders.length}`;
 
 renderOrders(allOrders);
+
+},err=>{
+console.error(err);
+container.innerHTML="Error loading orders";
+});
 
 }
 
@@ -232,28 +234,35 @@ html+=`
 `;
 
 card.innerHTML=html;
-
 container.appendChild(card);
 
+const completeBtn=card.querySelector(".complete");
+const deleteBtn=card.querySelector(".delete");
 
 /* DELETE */
 
-card.querySelector(".delete").onclick=async()=>{
+deleteBtn.onclick=async()=>{
 
 if(!confirm("Delete this test?")) return;
 
+deleteBtn.disabled=true;
+deleteBtn.innerText="Deleting...";
+
+try{
 await db.collection("orders").doc(o.id).delete();
-
 alert("Deleted");
-
-loadOrders();
+}catch(err){
+alert("❌ Failed: "+err.message);
+deleteBtn.disabled=false;
+deleteBtn.innerText="Delete";
+}
 
 };
 
 
 /* COMPLETE */
 
-card.querySelector(".complete").onclick=async()=>{
+completeBtn.onclick=async()=>{
 
 const result=card.querySelector(".result-input").value;
 
@@ -261,6 +270,11 @@ if(!result){
 alert("Enter result");
 return;
 }
+
+completeBtn.disabled=true;
+completeBtn.innerText="Saving...";
+
+try{
 
 await db.collection("results").doc(o.id).set({
 
@@ -275,10 +289,17 @@ uploaded_at:firebase.firestore.FieldValue.serverTimestamp()
 });
 
 await db.collection("orders").doc(o.id).update({
-status:"completed"
+status:"completed",
+updatedAt: firebase.firestore.FieldValue.serverTimestamp()
 });
 
 generatePDF(o,result);
+
+}catch(err){
+alert("❌ Failed: "+err.message);
+completeBtn.disabled=false;
+completeBtn.innerText="Complete";
+}
 
 };
 
@@ -287,9 +308,13 @@ generatePDF(o,result);
 
 card.querySelector(".whatsapp").onclick=()=>{
 
-const msg=`Hello ${o.name}, your lab result from Mobile Lab is ready.`;
+let phone=(o.phone||"").replace(/\D/g,"");
 
-const phone=o.phone.replace("+","");
+if(phone.startsWith("0")){
+phone="256"+phone.substring(1);
+}
+
+const msg=`Hello ${o.name}, your lab result from Mobile Lab is ready.`;
 
 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
 
@@ -324,8 +349,6 @@ pdf.text(`Phone: ${o.phone}`,20,y); y+=12;
 pdf.text(`Result: ${result}`,20,y);
 
 pdf.save(`Lab_Result_${o.name}.pdf`);
-
-loadOrders();
 
 }
 
