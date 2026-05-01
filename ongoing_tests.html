@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🧪 Ongoing Tests – Mobile Lab</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -12,11 +13,33 @@
 
 <style>
 body{font-family:Arial;margin:0;background:#f1f5f9;padding:16px;}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-button{cursor:pointer;border:none;border-radius:8px;padding:10px 14px;font-weight:bold;}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+button{
+cursor:pointer;
+border:none;
+border-radius:8px;
+padding:10px 14px;
+font-weight:bold;
+}
+
 #logoutBtn{background:#ef4444;color:white;}
 #chatBtn{background:#0ea5e9;color:white;}
-#search{padding:10px;width:100%;max-width:400px;border-radius:8px;border:1px solid #ccc;margin-bottom:20px;}
+
+#search{
+padding:10px;
+width:100%;
+max-width:400px;
+border-radius:8px;
+border:1px solid #ccc;
+margin-bottom:20px;
+}
 
 .order-card{
 background:white;
@@ -26,7 +49,10 @@ margin-bottom:16px;
 box-shadow:0 3px 10px rgba(0,0,0,0.05);
 }
 
-.order-card h3{margin-top:0;color:#0284c7;}
+.order-card h3{
+margin-top:0;
+color:#0284c7;
+}
 
 .result-input{
 width:100%;
@@ -34,10 +60,9 @@ padding:6px;
 border-radius:6px;
 border:1px solid #cbd5e1;
 margin-top:5px;
-margin-bottom:8px;
 }
 
-.complete{background:#22c55e;color:white;margin-top:10px;}
+.complete{background:#22c55e;color:white;margin-top:12px;}
 .delete{background:#ef4444;color:white;margin-left:10px;}
 .whatsapp{background:#25D366;color:white;margin-left:10px;}
 </style>
@@ -47,6 +72,7 @@ margin-bottom:8px;
 
 <header>
 <h2>🧪 Ongoing Tests</h2>
+
 <div>
 <button id="chatBtn">💬 Chat</button>
 <button id="logoutBtn">Logout</button>
@@ -145,40 +171,40 @@ list.forEach(o=>{
 const card=document.createElement("div");
 card.className="order-card";
 
-/* 🔥 SPLIT TESTS CLEANLY */
-const testsList = o.tests
-? o.tests.split("\n").map(t=>t.trim()).filter(t=>t)
-: [];
+/* SPLIT TESTS CLEANLY */
+let testsArray = [];
 
-let inputsHTML="";
+if(o.tests){
+testsArray = o.tests.split("\n").map(t=>t.trim()).filter(t=>t);
+}
 
-/* create input per test */
-testsList.forEach(test=>{
+/* BUILD INPUTS FOR EACH TEST */
+let inputsHTML = "";
+
+testsArray.forEach(test=>{
 inputsHTML += `
-<label><b>${test}</b></label>
-<input class="result-input" data-test="${test}" placeholder="Enter result">
+<label>${test}</label>
+<input class="result-input" data-test="${test}" placeholder="Enter result for ${test}">
 `;
 });
 
-let html=`
+card.innerHTML=`
 <h3>${o.name || ""}</h3>
 
 <p><b>Age:</b> ${o.age || ""}</p>
 <p><b>Phone:</b> ${o.phone || ""}</p>
 <p><b>Email:</b> ${o.email || ""}</p>
 
-<p><b>Tests:</b><br>${o.tests || ""}</p>
+<p><b>Tests:</b><br>${testsArray.join("<br>")}</p>
 
 ${inputsHTML}
-`;
 
-html+=`
+<br>
 <button class="complete">Complete</button>
 <button class="delete">Delete</button>
 <button class="whatsapp">WhatsApp</button>
 `;
 
-card.innerHTML=html;
 container.appendChild(card);
 
 /* DELETE */
@@ -190,42 +216,40 @@ alert("Deleted");
 loadOrders();
 };
 
-/* ✅ COMPLETE (FIXED SYSTEM) */
+/* COMPLETE */
 card.querySelector(".complete").onclick=async()=>{
 
-let resultsObj = {};
+const inputs = card.querySelectorAll(".result-input");
 
-/* collect results */
-card.querySelectorAll(".result-input").forEach(input=>{
+let results = {};
 
-const testName = input.dataset.test;
+inputs.forEach(input=>{
+const test = input.dataset.test;
 const value = input.value.trim();
 
-if(!value) return;
-
-resultsObj[testName] = {
-  Result:{
-    value:value,
-    units:""
-  }
+if(value){
+results[test] = {
+value: value,
+units: ""
 };
-
+}
 });
 
-if(Object.keys(resultsObj).length === 0){
+if(Object.keys(results).length === 0){
 alert("Enter at least one result");
 return;
 }
 
-/* SAVE STRUCTURED RESULTS */
+/* SAVE RESULTS CORRECTLY */
 await db.collection("results").doc(o.id).set({
 
 order_id:o.id,
 userId:o.userId,
-patientName:o.name,
-patientEmail:o.email,
 
-results: resultsObj,
+patientName:o.name || "",
+patientEmail:o.email || "",
+
+results:results,
 
 uploaded_at:firebase.firestore.FieldValue.serverTimestamp()
 
@@ -236,20 +260,17 @@ await db.collection("orders").doc(o.id).update({
 status:"completed"
 });
 
-/* GENERATE PDF */
-generatePDF(o,resultsObj);
-
+generatePDF(o, results);
 };
 
 /* WHATSAPP */
 card.querySelector(".whatsapp").onclick=()=>{
-const msg=`Hello ${o.name}, your lab result is ready.`;
+const msg=`Hello ${o.name}, your lab results are ready. Please check your app.`;
 const phone=o.phone.replace("+","");
 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
 };
 
 });
-
 }
 
 /* PDF */
@@ -271,8 +292,9 @@ pdf.text(`Patient: ${o.name}`,20,y); y+=8;
 pdf.text(`Age: ${o.age}`,20,y); y+=8;
 pdf.text(`Phone: ${o.phone}`,20,y); y+=12;
 
-Object.keys(results).forEach(test=>{
-pdf.text(`${test}: ${results[test].Result.value}`,20,y);
+/* LOOP RESULTS CLEANLY */
+Object.entries(results).forEach(([test,val])=>{
+pdf.text(`${test}: ${val.value}`,20,y);
 y+=8;
 });
 
