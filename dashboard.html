@@ -17,16 +17,12 @@ background:#f1f5f9;
 }
 
 /* HEADER */
-
 header{
 background:#0369a1;
 color:white;
 padding:20px;
 text-align:center;
-}
-
-header h2{
-margin:0;
+position:relative;
 }
 
 #userWelcome{
@@ -34,8 +30,49 @@ display:block;
 margin-top:6px;
 }
 
-/* DASHBOARD GRID */
+/* 🔔 NOTIFICATION */
+#notifBell{
+position:absolute;
+right:20px;
+top:20px;
+cursor:pointer;
+font-size:22px;
+}
 
+#notifCount{
+background:red;
+color:white;
+border-radius:50%;
+padding:2px 6px;
+font-size:12px;
+position:absolute;
+top:-5px;
+right:-10px;
+}
+
+/* 📊 STATS */
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+gap:10px;
+padding:10px 20px;
+}
+
+.stat{
+background:white;
+padding:12px;
+border-radius:10px;
+text-align:center;
+font-weight:bold;
+}
+
+.stat span{
+display:block;
+font-size:18px;
+color:#0369a1;
+}
+
+/* DASHBOARD GRID */
 .dashboard{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -43,8 +80,7 @@ gap:20px;
 padding:30px;
 }
 
-/* CARD STYLE */
-
+/* CARD */
 .card{
 background:white;
 padding:25px;
@@ -59,22 +95,11 @@ transition:0.25s;
 transform:scale(1.05);
 }
 
-.card img{
-width:70px;
-margin-bottom:10px;
-}
-
-.card h3{
-margin:0;
-color:#0369a1;
-}
-
-/* LOGOUT BUTTON */
-
+/* LOGOUT */
 .logout{
 position:fixed;
 top:20px;
-right:20px;
+right:70px;
 background:#ef4444;
 color:white;
 border:none;
@@ -94,40 +119,45 @@ cursor:pointer;
 <h2>🧪 Mobile Lab Mityana</h2>
 <span id="userWelcome">Loading...</span>
 
+<div id="notifBell">
+🔔 <span id="notifCount" style="display:none;">0</span>
+</div>
+
 </header>
 
 <button class="logout" onclick="logout()">Logout</button>
 
+<!-- 📊 STATS -->
+<div class="stats">
+<div class="stat">Total <span id="totalOrders">0</span></div>
+<div class="stat">Pending <span id="pendingOrders">0</span></div>
+<div class="stat">Ongoing <span id="ongoingOrders">0</span></div>
+<div class="stat">Completed <span id="completedOrders">0</span></div>
+</div>
 
 <div class="dashboard">
 
 <div class="card" id="orderCard">
-<img src="icons/order.png">
 <h3>Order a Test</h3>
 </div>
 
 <div class="card" id="resultsCard">
-<img src="icons/results.png">
 <h3>Results</h3>
 </div>
 
 <div class="card" id="contactCard">
-<img src="icons/contact.png">
 <h3>Contact Lab</h3>
 </div>
 
 <div class="card" id="profileCard">
-<img src="icons/profile.png">
 <h3>Profile</h3>
 </div>
   
 <div class="card" id="aboutCard">
-<img src="icons/about.png">
 <h3>About Us</h3>
 </div>
 
 </div>
-
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -135,88 +165,128 @@ cursor:pointer;
 
 <script>
 
+/* 🔥 Firebase Init */
 const firebaseConfig = {
-
 apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
 authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
 projectId:"mobile-lab-mityana-aeae2"
-
 };
 
+if(!firebase.apps.length){
 firebase.initializeApp(firebaseConfig);
+}
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* CHECK LOGIN */
-
+/* 🔐 AUTH */
 auth.onAuthStateChanged(async user=>{
 
 if(!user){
-
 location.href="login.html";
 return;
-
 }
 
-const doc = await db.collection("users").doc(user.uid).get();
+/* 👤 USER NAME */
+db.collection("users").doc(user.uid)
+.onSnapshot(doc=>{
 
-let name="User";
+let name = "User";
 
-if(doc.exists){
-
+if(doc.exists && doc.data().fullName){
 name = doc.data().fullName;
-
+}else if(user.email){
+name = user.email.split("@")[0];
 }
 
-document.getElementById("userWelcome").innerText="Welcome "+name;
+document.getElementById("userWelcome").innerText = "Welcome " + name;
 
 });
 
-/* DASHBOARD REDIRECTS */
+/* 📊 STATS */
+db.collection("orders")
+.where("userId","==",user.uid)
+.onSnapshot(snap=>{
 
-document.getElementById("orderCard").onclick=()=>{
+let total=0, pending=0, ongoing=0, completed=0;
 
-location.href="index.html";
+snap.forEach(d=>{
+total++;
 
-};
+const s = d.data().status;
 
-document.getElementById("resultsCard").onclick=()=>{
+if(s==="pending") pending++;
+if(s==="ongoing") ongoing++;
+if(s==="completed") completed++;
+});
+
+totalOrders.innerText = total;
+pendingOrders.innerText = pending;
+ongoingOrders.innerText = ongoing;
+completedOrders.innerText = completed;
+
+});
+
+/* 🔔 NOTIFICATIONS (UNREAD ONLY) */
+db.collection("results")
+.where("userId","==",user.uid)
+.where("seen","==",false)
+.onSnapshot(snap=>{
+
+const count = snap.size;
+const badge = document.getElementById("notifCount");
+
+if(count > 0){
+badge.style.display = "inline-block";
+badge.innerText = count;
+}else{
+badge.style.display = "none";
+}
+
+});
+
+});
+
+
+/* 🔔 CLICK → MARK AS READ */
+document.getElementById("notifBell").onclick = async ()=>{
+
+const user = auth.currentUser;
+if(!user) return;
+
+const snap = await db.collection("results")
+.where("userId","==",user.uid)
+.where("seen","==",false)
+.get();
+
+const batch = db.batch();
+
+snap.forEach(doc=>{
+batch.update(doc.ref,{ seen:true });
+});
+
+await batch.commit();
 
 location.href="inbox.html";
-
 };
 
-document.getElementById("contactCard").onclick=()=>{
 
-location.href="patient_chat.html";
+/* NAVIGATION */
+orderCard.onclick=()=>location.href="index.html";
+resultsCard.onclick=()=>location.href="inbox.html";
+contactCard.onclick=()=>location.href="patient_chat.html";
+profileCard.onclick=()=>location.href="profile.html";
+aboutCard.onclick=()=>location.href="about.html";
 
-};
-document.getElementById("aboutCard").onclick=()=>{
 
-location.href="about.html";
-  
-};
-document.getElementById("profileCard").onclick=()=>{
-
-location.href="profile.html";
-
-};
-
-/* LOGOUT */
-
+/* 🚪 LOGOUT */
 function logout(){
-
 auth.signOut().then(()=>{
-
 location.href="login.html";
-
 });
-
 }
 
 </script>
 
 </body>
-
 </html>
