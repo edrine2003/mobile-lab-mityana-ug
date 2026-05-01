@@ -1,11 +1,10 @@
 {
-  "name": "Edrine Lab Mityana",
-  "short_name": "Mobile Lab",
-  "description": "Diagnosis at your door",
-  "start_url": "/mobile-lab-mityana-ug/",
+  "name": "Mobile Lab Mityana",
+  "short_name": "Lab App",
+  "start_url": "/dashboard.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4cafcb",
+  "theme_color": "#0ea5e9",
   "icons": [
     {
       "src": "icon-192.png",
