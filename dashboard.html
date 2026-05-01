@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
@@ -17,7 +16,6 @@ background:#f1f5f9;
 }
 
 /* HEADER */
-
 header{
 background:#0369a1;
 color:white;
@@ -25,26 +23,64 @@ padding:20px;
 text-align:center;
 }
 
-header h2{
-margin:0;
+header h2{margin:0;}
+#userWelcome{display:block;margin-top:6px;}
+
+/* STATS BAR */
+.stats{
+display:flex;
+justify-content:space-around;
+background:#fff;
+padding:15px;
+margin:15px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
 }
 
-#userWelcome{
-display:block;
-margin-top:6px;
+.stat{
+text-align:center;
+}
+
+.stat h3{
+margin:0;
+color:#0369a1;
+}
+
+.stat span{
+font-size:13px;
+color:#64748b;
+}
+
+/* NOTIFICATIONS */
+.notifications{
+margin:15px;
+background:#fff;
+padding:15px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+.notifications h3{
+margin-top:0;
+}
+
+.note{
+padding:10px;
+margin-top:8px;
+border-radius:8px;
+background:#e0f2fe;
+font-size:13px;
 }
 
 /* DASHBOARD GRID */
-
 .dashboard{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:20px;
-padding:30px;
+padding:20px;
 }
 
-/* CARD STYLE */
-
+/* CARD */
 .card{
 background:white;
 padding:25px;
@@ -55,9 +91,7 @@ cursor:pointer;
 transition:0.25s;
 }
 
-.card:hover{
-transform:scale(1.05);
-}
+.card:hover{transform:scale(1.05);}
 
 .card img{
 width:70px;
@@ -69,8 +103,7 @@ margin:0;
 color:#0369a1;
 }
 
-/* LOGOUT BUTTON */
-
+/* LOGOUT */
 .logout{
 position:fixed;
 top:20px;
@@ -90,15 +123,35 @@ cursor:pointer;
 <body>
 
 <header>
-
 <h2>🧪 Mobile Lab Mityana</h2>
 <span id="userWelcome">Loading...</span>
-
 </header>
 
 <button class="logout" onclick="logout()">Logout</button>
 
+<!-- 📊 STATS -->
+<div class="stats">
+  <div class="stat">
+    <h3 id="pendingCount">0</h3>
+    <span>Pending</span>
+  </div>
+  <div class="stat">
+    <h3 id="ongoingCount">0</h3>
+    <span>Ongoing</span>
+  </div>
+  <div class="stat">
+    <h3 id="completedCount">0</h3>
+    <span>Completed</span>
+  </div>
+</div>
 
+<!-- 🔔 NOTIFICATIONS -->
+<div class="notifications">
+  <h3>🔔 Notifications</h3>
+  <div id="notesBox">No new notifications</div>
+</div>
+
+<!-- DASHBOARD -->
 <div class="dashboard">
 
 <div class="card" id="orderCard">
@@ -120,7 +173,7 @@ cursor:pointer;
 <img src="icons/profile.png">
 <h3>Profile</h3>
 </div>
-  
+
 <div class="card" id="aboutCard">
 <img src="icons/about.png">
 <h3>About Us</h3>
@@ -128,29 +181,24 @@ cursor:pointer;
 
 </div>
 
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
 
-/* 🔥 SAFE FIREBASE INIT */
 const firebaseConfig = {
 apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
 authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
 projectId:"mobile-lab-mityana-aeae2"
 };
 
-if(!firebase.apps.length){
 firebase.initializeApp(firebaseConfig);
-}
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-
-/* 🔐 CHECK LOGIN */
+/* LOGIN */
 auth.onAuthStateChanged(async user=>{
 
 if(!user){
@@ -158,66 +206,89 @@ location.href="login.html";
 return;
 }
 
-/* 🔄 REAL-TIME USER DATA */
-db.collection("users").doc(user.uid)
-.onSnapshot(doc=>{
+const doc = await db.collection("users").doc(user.uid).get();
 
-let name = "User";
+let name="User";
 
-if(doc.exists && doc.data().fullName){
+if(doc.exists){
 name = doc.data().fullName;
-}else if(user.email){
-name = user.email.split("@")[0];
 }
 
-document.getElementById("userWelcome").innerText = "Welcome " + name;
+document.getElementById("userWelcome").innerText="Welcome "+name;
 
-}, err=>{
-console.error(err);
-document.getElementById("userWelcome").innerText = "Welcome";
+/* LOAD DASHBOARD DATA */
+loadStats(user.uid);
+loadNotifications(user.uid);
+
 });
 
+/* 📊 LOAD STATS */
+async function loadStats(uid){
+
+const snap = await db.collection("orders")
+.where("userId","==",uid)
+.get();
+
+let pending=0, ongoing=0, completed=0;
+
+snap.forEach(d=>{
+const s = d.data().status;
+
+if(s==="pending") pending++;
+if(s==="ongoing") ongoing++;
+if(s==="completed") completed++;
 });
 
+document.getElementById("pendingCount").innerText = pending;
+document.getElementById("ongoingCount").innerText = ongoing;
+document.getElementById("completedCount").innerText = completed;
 
-/* 🚀 DASHBOARD REDIRECTS */
+}
 
-document.getElementById("orderCard").onclick=()=>{
-location.href="index.html";
-};
+/* 🔔 LOAD NOTIFICATIONS */
+async function loadNotifications(uid){
 
-document.getElementById("resultsCard").onclick=()=>{
-location.href="inbox.html";
-};
+const box = document.getElementById("notesBox");
+box.innerHTML="";
 
-document.getElementById("contactCard").onclick=()=>{
-location.href="patient_chat.html";
-};
+const snap = await db.collection("orders")
+.where("userId","==",uid)
+.where("status","==","completed")
+.get();
 
-document.getElementById("aboutCard").onclick=()=>{
-location.href="about.html";
-};
+if(snap.empty){
+box.innerHTML="No new notifications";
+return;
+}
 
-document.getElementById("profileCard").onclick=()=>{
-location.href="profile.html";
-};
+snap.forEach(d=>{
 
+const div=document.createElement("div");
+div.className="note";
 
-/* 🚪 LOGOUT */
+div.innerText = `✅ Your lab result (Order ${d.id}) is ready`;
+
+box.appendChild(div);
+
+});
+
+}
+
+/* NAVIGATION */
+
+orderCard.onclick=()=>location.href="index.html";
+resultsCard.onclick=()=>location.href="inbox.html";
+contactCard.onclick=()=>location.href="patient_chat.html";
+profileCard.onclick=()=>location.href="profile.html";
+aboutCard.onclick=()=>location.href="about.html";
+
+/* LOGOUT */
+
 function logout(){
-
-auth.signOut()
-.then(()=>{
-location.href="login.html";
-})
-.catch(err=>{
-alert("Logout failed: " + err.message);
-});
-
+auth.signOut().then(()=>location.href="login.html");
 }
 
 </script>
 
 </body>
-
 </html>
