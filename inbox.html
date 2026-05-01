@@ -29,6 +29,7 @@ th{background:#e2e8f0;}
 #chatSend{padding:10px 16px;background:#22c55e;color:white;border:none;cursor:pointer;}
 </style>
 </head>
+
 <body>
 
 <div class="welcome">
@@ -67,27 +68,22 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const inbox = document.getElementById("inbox");
 
-const chatBtn = document.getElementById("chatBtn");
-const chatPanel = document.getElementById("chatPanel");
-const chatMessages = document.getElementById("chatMessages");
-const chatInput = document.getElementById("chatInput");
-const chatSend = document.getElementById("chatSend");
-
-let userId, userName;
-const adminId = "DvmwZiewijWX8IBvKY5yF12ECqk1";
+/* 🔥 FIX FUNCTION */
+function getValue(val){
+  if(typeof val === "object"){
+    return val?.Result?.value || JSON.stringify(val);
+  }
+  return val;
+}
 
 auth.onAuthStateChanged(async user=>{
   if(!user) return location.href="login.html";
 
-  userId = user.uid;
-
-  const userDoc = await db.collection("users").doc(userId).get();
-  userName = userDoc.exists ? userDoc.data().fullName : "Patient";
-
   db.collection("results")
-    .where("userId","==",userId)
+    .where("userId","==",user.uid)
     .orderBy("uploaded_at","desc")
     .onSnapshot(async snapshot=>{
+
       inbox.innerHTML="";
 
       if(snapshot.empty){
@@ -96,175 +92,73 @@ auth.onAuthStateChanged(async user=>{
       }
 
       for(const doc of snapshot.docs){
+
         const r = doc.data();
-        let age = "N/A";
+        let age="N/A";
 
         if(r.order_id){
-          try{
-            const orderSnap = await db.collection("orders").doc(r.order_id).get();
-            if(orderSnap.exists && orderSnap.data().age){
-              age = orderSnap.data().age;
-            }
-          }catch(e){
-            console.warn("Could not fetch age:",e);
+          const orderSnap = await db.collection("orders").doc(r.order_id).get();
+          if(orderSnap.exists){
+            age = orderSnap.data().age || "N/A";
           }
         }
+
+        const results = r.results || {};
 
         const card=document.createElement("div");
         card.className="card";
 
         let html=`
-          <h3>${r.patient_name || "Patient"}</h3>
-          <p><b>Email:</b> ${r.patient_email || "N/A"}</p>
-          <p><b>Age:</b> ${age}</p>
-          <p><b>Client Number:</b> ${r.order_id || doc.id}</p>
-          <p><b>Date:</b> ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}</p>
+        <h3>${r.patient_name || "Patient"}</h3>
+        <p><b>Email:</b> ${r.patient_email || "N/A"}</p>
+        <p><b>Age:</b> ${age}</p>
+        <p><b>Client Number:</b> ${r.order_id || doc.id}</p>
+        <p><b>Date:</b> ${r.uploaded_at ? new Date(r.uploaded_at.toDate()).toLocaleDateString() : "N/A"}</p>
         `;
 
-        const results=(r.results && typeof r.results==="object")?r.results:{};
-
         if(Object.keys(results).length>0){
-          html+=`<table><thead><tr><th>Test</th><th>Result</th></tr></thead><tbody>`;
+          html+=`<table>
+          <tr><th>Test</th><th>Result</th></tr>`;
+
           Object.entries(results).forEach(([test,value])=>{
-            html+=`<tr><td>${test||"Unknown Test"}</td><td>${value||"N/A"}</td></tr>`;
+            html+=`
+              <tr>
+                <td>${test}</td>
+                <td>${getValue(value)}</td>
+              </tr>
+            `;
           });
-          html+=`</tbody></table>`;
+
+          html+=`</table>`;
         }
 
         html+=`<br><button class="download">Download PDF</button>`;
         card.innerHTML=html;
         inbox.appendChild(card);
 
-        card.querySelector(".download").onclick=async()=>{
+        /* PDF FIX */
+        card.querySelector(".download").onclick=()=>{
+
           const { jsPDF } = window.jspdf;
-          const pdf=new jsPDF("p","mm","a4");
+          const pdf=new jsPDF();
+
           let y=20;
 
-          pdf.setFillColor(14,165,233);
-          pdf.rect(0,0,210,25,"F");
-          pdf.setFontSize(20);
-          pdf.setTextColor(255,255,255);
-          pdf.text("LITTLE HEARTS LAB",105,17,{align:"center"});
-          y=35;
-
-          try{
-            const img=new Image();
-            img.src="logo.png";
-            await new Promise(res=>img.onload=res);
-            pdf.addImage(img,"PNG",80,y,50,50);
-            y+=55;
-          }catch(e){
-            console.warn("Logo missing, skipping");
-          }
-
-          pdf.setFillColor(230,245,255);
-          pdf.roundedRect(15,y,180,45,5,5,"F");
-          pdf.setFontSize(12);
-          pdf.setTextColor(0);
-          pdf.text(`Patient Name: ${r.patient_name||"N/A"}`,20,y+10);
-          pdf.text(`Email: ${r.patient_email||"N/A"}`,20,y+18);
-          pdf.text(`Age: ${age}`,20,y+26);
-          pdf.text(`Client No.: ${r.order_id||doc.id}`,120,y+10);
-          pdf.text(`Date: ${r.uploaded_at?new Date(r.uploaded_at.toDate()).toLocaleDateString():"N/A"}`,120,y+18);
-          y+=55;
-
-          pdf.setFillColor(14,165,233);
-          pdf.setTextColor(255);
-          pdf.rect(15,y,180,8,"F");
-          pdf.text("Test",20,y+6);
-          pdf.text("Result",150,y+6);
-          y+=8;
-
-          pdf.setFontSize(11);
-          pdf.setTextColor(0);
-          let rowToggle=false;
+          pdf.text(`Patient: ${r.patient_name}`,20,y); y+=10;
 
           Object.entries(results).forEach(([test,value])=>{
-            pdf.setFillColor(rowToggle?245:255,rowToggle?245:255,rowToggle?245:255);
-            pdf.rect(15,y,180,8,"F");
-            pdf.text(test||"Unknown Test",20,y+6);
-            pdf.text(value||"N/A",150,y+6);
+            pdf.text(`${test}: ${getValue(value)}`,20,y);
             y+=8;
-            rowToggle=!rowToggle;
           });
 
-          y+=15;
-          pdf.setFontSize(12);
-          pdf.setTextColor(14,165,233);
-          pdf.text("Prepared by Edrine, Labtech",105,y,{align:"center"});
-          y+=7;
-          pdf.setFontSize(10);
-          pdf.setTextColor(50);
-          pdf.text("Thank you for choosing Little Hearts Lab! Stay healthy. 🌿",105,y,{align:"center"});
-
-          pdf.save(`Patient_${r.patient_name||doc.id}.pdf`);
+          pdf.save(`Result_${doc.id}.pdf`);
         };
+
       }
     });
 
-  db.collection("chats")
-    .where("participants","array-contains",userId)
-    .orderBy("timestamp")
-    .onSnapshot(snapshot=>{
-      chatMessages.innerHTML="";
-
-      snapshot.forEach(doc=>{
-        const data=doc.data();
-
-        let sender;
-        if(data.senderName && data.senderName.trim()!==""){
-          sender=data.senderName;
-        }else if(data.senderId===userId){
-          sender=userName||"Patient";
-        }else{
-          sender="Admin";
-        }
-
-        const msgDiv=document.createElement("div");
-        msgDiv.textContent=`${sender}: ${data.text||""}`;
-        msgDiv.style.margin="6px 0";
-        msgDiv.style.padding="8px 12px";
-        msgDiv.style.borderRadius="12px";
-        msgDiv.style.maxWidth="80%";
-        msgDiv.style.wordWrap="break-word";
-
-        if(data.senderId===userId){
-          msgDiv.style.background="#0ea5e9";
-          msgDiv.style.color="white";
-          msgDiv.style.alignSelf="flex-end";
-        }else{
-          msgDiv.style.background="#f1f5f9";
-          msgDiv.style.border="1px solid #ccc";
-          msgDiv.style.alignSelf="flex-start";
-        }
-
-        chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop=chatMessages.scrollHeight;
-      });
-    });
 });
-
-chatBtn.onclick=()=>{
-  chatPanel.style.display=chatPanel.style.display==="none"?"flex":"none";
-};
-
-chatSend.onclick=async()=>{
-  const text=chatInput.value.trim();
-  if(!text) return;
-
-  await db.collection("chats").add({
-    text,
-    patientId:userId,
-    senderId:userId,
-    senderName:userName||"Patient",
-    receiverId:adminId,
-    participants:[userId,adminId],
-    status:"unread",
-    timestamp:firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  chatInput.value="";
-};
 </script>
+
 </body>
 </html>
