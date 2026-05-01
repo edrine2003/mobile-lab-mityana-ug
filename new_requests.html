@@ -34,7 +34,7 @@ button.cancel { background:#ef4444; color:#fff; }
 
 button { padding:6px 10px; border:none; border-radius:8px; cursor:pointer; margin-right:4px; }
 
-/* 🔀 ADMIN NAV BUTTONS (ADDED ONLY) */
+/* 🔀 ADMIN NAV BUTTONS */
 .admin-nav{
   display:flex;
   gap:10px;
@@ -63,7 +63,6 @@ button { padding:6px 10px; border:none; border-radius:8px; cursor:pointer; margi
 
 <h2>🧪 Pending Requests</h2>
 
-<!-- 🔀 NAVIGATION BUTTONS (ADDED ONLY) -->
 <div class="admin-nav">
   <button class="active">Pending</button>
   <button onclick="goPage('ongoing_tests.html')">Ongoing Tests</button>
@@ -124,70 +123,102 @@ document.getElementById("logoutBtn").onclick = async ()=>{
 };
 
 
-// 📥 LOAD ONLY PENDING
-async function loadPending(){
+// 📥 LOAD ONLY PENDING (REAL-TIME)
+function loadPending(){
 
-  const snapshot = await db.collection("orders")
+  db.collection("orders")
     .where("status","==","pending")
     .orderBy("createdAt","asc")
-    .get();
+    .onSnapshot(snapshot => {
 
-  if(snapshot.empty){
-    tableBody.innerHTML =
-      `<tr><td colspan="6">No pending requests</td></tr>`;
-    return;
-  }
+      if(snapshot.empty){
+        tableBody.innerHTML =
+          `<tr><td colspan="6">No pending requests</td></tr>`;
+        return;
+      }
 
-  tableBody.innerHTML = "";
-  let count = 1;
+      tableBody.innerHTML = "";
+      let count = 1;
 
-  snapshot.forEach(doc=>{
-    const o = doc.data();
+      snapshot.forEach(doc=>{
+        const o = doc.data();
 
-    const testsCount = o.tests
-      ? o.tests.split("|").length
-      : 0;
+        // ✅ FIXED TEST COUNT (supports both formats)
+        const testsCount = o.tests
+          ? o.tests.split("\n").filter(t => t.trim() !== "").length
+          : 0;
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${count++}</td>
-      <td>${o.createdAt?.toDate().toLocaleString() || "—"}</td>
-      <td>${doc.id}</td>
-      <td>${o.name || "—"}</td>
-      <td>${testsCount}</td>
-      <td>
-        <button class="start">Start</button>
-        <button class="cancel">Cancel</button>
-      </td>
-    `;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${count++}</td>
+          <td>${o.createdAt?.toDate().toLocaleString() || "—"}</td>
+          <td>${doc.id}</td>
+          <td>${o.name || "—"}</td>
+          <td>${testsCount}</td>
+          <td>
+            <button class="start">Start</button>
+            <button class="cancel">Cancel</button>
+          </td>
+        `;
 
-    tableBody.appendChild(tr);
+        tableBody.appendChild(tr);
 
-    // ▶ START TEST
-    tr.querySelector(".start").onclick = async ()=>{
+        const startBtn = tr.querySelector(".start");
+        const cancelBtn = tr.querySelector(".cancel");
 
-      await db.collection("orders").doc(doc.id).update({
-        status:"ongoing"
+        // ▶ START TEST
+        startBtn.onclick = async ()=>{
+          startBtn.disabled = true;
+          startBtn.innerText = "Starting...";
+
+          try{
+            await db.collection("orders").doc(doc.id).update({
+              status:"ongoing",
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            window.location.href = "ongoing_tests.html";
+
+          }catch(err){
+            alert("❌ Failed: " + err.message);
+            startBtn.disabled = false;
+            startBtn.innerText = "Start";
+          }
+        };
+
+        // ❌ CANCEL TEST
+        cancelBtn.onclick = async ()=>{
+          const reason = prompt("Reason for cancellation?");
+          if(!reason) return;
+
+          cancelBtn.disabled = true;
+          cancelBtn.innerText = "Cancelling...";
+
+          try{
+            await db.collection("orders").doc(doc.id).update({
+              status:"cancelled",
+              cancelReason: reason,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+          }catch(err){
+            alert("❌ Failed: " + err.message);
+            cancelBtn.disabled = false;
+            cancelBtn.innerText = "Cancel";
+          }
+        };
+
       });
 
-      window.location.href = "ongoing_tests.html";
-    };
-
-    // ❌ CANCEL TEST
-    tr.querySelector(".cancel").onclick = async ()=>{
-      if(!confirm("Cancel this request?")) return;
-
-      await db.collection("orders").doc(doc.id).update({
-        status:"cancelled"
-      });
-
-      loadPending();
-    };
-
-  });
+    }, err => {
+      console.error(err);
+      tableBody.innerHTML =
+        `<tr><td colspan="6">Error loading data</td></tr>`;
+    });
 }
 
-/* 🔀 PAGE NAV FUNCTION (ADDED ONLY) */
+
+/* 🔀 PAGE NAV FUNCTION */
 function goPage(page){
   window.location.href = page;
 }
