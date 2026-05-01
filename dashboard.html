@@ -8,6 +8,10 @@
 
 <title>Mobile Lab Patient Dashboard</title>
 
+<!-- ✅ PWA SUPPORT -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0369a1">
+
 <style>
 
 body{
@@ -17,7 +21,6 @@ background:#f1f5f9;
 }
 
 /* HEADER */
-
 header{
 background:#0369a1;
 color:white;
@@ -25,9 +28,7 @@ padding:20px;
 text-align:center;
 }
 
-header h2{
-margin:0;
-}
+header h2{ margin:0; }
 
 #userWelcome{
 display:block;
@@ -35,7 +36,6 @@ margin-top:6px;
 }
 
 /* DASHBOARD GRID */
-
 .dashboard{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -44,7 +44,6 @@ padding:30px;
 }
 
 /* CARD STYLE */
-
 .card{
 background:white;
 padding:25px;
@@ -69,8 +68,7 @@ margin:0;
 color:#0369a1;
 }
 
-/* LOGOUT BUTTON */
-
+/* LOGOUT */
 .logout{
 position:fixed;
 top:20px;
@@ -83,8 +81,7 @@ border-radius:8px;
 cursor:pointer;
 }
 
-/* 🔔 NEW: STATS + NOTIFICATIONS */
-
+/* 🔥 STATS */
 .top-widgets{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
@@ -100,11 +97,7 @@ box-shadow:0 2px 6px rgba(0,0,0,0.08);
 text-align:center;
 }
 
-.widget h4{
-margin:0;
-color:#0369a1;
-}
-
+.widget h4{margin:0;color:#0369a1;}
 .widget span{
 font-size:22px;
 font-weight:bold;
@@ -112,8 +105,7 @@ display:block;
 margin-top:6px;
 }
 
-/* 🔔 Notifications */
-
+/* 🔔 NOTIFICATIONS */
 .notifications{
 padding:20px;
 }
@@ -126,6 +118,22 @@ margin-bottom:10px;
 border-radius:6px;
 }
 
+/* ⬇ INSTALL BUTTON */
+#installBtn{
+display:none;
+position:fixed;
+bottom:20px;
+right:20px;
+background:#22c55e;
+color:white;
+padding:12px 18px;
+border:none;
+border-radius:12px;
+font-weight:bold;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+z-index:9999;
+}
+
 </style>
 
 </head>
@@ -133,38 +141,20 @@ border-radius:6px;
 <body>
 
 <header>
-
 <h2>🧪 Mobile Lab Mityana</h2>
 <span id="userWelcome">Loading...</span>
-
 </header>
 
 <button class="logout" onclick="logout()">Logout</button>
 
-
-<!-- 🔥 NEW: STATS -->
+<!-- 🔥 STATS -->
 <div class="top-widgets">
-
-<div class="widget">
-<h4>Total Tests</h4>
-<span id="totalTests">0</span>
+<div class="widget"><h4>Total Tests</h4><span id="totalTests">0</span></div>
+<div class="widget"><h4>Pending</h4><span id="pendingTests">0</span></div>
+<div class="widget"><h4>Completed</h4><span id="completedTests">0</span></div>
 </div>
 
-<div class="widget">
-<h4>Pending</h4>
-<span id="pendingTests">0</span>
-</div>
-
-<div class="widget">
-<h4>Completed</h4>
-<span id="completedTests">0</span>
-</div>
-
-</div>
-
-
-<!-- 🔥 DASHBOARD -->
-
+<!-- DASHBOARD -->
 <div class="dashboard">
 
 <div class="card" id="orderCard">
@@ -186,7 +176,7 @@ border-radius:6px;
 <img src="icons/profile.png">
 <h3>Profile</h3>
 </div>
-  
+
 <div class="card" id="aboutCard">
 <img src="icons/about.png">
 <h3>About Us</h3>
@@ -194,15 +184,17 @@ border-radius:6px;
 
 </div>
 
-
-<!-- 🔔 NEW: NOTIFICATIONS -->
-
+<!-- 🔔 NOTIFICATIONS -->
 <div class="notifications">
 <h3>🔔 Notifications</h3>
 <div id="notificationsBox">Loading...</div>
 </div>
 
+<!-- ⬇ INSTALL BUTTON -->
+<button id="installBtn">⬇ Install App</button>
 
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -210,11 +202,9 @@ border-radius:6px;
 <script>
 
 const firebaseConfig = {
-
 apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
 authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
 projectId:"mobile-lab-mityana-aeae2"
-
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -222,8 +212,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* CHECK LOGIN */
-
+/* AUTH */
 auth.onAuthStateChanged(async user=>{
 
 if(!user){
@@ -234,27 +223,19 @@ return;
 const doc = await db.collection("users").doc(user.uid).get();
 
 let name="User";
-
-if(doc.exists){
-name = doc.data().fullName;
-}
+if(doc.exists) name = doc.data().fullName;
 
 document.getElementById("userWelcome").innerText="Welcome "+name;
 
-/* 🔥 LOAD STATS */
 loadStats(user.uid);
-
-/* 🔔 LOAD NOTIFICATIONS */
 loadNotifications(user.uid);
 
 });
 
-
-/* 🔥 LOAD DASHBOARD STATS */
-
+/* 🔥 STATS */
 async function loadStats(userId){
 
-let total=0, pending=0, completed=0;
+let total=0,pending=0,completed=0;
 
 const snap = await db.collection("orders")
 .where("userId","==",userId)
@@ -263,7 +244,6 @@ const snap = await db.collection("orders")
 snap.forEach(d=>{
 total++;
 const s=d.data().status;
-
 if(s==="pending") pending++;
 if(s==="completed") completed++;
 });
@@ -274,12 +254,10 @@ document.getElementById("completedTests").innerText=completed;
 
 }
 
-
-/* 🔔 LOAD NOTIFICATIONS */
-
+/* 🔔 NOTIFICATIONS */
 function loadNotifications(userId){
 
-const box = document.getElementById("notificationsBox");
+const box=document.getElementById("notificationsBox");
 
 db.collection("notifications")
 .where("userId","==",userId)
@@ -287,68 +265,75 @@ db.collection("notifications")
 .limit(5)
 .onSnapshot(snap=>{
 
-box.innerHTML="";
-
 if(snap.empty){
-box.innerHTML="<p>No notifications</p>";
+box.innerHTML="<p>No notifications yet</p>";
 return;
 }
 
+box.innerHTML="";
+
 snap.forEach(doc=>{
-const n = doc.data();
+const n=doc.data();
 
 const div=document.createElement("div");
 div.className="notification";
 
-div.innerHTML=`
-<b>${n.title || "Update"}</b><br>
-${n.message || ""}
-`;
+div.innerHTML=`<b>${n.title||"Update"}</b><br>${n.message||""}`;
 
 box.appendChild(div);
-
 });
 
 });
 
 }
 
-
-/* DASHBOARD REDIRECTS */
-
-document.getElementById("orderCard").onclick=()=>{
-location.href="index.html";
-};
-
-document.getElementById("resultsCard").onclick=()=>{
-location.href="inbox.html";
-};
-
-document.getElementById("contactCard").onclick=()=>{
-location.href="patient_chat.html";
-};
-
-document.getElementById("aboutCard").onclick=()=>{
-location.href="about.html";
-};
-
-document.getElementById("profileCard").onclick=()=>{
-location.href="profile.html";
-};
-
+/* NAVIGATION */
+orderCard.onclick=()=>location.href="index.html";
+resultsCard.onclick=()=>location.href="inbox.html";
+contactCard.onclick=()=>location.href="patient_chat.html";
+aboutCard.onclick=()=>location.href="about.html";
+profileCard.onclick=()=>location.href="profile.html";
 
 /* LOGOUT */
-
 function logout(){
+auth.signOut().then(()=>location.href="login.html");
+}
 
-auth.signOut().then(()=>{
-location.href="login.html";
+/* 🔥 INSTALL BUTTON */
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e)=>{
+e.preventDefault();
+deferredPrompt=e;
+document.getElementById("installBtn").style.display="block";
 });
 
+installBtn.onclick=async()=>{
+if(!deferredPrompt){
+alert("Install not available yet");
+return;
+}
+
+deferredPrompt.prompt();
+const choice=await deferredPrompt.userChoice;
+
+if(choice.outcome==="accepted"){
+console.log("Installed");
+}
+
+deferredPrompt=null;
+};
+
+window.addEventListener("appinstalled",()=>{
+installBtn.style.display="none";
+});
+
+/* 🔥 SERVICE WORKER */
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js");
 }
 
 </script>
 
 </body>
-
 </html>
