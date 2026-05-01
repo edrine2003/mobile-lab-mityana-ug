@@ -11,42 +11,61 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{font-family:Arial;background:#f4f6f8;padding:20px;}
+body{
+  font-family:Arial;
+  background:#f4f6f8;
+  padding:20px;
+}
 
 .result-card{
-background:#fff;
-padding:15px;
-margin:15px 0;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.05);
+  background:#fff;
+  padding:16px;
+  margin:15px 0;
+  border-radius:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.05);
 }
 
-.test-block{
-margin-top:10px;
-padding:10px;
-background:#f1f5f9;
-border-radius:8px;
+.status{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#22c55e;
+  color:white;
+  font-size:12px;
+  font-weight:bold;
 }
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:left;
+}
+
+th{background:#e2e8f0;}
 
 input{
-width:100%;
-padding:6px;
-margin-top:4px;
-border:1px solid #ccc;
-border-radius:6px;
+  width:100%;
+  padding:6px;
 }
 
 button{
-margin-top:10px;
-margin-right:6px;
-padding:8px 12px;
-border:none;
-border-radius:6px;
-cursor:pointer;
+  margin-top:10px;
+  margin-right:6px;
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
 }
 
 .save{background:#0ea5e9;color:#fff;}
 .pdf{background:#22c55e;color:#fff;}
+.back{background:#f59e0b;color:#fff;}
 .del{background:#ef4444;color:#fff;}
 </style>
 </head>
@@ -60,6 +79,7 @@ cursor:pointer;
 
 <script>
 
+/* FIREBASE */
 firebase.initializeApp({
   apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
@@ -87,17 +107,43 @@ auth.onAuthStateChanged(async user=>{
 /* LOGOUT */
 document.getElementById("logoutBtn").onclick = ()=>auth.signOut();
 
-/* LOAD RESULTS */
+/* NORMALIZE RESULTS (🔥 KEY FIX) */
+function normalize(results){
+
+  let clean = {};
+
+  // Case 1: New structured format
+  if(typeof results === "object" && !Array.isArray(results)){
+    Object.keys(results).forEach(test=>{
+      const val = results[test];
+
+      if(typeof val === "object"){
+        clean[test] = val.Result?.value || "";
+      } else {
+        clean[test] = val;
+      }
+    });
+  }
+
+  // Case 2: Old string format
+  if(typeof results === "string"){
+    clean["Result"] = results;
+  }
+
+  return clean;
+}
+
+/* LOAD */
 async function loadResults(){
 
-  box.innerHTML = "";
+  box.innerHTML="";
 
   const snap = await db.collection("orders")
     .where("status","==","completed")
     .get();
 
   if(snap.empty){
-    box.innerHTML = "<p>No completed results</p>";
+    box.innerHTML="<p>No completed results</p>";
     return;
   }
 
@@ -107,33 +153,34 @@ async function loadResults(){
     if(!resDoc.exists) continue;
 
     const data = resDoc.data();
-    const results = data.results || {};
+    const results = normalize(data.results || data.result || "");
 
     const card = document.createElement("div");
-    card.className = "result-card";
+    card.className="result-card";
 
     let html = `
       <h3>${data.patientName || "Patient"}</h3>
       <p><b>Order ID:</b> ${o.id}</p>
+      <p><b>Status:</b> <span class="status">Completed</span></p>
+
+      <table>
+      <tr><th>Test</th><th>Result</th></tr>
     `;
 
-    /* DISPLAY TESTS CLEANLY */
     Object.keys(results).forEach(test=>{
-
-      const value = results[test]?.Result?.value || "";
-
       html += `
-        <div class="test-block">
-          <b>${test}</b>
-          <input data-test="${test}" value="${value}">
-        </div>
+        <tr>
+          <td>${test}</td>
+          <td><input data-test="${test}" value="${results[test]}"></td>
+        </tr>
       `;
-
     });
 
-    html += `
+    html += `</table>
+
       <button class="save">Update</button>
       <button class="pdf">PDF</button>
+      <button class="back">Move to Ongoing</button>
       <button class="del">Delete</button>
     `;
 
@@ -147,10 +194,7 @@ async function loadResults(){
 
       card.querySelectorAll("input").forEach(i=>{
         updated[i.dataset.test] = {
-          Result:{
-            value:i.value,
-            units:""
-          }
+          Result:{ value:i.value, units:"" }
         };
       });
 
@@ -163,42 +207,37 @@ async function loadResults(){
 
     /* PDF */
     card.querySelector(".pdf").onclick = ()=>{
-
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF();
 
-      let y = 20;
+      let y=20;
 
-      pdf.text("Mobile Lab Results",105,y,{align:"center"});
-      y+=10;
+      pdf.text(`Patient: ${data.patientName}`,20,y); y+=10;
 
-      pdf.text(`Patient: ${data.patientName}`,20,y); y+=8;
-
-      Object.keys(results).forEach(test=>{
-        pdf.text(`${test}: ${results[test].Result.value}`,20,y);
+      Object.keys(results).forEach(t=>{
+        pdf.text(`${t}: ${results[t]}`,20,y);
         y+=8;
       });
 
       pdf.save(`Result_${o.id}.pdf`);
+    };
 
+    /* BACK */
+    card.querySelector(".back").onclick = async ()=>{
+      await db.collection("orders").doc(o.id).update({status:"ongoing"});
+      card.remove();
     };
 
     /* DELETE */
     card.querySelector(".del").onclick = async ()=>{
-
-      if(!confirm("Delete result?")) return;
+      if(!confirm("Delete?")) return;
 
       await db.collection("results").doc(o.id).delete();
-      await db.collection("orders").doc(o.id).update({
-        status:"ongoing"
-      });
-
+      await db.collection("orders").doc(o.id).update({status:"ongoing"});
       card.remove();
-
     };
 
   }
-
 }
 
 </script>
