@@ -5,7 +5,6 @@
 <title>Completed Results | Admin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -17,33 +16,56 @@ body {
   background: #f4f6f8;
   padding: 20px;
 }
+
+h2 {
+  margin-bottom: 10px;
+}
+
 .result-card {
   background: #fff;
   padding: 15px;
   margin: 15px 0;
-  border-radius: 6px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 8px;
 }
+
 th, td {
   border: 1px solid #ddd;
   padding: 6px;
 }
+
 th {
   background: #eee;
 }
+
 input {
   width: 100%;
   padding: 4px;
   box-sizing: border-box;
 }
+
 button {
   margin-right: 5px;
   padding: 6px 10px;
   cursor: pointer;
+  border: none;
+  border-radius: 6px;
+}
+
+.save { background: #0ea5e9; color: white; }
+.pdf { background: #22c55e; color: white; }
+.del { background: #ef4444; color: white; }
+
+#logoutBtn {
+  background: #ef4444;
+  color: white;
+  margin-bottom: 15px;
 }
 </style>
 </head>
@@ -52,164 +74,253 @@ button {
 
 <h2>Completed Test Results (Admin)</h2>
 <button id="logoutBtn">Logout</button>
+
 <div id="resultsContainer">Loading…</div>
 
 <script>
-/* 🔥 Firebase Init */
-firebase.initializeApp({
+
+// 🔥 Firebase Init
+const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId: "mobile-lab-mityana-aeae2"
-});
+};
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 const box = document.getElementById("resultsContainer");
 
-/* 🔐 Auth + Admin Check */
+
+// 🔐 AUTH CHECK
 auth.onAuthStateChanged(async user => {
-  if (!user) return location.href = "login.html";
+
+  if (!user) {
+    location.href = "login.html";
+    return;
+  }
 
   const u = await db.collection("users").doc(user.uid).get();
+
   if (!u.exists || u.data().role !== "admin") {
+    alert("Access denied");
     await auth.signOut();
-    return location.href = "login.html";
+    location.href = "login.html";
+    return;
   }
 
   loadResults();
+
 });
 
-/* Logout */
-document.getElementById("logoutBtn").onclick = () => auth.signOut();
 
-/* 🔁 Normalize results for table display */
+// 🚪 LOGOUT
+document.getElementById("logoutBtn").onclick = async () => {
+  await auth.signOut();
+  location.href = "login.html";
+};
+
+
+// 🔁 NORMALIZE RESULTS
 function normalizeResults(data){
-  let r = data.results || data.tests || {};
+
+  let r = data.results || {};
   let normalized = {};
 
   Object.keys(r).forEach(test => {
-    if (typeof r[test] === "object" && !Array.isArray(r[test])) {
-      normalized[test] = {};
-      Object.keys(r[test]).forEach(param => {
-        const v = r[test][param];
-        normalized[test][param] =
-          typeof v === "object"
-            ? { value: v.value || "", units: v.units || "" }
-            : { value: v, units: "" };
-      });
-    }
-  });
 
-  if (!Object.keys(normalized).length && Object.keys(r).length) {
-    normalized["General Test"] = {};
-    Object.keys(r).forEach(p => {
-      normalized["General Test"][p] = { value: r[p], units: "" };
+    normalized[test] = {};
+
+    Object.keys(r[test]).forEach(param => {
+
+      const v = r[test][param];
+
+      normalized[test][param] =
+        typeof v === "object"
+          ? { value: v.value || "", units: v.units || "" }
+          : { value: v, units: "" };
+
     });
-  }
+
+  });
 
   return normalized;
 }
 
-/* 📥 Load completed results */
-async function loadResults() {
-  box.innerHTML = "";
 
-  const snap = await db.collection("orders")
-    .where("status", "==", "completed")
-    .get();
+// 📥 LOAD RESULTS (REAL-TIME)
+function loadResults(){
 
-  if (snap.empty) {
-    box.innerHTML = "<p>No completed results</p>";
-    return;
-  }
+  db.collection("orders")
+    .where("status","==","completed")
+    .onSnapshot(async snapshot => {
 
-  for (const o of snap.docs) {
-    const rs = await db.collection("results").doc(o.id).get();
-    if (!rs.exists) continue;
+      box.innerHTML = "";
 
-    const data = rs.data();
-    const results = normalizeResults(data);
+      if (snapshot.empty) {
+        box.innerHTML = "<p>No completed results</p>";
+        return;
+      }
 
-    const card = document.createElement("div");
-    card.className = "result-card";
+      for (const doc of snapshot.docs) {
 
-    // Show patient name if exists, else fallback to email
-    const patientName = data.patientName || data.patientEmail || "N/A";
+        const orderId = doc.id;
 
-    let html = `<h4>Order: ${o.id}</h4>
-                <p>Patient: ${patientName}</p>`;
+        const rs = await db.collection("results").doc(orderId).get();
+        if (!rs.exists) continue;
 
-    Object.keys(results).forEach(test => {
-      html += `<h4>${test}</h4><table>
-      <tr><th>Parameter</th><th>Units</th><th>Value</th></tr>`;
-      Object.keys(results[test]).forEach(param => {
-        const r = results[test][param];
-        html += `<tr>
-          <td>${param}</td>
-          <td>${r.units}</td>
-          <td><input data-test="${test}" data-param="${param}" data-units="${r.units}" value="${r.value}"></td>
-        </tr>`;
-      });
-      html += "</table>";
+        const data = rs.data();
+        const results = normalizeResults(data);
+
+        const patientName =
+          data.patient_name ||
+          data.patientName ||
+          data.patient_email ||
+          data.patientEmail ||
+          "N/A";
+
+        const card = document.createElement("div");
+        card.className = "result-card";
+
+        let html = `
+          <h4>Order: ${orderId}</h4>
+          <p><b>Patient:</b> ${patientName}</p>
+        `;
+
+        Object.keys(results).forEach(test => {
+
+          html += `<h4>${test}</h4>
+          <table>
+            <tr><th>Parameter</th><th>Units</th><th>Value</th></tr>`;
+
+          Object.keys(results[test]).forEach(param => {
+
+            const r = results[test][param];
+
+            html += `
+              <tr>
+                <td>${param}</td>
+                <td>${r.units}</td>
+                <td>
+                  <input data-test="${test}" data-param="${param}" data-units="${r.units}" value="${r.value}">
+                </td>
+              </tr>
+            `;
+
+          });
+
+          html += `</table>`;
+
+        });
+
+        html += `
+          <button class="save">Update</button>
+          <button class="pdf">PDF</button>
+          <button class="del">Delete</button>
+        `;
+
+        card.innerHTML = html;
+        box.appendChild(card);
+
+        const saveBtn = card.querySelector(".save");
+        const delBtn = card.querySelector(".del");
+
+
+        // ✏ UPDATE
+        saveBtn.onclick = async () => {
+
+          saveBtn.disabled = true;
+          saveBtn.innerText = "Saving...";
+
+          try {
+
+            let updated = {};
+
+            card.querySelectorAll("input").forEach(i => {
+
+              updated[i.dataset.test] ??= {};
+              updated[i.dataset.test][i.dataset.param] = {
+                value: i.value,
+                units: i.dataset.units
+              };
+
+            });
+
+            await db.collection("results").doc(orderId).update({
+              results: updated,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            alert("Updated successfully!");
+
+          } catch(err) {
+            alert("Error: " + err.message);
+          }
+
+          saveBtn.disabled = false;
+          saveBtn.innerText = "Update";
+        };
+
+
+        // 📄 PDF
+        card.querySelector(".pdf").onclick = () => {
+
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF();
+
+          let y = 10;
+
+          pdf.text(`Order: ${orderId}`, 10, y); y += 8;
+          pdf.text(`Patient: ${patientName}`, 10, y); y += 8;
+
+          Object.keys(results).forEach(test => {
+            pdf.text(test, 10, y); y += 6;
+
+            Object.keys(results[test]).forEach(param => {
+              const r = results[test][param];
+              pdf.text(`${param}: ${r.value} ${r.units}`, 10, y);
+              y += 6;
+            });
+          });
+
+          pdf.save(`Result_${orderId}.pdf`);
+        };
+
+
+        // 🗑 DELETE (RESTORE TO ONGOING)
+        delBtn.onclick = async () => {
+
+          if (!confirm("Delete this result?")) return;
+
+          delBtn.disabled = true;
+          delBtn.innerText = "Deleting...";
+
+          try {
+
+            await db.collection("results").doc(orderId).delete();
+
+            await db.collection("orders").doc(orderId).update({
+              status: "ongoing",
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            card.remove();
+
+          } catch(err) {
+            alert("Error: " + err.message);
+            delBtn.disabled = false;
+            delBtn.innerText = "Delete";
+          }
+
+        };
+
+      }
+
     });
 
-    html += `
-      <button class="save">Update</button>
-      <button class="pdf">PDF</button>
-      <button class="del">Delete</button>
-    `;
-
-    card.innerHTML = html;
-    box.appendChild(card);
-
-    /* ✏ Update results */
-    card.querySelector(".save").onclick = async () => {
-      let updated = {};
-      card.querySelectorAll("input").forEach(i => {
-        updated[i.dataset.test] ??= {};
-        updated[i.dataset.test][i.dataset.param] = {
-          value: i.value,
-          units: i.dataset.units
-        };
-      });
-
-      await db.collection("results").doc(o.id).update({
-        results: updated,
-        patientEmail: data.patientEmail.toLowerCase(),
-        patientName: patientName
-      });
-
-      alert("Updated successfully!");
-    };
-
-    /* 📄 PDF download */
-    card.querySelector(".pdf").onclick = () => {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF();
-      let y = 10;
-      pdf.text(`Order ${o.id}`, 10, y); y += 8;
-      pdf.text(`Patient: ${patientName}`, 10, y); y += 8;
-
-      Object.keys(results).forEach(test => {
-        pdf.text(test, 10, y); y += 6;
-        Object.keys(results[test]).forEach(param => {
-          const r = results[test][param];
-          pdf.text(`${param}: ${r.value} ${r.units}`, 10, y); y += 6;
-        });
-      });
-
-      pdf.save(`Result_${o.id}.pdf`);
-    };
-
-    /* 🗑 Delete result */
-    card.querySelector(".del").onclick = async () => {
-      if (!confirm("Delete this result?")) return;
-      await db.collection("results").doc(o.id).delete();
-      await db.collection("orders").doc(o.id).update({ status: "ongoing" });
-      card.remove();
-    };
-  }
 }
+
 </script>
 
 </body>
