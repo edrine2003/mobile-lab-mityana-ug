@@ -1,269 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧪 Ongoing Tests – Mobile Lab</title>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<title>Mobile Lab Patient Dashboard</title>
 
 <style>
-body{font-family:Arial;margin:0;background:#f1f5f9;padding:16px;}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-button{cursor:pointer;border:none;border-radius:8px;padding:10px 14px;font-weight:bold;}
-#logoutBtn{background:#ef4444;color:white;}
-#chatBtn{background:#0ea5e9;color:white;}
-#search{padding:10px;width:100%;max-width:400px;border-radius:8px;border:1px solid #ccc;margin-bottom:20px;}
-.order-card{background:white;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 3px 10px rgba(0,0,0,0.05);}
-.order-card h3{margin-top:0;color:#0284c7;}
-.result-input{width:100%;padding:6px;border-radius:6px;border:1px solid #cbd5e1;margin-top:5px;}
-table{width:100%;border-collapse:collapse;margin-top:8px;}
-th,td{border:1px solid #ddd;padding:6px;text-align:center;}
-th{background:#e2e8f0;}
-.complete{background:#22c55e;color:white;margin-top:12px;}
-.delete{background:#ef4444;color:white;margin-left:10px;}
-.whatsapp{background:#25D366;color:white;margin-left:10px;}
+
+body{
+font-family:Arial, sans-serif;
+margin:0;
+background:#f1f5f9;
+}
+
+/* HEADER */
+
+header{
+background:#0369a1;
+color:white;
+padding:20px;
+text-align:center;
+}
+
+header h2{
+margin:0;
+}
+
+#userWelcome{
+display:block;
+margin-top:6px;
+}
+
+/* DASHBOARD GRID */
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+padding:30px;
+}
+
+/* CARD STYLE */
+
+.card{
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+text-align:center;
+cursor:pointer;
+transition:0.25s;
+}
+
+.card:hover{
+transform:scale(1.05);
+}
+
+.card img{
+width:70px;
+margin-bottom:10px;
+}
+
+.card h3{
+margin:0;
+color:#0369a1;
+}
+
+/* LOGOUT BUTTON */
+
+.logout{
+position:fixed;
+top:20px;
+right:20px;
+background:#ef4444;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+cursor:pointer;
+}
+
 </style>
+
 </head>
 
 <body>
 
 <header>
-<h2>🧪 Ongoing Tests</h2>
-<div>
-<button id="chatBtn">💬 Chat</button>
-<button id="logoutBtn">Logout</button>
-</div>
+
+<h2>🧪 Mobile Lab Mityana</h2>
+<span id="userWelcome">Loading...</span>
+
 </header>
 
-<input id="search" placeholder="Search patient name or phone">
+<button class="logout" onclick="logout()">Logout</button>
 
-<div id="ordersCounter"></div>
-<div id="ordersContainer"></div>
+
+<div class="dashboard">
+
+<div class="card" id="orderCard">
+<img src="icons/order.png">
+<h3>Order a Test</h3>
+</div>
+
+<div class="card" id="resultsCard">
+<img src="icons/results.png">
+<h3>Results</h3>
+</div>
+
+<div class="card" id="contactCard">
+<img src="icons/contact.png">
+<h3>Contact Lab</h3>
+</div>
+
+<div class="card" id="profileCard">
+<img src="icons/profile.png">
+<h3>Profile</h3>
+</div>
+  
+<div class="card" id="aboutCard">
+<img src="icons/about.png">
+<h3>About Us</h3>
+</div>
+
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
 
-const firebaseConfig={
+/* 🔥 SAFE FIREBASE INIT */
+const firebaseConfig = {
 apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
 authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
 projectId:"mobile-lab-mityana-aeae2"
 };
 
+if(!firebase.apps.length){
 firebase.initializeApp(firebaseConfig);
+}
 
-const auth=firebase.auth();
-const db=firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-const container=document.getElementById("ordersContainer");
-const counter=document.getElementById("ordersCounter");
-const search=document.getElementById("search");
 
-let allOrders=[];
-
-/* AUTH */
+/* 🔐 CHECK LOGIN */
 auth.onAuthStateChanged(async user=>{
-if(!user){location.href="login.html";return;}
 
-const u=await db.collection("users").doc(user.uid).get();
-
-if(!u.exists || u.data().role!=="admin"){
-alert("Access denied");
-auth.signOut();
+if(!user){
 location.href="login.html";
 return;
 }
 
-loadOrders();
+/* 🔄 REAL-TIME USER DATA */
+db.collection("users").doc(user.uid)
+.onSnapshot(doc=>{
+
+let name = "User";
+
+if(doc.exists && doc.data().fullName){
+name = doc.data().fullName;
+}else if(user.email){
+name = user.email.split("@")[0];
+}
+
+document.getElementById("userWelcome").innerText = "Welcome " + name;
+
+}, err=>{
+console.error(err);
+document.getElementById("userWelcome").innerText = "Welcome";
 });
 
-/* LOGOUT */
-logoutBtn.onclick=async()=>{
-await auth.signOut();
-location.href="login.html";
+});
+
+
+/* 🚀 DASHBOARD REDIRECTS */
+
+document.getElementById("orderCard").onclick=()=>{
+location.href="index.html";
 };
 
-/* CHAT */
-chatBtn.onclick=()=>{
+document.getElementById("resultsCard").onclick=()=>{
+location.href="inbox.html";
+};
+
+document.getElementById("contactCard").onclick=()=>{
 location.href="patient_chat.html";
 };
 
-/* LOAD ORDERS */
-async function loadOrders(){
-
-const snap=await db.collection("orders")
-.where("status","==","ongoing")
-.orderBy("createdAt","asc")
-.get();
-
-allOrders=[];
-
-snap.forEach(d=>{
-allOrders.push({id:d.id,...d.data()});
-});
-
-counter.innerText=`Ongoing Tests: ${allOrders.length}`;
-
-renderOrders(allOrders);
-}
-
-/* SEARCH */
-search.oninput=()=>{
-const q=search.value.toLowerCase();
-
-const filtered=allOrders.filter(o=>
-(o.name||"").toLowerCase().includes(q) ||
-(o.phone||"").includes(q)
-);
-
-renderOrders(filtered);
+document.getElementById("aboutCard").onclick=()=>{
+location.href="about.html";
 };
 
-/* RENDER */
-function renderOrders(list){
-
-container.innerHTML="";
-
-list.forEach(o=>{
-
-const card=document.createElement("div");
-card.className="order-card";
-
-/* ✅ SPLIT MULTIPLE TESTS */
-const testsList = o.tests ? o.tests.split("\n") : [];
-
-let inputsHTML = "";
-
-testsList.forEach(test=>{
-inputsHTML += `
-<label>${test}</label>
-<input class="result-input" data-test="${test}" placeholder="Enter result for ${test}">
-`;
-});
-
-let html=`
-<h3>${o.name || ""}</h3>
-
-<p><b>Age:</b> ${o.age || ""}</p>
-<p><b>Phone:</b> ${o.phone || ""}</p>
-<p><b>Email:</b> ${o.email || ""}</p>
-
-<p><b>Tests:</b><br>${o.tests}</p>
-
-${inputsHTML}
-`;
-
-html+=`
-<br>
-<button class="complete">Complete</button>
-<button class="delete">Delete</button>
-<button class="whatsapp">WhatsApp</button>
-`;
-
-card.innerHTML=html;
-container.appendChild(card);
-
-/* DELETE */
-card.querySelector(".delete").onclick=async()=>{
-if(!confirm("Delete this test?")) return;
-
-await db.collection("orders").doc(o.id).delete();
-alert("Deleted");
-loadOrders();
+document.getElementById("profileCard").onclick=()=>{
+location.href="profile.html";
 };
 
-/* ✅ COMPLETE (FIXED STRUCTURE) */
-card.querySelector(".complete").onclick=async()=>{
 
-let resultsObj = {};
+/* 🚪 LOGOUT */
+function logout(){
 
-/* collect all inputs */
-card.querySelectorAll(".result-input").forEach(input=>{
-
-const testName = input.dataset.test;
-const value = input.value;
-
-if(!value) return;
-
-resultsObj[testName] = {
-  "Result": {
-    value: value,
-    units: ""
-  }
-};
-
+auth.signOut()
+.then(()=>{
+location.href="login.html";
+})
+.catch(err=>{
+alert("Logout failed: " + err.message);
 });
 
-if(Object.keys(resultsObj).length === 0){
-alert("Enter at least one result");
-return;
-}
-
-/* SAVE CORRECT FORMAT */
-await db.collection("results").doc(o.id).set({
-
-order_id:o.id,
-userId:o.userId,
-patientName:o.name,
-patientEmail:o.email,
-
-results: resultsObj,
-
-uploaded_at:firebase.firestore.FieldValue.serverTimestamp()
-
-});
-
-/* UPDATE ORDER STATUS */
-await db.collection("orders").doc(o.id).update({
-status:"completed"
-});
-
-generatePDF(o, resultsObj);
-
-};
-
-/* WHATSAPP */
-card.querySelector(".whatsapp").onclick=()=>{
-const msg=`Hello ${o.name}, your lab result from Mobile Lab is ready.`;
-const phone=o.phone.replace("+","");
-window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
-};
-
-});
-
-}
-
-/* PDF */
-function generatePDF(o,results){
-
-const {jsPDF}=window.jspdf;
-const pdf=new jsPDF();
-
-let y=20;
-
-pdf.setFontSize(18);
-pdf.text("Mobile Lab Services",105,y,{align:"center"});
-
-y+=15;
-pdf.setFontSize(12);
-
-pdf.text(`Patient: ${o.name}`,20,y); y+=8;
-pdf.text(`Age: ${o.age}`,20,y); y+=8;
-pdf.text(`Phone: ${o.phone}`,20,y); y+=12;
-
-Object.keys(results).forEach(test=>{
-pdf.text(`${test}: ${results[test].Result.value}`,20,y);
-y+=8;
-});
-
-pdf.save(`Lab_Result_${o.name}.pdf`);
-
-loadOrders();
 }
 
 </script>
 
 </body>
+
 </html>
