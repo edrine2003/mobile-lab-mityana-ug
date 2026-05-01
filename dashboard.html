@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -16,6 +17,7 @@ background:#f1f5f9;
 }
 
 /* HEADER */
+
 header{
 background:#0369a1;
 color:white;
@@ -23,64 +25,26 @@ padding:20px;
 text-align:center;
 }
 
-header h2{margin:0;}
-#userWelcome{display:block;margin-top:6px;}
-
-/* STATS BAR */
-.stats{
-display:flex;
-justify-content:space-around;
-background:#fff;
-padding:15px;
-margin:15px;
-border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-}
-
-.stat{
-text-align:center;
-}
-
-.stat h3{
+header h2{
 margin:0;
-color:#0369a1;
 }
 
-.stat span{
-font-size:13px;
-color:#64748b;
-}
-
-/* NOTIFICATIONS */
-.notifications{
-margin:15px;
-background:#fff;
-padding:15px;
-border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-}
-
-.notifications h3{
-margin-top:0;
-}
-
-.note{
-padding:10px;
-margin-top:8px;
-border-radius:8px;
-background:#e0f2fe;
-font-size:13px;
+#userWelcome{
+display:block;
+margin-top:6px;
 }
 
 /* DASHBOARD GRID */
+
 .dashboard{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:20px;
-padding:20px;
+padding:30px;
 }
 
-/* CARD */
+/* CARD STYLE */
+
 .card{
 background:white;
 padding:25px;
@@ -91,7 +55,9 @@ cursor:pointer;
 transition:0.25s;
 }
 
-.card:hover{transform:scale(1.05);}
+.card:hover{
+transform:scale(1.05);
+}
 
 .card img{
 width:70px;
@@ -103,7 +69,8 @@ margin:0;
 color:#0369a1;
 }
 
-/* LOGOUT */
+/* LOGOUT BUTTON */
+
 .logout{
 position:fixed;
 top:20px;
@@ -116,6 +83,49 @@ border-radius:8px;
 cursor:pointer;
 }
 
+/* 🔔 NEW: STATS + NOTIFICATIONS */
+
+.top-widgets{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+padding:20px;
+}
+
+.widget{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
+text-align:center;
+}
+
+.widget h4{
+margin:0;
+color:#0369a1;
+}
+
+.widget span{
+font-size:22px;
+font-weight:bold;
+display:block;
+margin-top:6px;
+}
+
+/* 🔔 Notifications */
+
+.notifications{
+padding:20px;
+}
+
+.notification{
+background:#fff;
+padding:12px;
+border-left:5px solid #0ea5e9;
+margin-bottom:10px;
+border-radius:6px;
+}
+
 </style>
 
 </head>
@@ -123,35 +133,38 @@ cursor:pointer;
 <body>
 
 <header>
+
 <h2>🧪 Mobile Lab Mityana</h2>
 <span id="userWelcome">Loading...</span>
+
 </header>
 
 <button class="logout" onclick="logout()">Logout</button>
 
-<!-- 📊 STATS -->
-<div class="stats">
-  <div class="stat">
-    <h3 id="pendingCount">0</h3>
-    <span>Pending</span>
-  </div>
-  <div class="stat">
-    <h3 id="ongoingCount">0</h3>
-    <span>Ongoing</span>
-  </div>
-  <div class="stat">
-    <h3 id="completedCount">0</h3>
-    <span>Completed</span>
-  </div>
+
+<!-- 🔥 NEW: STATS -->
+<div class="top-widgets">
+
+<div class="widget">
+<h4>Total Tests</h4>
+<span id="totalTests">0</span>
 </div>
 
-<!-- 🔔 NOTIFICATIONS -->
-<div class="notifications">
-  <h3>🔔 Notifications</h3>
-  <div id="notesBox">No new notifications</div>
+<div class="widget">
+<h4>Pending</h4>
+<span id="pendingTests">0</span>
 </div>
 
-<!-- DASHBOARD -->
+<div class="widget">
+<h4>Completed</h4>
+<span id="completedTests">0</span>
+</div>
+
+</div>
+
+
+<!-- 🔥 DASHBOARD -->
+
 <div class="dashboard">
 
 <div class="card" id="orderCard">
@@ -173,13 +186,22 @@ cursor:pointer;
 <img src="icons/profile.png">
 <h3>Profile</h3>
 </div>
-
+  
 <div class="card" id="aboutCard">
 <img src="icons/about.png">
 <h3>About Us</h3>
 </div>
 
 </div>
+
+
+<!-- 🔔 NEW: NOTIFICATIONS -->
+
+<div class="notifications">
+<h3>🔔 Notifications</h3>
+<div id="notificationsBox">Loading...</div>
+</div>
+
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -188,9 +210,11 @@ cursor:pointer;
 <script>
 
 const firebaseConfig = {
+
 apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
 authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
 projectId:"mobile-lab-mityana-aeae2"
+
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -198,7 +222,8 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* LOGIN */
+/* CHECK LOGIN */
+
 auth.onAuthStateChanged(async user=>{
 
 if(!user){
@@ -216,79 +241,114 @@ name = doc.data().fullName;
 
 document.getElementById("userWelcome").innerText="Welcome "+name;
 
-/* LOAD DASHBOARD DATA */
+/* 🔥 LOAD STATS */
 loadStats(user.uid);
+
+/* 🔔 LOAD NOTIFICATIONS */
 loadNotifications(user.uid);
 
 });
 
-/* 📊 LOAD STATS */
-async function loadStats(uid){
+
+/* 🔥 LOAD DASHBOARD STATS */
+
+async function loadStats(userId){
+
+let total=0, pending=0, completed=0;
 
 const snap = await db.collection("orders")
-.where("userId","==",uid)
+.where("userId","==",userId)
 .get();
 
-let pending=0, ongoing=0, completed=0;
-
 snap.forEach(d=>{
-const s = d.data().status;
+total++;
+const s=d.data().status;
 
 if(s==="pending") pending++;
-if(s==="ongoing") ongoing++;
 if(s==="completed") completed++;
 });
 
-document.getElementById("pendingCount").innerText = pending;
-document.getElementById("ongoingCount").innerText = ongoing;
-document.getElementById("completedCount").innerText = completed;
+document.getElementById("totalTests").innerText=total;
+document.getElementById("pendingTests").innerText=pending;
+document.getElementById("completedTests").innerText=completed;
 
 }
 
-/* 🔔 LOAD NOTIFICATIONS */
-async function loadNotifications(uid){
 
-const box = document.getElementById("notesBox");
+/* 🔔 LOAD NOTIFICATIONS */
+
+function loadNotifications(userId){
+
+const box = document.getElementById("notificationsBox");
+
+db.collection("notifications")
+.where("userId","==",userId)
+.orderBy("time","desc")
+.limit(5)
+.onSnapshot(snap=>{
+
 box.innerHTML="";
 
-const snap = await db.collection("orders")
-.where("userId","==",uid)
-.where("status","==","completed")
-.get();
-
 if(snap.empty){
-box.innerHTML="No new notifications";
+box.innerHTML="<p>No notifications</p>";
 return;
 }
 
-snap.forEach(d=>{
+snap.forEach(doc=>{
+const n = doc.data();
 
 const div=document.createElement("div");
-div.className="note";
+div.className="notification";
 
-div.innerText = `✅ Your lab result (Order ${d.id}) is ready`;
+div.innerHTML=`
+<b>${n.title || "Update"}</b><br>
+${n.message || ""}
+`;
 
 box.appendChild(div);
 
 });
 
+});
+
 }
 
-/* NAVIGATION */
 
-orderCard.onclick=()=>location.href="index.html";
-resultsCard.onclick=()=>location.href="inbox.html";
-contactCard.onclick=()=>location.href="patient_chat.html";
-profileCard.onclick=()=>location.href="profile.html";
-aboutCard.onclick=()=>location.href="about.html";
+/* DASHBOARD REDIRECTS */
+
+document.getElementById("orderCard").onclick=()=>{
+location.href="index.html";
+};
+
+document.getElementById("resultsCard").onclick=()=>{
+location.href="inbox.html";
+};
+
+document.getElementById("contactCard").onclick=()=>{
+location.href="patient_chat.html";
+};
+
+document.getElementById("aboutCard").onclick=()=>{
+location.href="about.html";
+};
+
+document.getElementById("profileCard").onclick=()=>{
+location.href="profile.html";
+};
+
 
 /* LOGOUT */
 
 function logout(){
-auth.signOut().then(()=>location.href="login.html");
+
+auth.signOut().then(()=>{
+location.href="login.html";
+});
+
 }
 
 </script>
 
 </body>
+
 </html>
