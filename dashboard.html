@@ -8,7 +8,6 @@
 
 <title>Mobile Lab Patient Dashboard</title>
 
-<!-- ✅ PWA SUPPORT -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0369a1">
 
@@ -20,7 +19,6 @@ margin:0;
 background:#f1f5f9;
 }
 
-/* HEADER */
 header{
 background:#0369a1;
 color:white;
@@ -35,7 +33,6 @@ display:block;
 margin-top:6px;
 }
 
-/* DASHBOARD GRID */
 .dashboard{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -43,7 +40,6 @@ gap:20px;
 padding:30px;
 }
 
-/* CARD STYLE */
 .card{
 background:white;
 padding:25px;
@@ -68,7 +64,6 @@ margin:0;
 color:#0369a1;
 }
 
-/* LOGOUT */
 .logout{
 position:fixed;
 top:20px;
@@ -81,7 +76,6 @@ border-radius:8px;
 cursor:pointer;
 }
 
-/* 🔥 STATS */
 .top-widgets{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
@@ -105,7 +99,6 @@ display:block;
 margin-top:6px;
 }
 
-/* 🔔 NOTIFICATIONS */
 .notifications{
 padding:20px;
 }
@@ -118,7 +111,6 @@ margin-bottom:10px;
 border-radius:6px;
 }
 
-/* ⬇ INSTALL BUTTON */
 #installBtn{
 display:none;
 position:fixed;
@@ -167,6 +159,12 @@ z-index:9999;
 <h3>Results</h3>
 </div>
 
+<!-- ✅ NEW CYCLE TRACKER -->
+<div class="card" id="cycleCard">
+<img src="icons/cycle.png">
+<h3>🩸 Cycle Tracker</h3>
+</div>
+
 <div class="card" id="contactCard">
 <img src="icons/contact.png">
 <h3>Contact Lab</h3>
@@ -190,9 +188,7 @@ z-index:9999;
 <div id="notificationsBox">Loading...</div>
 </div>
 
-<!-- ⬇ INSTALL BUTTON -->
 <button id="installBtn">⬇ Install App</button>
-
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -294,18 +290,21 @@ contactCard.onclick=()=>location.href="patient_chat.html";
 aboutCard.onclick=()=>location.href="about.html";
 profileCard.onclick=()=>location.href="profile.html";
 
+/* ✅ NEW NAV */
+cycleCard.onclick=()=>location.href="cycle.html";
+
 /* LOGOUT */
 function logout(){
 auth.signOut().then(()=>location.href="login.html");
 }
 
-/* 🔥 INSTALL BUTTON */
+/* INSTALL BUTTON */
 let deferredPrompt;
 
 window.addEventListener("beforeinstallprompt", (e)=>{
 e.preventDefault();
 deferredPrompt=e;
-document.getElementById("installBtn").style.display="block";
+installBtn.style.display="block";
 });
 
 installBtn.onclick=async()=>{
@@ -315,12 +314,7 @@ return;
 }
 
 deferredPrompt.prompt();
-const choice=await deferredPrompt.userChoice;
-
-if(choice.outcome==="accepted"){
-console.log("Installed");
-}
-
+await deferredPrompt.userChoice;
 deferredPrompt=null;
 };
 
@@ -328,7 +322,7 @@ window.addEventListener("appinstalled",()=>{
 installBtn.style.display="none";
 });
 
-/* 🔥 SERVICE WORKER */
+/* SERVICE WORKER */
 if("serviceWorker" in navigator){
 navigator.serviceWorker.register("sw.js");
 }
