@@ -3,194 +3,217 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🩸 Cycle Tracker – Mobile Lab</title>
+<title>Cycle Tracker</title>
 
 <style>
 body{
-  font-family: Arial, sans-serif;
+  font-family:Arial;
   margin:0;
-  padding:16px;
   background:#f1f5f9;
 }
-h2{color:#0ea5e9;text-align:center;}
 
-.card{
-  background:white;
-  padding:16px;
-  border-radius:14px;
-  margin-bottom:16px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+/* HEADER */
+header{
+  background:#ec4899;
+  color:#fff;
+  text-align:center;
+  padding:15px;
 }
 
-label{font-weight:bold;font-size:13px;}
+/* CONTAINER */
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+
+/* INPUT CARD */
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom:20px;
+}
+
 input{
   width:100%;
   padding:10px;
-  margin:6px 0 12px;
-  border-radius:10px;
+  margin:8px 0;
+  border-radius:8px;
   border:1px solid #ccc;
 }
 
 button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  background:#0ea5e9;
+  background:#ec4899;
   color:white;
+  border:none;
+  padding:12px;
+  width:100%;
+  border-radius:10px;
   font-weight:bold;
   cursor:pointer;
 }
 
+/* RESULTS */
+.results{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  margin-top:15px;
+}
+
+/* CALENDAR */
 .calendar{
+  margin-top:20px;
+}
+
+.calendar-grid{
   display:grid;
   grid-template-columns:repeat(7,1fr);
-  gap:6px;
-  margin-top:10px;
+  gap:5px;
 }
 
 .day{
   padding:10px;
   text-align:center;
-  border-radius:8px;
+  background:#fff;
+  border-radius:6px;
   font-size:12px;
-  background:#e2e8f0;
 }
 
-/* Colors */
-.period{background:#ef4444;color:white;}
-.ovulation{background:#a855f7;color:white;}
-.fertile{background:#38bdf8;color:white;}
-.safe{background:#22c55e;color:white;}
+/* COLORS */
+.period{background:#f87171;color:#fff;}
+.ovulation{background:#f472b6;color:#fff;}
+.fertile{background:#fde68a;}
+.safe{background:#bbf7d0;}
 
-.status{
-  padding:12px;
-  border-radius:12px;
+.legend{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
   margin-top:10px;
-  background:#e0f2fe;
+  font-size:12px;
 }
-
-small{color:#64748b;}
+.legend span{
+  padding:5px 10px;
+  border-radius:6px;
+}
 </style>
+
 </head>
 
 <body>
 
+<header>
 <h2>🩸 Cycle Tracker</h2>
+</header>
+
+<div class="container">
 
 <div class="card">
-  <label>Last Period Start Date</label>
-  <input type="date" id="lastPeriod">
+<label>Last Period Date</label>
+<input type="date" id="lastPeriod">
 
-  <label>Cycle Length (days)</label>
-  <input type="number" id="cycleLength" value="28">
+<label>Cycle Length</label>
+<input type="number" id="cycleLength" value="28">
 
-  <label>Period Length (days)</label>
-  <input type="number" id="periodLength" value="5">
+<label>Period Duration</label>
+<input type="number" id="periodDuration" value="5">
 
-  <button onclick="generateCycle()">Track Cycle</button>
+<button onclick="calculate()">Calculate Cycle</button>
 </div>
 
-<div class="card">
-  <h3>📊 Today’s Status</h3>
-  <div id="todayStatus" class="status">No data yet</div>
-</div>
+<div id="output"></div>
 
-<div class="card">
-  <h3>📆 Cycle Calendar</h3>
-  <div id="calendar" class="calendar"></div>
-</div>
-
-<div class="card">
-  <small>
-⚠️ This tracker provides estimates only and should not be used as a guaranteed method for pregnancy prevention.
-  </small>
 </div>
 
 <script>
-function generateCycle(){
-  const lastPeriod = new Date(document.getElementById("lastPeriod").value);
-  const cycleLength = Number(document.getElementById("cycleLength").value);
-  const periodLength = Number(document.getElementById("periodLength").value);
 
-  if(!lastPeriod){
-    alert("Please select last period date");
-    return;
-  }
+function calculate(){
 
-  const calendar = document.getElementById("calendar");
-  calendar.innerHTML = "";
+const last = new Date(document.getElementById("lastPeriod").value);
+const cycle = parseInt(document.getElementById("cycleLength").value);
+const periodDays = parseInt(document.getElementById("periodDuration").value);
 
-  const today = new Date();
+// Save data
+localStorage.setItem("cycleData", JSON.stringify({
+last, cycle, periodDays
+}));
 
-  for(let i=0; i<cycleLength; i++){
-    const day = new Date(lastPeriod);
-    day.setDate(day.getDate() + i);
+// Next period
+const nextPeriod = new Date(last);
+nextPeriod.setDate(last.getDate() + cycle);
 
-    const div = document.createElement("div");
-    div.className = "day";
-    div.innerText = day.getDate();
+// Ovulation
+const ovulation = new Date(last);
+ovulation.setDate(last.getDate() + (cycle - 14));
 
-    // Period days
-    if(i < periodLength){
-      div.classList.add("period");
-    }
-    // Ovulation (middle)
-    else if(i === Math.floor(cycleLength / 2)){
-      div.classList.add("ovulation");
-    }
-    // Fertile window (5 days before ovulation)
-    else if(i >= (cycleLength/2 - 4) && i < (cycleLength/2)){
-      div.classList.add("fertile");
-    }
-    // Safe
-    else{
-      div.classList.add("safe");
-    }
+// Fertile window
+const fertileStart = new Date(ovulation);
+fertileStart.setDate(ovulation.getDate() - 5);
 
-    // Today highlight
-    if(day.toDateString() === today.toDateString()){
-      updateTodayStatus(i, cycleLength, periodLength);
-    }
+// Build UI
+let html = `
+<div class="results">
+<h3>📊 Results</h3>
+<p>🔴 Next Period: <b>${nextPeriod.toDateString()}</b></p>
+<p>🌸 Ovulation: <b>${ovulation.toDateString()}</b></p>
+<p>⚠️ Fertile: <b>${fertileStart.toDateString()} → ${ovulation.toDateString()}</b></p>
+</div>
 
-    calendar.appendChild(div);
-  }
+<div class="calendar">
+<h3>📅 Calendar</h3>
+<div class="calendar-grid">
+`;
 
-  // Save locally
-  localStorage.setItem("cycleData", JSON.stringify({
-    lastPeriod,
-    cycleLength,
-    periodLength
-  }));
+// Build 30-day calendar
+for(let i=0;i<30;i++){
+
+let d = new Date(last);
+d.setDate(last.getDate()+i);
+
+let cls="safe";
+
+// Period days
+if(i < periodDays) cls="period";
+
+// Fertile
+if(d >= fertileStart && d <= ovulation) cls="fertile";
+
+// Ovulation
+if(d.toDateString() === ovulation.toDateString()) cls="ovulation";
+
+html += `<div class="day ${cls}">${d.getDate()}</div>`;
 }
 
-function updateTodayStatus(dayIndex, cycleLength, periodLength){
-  const status = document.getElementById("todayStatus");
+html += `
+</div>
 
-  if(dayIndex < periodLength){
-    status.innerHTML = "🩸 Menstrual Phase<br>Low fertility";
-  }
-  else if(dayIndex === Math.floor(cycleLength / 2)){
-    status.innerHTML = "🟣 Ovulation Day<br>High chance of pregnancy";
-  }
-  else if(dayIndex >= (cycleLength/2 - 4) && dayIndex < (cycleLength/2)){
-    status.innerHTML = "🔵 Fertile Window<br>High chance of pregnancy";
-  }
-  else{
-    status.innerHTML = "🟢 Safe Day<br>Low chance of pregnancy";
-  }
+<div class="legend">
+<span class="period">Period</span>
+<span class="ovulation">Ovulation</span>
+<span class="fertile">Fertile</span>
+<span class="safe">Safe</span>
+</div>
+</div>
+`;
+
+document.getElementById("output").innerHTML = html;
+
 }
 
-// Auto load saved data
-window.onload = ()=>{
-  const saved = JSON.parse(localStorage.getItem("cycleData"));
-  if(saved){
-    document.getElementById("lastPeriod").value = saved.lastPeriod.split("T")[0];
-    document.getElementById("cycleLength").value = saved.cycleLength;
-    document.getElementById("periodLength").value = saved.periodLength;
-    generateCycle();
-  }
+// LOAD SAVED DATA
+window.onload = () => {
+const saved = JSON.parse(localStorage.getItem("cycleData"));
+if(saved){
+document.getElementById("lastPeriod").value = saved.last.split("T")[0];
+document.getElementById("cycleLength").value = saved.cycle;
+document.getElementById("periodDuration").value = saved.periodDays;
+calculate();
+}
 };
+
 </script>
 
 </body>
