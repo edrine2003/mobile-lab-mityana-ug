@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🩸 Cycle Tracker – Mobile Lab</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  padding:16px;
+  background:#f1f5f9;
+}
+h2{color:#0ea5e9;text-align:center;}
+
+.card{
+  background:white;
+  padding:16px;
+  border-radius:14px;
+  margin-bottom:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+label{font-weight:bold;font-size:13px;}
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0 12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#0ea5e9;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  margin-top:10px;
+}
+
+.day{
+  padding:10px;
+  text-align:center;
+  border-radius:8px;
+  font-size:12px;
+  background:#e2e8f0;
+}
+
+/* Colors */
+.period{background:#ef4444;color:white;}
+.ovulation{background:#a855f7;color:white;}
+.fertile{background:#38bdf8;color:white;}
+.safe{background:#22c55e;color:white;}
+
+.status{
+  padding:12px;
+  border-radius:12px;
+  margin-top:10px;
+  background:#e0f2fe;
+}
+
+small{color:#64748b;}
+</style>
+</head>
+
+<body>
+
+<h2>🩸 Cycle Tracker</h2>
+
+<div class="card">
+  <label>Last Period Start Date</label>
+  <input type="date" id="lastPeriod">
+
+  <label>Cycle Length (days)</label>
+  <input type="number" id="cycleLength" value="28">
+
+  <label>Period Length (days)</label>
+  <input type="number" id="periodLength" value="5">
+
+  <button onclick="generateCycle()">Track Cycle</button>
+</div>
+
+<div class="card">
+  <h3>📊 Today’s Status</h3>
+  <div id="todayStatus" class="status">No data yet</div>
+</div>
+
+<div class="card">
+  <h3>📆 Cycle Calendar</h3>
+  <div id="calendar" class="calendar"></div>
+</div>
+
+<div class="card">
+  <small>
+⚠️ This tracker provides estimates only and should not be used as a guaranteed method for pregnancy prevention.
+  </small>
+</div>
+
+<script>
+function generateCycle(){
+  const lastPeriod = new Date(document.getElementById("lastPeriod").value);
+  const cycleLength = Number(document.getElementById("cycleLength").value);
+  const periodLength = Number(document.getElementById("periodLength").value);
+
+  if(!lastPeriod){
+    alert("Please select last period date");
+    return;
+  }
+
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+
+  const today = new Date();
+
+  for(let i=0; i<cycleLength; i++){
+    const day = new Date(lastPeriod);
+    day.setDate(day.getDate() + i);
+
+    const div = document.createElement("div");
+    div.className = "day";
+    div.innerText = day.getDate();
+
+    // Period days
+    if(i < periodLength){
+      div.classList.add("period");
+    }
+    // Ovulation (middle)
+    else if(i === Math.floor(cycleLength / 2)){
+      div.classList.add("ovulation");
+    }
+    // Fertile window (5 days before ovulation)
+    else if(i >= (cycleLength/2 - 4) && i < (cycleLength/2)){
+      div.classList.add("fertile");
+    }
+    // Safe
+    else{
+      div.classList.add("safe");
+    }
+
+    // Today highlight
+    if(day.toDateString() === today.toDateString()){
+      updateTodayStatus(i, cycleLength, periodLength);
+    }
+
+    calendar.appendChild(div);
+  }
+
+  // Save locally
+  localStorage.setItem("cycleData", JSON.stringify({
+    lastPeriod,
+    cycleLength,
+    periodLength
+  }));
+}
+
+function updateTodayStatus(dayIndex, cycleLength, periodLength){
+  const status = document.getElementById("todayStatus");
+
+  if(dayIndex < periodLength){
+    status.innerHTML = "🩸 Menstrual Phase<br>Low fertility";
+  }
+  else if(dayIndex === Math.floor(cycleLength / 2)){
+    status.innerHTML = "🟣 Ovulation Day<br>High chance of pregnancy";
+  }
+  else if(dayIndex >= (cycleLength/2 - 4) && dayIndex < (cycleLength/2)){
+    status.innerHTML = "🔵 Fertile Window<br>High chance of pregnancy";
+  }
+  else{
+    status.innerHTML = "🟢 Safe Day<br>Low chance of pregnancy";
+  }
+}
+
+// Auto load saved data
+window.onload = ()=>{
+  const saved = JSON.parse(localStorage.getItem("cycleData"));
+  if(saved){
+    document.getElementById("lastPeriod").value = saved.lastPeriod.split("T")[0];
+    document.getElementById("cycleLength").value = saved.cycleLength;
+    document.getElementById("periodLength").value = saved.periodLength;
+    generateCycle();
+  }
+};
+</script>
+
+</body>
+</html>
