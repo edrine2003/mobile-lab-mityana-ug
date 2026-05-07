@@ -3,48 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle Tracker</title>
+<title>Women's Health & Fertility Hub</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ec4899">
 
 <style>
-body{
-  font-family:Arial;
+*{
   margin:0;
-  background:#f1f5f9;
+  padding:0;
+  box-sizing:border-box;
 }
 
-/* HEADER */
+body{
+  font-family:Arial,sans-serif;
+  background:#f8fafc;
+  color:#0f172a;
+}
+
 header{
   background:linear-gradient(135deg,#ec4899,#f472b6);
-  color:#fff;
+  color:white;
+  padding:25px 20px;
   text-align:center;
-  padding:18px;
 }
 
-/* CONTAINER */
+header h1{
+  font-size:28px;
+}
+
+header p{
+  margin-top:8px;
+  opacity:0.95;
+}
+
 .container{
-  max-width:900px;
+  max-width:1200px;
   margin:auto;
   padding:20px;
 }
 
-/* CARD */
-.card{
-  background:#fff;
-  padding:20px;
-  border-radius:14px;
-  box-shadow:0 6px 14px rgba(0,0,0,0.1);
-  margin-bottom:20px;
+.dashboard{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:18px;
+  margin-bottom:25px;
 }
 
-input{
+.card{
+  background:white;
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+  transition:0.25s;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+}
+
+.card h2{
+  color:#ec4899;
+  margin-bottom:10px;
+  font-size:22px;
+}
+
+.card p{
+  color:#475569;
+  line-height:1.6;
+}
+
+.section{
+  background:white;
+  padding:24px;
+  border-radius:18px;
+  margin-bottom:25px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+
+.section-title{
+  color:#ec4899;
+  margin-bottom:20px;
+  font-size:24px;
+}
+
+input,select,textarea{
   width:100%;
   padding:12px;
-  margin:8px 0;
   border-radius:10px;
-  border:1px solid #ddd;
+  border:1px solid #cbd5e1;
+  margin-top:8px;
+  margin-bottom:16px;
 }
 
-/* BUTTON */
 button{
   background:linear-gradient(135deg,#ec4899,#f472b6);
   color:white;
@@ -54,143 +105,355 @@ button{
   border-radius:12px;
   font-weight:bold;
   cursor:pointer;
+  transition:0.2s;
 }
 
-/* RESULTS */
+button:hover{
+  opacity:0.92;
+}
+
 .results{
-  background:linear-gradient(135deg,#fce7f3,#fff);
-  border-radius:16px;
+  margin-top:20px;
+  background:#fdf2f8;
   padding:20px;
-  margin-top:15px;
+  border-radius:14px;
 }
 
-.results h2{
-  color:#ec4899;
-}
-
-/* CALENDAR */
 .calendar-grid{
   display:grid;
   grid-template-columns:repeat(7,1fr);
   gap:6px;
-  margin-top:10px;
+  margin-top:15px;
 }
 
 .day{
-  padding:12px;
-  text-align:center;
-  border-radius:8px;
-  font-size:12px;
   background:#fff;
+  padding:12px;
+  border-radius:8px;
+  text-align:center;
+  font-size:12px;
 }
 
-/* COLORS */
-.period{background:#f87171;color:#fff;}
-.ovulation{background:#ec4899;color:#fff;}
+.period{background:#f87171;color:white;}
 .fertile{background:#fde68a;}
+.ovulation{background:#ec4899;color:white;}
 .safe{background:#bbf7d0;}
 
 .legend{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  margin-top:10px;
-  font-size:12px;
+  margin-top:14px;
 }
 
 .legend span{
-  padding:6px 10px;
+  padding:6px 12px;
   border-radius:6px;
+  font-size:12px;
 }
 
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+@media(max-width:768px){
+  .grid2{
+    grid-template-columns:1fr;
+  }
+}
+
+.tip-box{
+  background:#fff1f2;
+  border-left:5px solid #ec4899;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:12px;
+}
+
+.tip-box h4{
+  margin-bottom:8px;
+  color:#be185d;
+}
+
+.list li{
+  margin-bottom:10px;
+  line-height:1.6;
+}
+
+.badge{
+  display:inline-block;
+  background:#ec4899;
+  color:white;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:12px;
+  margin-top:8px;
+}
+
+footer{
+  text-align:center;
+  padding:25px;
+  color:#64748b;
+  font-size:13px;
+}
 </style>
 </head>
-
 <body>
 
 <header>
-<h2>🩸 Cycle Tracker</h2>
-<p>Understand your body better 💖</p>
+<h1>💖 Women's Health & Fertility Hub</h1>
+<p>Track your cycle • Understand fertility • Learn about your body</p>
 </header>
 
 <div class="container">
 
+<div class="dashboard">
+
 <div class="card">
+<h2>🩸 Cycle Tracker</h2>
+<p>Track periods, fertile window, ovulation, and safe days.</p>
+<div class="badge">Smart Predictions</div>
+</div>
+
+<div class="card">
+<h2>🌸 Fertility Center</h2>
+<p>Know your most fertile days and increase conception chances.</p>
+<div class="badge">Pregnancy Planning</div>
+</div>
+
+<div class="card">
+<h2>🤰 Pregnancy Signs</h2>
+<p>Learn the early symptoms and changes during pregnancy.</p>
+<div class="badge">Educational</div>
+</div>
+
+<div class="card">
+<h2>🧼 Feminine Care</h2>
+<p>Learn healthy vulva hygiene and self-care habits.</p>
+<div class="badge">Health Tips</div>
+</div>
+
+</div>
+
+<!-- CYCLE TRACKER -->
+<div class="section">
+<h2 class="section-title">🩸 Cycle Tracker</h2>
+
 <label>Last Period Date</label>
 <input type="date" id="lastPeriod">
 
-<label>Cycle Length (days)</label>
+<label>Cycle Length</label>
 <input type="number" id="cycleLength" value="28">
 
-<label>Period Duration (days)</label>
+<label>Period Duration</label>
 <input type="number" id="periodDuration" value="5">
 
-<button onclick="calculate()">Track My Cycle</button>
+<button onclick="calculateCycle()">Calculate My Cycle</button>
+
+<div id="cycleResults"></div>
 </div>
 
-<div id="output"></div>
+<!-- FERTILITY CALCULATOR -->
+<div class="section">
+<h2 class="section-title">🌸 Fertility Calculator</h2>
+
+<div class="grid2">
+<div>
+<label>Age</label>
+<input type="number" id="age" placeholder="Enter age">
+</div>
+
+<div>
+<label>Cycle Regularity</label>
+<select id="regularity">
+<option>Regular</option>
+<option>Irregular</option>
+</select>
+</div>
+</div>
+
+<label>How Often Do You Have Sex?</label>
+<select id="frequency">
+<option>Daily</option>
+<option>Every 2-3 days</option>
+<option>Rarely</option>
+</select>
+
+<button onclick="fertilityChance()">Check Chances</button>
+
+<div id="chanceResults" class="results"></div>
+</div>
+
+<!-- EARLY PREGNANCY SIGNS -->
+<div class="section">
+<h2 class="section-title">🤰 Early Signs of Pregnancy</h2>
+
+<div class="grid2">
+
+<div class="tip-box">
+<h4>🩸 Missed Period</h4>
+<p>A delayed or missed period is one of the earliest signs.</p>
+</div>
+
+<div class="tip-box">
+<h4>🤢 Nausea</h4>
+<p>Morning sickness can occur during early pregnancy.</p>
+</div>
+
+<div class="tip-box">
+<h4>😴 Fatigue</h4>
+<p>You may feel tired more often than usual.</p>
+</div>
+
+<div class="tip-box">
+<h4>💧 Frequent Urination</h4>
+<p>Hormonal changes can increase urination frequency.</p>
+</div>
+
+<div class="tip-box">
+<h4>💖 Breast Tenderness</h4>
+<p>Breasts may feel sore, fuller, or sensitive.</p>
+</div>
+
+<div class="tip-box">
+<h4>🍟 Food Cravings</h4>
+<p>Some people experience cravings or food aversions.</p>
+</div>
 
 </div>
+</div>
+
+<!-- HOW TO GET PREGNANT -->
+<div class="section">
+<h2 class="section-title">💕 How To Improve Chances of Pregnancy</h2>
+
+<ul class="list">
+<li>🌸 Track ovulation and fertile days.</li>
+<li>🗓️ Have sex during the fertile window.</li>
+<li>🥗 Eat healthy foods rich in vitamins and iron.</li>
+<li>😴 Get enough sleep and reduce stress.</li>
+<li>🚭 Avoid smoking and excessive alcohol.</li>
+<li>💧 Stay hydrated and maintain healthy weight.</li>
+<li>🏃 Moderate exercise can improve fertility health.</li>
+</ul>
+</div>
+
+<!-- SEX TIMING -->
+<div class="section">
+<h2 class="section-title">⏰ Best Timing for Sex During Fertility</h2>
+
+<div class="tip-box">
+<h4>🌸 Most Fertile Time</h4>
+<p>The 5 days before ovulation and ovulation day are usually the most fertile.</p>
+</div>
+
+<div class="tip-box">
+<h4>💕 Frequency</h4>
+<p>Sex every 1–2 days during fertile window may improve chances.</p>
+</div>
+
+<div class="tip-box">
+<h4>🧘 Relaxation</h4>
+<p>Stress management may support overall reproductive health.</p>
+</div>
+</div>
+
+<!-- FERTILITY SIGNS -->
+<div class="section">
+<h2 class="section-title">🌿 Physical Signs of Fertility</h2>
+
+<ul class="list">
+<li>💧 Clear stretchy cervical mucus</li>
+<li>🔥 Increased libido</li>
+<li>🌡️ Slight rise in body temperature</li>
+<li>⚡ Increased energy</li>
+<li>🌸 Mild pelvic discomfort during ovulation</li>
+</ul>
+</div>
+
+<!-- FEMININE CARE -->
+<div class="section">
+<h2 class="section-title">🧼 Vulva & Feminine Hygiene</h2>
+
+<ul class="list">
+<li>🚿 Wash gently with clean water.</li>
+<li>🧴 Avoid harsh soaps and scented products.</li>
+<li>❌ Avoid douching.</li>
+<li>👙 Wear breathable cotton underwear.</li>
+<li>💧 Keep the area dry and clean.</li>
+<li>👩‍⚕️ See a doctor for itching, pain, or unusual discharge.</li>
+</ul>
+</div>
+
+<!-- MOOD TRACKER -->
+<div class="section">
+<h2 class="section-title">😊 Mood & Symptom Tracker</h2>
+
+<label>How do you feel today?</label>
+<select id="mood">
+<option>😊 Happy</option>
+<option>😴 Tired</option>
+<option>😣 Cramps</option>
+<option>😢 Emotional</option>
+<option>💪 Energetic</option>
+</select>
+
+<label>Notes</label>
+<textarea id="notes" placeholder="Write symptoms or notes..."></textarea>
+
+<button onclick="saveMood()">Save Mood</button>
+
+<div id="savedMood" class="results"></div>
+</div>
+
+<!-- LAB SERVICES -->
+<div class="section">
+<h2 class="section-title">🧪 Lab & Medical Services</h2>
+
+<div class="dashboard">
+
+<div class="card">
+<h2>🤰 Pregnancy Test</h2>
+<p>Book home pregnancy testing services.</p>
+<button onclick="location.href='index.html'">Book Test</button>
+</div>
+
+<div class="card">
+<h2>💬 Chat With Lab</h2>
+<p>Talk to healthcare support.</p>
+<button onclick="location.href='patient_chat.html'">Open Chat</button>
+</div>
+
+<div class="card">
+<h2>🧬 Hormone Testing</h2>
+<p>Check hormone and fertility-related tests.</p>
+<button onclick="location.href='index.html'">View Tests</button>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<footer>
+⚠️ This platform provides educational information only and is not a substitute for professional medical advice.
+</footer>
 
 <script>
 
-/* 🔥 PHASE LOGIC (FLO STYLE) */
-function getPhase(today, last, cycle){
+function calculateCycle(){
 
-const diff = Math.floor((today - last)/(1000*60*60*24));
-const day = diff % cycle;
+const last = new Date(document.getElementById('lastPeriod').value);
+const cycle = parseInt(document.getElementById('cycleLength').value);
+const periodDays = parseInt(document.getElementById('periodDuration').value);
 
-if(day <= 5){
-return {
-phase:"🩸 Period Phase",
-msg:"Your period is ongoing. Your body needs rest.",
-tips:["Drink warm fluids","Eat iron-rich foods","Get enough rest"]
-};
-}
-
-if(day <= 13){
-return {
-phase:"🌿 Follicular Phase",
-msg:"Energy is rising. Great time to focus and be productive.",
-tips:["Exercise lightly","Start new tasks","Stay active"]
-};
-}
-
-if(day <= 16){
-return {
-phase:"🌸 Ovulation Phase",
-msg:"High fertility window. You may feel more confident.",
-tips:["Stay hydrated","Socialize","Track body signals"]
-};
-}
-
-return {
-phase:"🌙 Luteal Phase",
-msg:"Your body is preparing for the next cycle.",
-tips:["Avoid stress","Eat healthy","Get good sleep"]
-};
-}
-
-/* 🔥 MAIN FUNCTION */
-function calculate(){
-
-const last = new Date(document.getElementById("lastPeriod").value);
-const cycle = parseInt(document.getElementById("cycleLength").value);
-const periodDays = parseInt(document.getElementById("periodDuration").value);
-
-if(!last){
-alert("Please select your last period date");
+if(!document.getElementById('lastPeriod').value){
+alert('Please select your last period date');
 return;
 }
 
-/* SAVE */
-localStorage.setItem("cycleData", JSON.stringify({
-last: last.toISOString(),
-cycle,
-periodDays
-}));
-
-/* CALCULATIONS */
 const nextPeriod = new Date(last);
 nextPeriod.setDate(last.getDate() + cycle);
 
@@ -200,46 +463,28 @@ ovulation.setDate(last.getDate() + (cycle - 14));
 const fertileStart = new Date(ovulation);
 fertileStart.setDate(ovulation.getDate() - 5);
 
-const today = new Date();
-const phaseData = getPhase(today, last, cycle);
-
-/* UI */
 let html = `
 <div class="results">
-
-<h3>💖 Your Body Today</h3>
-<h2>${phaseData.phase}</h2>
-<p>${phaseData.msg}</p>
-
-<ul>
-${phaseData.tips.map(t=>`<li>${t}</li>`).join("")}
-</ul>
-
-<hr>
-
+<h3>💖 Your Cycle Insights</h3>
 <p>🔴 Next Period: <b>${nextPeriod.toDateString()}</b></p>
-<p>🌸 Ovulation: <b>${ovulation.toDateString()}</b></p>
+<p>🌸 Ovulation Day: <b>${ovulation.toDateString()}</b></p>
 <p>⚠️ Fertile Window: <b>${fertileStart.toDateString()} → ${ovulation.toDateString()}</b></p>
-
 </div>
 
-<h3>📅 Cycle Calendar</h3>
+<h3 style="margin-top:20px;color:#ec4899;">📅 Cycle Calendar</h3>
 <div class="calendar-grid">
 `;
 
-/* CALENDAR */
 for(let i=0;i<30;i++){
 
 let d = new Date(last);
 d.setDate(last.getDate()+i);
 
-let cls="safe";
+let cls='safe';
 
-if(i < periodDays) cls="period";
-
-if(d >= fertileStart && d <= ovulation) cls="fertile";
-
-if(d.toDateString() === ovulation.toDateString()) cls="ovulation";
+if(i < periodDays) cls='period';
+if(d >= fertileStart && d <= ovulation) cls='fertile';
+if(d.toDateString() === ovulation.toDateString()) cls='ovulation';
 
 html += `<div class="day ${cls}">${d.getDate()}</div>`;
 }
@@ -249,27 +494,87 @@ html += `
 
 <div class="legend">
 <span class="period">Period</span>
-<span class="ovulation">Ovulation</span>
 <span class="fertile">Fertile</span>
+<span class="ovulation">Ovulation</span>
 <span class="safe">Safe</span>
 </div>
 `;
 
-document.getElementById("output").innerHTML = html;
+localStorage.setItem('cycleData', JSON.stringify({
+last: document.getElementById('lastPeriod').value,
+cycle,
+periodDays
+}));
 
+document.getElementById('cycleResults').innerHTML = html;
 }
 
-/* LOAD SAVED DATA */
-window.onload = () => {
-const saved = JSON.parse(localStorage.getItem("cycleData"));
+function fertilityChance(){
+
+const age = parseInt(document.getElementById('age').value);
+const regularity = document.getElementById('regularity').value;
+const frequency = document.getElementById('frequency').value;
+
+let chance = 'Medium';
+
+if(age <= 30 && regularity === 'Regular' && frequency !== 'Rarely'){
+chance = 'High 🌸';
+}
+
+if(age > 35 || regularity === 'Irregular'){
+chance = 'Moderate ⚠️';
+}
+
+if(frequency === 'Rarely'){
+chance = 'Lower 🌙';
+}
+
+
+document.getElementById('chanceResults').innerHTML = `
+<h3>💕 Fertility Estimate</h3>
+<p>Your estimated fertility chance is:</p>
+<h2 style="color:#ec4899;">${chance}</h2>
+<p>Tracking ovulation and timing sex during fertile days may improve chances.</p>
+`;
+}
+
+function saveMood(){
+
+const mood = document.getElementById('mood').value;
+const notes = document.getElementById('notes').value;
+
+localStorage.setItem('moodTracker', JSON.stringify({mood,notes}));
+
+
+document.getElementById('savedMood').innerHTML = `
+<h3>✅ Mood Saved</h3>
+<p><b>Mood:</b> ${mood}</p>
+<p><b>Notes:</b> ${notes}</p>
+`;
+}
+
+window.onload = ()=>{
+
+const saved = JSON.parse(localStorage.getItem('cycleData'));
 
 if(saved){
-document.getElementById("lastPeriod").value = saved.last.split("T")[0];
-document.getElementById("cycleLength").value = saved.cycle;
-document.getElementById("periodDuration").value = saved.periodDays;
-calculate();
+document.getElementById('lastPeriod').value = saved.last;
+document.getElementById('cycleLength').value = saved.cycle;
+document.getElementById('periodDuration').value = saved.periodDays;
+calculateCycle();
 }
-};
+
+const moodSaved = JSON.parse(localStorage.getItem('moodTracker'));
+
+if(moodSaved){
+document.getElementById('savedMood').innerHTML = `
+<h3>📌 Last Saved Mood</h3>
+<p><b>Mood:</b> ${moodSaved.mood}</p>
+<p><b>Notes:</b> ${moodSaved.notes}</p>
+`;
+}
+
+}
 
 </script>
 
