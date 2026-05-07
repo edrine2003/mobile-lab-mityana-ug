@@ -1,414 +1,462 @@
-# cycle.html
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cycle Tracker</title>
+
+<title>Women's Cycle Tracker</title>
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#db2777">
 
 <style>
-body{
+
+*{
 margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#fce7f3,#f3e8ff);
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#fff1f2;
 color:#1e293b;
 }
 
+/* HEADER */
 header{
-background:linear-gradient(135deg,#ec4899,#c084fc);
+background:linear-gradient(135deg,#db2777,#f472b6);
+padding:25px;
 color:white;
-padding:20px;
 text-align:center;
+border-bottom-left-radius:25px;
+border-bottom-right-radius:25px;
+box-shadow:0 4px 14px rgba(0,0,0,0.15);
 }
 
+header h1{
+font-size:30px;
+margin-bottom:8px;
+}
+
+header p{
+font-size:15px;
+opacity:0.95;
+}
+
+/* MAIN */
 .container{
 padding:20px;
-max-width:700px;
+max-width:1100px;
 margin:auto;
 }
 
-.card{
+/* TRACKER */
+.tracker{
 background:white;
-padding:20px;
-border-radius:20px;
-margin-bottom:20px;
-box-shadow:0 4px 15px rgba(0,0,0,0.08);
+padding:25px;
+border-radius:22px;
+box-shadow:0 4px 14px rgba(0,0,0,0.08);
+margin-bottom:25px;
 }
 
-input,button{
+.tracker h2{
+color:#db2777;
+margin-bottom:18px;
+}
+
+.input-group{
+margin-bottom:18px;
+}
+
+label{
+display:block;
+font-weight:bold;
+margin-bottom:8px;
+}
+
+input{
 width:100%;
 padding:14px;
-margin-top:10px;
 border-radius:12px;
-border:1px solid #ddd;
-font-size:16px;
+border:1px solid #e2e8f0;
+font-size:15px;
 }
 
 button{
-background:#ec4899;
-color:white;
+width:100%;
+padding:15px;
+background:linear-gradient(135deg,#db2777,#f472b6);
 border:none;
+border-radius:14px;
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+}
+
+button:hover{
+opacity:0.95;
+}
+
+/* RESULTS */
+.results{
+margin-top:25px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:18px;
+}
+
+.result-card{
+background:#fff;
+padding:18px;
+border-radius:18px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
+border-top:6px solid #db2777;
+}
+
+.result-card h3{
+color:#db2777;
+margin-bottom:10px;
+font-size:18px;
+}
+
+.result-card p{
+font-size:15px;
+line-height:1.6;
+}
+
+/* HEALTH CARDS */
+.health-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:20px;
+margin-top:30px;
+}
+
+.health-card{
+background:white;
+border-radius:22px;
+padding:22px;
+text-align:center;
+cursor:pointer;
+transition:0.3s;
+box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+
+.health-card:hover{
+transform:translateY(-6px);
+box-shadow:0 12px 28px rgba(0,0,0,0.14);
+}
+
+.health-card img{
+width:90px;
+height:90px;
+object-fit:contain;
+margin-bottom:15px;
+}
+
+.health-card h3{
+color:#db2777;
+margin-bottom:10px;
+font-size:22px;
+}
+
+.health-card p{
+font-size:14px;
+color:#64748b;
+line-height:1.6;
+}
+
+/* TIPS */
+.tips{
+margin-top:35px;
+background:white;
+padding:25px;
+border-radius:22px;
+box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+
+.tips h2{
+color:#db2777;
+margin-bottom:18px;
+}
+
+.tip{
+padding:15px;
+border-left:5px solid #f472b6;
+background:#fff1f2;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.tip h4{
+margin-bottom:6px;
+color:#be185d;
+}
+
+.tip p{
+font-size:14px;
+line-height:1.6;
+}
+
+/* CALENDAR */
+.calendar-box{
+margin-top:35px;
+background:white;
+padding:25px;
+border-radius:22px;
+box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+
+.calendar-box h2{
+color:#db2777;
+margin-bottom:18px;
+}
+
+.calendar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:10px;
+}
+
+.day{
+background:#ffe4e6;
+padding:15px;
+text-align:center;
+border-radius:12px;
 font-weight:bold;
 }
 
-.result{
-margin-top:15px;
-line-height:2;
+.fertile{
+background:#f9a8d4;
+color:white;
 }
+
+.period{
+background:#db2777;
+color:white;
+}
+
+.ovulation{
+background:#be185d;
+color:white;
+}
+
+/* MOBILE */
+@media(max-width:700px){
+
+header h1{
+font-size:24px;
+}
+
+.health-card h3{
+font-size:19px;
+}
+
+}
+
 </style>
+
 </head>
+
 <body>
 
 <header>
-<h1>🩸 Cycle Tracker</h1>
-<p>Track periods, ovulation & safe days</p>
+<h1>🌸 Women's Cycle Tracker</h1>
+<p>Track periods, ovulation, fertile days & women's health</p>
 </header>
 
 <div class="container">
 
-<div class="card">
-<h3>Enter Your Last Period</h3>
-<input type="date" id="lastPeriod">
-<input type="number" id="cycleLength" placeholder="Cycle Length (28 days)">
-<button onclick="calculateCycle()">Calculate</button>
+<!-- TRACKER -->
+<div class="tracker">
 
-<div class="result" id="result"></div>
+<h2>📅 Cycle Calculator</h2>
+
+<div class="input-group">
+<label>First Day of Last Period</label>
+<input type="date" id="lastPeriod">
 </div>
 
-<div class="card">
-<h3>🌸 What You’ll See</h3>
-<ul>
-<li>Next period prediction</li>
-<li>Ovulation day</li>
-<li>Fertile window</li>
-<li>Safe days</li>
-<li>Pregnancy chances</li>
-</ul>
+<div class="input-group">
+<label>Cycle Length (Days)</label>
+<input type="number" id="cycleLength" value="28">
+</div>
+
+<button onclick="calculateCycle()">Calculate My Cycle</button>
+
+<div class="results">
+
+<div class="result-card">
+<h3>🩸 Next Period</h3>
+<p id="nextPeriod">--</p>
+</div>
+
+<div class="result-card">
+<h3>🌸 Ovulation Day</h3>
+<p id="ovulationDay">--</p>
+</div>
+
+<div class="result-card">
+<h3>💖 Fertile Window</h3>
+<p id="fertileDays">--</p>
+</div>
+
+<div class="result-card">
+<h3>✅ Safe Days</h3>
+<p id="safeDays">--</p>
+</div>
+
+</div>
+
+</div>
+
+<!-- CALENDAR -->
+<div class="calendar-box">
+
+<h2>🗓️ Cycle Calendar View</h2>
+
+<div class="calendar">
+
+<div class="day">1</div>
+<div class="day period">2</div>
+<div class="day period">3</div>
+<div class="day period">4</div>
+<div class="day period">5</div>
+<div class="day">6</div>
+<div class="day">7</div>
+
+<div class="day">8</div>
+<div class="day">9</div>
+<div class="day fertile">10</div>
+<div class="day fertile">11</div>
+<div class="day fertile">12</div>
+<div class="day ovulation">13</div>
+<div class="day fertile">14</div>
+
+<div class="day fertile">15</div>
+<div class="day">16</div>
+<div class="day">17</div>
+<div class="day">18</div>
+<div class="day">19</div>
+<div class="day">20</div>
+<div class="day">21</div>
+
+<div class="day">22</div>
+<div class="day">23</div>
+<div class="day">24</div>
+<div class="day">25</div>
+<div class="day">26</div>
+<div class="day">27</div>
+<div class="day">28</div>
+
+</div>
+
+</div>
+
+<!-- HEALTH PAGES -->
+<div class="health-grid">
+
+<div class="health-card" onclick="location.href='fertility.html'">
+<img src="icons/fertility.png">
+<h3>🌸 Fertility</h3>
+<p>Learn fertile signs, ovulation timing & conception tips.</p>
+</div>
+
+<div class="health-card" onclick="location.href='pregnancy.html'">
+<img src="icons/pregnancy.png">
+<h3>🤰 Pregnancy</h3>
+<p>Early pregnancy signs, symptoms & pregnancy advice.</p>
+</div>
+
+<div class="health-card" onclick="location.href='women_care.html'">
+<img src="icons/women.png">
+<h3>💖 Women Care</h3>
+<p>Hygiene, vulva care, discharge & feminine wellness tips.</p>
+</div>
+
+<div class="health-card" onclick="location.href='fertility.html#conception'">
+<img src="icons/conceive.png">
+<h3>👶 Get Pregnant</h3>
+<p>Best sex timing, fertility advice & conception support.</p>
+</div>
+
+</div>
+
+<!-- TIPS -->
+<div class="tips">
+
+<h2>💡 Daily Women's Health Tips</h2>
+
+<div class="tip">
+<h4>🌸 Fertile Signs</h4>
+<p>Clear stretchy discharge, increased libido and mild cramps may indicate ovulation.</p>
+</div>
+
+<div class="tip">
+<h4>🤰 Early Pregnancy Signs</h4>
+<p>Missed periods, nausea, breast tenderness and fatigue are common early symptoms.</p>
+</div>
+
+<div class="tip">
+<h4>💖 Vulva Hygiene</h4>
+<p>Use clean water, avoid harsh soaps and wear breathable cotton underwear.</p>
+</div>
+
+<div class="tip">
+<h4>👶 Best Time To Conceive</h4>
+<p>Sex during fertile days and ovulation gives the highest pregnancy chances.</p>
+</div>
+
 </div>
 
 </div>
 
 <script>
+
 function calculateCycle(){
-const last = new Date(document.getElementById('lastPeriod').value);
-const cycle = parseInt(document.getElementById('cycleLength').value) || 28;
 
-const nextPeriod = new Date(last);
-nextPeriod.setDate(nextPeriod.getDate()+cycle);
+const lastPeriod = document.getElementById("lastPeriod").value;
+const cycleLength = parseInt(document.getElementById("cycleLength").value);
 
-const ovulation = new Date(nextPeriod);
-ovulation.setDate(ovulation.getDate()-14);
+if(!lastPeriod){
+alert("Please select your last period date");
+return;
+}
+
+const start = new Date(lastPeriod);
+
+const nextPeriod = new Date(start);
+nextPeriod.setDate(start.getDate() + cycleLength);
+
+const ovulation = new Date(start);
+ovulation.setDate(start.getDate() + (cycleLength - 14));
 
 const fertileStart = new Date(ovulation);
-fertileStart.setDate(fertileStart.getDate()-5);
+fertileStart.setDate(ovulation.getDate() - 5);
 
 const fertileEnd = new Date(ovulation);
-fertileEnd.setDate(fertileEnd.getDate()+1);
+fertileEnd.setDate(ovulation.getDate() + 1);
 
-result.innerHTML=`
-<b>🩸 Next Period:</b> ${nextPeriod.toDateString()}<br>
-<b>🌸 Ovulation Day:</b> ${ovulation.toDateString()}<br>
-<b>💕 Fertile Window:</b> ${fertileStart.toDateString()} - ${fertileEnd.toDateString()}<br>
-<b>💙 Safe Days:</b> Outside fertile window<br>
-<b>🤰 High Pregnancy Chance:</b> During fertile days
-`;
+document.getElementById("nextPeriod").innerText =
+nextPeriod.toDateString();
+
+document.getElementById("ovulationDay").innerText =
+ovulation.toDateString();
+
+document.getElementById("fertileDays").innerText =
+fertileStart.toDateString() + " → " + fertileEnd.toDateString();
+
+document.getElementById("safeDays").innerText =
+"Most likely outside fertile window";
+
 }
+
 </script>
 
 </body>
 </html>
-```
-
----
-
-# fertility.html
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fertility Calculator</title>
-
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#fdf2f8,#ede9fe);
-}
-
-header{
-background:linear-gradient(135deg,#d946ef,#ec4899);
-color:white;
-padding:25px;
-text-align:center;
-}
-
-.container{
-padding:20px;
-max-width:800px;
-margin:auto;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:20px;
-margin-bottom:20px;
-box-shadow:0 5px 15px rgba(0,0,0,0.08);
-}
-
-.tip{
-padding:12px;
-background:#fce7f3;
-border-radius:12px;
-margin-top:10px;
-}
-</style>
-</head>
-<body>
-
-<header>
-<h1>🌸 Fertility Hub</h1>
-<p>Boost your chances of conception</p>
-</header>
-
-<div class="container">
-
-<div class="card">
-<h2>💕 Best Days To Conceive</h2>
-<p>The best time for pregnancy is 5 days before ovulation and the ovulation day itself.</p>
-</div>
-
-<div class="card">
-<h2>🥗 Fertility Foods</h2>
-<div class="tip">Leafy greens improve reproductive health.</div>
-<div class="tip">Drink enough water daily.</div>
-<div class="tip">Eat fruits rich in antioxidants.</div>
-<div class="tip">Reduce excessive sugar.</div>
-</div>
-
-<div class="card">
-<h2>😴 Lifestyle Tips</h2>
-<ul>
-<li>Sleep 7–8 hours</li>
-<li>Reduce stress</li>
-<li>Exercise moderately</li>
-<li>Avoid smoking</li>
-<li>Reduce alcohol intake</li>
-</ul>
-</div>
-
-<div class="card">
-<h2>🔥 High Fertility Signs</h2>
-<ul>
-<li>Clear stretchy mucus</li>
-<li>Higher sex drive</li>
-<li>Ovulation cramps</li>
-<li>Breast sensitivity</li>
-<li>Increased energy</li>
-</ul>
-</div>
-
-</div>
-
-</body>
-</html>
-```
-
----
-
-# pregnancy.html
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pregnancy Signs</title>
-
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#fff1f2,#fdf2f8);
-}
-
-header{
-background:linear-gradient(135deg,#fb7185,#ec4899);
-color:white;
-padding:25px;
-text-align:center;
-}
-
-.container{
-padding:20px;
-max-width:800px;
-margin:auto;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:20px;
-margin-bottom:20px;
-box-shadow:0 5px 15px rgba(0,0,0,0.08);
-}
-
-.sign{
-padding:15px;
-margin-top:10px;
-background:#ffe4e6;
-border-radius:12px;
-}
-</style>
-</head>
-<body>
-
-<header>
-<h1>🤰 Early Pregnancy Signs</h1>
-<p>Learn the common signs of pregnancy</p>
-</header>
-
-<div class="container">
-
-<div class="card">
-<h2>🌸 Common Early Signs</h2>
-
-<div class="sign">Missed period</div>
-<div class="sign">Morning sickness</div>
-<div class="sign">Breast tenderness</div>
-<div class="sign">Frequent urination</div>
-<div class="sign">Fatigue</div>
-<div class="sign">Mood swings</div>
-<div class="sign">Light spotting</div>
-<div class="sign">Food cravings</div>
-
-</div>
-
-<div class="card">
-<h2>🧪 When To Test</h2>
-<p>Take a pregnancy test after missing your period for more accurate results.</p>
-</div>
-
-<div class="card">
-<h2>🚨 Visit a Clinic If You Have</h2>
-<ul>
-<li>Heavy bleeding</li>
-<li>Severe abdominal pain</li>
-<li>High fever</li>
-<li>Dizziness</li>
-</ul>
-</div>
-
-</div>
-
-</body>
-</html>
-```
-
----
-
-# women_care.html
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Women's Care</title>
-
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#fdf4ff,#fce7f3);
-}
-
-header{
-background:linear-gradient(135deg,#a855f7,#ec4899);
-color:white;
-padding:25px;
-text-align:center;
-}
-
-.container{
-padding:20px;
-max-width:900px;
-margin:auto;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:20px;
-margin-bottom:20px;
-box-shadow:0 5px 15px rgba(0,0,0,0.08);
-}
-
-.tip{
-background:#f3e8ff;
-padding:14px;
-border-radius:12px;
-margin-top:10px;
-}
-</style>
-</head>
-<body>
-
-<header>
-<h1>🧼 Women's Care</h1>
-<p>Health, hygiene & wellness tips</p>
-</header>
-
-<div class="container">
-
-<div class="card">
-<h2>🌿 Vulva Hygiene</h2>
-<div class="tip">Wash with clean warm water.</div>
-<div class="tip">Avoid strong soaps or perfumes.</div>
-<div class="tip">Wear breathable cotton underwear.</div>
-<div class="tip">Avoid douching.</div>
-</div>
-
-<div class="card">
-<h2>🩸 Menstrual Hygiene</h2>
-<ul>
-<li>Change pads regularly</li>
-<li>Wash hands before changing pads</li>
-<li>Dispose pads safely</li>
-<li>Keep intimate area dry</li>
-</ul>
-</div>
-
-<div class="card">
-<h2>💕 Healthy Lifestyle</h2>
-<ul>
-<li>Drink enough water</li>
-<li>Exercise often</li>
-<li>Eat fruits and vegetables</li>
-<li>Sleep well</li>
-<li>Manage stress</li>
-</ul>
-</div>
-
-<div class="card">
-<h2>🚨 See A Doctor If You Notice</h2>
-<ul>
-<li>Bad smelling discharge</li>
-<li>Severe pain</li>
-<li>Persistent itching</li>
-<li>Heavy bleeding</li>
-</ul>
-</div>
-
-</div>
-
-</body>
-</html>
-```
