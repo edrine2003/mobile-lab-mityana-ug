@@ -5,10 +5,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Women's Cycle Tracker</title>
+<title>Women's Cycle Tracker • Mobile Lab</title>
 
+<!-- PWA -->
 <link rel="manifest" href="manifest.json">
-
 <meta name="theme-color" content="#db2777">
 
 <style>
@@ -28,12 +28,12 @@ color:#1e293b;
 /* HEADER */
 header{
 background:linear-gradient(135deg,#db2777,#f472b6);
-padding:25px;
-color:white;
+padding:25px 20px;
 text-align:center;
+color:white;
 border-bottom-left-radius:25px;
 border-bottom-right-radius:25px;
-box-shadow:0 4px 14px rgba(0,0,0,0.15);
+box-shadow:0 4px 15px rgba(0,0,0,0.15);
 }
 
 header h1{
@@ -44,37 +44,42 @@ margin-bottom:8px;
 header p{
 font-size:15px;
 opacity:0.95;
+line-height:1.5;
 }
 
-/* MAIN */
+/* CONTAINER */
 .container{
-padding:20px;
-max-width:1100px;
+max-width:1200px;
 margin:auto;
+padding:20px;
 }
 
-/* TRACKER */
-.tracker{
+/* MAIN CARD */
+.card{
 background:white;
-padding:25px;
+padding:22px;
 border-radius:22px;
-box-shadow:0 4px 14px rgba(0,0,0,0.08);
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
 margin-bottom:25px;
 }
 
-.tracker h2{
+/* TITLES */
+.section-title{
 color:#db2777;
 margin-bottom:18px;
+font-size:24px;
 }
 
+/* INPUTS */
 .input-group{
 margin-bottom:18px;
 }
 
 label{
 display:block;
-font-weight:bold;
 margin-bottom:8px;
+font-weight:bold;
+color:#be185d;
 }
 
 input{
@@ -83,14 +88,20 @@ padding:14px;
 border-radius:12px;
 border:1px solid #e2e8f0;
 font-size:15px;
+outline:none;
 }
 
+input:focus{
+border-color:#db2777;
+}
+
+/* BUTTON */
 button{
 width:100%;
 padding:15px;
-background:linear-gradient(135deg,#db2777,#f472b6);
 border:none;
 border-radius:14px;
+background:linear-gradient(135deg,#db2777,#f472b6);
 color:white;
 font-size:16px;
 font-weight:bold;
@@ -104,10 +115,10 @@ opacity:0.95;
 
 /* RESULTS */
 .results{
-margin-top:25px;
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:18px;
+margin-top:25px;
 }
 
 .result-card{
@@ -115,7 +126,7 @@ background:#fff;
 padding:18px;
 border-radius:18px;
 box-shadow:0 4px 12px rgba(0,0,0,0.08);
-border-top:6px solid #db2777;
+border-top:5px solid #db2777;
 }
 
 .result-card h3{
@@ -125,8 +136,40 @@ font-size:18px;
 }
 
 .result-card p{
-font-size:15px;
 line-height:1.6;
+font-size:15px;
+}
+
+/* CALENDAR */
+.calendar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:10px;
+margin-top:20px;
+}
+
+.day{
+padding:15px;
+background:#ffe4e6;
+border-radius:12px;
+text-align:center;
+font-weight:bold;
+font-size:14px;
+}
+
+.period{
+background:#db2777;
+color:white;
+}
+
+.fertile{
+background:#f472b6;
+color:white;
+}
+
+.ovulation{
+background:#9d174d;
+color:white;
 }
 
 /* HEALTH CARDS */
@@ -134,7 +177,7 @@ line-height:1.6;
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
 gap:20px;
-margin-top:30px;
+margin-top:20px;
 }
 
 .health-card{
@@ -144,19 +187,19 @@ padding:22px;
 text-align:center;
 cursor:pointer;
 transition:0.3s;
-box-shadow:0 4px 14px rgba(0,0,0,0.08);
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
 }
 
 .health-card:hover{
-transform:translateY(-6px);
-box-shadow:0 12px 28px rgba(0,0,0,0.14);
+transform:translateY(-5px);
+box-shadow:0 12px 24px rgba(0,0,0,0.14);
 }
 
 .health-card img{
 width:90px;
 height:90px;
 object-fit:contain;
-margin-bottom:15px;
+margin-bottom:14px;
 }
 
 .health-card h3{
@@ -166,84 +209,59 @@ font-size:22px;
 }
 
 .health-card p{
-font-size:14px;
 color:#64748b;
 line-height:1.6;
+font-size:14px;
 }
 
 /* TIPS */
-.tips{
-margin-top:35px;
-background:white;
-padding:25px;
-border-radius:22px;
-box-shadow:0 4px 14px rgba(0,0,0,0.08);
-}
-
-.tips h2{
-color:#db2777;
-margin-bottom:18px;
-}
-
 .tip{
-padding:15px;
-border-left:5px solid #f472b6;
 background:#fff1f2;
-border-radius:10px;
+padding:15px;
+border-left:5px solid #db2777;
+border-radius:12px;
 margin-bottom:15px;
 }
 
 .tip h4{
-margin-bottom:6px;
+margin-bottom:8px;
 color:#be185d;
 }
 
 .tip p{
-font-size:14px;
 line-height:1.6;
+font-size:14px;
 }
 
-/* CALENDAR */
-.calendar-box{
-margin-top:35px;
-background:white;
-padding:25px;
-border-radius:22px;
-box-shadow:0 4px 14px rgba(0,0,0,0.08);
-}
-
-.calendar-box h2{
-color:#db2777;
-margin-bottom:18px;
-}
-
-.calendar{
+/* QUICK LINKS */
+.quick-links{
 display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:10px;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+margin-top:20px;
 }
 
-.day{
-background:#ffe4e6;
-padding:15px;
+.quick-btn{
+background:linear-gradient(135deg,#db2777,#f472b6);
+color:white;
+padding:16px;
+border-radius:16px;
 text-align:center;
-border-radius:12px;
 font-weight:bold;
+cursor:pointer;
+transition:0.3s;
 }
 
-.fertile{
-background:#f9a8d4;
-color:white;
+.quick-btn:hover{
+transform:scale(1.03);
 }
 
-.period{
-background:#db2777;
-color:white;
-}
-
-.ovulation{
-background:#be185d;
-color:white;
+/* FOOTER */
+footer{
+text-align:center;
+padding:30px 15px;
+font-size:14px;
+color:#64748b;
 }
 
 /* MOBILE */
@@ -253,29 +271,44 @@ header h1{
 font-size:24px;
 }
 
+.section-title{
+font-size:20px;
+}
+
 .health-card h3{
 font-size:19px;
+}
+
+.calendar{
+grid-template-columns:repeat(4,1fr);
+}
+
+.day{
+font-size:13px;
+padding:12px;
 }
 
 }
 
 </style>
-
 </head>
 
 <body>
 
 <header>
 <h1>🌸 Women's Cycle Tracker</h1>
-<p>Track periods, ovulation, fertile days & women's health</p>
+<p>
+Track periods, ovulation, fertile days, safe days,
+pregnancy chances & women wellness.
+</p>
 </header>
 
 <div class="container">
 
 <!-- TRACKER -->
-<div class="tracker">
+<div class="card">
 
-<h2>📅 Cycle Calculator</h2>
+<h2 class="section-title">📅 Cycle Calculator</h2>
 
 <div class="input-group">
 <label>First Day of Last Period</label>
@@ -287,7 +320,9 @@ font-size:19px;
 <input type="number" id="cycleLength" value="28">
 </div>
 
-<button onclick="calculateCycle()">Calculate My Cycle</button>
+<button onclick="calculateCycle()">
+Calculate My Cycle
+</button>
 
 <div class="results">
 
@@ -316,9 +351,9 @@ font-size:19px;
 </div>
 
 <!-- CALENDAR -->
-<div class="calendar-box">
+<div class="card">
 
-<h2>🗓️ Cycle Calendar View</h2>
+<h2 class="section-title">🗓️ Calendar View</h2>
 
 <div class="calendar">
 
@@ -358,70 +393,140 @@ font-size:19px;
 
 </div>
 
-<!-- HEALTH PAGES -->
+<!-- WOMEN HEALTH SECTIONS -->
+<div class="card">
+
+<h2 class="section-title">💖 Women's Health Center</h2>
+
 <div class="health-grid">
 
+<!-- Fertility -->
 <div class="health-card" onclick="location.href='fertility.html'">
-<img src="icons/fertility.png">
+<img src="icons/fertility.jpg">
 <h3>🌸 Fertility</h3>
-<p>Learn fertile signs, ovulation timing & conception tips.</p>
+<p>
+Ovulation signs, fertile days, conception timing and fertility advice.
+</p>
 </div>
 
+<!-- Pregnancy -->
 <div class="health-card" onclick="location.href='pregnancy.html'">
-<img src="icons/pregnancy.png">
+<img src="icons/pregnancy.jpg">
 <h3>🤰 Pregnancy</h3>
-<p>Early pregnancy signs, symptoms & pregnancy advice.</p>
+<p>
+Early pregnancy signs, symptoms, baby development and pregnancy care.
+</p>
 </div>
 
+<!-- Women Care -->
 <div class="health-card" onclick="location.href='women_care.html'">
-<img src="icons/women.png">
+<img src="icons/women.jpg">
 <h3>💖 Women Care</h3>
-<p>Hygiene, vulva care, discharge & feminine wellness tips.</p>
+<p>
+Vulva hygiene, feminine wellness, discharge and self-care education.
+</p>
 </div>
 
+<!-- Conception -->
 <div class="health-card" onclick="location.href='fertility.html#conception'">
-<img src="icons/conceive.png">
+<img src="icons/conceive.jpg">
 <h3>👶 Get Pregnant</h3>
-<p>Best sex timing, fertility advice & conception support.</p>
+<p>
+Best timing for sex, fertility chances and conception support.
+</p>
 </div>
 
 </div>
 
-<!-- TIPS -->
-<div class="tips">
+</div>
 
-<h2>💡 Daily Women's Health Tips</h2>
+<!-- HEALTH TIPS -->
+<div class="card">
+
+<h2 class="section-title">💡 Daily Health Tips</h2>
 
 <div class="tip">
-<h4>🌸 Fertile Signs</h4>
-<p>Clear stretchy discharge, increased libido and mild cramps may indicate ovulation.</p>
+<h4>🌸 Physical Signs Of Fertility</h4>
+<p>
+Clear stretchy discharge, mild cramps and increased libido often
+happen near ovulation.
+</p>
 </div>
 
 <div class="tip">
 <h4>🤰 Early Pregnancy Signs</h4>
-<p>Missed periods, nausea, breast tenderness and fatigue are common early symptoms.</p>
+<p>
+Missed periods, nausea, breast tenderness and tiredness
+can be early pregnancy signs.
+</p>
 </div>
 
 <div class="tip">
-<h4>💖 Vulva Hygiene</h4>
-<p>Use clean water, avoid harsh soaps and wear breathable cotton underwear.</p>
+<h4>💖 Vulva Care</h4>
+<p>
+Wash with clean water only, avoid harsh soaps and wear cotton underwear.
+</p>
 </div>
 
 <div class="tip">
-<h4>👶 Best Time To Conceive</h4>
-<p>Sex during fertile days and ovulation gives the highest pregnancy chances.</p>
+<h4>👶 Best Time For Pregnancy</h4>
+<p>
+Having sex during the fertile window gives the highest chance
+of getting pregnant.
+</p>
+</div>
+
+<div class="tip">
+<h4>🩸 Healthy Period Care</h4>
+<p>
+Drink water, rest well and change pads regularly during menstruation.
+</p>
+</div>
+
+</div>
+
+<!-- QUICK LINKS -->
+<div class="card">
+
+<h2 class="section-title">⚡ Quick Access</h2>
+
+<div class="quick-links">
+
+<div class="quick-btn" onclick="location.href='dashboard.html'">
+🏠 Dashboard
+</div>
+
+<div class="quick-btn" onclick="location.href='index.html'">
+🧪 Order Lab Test
+</div>
+
+<div class="quick-btn" onclick="location.href='inbox.html'">
+📋 Results Inbox
+</div>
+
+<div class="quick-btn" onclick="location.href='patient_chat.html'">
+💬 Contact Doctor
 </div>
 
 </div>
 
 </div>
+
+</div>
+
+<footer>
+🌸 Mobile Lab Mityana • Women's Health & Fertility Support
+</footer>
 
 <script>
 
 function calculateCycle(){
 
-const lastPeriod = document.getElementById("lastPeriod").value;
-const cycleLength = parseInt(document.getElementById("cycleLength").value);
+const lastPeriod =
+document.getElementById("lastPeriod").value;
+
+const cycleLength =
+parseInt(document.getElementById("cycleLength").value);
 
 if(!lastPeriod){
 alert("Please select your last period date");
@@ -449,11 +554,17 @@ document.getElementById("ovulationDay").innerText =
 ovulation.toDateString();
 
 document.getElementById("fertileDays").innerText =
-fertileStart.toDateString() + " → " + fertileEnd.toDateString();
+fertileStart.toDateString()
++ " → " +
+fertileEnd.toDateString();
 
 document.getElementById("safeDays").innerText =
-"Most likely outside fertile window";
+"Days outside fertile window are usually safer.";
 
+}
+
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("sw.js");
 }
 
 </script>
