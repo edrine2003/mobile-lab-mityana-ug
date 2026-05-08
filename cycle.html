@@ -4,265 +4,225 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Women Cycle Tracker • Mobile Lab Mityana</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ec4899">
+<title>Women's Cycle & Fertility Tracker</title>
 
 <style>
 
-:root{
-  --primary:#ec4899;
-  --secondary:#f472b6;
-  --bg:#fff1f2;
-  --dark:#1e293b;
-  --card:#ffffff;
-  --danger:#ef4444;
-  --safe:#22c55e;
-  --fertile:#f59e0b;
-  --ovu:#8b5cf6;
-}
-
 *{
-  box-sizing:border-box;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
 }
 
 body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--bg);
-  color:var(--dark);
+background:#fff0f6;
+padding:15px;
+color:#222;
 }
 
-/* HEADER */
-
 header{
-  background:linear-gradient(135deg,var(--primary),var(--secondary));
-  color:white;
-  padding:25px 20px;
-  text-align:center;
+background:linear-gradient(135deg,#ec4899,#db2777);
+padding:25px;
+border-radius:20px;
+color:white;
+text-align:center;
+margin-bottom:20px;
+box-shadow:0 6px 18px rgba(0,0,0,0.15);
 }
 
 header h1{
-  margin:0;
-  font-size:28px;
+font-size:28px;
+margin-bottom:8px;
 }
 
 header p{
-  margin-top:8px;
-  opacity:0.95;
+font-size:15px;
+opacity:0.95;
 }
 
-/* CONTAINER */
-
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:20px;
+.card{
+background:white;
+padding:20px;
+border-radius:18px;
+margin-bottom:20px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* TOP STATS */
-
-.top-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-  margin-bottom:20px;
-}
-
-.stat{
-  background:white;
-  border-radius:16px;
-  padding:20px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
-  text-align:center;
-}
-
-.stat h3{
-  margin:0;
-  color:var(--primary);
-}
-
-.stat span{
-  display:block;
-  margin-top:10px;
-  font-size:26px;
-  font-weight:bold;
-}
-
-/* FORM */
-
-.form-card{
-  background:white;
-  padding:25px;
-  border-radius:18px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
-  margin-bottom:25px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:16px;
+.card h2{
+color:#db2777;
+margin-bottom:15px;
+font-size:22px;
 }
 
 label{
-  display:block;
-  margin-bottom:6px;
-  font-weight:bold;
+display:block;
+margin-top:14px;
+font-weight:bold;
 }
 
-input,select{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #ddd;
+input,select,textarea{
+width:100%;
+padding:12px;
+margin-top:8px;
+border-radius:12px;
+border:1px solid #ddd;
+font-size:15px;
 }
 
 button{
-  width:100%;
-  padding:15px;
-  border:none;
-  border-radius:14px;
-  background:linear-gradient(135deg,var(--primary),var(--secondary));
-  color:white;
-  font-size:17px;
-  font-weight:bold;
-  cursor:pointer;
-  margin-top:20px;
+width:100%;
+padding:14px;
+margin-top:18px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,#ec4899,#db2777);
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
 }
 
-/* CALENDAR */
+button:hover{
+opacity:0.95;
+}
 
-.calendar-card{
-  background:white;
-  padding:20px;
-  border-radius:18px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
-  margin-bottom:25px;
+.results{
+background:#fdf2f8;
+padding:18px;
+border-radius:15px;
+line-height:1.8;
+margin-top:18px;
 }
 
 .calendar{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:8px;
-  margin-top:20px;
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:8px;
+margin-top:18px;
 }
 
 .day{
-  background:#f8fafc;
-  border-radius:12px;
-  padding:12px;
-  min-height:75px;
-  text-align:center;
-  font-size:14px;
-  font-weight:bold;
+padding:10px;
+border-radius:10px;
+text-align:center;
+font-size:13px;
+background:#f3f4f6;
 }
 
-/* COLORS */
-
 .period{
-  background:#ef4444;
-  color:white;
+background:#ef4444;
+color:white;
 }
 
 .fertile{
-  background:#f59e0b;
-  color:white;
-}
-
-.safe{
-  background:#22c55e;
-  color:white;
+background:#22c55e;
+color:white;
 }
 
 .ovulation{
-  background:#8b5cf6;
-  color:white;
+background:#a855f7;
+color:white;
 }
 
-/* LEGEND */
+.safe{
+background:#3b82f6;
+color:white;
+}
 
 .legend{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:15px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-top:15px;
 }
 
 .legend div{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  background:#f8fafc;
-  padding:8px 12px;
-  border-radius:12px;
-  font-size:14px;
+padding:10px;
+border-radius:10px;
+font-size:14px;
+color:white;
+text-align:center;
 }
 
-.color{
-  width:18px;
-  height:18px;
-  border-radius:50%;
+.symptoms-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-top:15px;
 }
 
-/* CARDS */
+.symptoms-grid label{
+background:#fff1f2;
+padding:12px;
+border-radius:12px;
+font-size:14px;
+}
 
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:18px;
+.analytics{
+background:#eff6ff;
+padding:15px;
+border-radius:14px;
+line-height:1.8;
+margin-top:15px;
+}
+
+.warning{
+background:#fef2f2;
+padding:15px;
+border-radius:14px;
+color:#b91c1c;
+font-weight:bold;
+line-height:1.8;
+}
+
+.saved-box{
+background:#f9fafb;
+padding:15px;
+border-radius:12px;
+margin-top:15px;
+line-height:1.8;
+}
+
+.cards-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:15px;
+margin-top:20px;
 }
 
 .info-card{
-  background:white;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+background:#fff5f7;
+padding:20px;
+border-radius:15px;
+text-align:center;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
 
-.info-card img{
-  width:100%;
-  height:180px;
-  object-fit:cover;
+.info-card h3{
+margin-top:10px;
+color:#db2777;
+font-size:18px;
 }
 
-.info-body{
-  padding:18px;
+.info-card p{
+font-size:14px;
+margin-top:8px;
+line-height:1.6;
 }
-
-.info-body h3{
-  margin-top:0;
-  color:var(--primary);
-}
-
-.info-body p{
-  line-height:1.6;
-}
-
-.info-body a{
-  display:inline-block;
-  margin-top:10px;
-  text-decoration:none;
-  background:var(--primary);
-  color:white;
-  padding:10px 15px;
-  border-radius:10px;
-  font-weight:bold;
-}
-
-/* RESPONSIVE */
 
 @media(max-width:700px){
 
-header h1{
-  font-size:22px;
+.calendar{
+grid-template-columns:repeat(4,1fr);
 }
 
-.day{
-  min-height:60px;
-  font-size:12px;
-  padding:8px;
+.legend{
+grid-template-columns:1fr;
+}
+
+.cards-grid{
+grid-template-columns:1fr;
 }
 
 }
@@ -273,161 +233,188 @@ header h1{
 <body>
 
 <header>
-<h1>🌸 Women Health & Cycle Tracker</h1>
-<p>Track periods, ovulation, fertile days, safe days & pregnancy chances</p>
+<h1>🌸 Women's Health & Fertility Tracker</h1>
+<p>Track periods, fertility, ovulation, pregnancy signs & reproductive health</p>
 </header>
 
-<div class="container">
+<div class="card">
 
-<!-- TOP STATS -->
+<h2>📅 Cycle Calculator</h2>
 
-<div class="top-grid">
-
-<div class="stat">
-<h3>🩸 Next Period</h3>
-<span id="nextPeriod">--</span>
-</div>
-
-<div class="stat">
-<h3>🥚 Ovulation</h3>
-<span id="ovulationDay">--</span>
-</div>
-
-<div class="stat">
-<h3>💞 Fertile Window</h3>
-<span id="fertileWindow">--</span>
-</div>
-
-<div class="stat">
-<h3>📅 Cycle Length</h3>
-<span id="cycleDisplay">28 Days</span>
-</div>
-
-</div>
-
-<!-- FORM -->
-
-<div class="form-card">
-
-<h2>Enter Your Cycle Details</h2>
-
-<div class="grid">
-
-<div>
 <label>First Day of Last Period</label>
 <input type="date" id="lastPeriod">
-</div>
 
-<div>
-<label>Cycle Length</label>
-<input type="number" id="cycleLength" value="28">
-</div>
-
-<div>
-<label>How Many Days Your Period Lasts</label>
-<input type="number" id="periodDays" value="5">
-</div>
-
-<div>
-<label>Cycle Type</label>
-<select id="cycleType">
-<option>Regular</option>
-<option>Irregular</option>
+<label>Cycle Length (Days)</label>
+<select id="cycleLength">
+<option value="21">21 Days</option>
+<option value="24">24 Days</option>
+<option value="26">26 Days</option>
+<option value="28" selected>28 Days</option>
+<option value="30">30 Days</option>
+<option value="32">32 Days</option>
+<option value="35">35 Days</option>
+<option value="irregular">Irregular</option>
 </select>
-</div>
 
-</div>
+<label>How Many Days Your Period Lasts</label>
+<select id="periodDays">
+<option>2</option>
+<option>3</option>
+<option selected>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+<option>8</option>
+<option>9</option>
+<option>10</option>
+</select>
 
-<button onclick="calculateCycle()">
-Calculate My Cycle
-</button>
+<button onclick="calculateCycle()">Calculate Cycle</button>
 
-</div>
-
-<!-- CALENDAR -->
-
-<div class="calendar-card">
-
-<h2>📅 Cycle Calendar</h2>
-
-<div class="legend">
-
-<div>
-<span class="color" style="background:#ef4444"></span>
-🩸 Red = Menstrual Days
-</div>
-
-<div>
-<span class="color" style="background:#f59e0b"></span>
-💞 Orange = Fertile Days
-</div>
-
-<div>
-<span class="color" style="background:#8b5cf6"></span>
-🥚 Purple = Ovulation Day
-</div>
-
-<div>
-<span class="color" style="background:#22c55e"></span>
-💚 Green = Safe Days
-</div>
-
+<div class="results" id="resultsBox">
+No results yet.
 </div>
 
 <div class="calendar" id="calendar"></div>
 
+<div class="legend">
+<div style="background:#ef4444;">🩸 Period Days</div>
+<div style="background:#22c55e;">🌱 Fertile Days</div>
+<div style="background:#a855f7;">💜 Ovulation Day</div>
+<div style="background:#3b82f6;">💙 Safe Days</div>
 </div>
 
-<!-- WOMEN HEALTH CARDS -->
+</div>
 
-<div class="cards">
+<div class="card">
+
+<h2>🩺 Daily Symptom Tracker</h2>
+
+<div class="symptoms-grid">
+<label><input type="checkbox"> Cramps</label>
+<label><input type="checkbox"> Mood Swings</label>
+<label><input type="checkbox"> Acne</label>
+<label><input type="checkbox"> Bloating</label>
+<label><input type="checkbox"> Fatigue</label>
+<label><input type="checkbox"> Breast Pain</label>
+<label><input type="checkbox"> Headache</label>
+<label><input type="checkbox"> Back Pain</label>
+</div>
+
+<label>Daily Notes</label>
+<textarea id="dailyNotes" placeholder="Write today's feelings or symptoms..."></textarea>
+
+<button onclick="saveDailyNotes()">Save Daily Notes</button>
+
+</div>
+
+<div class="card">
+
+<h2>📊 Cycle Analytics</h2>
+
+<div class="analytics" id="analyticsBox">
+No analytics yet.
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>🤰 Fertility & Pregnancy Mode</h2>
+
+<select id="modeSelect" onchange="updateModeTips()">
+<option value="conceive">Trying to Conceive</option>
+<option value="avoid">Avoid Pregnancy</option>
+</select>
+
+<div class="results" id="modeTips"></div>
+
+</div>
+
+<div class="card">
+
+<h2>🚨 Health Warnings</h2>
+
+<div class="warning">
+⚠️ Seek medical help if:
+<br><br>
+• Your period lasts more than 10 days
+<br>
+• Severe pelvic pain occurs
+<br>
+• You miss periods repeatedly
+<br>
+• Heavy bleeding occurs
+<br>
+• Unusual discharge or bad smell develops
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>💊 Medication Tracker</h2>
+
+<label>Medication Name</label>
+<input type="text" id="medicationName">
+
+<label>Purpose</label>
+<input type="text" id="medicationPurpose">
+
+<button onclick="saveMedication()">Save Medication</button>
+
+<div class="saved-box" id="medicationList">
+No medications saved.
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>🤱 Pregnancy & Fertility Education</h2>
+
+<div class="cards-grid">
 
 <div class="info-card">
-<img src="pregnancy.jpg">
-<div class="info-body">
-<h3>🤰 Early Pregnancy Signs</h3>
+<h3>🌱 Early Pregnancy Signs</h3>
 <p>
-• Missed periods<br>
-• Breast tenderness<br>
-• Nausea<br>
-• Fatigue<br>
-• Mood changes
+Missed periods, nausea, breast tenderness, fatigue, frequent urination and mood changes.
 </p>
-<a href="pregnancy.html">Read More</a>
-</div>
 </div>
 
 <div class="info-card">
-<img src="fertility.jpg">
-<div class="info-body">
-<h3>💞 Fertility & Conception</h3>
+<h3>💕 Tips To Conceive</h3>
 <p>
-Learn best ovulation days, timing sex, increasing fertility and pregnancy chances.
+Have sex during fertile days, eat healthy foods, reduce stress and track ovulation.
 </p>
-<a href="fertility.html">Open Fertility Guide</a>
-</div>
 </div>
 
 <div class="info-card">
-<img src="women.jpg">
-<div class="info-body">
-<h3>🌺 Women Care</h3>
+<h3>💧 Vulva Hygiene</h3>
 <p>
-Learn vulva hygiene, healthy discharge, infection signs and self care tips.
+Wash with clean water, avoid harsh soaps, wipe front to back and wear cotton underwear.
 </p>
-<a href="women_care.html">Women Care Tips</a>
-</div>
 </div>
 
 <div class="info-card">
-<img src="conceive.jpg">
-<div class="info-body">
-<h3>🥚 Pregnancy Chances</h3>
+<h3>🔥 Signs Of Fertility</h3>
 <p>
-Track fertile windows and know your chances of getting pregnant.
+Clear stretchy discharge, increased libido, mild cramps and breast sensitivity.
 </p>
-<a href="fertility.html">Check Chances</a>
 </div>
+
+<div class="info-card">
+<h3>🗓️ Timing Sex</h3>
+<p>
+Best chances occur 2 days before ovulation and on ovulation day.
+</p>
+</div>
+
+<div class="info-card">
+<h3>📈 Pregnancy Chances</h3>
+<p>
+Highest during fertile window. Lower during safe days.
+</p>
 </div>
 
 </div>
@@ -436,97 +423,257 @@ Track fertile windows and know your chances of getting pregnant.
 
 <script>
 
+function saveCycleData(data){
+localStorage.setItem("cycleData",JSON.stringify(data));
+}
+
+function getCycleData(){
+return JSON.parse(localStorage.getItem("cycleData"));
+}
+
 function calculateCycle(){
 
-const lastPeriod = document.getElementById("lastPeriod").value;
-const cycleLength = parseInt(document.getElementById("cycleLength").value);
-const periodDays = parseInt(document.getElementById("periodDays").value);
+const lastPeriod=document.getElementById("lastPeriod").value;
+const cycleLength=document.getElementById("cycleLength").value;
+const periodDays=parseInt(document.getElementById("periodDays").value);
 
 if(!lastPeriod){
 alert("Please select your last period date");
 return;
 }
 
-document.getElementById("cycleDisplay").innerText = cycleLength+" Days";
+if(cycleLength==="irregular"){
 
-const startDate = new Date(lastPeriod);
+document.getElementById("resultsBox").innerHTML=`
+⚠️ Your cycle is irregular.<br><br>
+Ovulation may change monthly.<br><br>
+Track symptoms and cervical mucus carefully.
+`;
 
-const nextPeriod = new Date(startDate);
-nextPeriod.setDate(startDate.getDate()+cycleLength);
+saveCycleData({
+lastPeriod,
+cycleLength,
+periodDays
+});
 
-const ovulation = new Date(startDate);
-ovulation.setDate(startDate.getDate()+(cycleLength-14));
+return;
+}
 
-const fertileStart = new Date(ovulation);
-fertileStart.setDate(ovulation.getDate()-4);
+const cycle=parseInt(cycleLength);
 
-const fertileEnd = new Date(ovulation);
+const start=new Date(lastPeriod);
+
+const ovulation=new Date(start);
+ovulation.setDate(start.getDate()+cycle-14);
+
+const fertileStart=new Date(ovulation);
+fertileStart.setDate(ovulation.getDate()-5);
+
+const fertileEnd=new Date(ovulation);
 fertileEnd.setDate(ovulation.getDate()+1);
 
-document.getElementById("nextPeriod").innerText =
-nextPeriod.toDateString();
+const nextPeriod=new Date(start);
+nextPeriod.setDate(start.getDate()+cycle);
 
-document.getElementById("ovulationDay").innerText =
-ovulation.toDateString();
+document.getElementById("resultsBox").innerHTML=`
+🩸 Next Period: <b>${nextPeriod.toDateString()}</b><br>
+🌱 Fertile Window: <b>${fertileStart.toDateString()} - ${fertileEnd.toDateString()}</b><br>
+💜 Ovulation Day: <b>${ovulation.toDateString()}</b><br>
+💙 Safe Days: Outside fertile window<br><br>
 
-document.getElementById("fertileWindow").innerText =
-fertileStart.getDate()+" - "+fertileEnd.getDate();
+💕 Pregnancy Chance During Fertile Days:
+<b>HIGH</b>
+`;
 
-generateCalendar(startDate,periodDays,ovulation,fertileStart,fertileEnd);
+generateCalendar(start,cycle,periodDays,ovulation,fertileStart,fertileEnd);
+
+saveCycleData({
+lastPeriod,
+cycleLength,
+periodDays
+});
+
+updateAnalytics();
 
 }
 
-function generateCalendar(startDate,periodDays,ovulation,fertileStart,fertileEnd){
+function generateCalendar(start,cycle,periodDays,ovulation,fertileStart,fertileEnd){
 
-const calendar = document.getElementById("calendar");
-calendar.innerHTML="";
+const cal=document.getElementById("calendar");
+cal.innerHTML="";
 
-for(let i=1;i<=31;i++){
+for(let i=0;i<cycle;i++){
+
+const dayDate=new Date(start);
+dayDate.setDate(start.getDate()+i);
 
 const div=document.createElement("div");
 div.className="day";
-div.innerHTML=i;
 
-const current = new Date(startDate);
-current.setDate(startDate.getDate() + (i-1));
+div.innerHTML=dayDate.getDate();
 
-/* PERIOD */
-
-const periodEnd = new Date(startDate);
-periodEnd.setDate(startDate.getDate()+periodDays-1);
-
-if(current >= startDate && current <= periodEnd){
+if(i<periodDays){
 div.classList.add("period");
 }
 
-/* OVULATION */
-
-if(current.toDateString()===ovulation.toDateString()){
-div.classList.add("ovulation");
-}
-
-/* FERTILE */
-
-if(current >= fertileStart && current <= fertileEnd){
+if(dayDate>=fertileStart && dayDate<=fertileEnd){
 div.classList.add("fertile");
 }
 
-/* SAFE DAYS */
+if(dayDate.toDateString()===ovulation.toDateString()){
+div.classList.remove("fertile");
+div.classList.add("ovulation");
+}
 
 if(
-current < fertileStart ||
-current > fertileEnd
+!(dayDate>=fertileStart && dayDate<=fertileEnd)
+&& i>=periodDays
 ){
-if(!div.classList.contains("period")){
 div.classList.add("safe");
 }
-}
 
-calendar.appendChild(div);
-
-}
+cal.appendChild(div);
 
 }
+
+}
+
+function showSavedData(){
+
+const data=getCycleData();
+
+if(!data) return;
+
+document.getElementById("lastPeriod").value=data.lastPeriod;
+document.getElementById("cycleLength").value=data.cycleLength;
+document.getElementById("periodDays").value=data.periodDays;
+
+}
+
+function saveDailyNotes(){
+
+const notes=document.getElementById("dailyNotes").value;
+
+localStorage.setItem("dailyNotes",notes);
+
+alert("Notes saved successfully");
+
+}
+
+function loadDailyNotes(){
+
+const notes=localStorage.getItem("dailyNotes");
+
+if(notes){
+document.getElementById("dailyNotes").value=notes;
+}
+
+}
+
+function updateAnalytics(){
+
+const data=getCycleData();
+
+if(!data) return;
+
+document.getElementById("analyticsBox").innerHTML=`
+<b>Average Cycle:</b> ${data.cycleLength} Days<br>
+<b>Period Duration:</b> ${data.periodDays} Days<br>
+<b>Cycle Status:</b> ${
+data.cycleLength>=26 && data.cycleLength<=32
+? "Normal"
+: "Irregular"
+}<br>
+<b>Fertility Health:</b> Healthy
+`;
+
+}
+
+function updateModeTips(){
+
+const mode=document.getElementById("modeSelect").value;
+
+const box=document.getElementById("modeTips");
+
+if(mode==="conceive"){
+
+box.innerHTML=`
+💕 Have sex during fertile days.<br><br>
+🥗 Eat healthy foods.<br><br>
+💧 Drink enough water.<br><br>
+😴 Sleep well and reduce stress.
+`;
+
+}else{
+
+box.innerHTML=`
+⚠️ Avoid unprotected sex during fertile days.<br><br>
+📅 Track ovulation carefully every month.
+`;
+
+}
+
+}
+
+function saveMedication(){
+
+const name=document.getElementById("medicationName").value;
+const purpose=document.getElementById("medicationPurpose").value;
+
+if(!name || !purpose){
+alert("Complete medication details");
+return;
+}
+
+const meds=JSON.parse(localStorage.getItem("medications") || "[]");
+
+meds.push({name,purpose});
+
+localStorage.setItem("medications",JSON.stringify(meds));
+
+loadMedications();
+
+alert("Medication saved");
+
+}
+
+function loadMedications(){
+
+const meds=JSON.parse(localStorage.getItem("medications") || "[]");
+
+const box=document.getElementById("medicationList");
+
+if(meds.length===0){
+box.innerHTML="No medications saved.";
+return;
+}
+
+box.innerHTML="";
+
+meds.forEach(m=>{
+
+box.innerHTML += `
+💊 <b>${m.name}</b> — ${m.purpose}<br><br>
+`;
+
+});
+
+}
+
+window.onload=()=>{
+
+showSavedData();
+loadDailyNotes();
+loadMedications();
+updateModeTips();
+
+const data=getCycleData();
+
+if(data && data.cycleLength!=="irregular"){
+calculateCycle();
+}
+
+};
 
 </script>
 
