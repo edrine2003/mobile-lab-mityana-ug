@@ -3,109 +3,307 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧪 New Requests – Mobile Lab</title>
-
+<title>Admin Dashboard – Mobile Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
-body { font-family: Arial,sans-serif; background:#f1f5f9; margin:0; padding:16px; }
-h2 { text-align:center; margin-bottom:16px; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;color:#0f172a;}
 
-#logoutBtn {
-  position: fixed;
-  top:16px;
-  right:16px;
-  background:#ef4444;
-  color:#fff;
-  border:none;
-  padding:10px 14px;
-  border-radius:999px;
-  cursor:pointer;
+/* ── TOPBAR ── */
+.topbar{
+  background:linear-gradient(135deg,#0ea5e9,#14b8a6);
+  padding:14px 20px;display:flex;align-items:center;gap:14px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100;
+}
+.topbar-logo{font-size:26px;}
+.topbar-info h2{color:#fff;font-size:17px;font-weight:900;margin:0;}
+.topbar-info p{color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;margin:2px 0 0;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.topbar-btn{
+  background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);
+  border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;
+  align-items:center;gap:6px;transition:all 0.2s;
+}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+#chatNotifBadge{
+  background:#ef4444;color:#fff;border-radius:999px;
+  font-size:11px;font-weight:900;padding:2px 7px;
+  display:none;animation:badgePulse 2s infinite;
+}
+@keyframes badgePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+
+/* ── STATS ROW ── */
+.stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  padding:18px 20px 0;
+}
+@media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+.stat-card{
+  background:#fff;border-radius:18px;padding:16px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.06);
+  display:flex;align-items:center;gap:12px;
+  border:1px solid rgba(0,0,0,0.05);
+}
+.stat-icon{
+  width:46px;height:46px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+}
+.stat-val{font-size:24px;font-weight:900;line-height:1;}
+.stat-lbl{font-size:12px;font-weight:700;color:#64748b;margin-top:2px;}
+
+/* ── NAV TABS ── */
+.nav-tabs{
+  display:flex;gap:8px;padding:16px 20px 0;
+  overflow-x:auto;scrollbar-width:none;
+}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.tab-btn{
+  padding:10px 18px;border:none;border-radius:999px;cursor:pointer;
+  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;
+  background:#fff;color:#64748b;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:all 0.2s;
+  display:flex;align-items:center;gap:6px;
+}
+.tab-btn.active{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);}
+.tab-count{
+  background:rgba(255,255,255,0.3);border-radius:999px;
+  padding:2px 7px;font-size:11px;font-weight:900;
+}
+.tab-btn:not(.active) .tab-count{background:rgba(14,165,233,0.1);color:#0ea5e9;}
+
+/* ── CONTENT AREA ── */
+.content{padding:16px 20px;}
+
+/* ── TOOLBAR ── */
+.toolbar{
+  display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;
+}
+.search-input{
+  flex:1;min-width:180px;padding:10px 16px;border-radius:999px;
+  border:1.5px solid #e2e8f0;background:#fff;
+  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:600;
+  outline:none;color:#0f172a;
+}
+.search-input:focus{border-color:#0ea5e9;}
+.filter-select{
+  padding:10px 14px;border-radius:999px;border:1.5px solid #e2e8f0;
+  background:#fff;font-family:'Nunito',Arial,sans-serif;
+  font-size:13px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;
+}
+.filter-select:focus{border-color:#0ea5e9;}
+</style>
+<style>
+/* ── ORDER CARDS ── */
+.orders-grid{display:flex;flex-direction:column;gap:12px;}
+.order-card{
+  background:#fff;border-radius:18px;padding:16px 18px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.06);
+  border:1px solid rgba(0,0,0,0.05);
+  transition:all 0.2s;
+}
+.order-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.1);transform:translateY(-1px);}
+.order-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.order-id{font-size:12px;font-weight:800;color:#64748b;}
+.order-time{font-size:12px;font-weight:700;color:#94a3b8;}
+.order-name{font-size:16px;font-weight:900;color:#0f172a;margin-bottom:2px;}
+.order-contact{font-size:13px;font-weight:600;color:#64748b;}
+.status-badge{
+  padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;
+  white-space:nowrap;flex-shrink:0;
+}
+.status-pending{background:rgba(245,158,11,0.12);color:#b45309;}
+.status-ongoing{background:rgba(14,165,233,0.12);color:#0369a1;}
+.status-completed{background:rgba(34,197,94,0.12);color:#15803d;}
+.status-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
+
+.order-tests{
+  background:#f8fafc;border-radius:12px;padding:10px 12px;
+  margin:10px 0;font-size:13px;font-weight:600;color:#0f172a;
+  line-height:1.7;max-height:100px;overflow:auto;
+}
+.order-tests::-webkit-scrollbar{width:3px;}
+.order-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.meta-chip{
+  display:flex;align-items:center;gap:5px;
+  background:#f1f5f9;border-radius:999px;
+  padding:5px 10px;font-size:12px;font-weight:700;color:#475569;
+}
+.order-total{
+  font-size:18px;font-weight:900;
+  background:linear-gradient(135deg,#0369a1,#0f766e);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.order-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.action-btn{
+  padding:9px 16px;border:none;border-radius:12px;cursor:pointer;
+  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;
+  transition:all 0.2s;display:flex;align-items:center;gap:6px;
+}
+.action-btn:hover{transform:translateY(-1px);}
+.btn-start{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 4px 12px rgba(34,197,94,0.3);}
+.btn-complete{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;box-shadow:0 4px 12px rgba(14,165,233,0.3);}
+.btn-cancel{background:#fff;color:#ef4444;border:1.5px solid rgba(239,68,68,0.3);}
+.btn-whatsapp{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;box-shadow:0 4px 12px rgba(37,211,102,0.3);}
+.btn-result{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 4px 12px rgba(139,92,246,0.3);}
+.btn-view{background:#f1f5f9;color:#0f172a;}
+
+/* ── RESULT MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:#fff;border-radius:28px 28px 0 0;padding:24px 20px 36px;
+  width:100%;max-width:560px;
+  transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  max-height:90vh;overflow-y:auto;
+}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:999px;margin:0 auto 20px;}
+.modal h3{font-size:18px;font-weight:900;color:#0f172a;margin-bottom:16px;}
+.modal label{font-size:13px;font-weight:800;color:#0f172a;display:block;margin-bottom:6px;}
+.modal input,.modal select,.modal textarea{
+  width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid #e2e8f0;
+  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
+  color:#0f172a;background:#fff;outline:none;margin-bottom:14px;
+}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:#0ea5e9;}
+.modal textarea{min-height:100px;resize:none;}
+.modal-btn{
+  width:100%;padding:14px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,#0ea5e9,#14b8a6);
+  color:#fff;font-size:15px;font-weight:900;cursor:pointer;
+  font-family:'Nunito',Arial,sans-serif;
+  box-shadow:0 6px 18px rgba(14,165,233,0.3);margin-top:4px;
 }
 
-table { width:100%; border-collapse: collapse; background:#fff; }
-th,td { border:1px solid #cbd5e1; padding:8px; text-align:left; }
-th { background:#e2e8f0; }
-
-button.start { background:#22c55e; color:#fff; }
-button.cancel { background:#ef4444; color:#fff; }
-
-button { padding:6px 10px; border:none; border-radius:8px; cursor:pointer; margin-right:4px; }
-
-/* 🔀 ADMIN NAV BUTTONS */
-.admin-nav{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  margin:20px 0;
+/* ── EMPTY STATE ── */
+.empty-state{
+  text-align:center;padding:50px 20px;color:#94a3b8;
 }
+.empty-state .icon{font-size:52px;opacity:0.4;margin-bottom:12px;}
+.empty-state p{font-size:15px;font-weight:700;}
 
-.admin-nav button{
-  padding:10px 16px;
-  border:none;
-  border-radius:999px;
-  cursor:pointer;
-  background:#e5e7eb;
-  font-weight:600;
+/* ── TOAST ── */
+.toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
+  background:#0f172a;color:#fff;padding:12px 24px;border-radius:999px;
+  font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;
 }
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-.admin-nav button.active{
-  background:#0ea5e9;
-  color:white;
-}
+/* ── DETAIL EXPAND ── */
+.order-detail{display:none;border-top:1px solid #f1f5f9;margin-top:12px;padding-top:12px;}
+.order-detail.open{display:block;}
+.detail-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;font-weight:600;border-bottom:1px solid #f8fafc;}
+.detail-row span:first-child{color:#64748b;}
+.detail-row span:last-child{color:#0f172a;font-weight:800;text-align:right;max-width:60%;}
 </style>
 </head>
 <body>
 
-<button id="logoutBtn">Logout</button>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-<h2>🧪 Pending Requests</h2>
-
-<div class="admin-nav">
-  <button class="active">Pending</button>
-  <button onclick="goPage('ongoing_tests.html')">Ongoing Tests</button>
-  <button onclick="goPage('completed_tests.html')">Completed Tests</button>
+<!-- TOPBAR -->
+<div class="topbar">
+  <span class="topbar-logo">🧪</span>
+  <div class="topbar-info">
+    <h2>Admin Dashboard</h2>
+    <p>Mobile Lab – Mityana</p>
+  </div>
+  <div class="topbar-right">
+    <a class="topbar-btn" href="doctor_chat.html">
+      💬 Chats <span id="chatNotifBadge">0</span>
+    </a>
+    <button class="topbar-btn" id="logoutBtn">🚪 Logout</button>
+  </div>
 </div>
 
-<table>
-<thead>
-<tr>
-  <th>#</th>
-  <th>Time</th>
-  <th>Order ID</th>
-  <th>Client</th>
-  <th>Tests</th>
-  <th>Actions</th>
-</tr>
-</thead>
-<tbody id="requestsTable">
-<tr><td colspan="6">Loading...</td></tr>
-</tbody>
-</table>
+<!-- STATS ROW -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(245,158,11,0.12);">⏳</div>
+    <div><div class="stat-val" id="statPending" style="color:#b45309;">0</div><div class="stat-lbl">Pending</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(14,165,233,0.12);">🔬</div>
+    <div><div class="stat-val" id="statOngoing" style="color:#0369a1;">0</div><div class="stat-lbl">Ongoing</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(34,197,94,0.12);">✅</div>
+    <div><div class="stat-val" id="statCompleted" style="color:#15803d;">0</div><div class="stat-lbl">Completed</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(239,68,68,0.1);">❌</div>
+    <div><div class="stat-val" id="statCancelled" style="color:#b91c1c;">0</div><div class="stat-lbl">Cancelled</div></div>
+  </div>
+</div>
 
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="tab-btn active" id="tab-pending" onclick="switchTab('pending')">⏳ Pending <span class="tab-count" id="cnt-pending">0</span></button>
+  <button class="tab-btn" id="tab-ongoing" onclick="switchTab('ongoing')">🔬 Ongoing <span class="tab-count" id="cnt-ongoing">0</span></button>
+  <button class="tab-btn" id="tab-completed" onclick="switchTab('completed')">✅ Completed <span class="tab-count" id="cnt-completed">0</span></button>
+  <button class="tab-btn" id="tab-cancelled" onclick="switchTab('cancelled')">❌ Cancelled <span class="tab-count" id="cnt-cancelled">0</span></button>
+  <button class="tab-btn" id="tab-all" onclick="switchTab('all')">📋 All Orders <span class="tab-count" id="cnt-all">0</span></button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div class="toolbar">
+    <input class="search-input" id="searchInput" placeholder="🔍 Search by name, phone, order ID..." oninput="filterOrders()">
+    <select class="filter-select" id="sortSelect" onchange="filterOrders()">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="highest">Highest Total</option>
+    </select>
+  </div>
+  <div class="orders-grid" id="ordersGrid">
+    <div class="empty-state"><div class="icon">⏳</div><p>Loading orders...</p></div>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal-overlay" id="resultModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>📋 Upload Test Results</h3>
+    <label>Order ID</label>
+    <input type="text" id="resultOrderId" readonly>
+    <label>Patient Name</label>
+    <input type="text" id="resultPatientName" readonly>
+    <label>Test Results Summary</label>
+    <textarea id="resultText" placeholder="e.g. CBC: Normal&#10;HIV: Non-reactive&#10;Blood Glucose: 5.2 mmol/L"></textarea>
+    <label>Doctor's Notes / Advice</label>
+    <textarea id="resultNotes" placeholder="e.g. Continue medication, drink more water..."></textarea>
+    <button class="modal-btn" onclick="submitResult()">✅ Save & Notify Patient</button>
+  </div>
+</div>
 <script>
 const firebaseConfig = {
   apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId:"mobile-lab-mityana-aeae2"
 };
-
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
-const tableBody = document.getElementById("requestsTable");
 
+let allOrders = [];
+let currentTab = "pending";
+let resultTargetId = "";
+const ADMIN_WHATSAPP = "256750992939";
 
-// 🔐 ADMIN AUTH CHECK
+// ── AUTH ──
 auth.onAuthStateChanged(async user => {
-  if(!user){
-    window.location.href="login.html";
-    return;
-  }
-
+  if(!user){ window.location.href="login.html"; return; }
   const snap = await db.collection("users").doc(user.uid).get();
   if(!snap.exists || snap.data().role !== "admin"){
     alert("Access denied");
@@ -113,116 +311,291 @@ auth.onAuthStateChanged(async user => {
     window.location.href="login.html";
     return;
   }
-
-  loadPending();
+  loadOrders();
+  watchChatUnread();
 });
 
-document.getElementById("logoutBtn").onclick = async ()=>{
+document.getElementById("logoutBtn").onclick = async () => {
   await auth.signOut();
   window.location.href="login.html";
 };
 
-
-// 📥 LOAD ONLY PENDING (REAL-TIME)
-function loadPending(){
-
-  db.collection("orders")
-    .where("status","==","pending")
-    .orderBy("createdAt","asc")
-    .onSnapshot(snapshot => {
-
-      if(snapshot.empty){
-        tableBody.innerHTML =
-          `<tr><td colspan="6">No pending requests</td></tr>`;
-        return;
-      }
-
-      tableBody.innerHTML = "";
-      let count = 1;
-
-      snapshot.forEach(doc=>{
-        const o = doc.data();
-
-        // ✅ FIXED TEST COUNT (supports both formats)
-        const testsCount = o.tests
-          ? o.tests.split("\n").filter(t => t.trim() !== "").length
-          : 0;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${count++}</td>
-          <td>${o.createdAt?.toDate().toLocaleString() || "—"}</td>
-          <td>${doc.id}</td>
-          <td>${o.name || "—"}</td>
-          <td>${testsCount}</td>
-          <td>
-            <button class="start">Start</button>
-            <button class="cancel">Cancel</button>
-          </td>
-        `;
-
-        tableBody.appendChild(tr);
-
-        const startBtn = tr.querySelector(".start");
-        const cancelBtn = tr.querySelector(".cancel");
-
-        // ▶ START TEST
-        startBtn.onclick = async ()=>{
-          startBtn.disabled = true;
-          startBtn.innerText = "Starting...";
-
-          try{
-            await db.collection("orders").doc(doc.id).update({
-              status:"ongoing",
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            window.location.href = "ongoing_tests.html";
-
-          }catch(err){
-            alert("❌ Failed: " + err.message);
-            startBtn.disabled = false;
-            startBtn.innerText = "Start";
-          }
-        };
-
-        // ❌ CANCEL TEST
-        cancelBtn.onclick = async ()=>{
-          const reason = prompt("Reason for cancellation?");
-          if(!reason) return;
-
-          cancelBtn.disabled = true;
-          cancelBtn.innerText = "Cancelling...";
-
-          try{
-            await db.collection("orders").doc(doc.id).update({
-              status:"cancelled",
-              cancelReason: reason,
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-          }catch(err){
-            alert("❌ Failed: " + err.message);
-            cancelBtn.disabled = false;
-            cancelBtn.innerText = "Cancel";
-          }
-        };
-
-      });
-
-    }, err => {
-      console.error(err);
-      tableBody.innerHTML =
-        `<tr><td colspan="6">Error loading data</td></tr>`;
-    });
+// ── WATCH CHAT UNREAD ──
+function watchChatUnread(){
+  db.collection("chats").onSnapshot(snapshot => {
+    let total = 0;
+    snapshot.forEach(doc => { total += doc.data().unreadDoctor || 0; });
+    const badge = document.getElementById("chatNotifBadge");
+    if(total > 0){
+      badge.style.display = "inline";
+      badge.innerText = total;
+    } else {
+      badge.style.display = "none";
+    }
+  });
 }
 
+// ── LOAD ALL ORDERS REAL-TIME ──
+function loadOrders(){
+  db.collection("orders").orderBy("createdAt","desc").onSnapshot(snapshot => {
+    allOrders = [];
+    snapshot.forEach(doc => allOrders.push({ id: doc.id, ...doc.data() }));
+    updateStats();
+    filterOrders();
+  }, err => {
+    document.getElementById("ordersGrid").innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>Error: ${err.message}</p></div>`;
+  });
+}
 
-/* 🔀 PAGE NAV FUNCTION */
-function goPage(page){
-  window.location.href = page;
+// ── STATS ──
+function updateStats(){
+  const counts = { pending:0, ongoing:0, completed:0, cancelled:0 };
+  allOrders.forEach(o => { if(counts[o.status] !== undefined) counts[o.status]++; });
+  document.getElementById("statPending").innerText = counts.pending;
+  document.getElementById("statOngoing").innerText = counts.ongoing;
+  document.getElementById("statCompleted").innerText = counts.completed;
+  document.getElementById("statCancelled").innerText = counts.cancelled;
+  document.getElementById("cnt-pending").innerText = counts.pending;
+  document.getElementById("cnt-ongoing").innerText = counts.ongoing;
+  document.getElementById("cnt-completed").innerText = counts.completed;
+  document.getElementById("cnt-cancelled").innerText = counts.cancelled;
+  document.getElementById("cnt-all").innerText = allOrders.length;
+}
+
+// ── TAB SWITCH ──
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-"+tab).classList.add("active");
+  filterOrders();
+}
+
+// ── FILTER + SORT ──
+function filterOrders(){
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const sort = document.getElementById("sortSelect").value;
+
+  let filtered = allOrders.filter(o => {
+    const matchTab = currentTab === "all" || o.status === currentTab;
+    const matchSearch = !search ||
+      (o.name||"").toLowerCase().includes(search) ||
+      (o.phone||"").toLowerCase().includes(search) ||
+      (o.id||"").toLowerCase().includes(search) ||
+      (o.location||"").toLowerCase().includes(search);
+    return matchTab && matchSearch;
+  });
+
+  if(sort === "oldest") filtered.reverse();
+  else if(sort === "highest"){
+    filtered.sort((a,b) => {
+      const aTotal = parseInt((a.total||"0").replace(/\D/g,"")) || 0;
+      const bTotal = parseInt((b.total||"0").replace(/\D/g,"")) || 0;
+      return bTotal - aTotal;
+    });
+  }
+
+  renderOrders(filtered);
+}
+
+// ── RENDER ORDERS ──
+function renderOrders(orders){
+  const grid = document.getElementById("ordersGrid");
+  if(orders.length === 0){
+    grid.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No orders found</p></div>`;
+    return;
+  }
+  grid.innerHTML = "";
+  orders.forEach((o, idx) => {
+    const card = document.createElement("div");
+    card.className = "order-card";
+    const time = o.createdAt ? o.createdAt.toDate().toLocaleString("en-UG") : "—";
+    const testsArr = (o.tests||"").split("\n").filter(t=>t.trim());
+    const testsHtml = testsArr.map(t=>`• ${t}`).join("<br>") || "—";
+    const statusClass = `status-${o.status||"pending"}`;
+    const statusLabel = {pending:"⏳ Pending",ongoing:"🔬 Ongoing",completed:"✅ Completed",cancelled:"❌ Cancelled"}[o.status] || o.status;
+
+    // Action buttons based on status
+    let actionBtns = "";
+    if(o.status === "pending"){
+      actionBtns = `
+        <button class="action-btn btn-start" onclick="startOrder('${o.id}',this)">▶ Start Test</button>
+        <button class="action-btn btn-whatsapp" onclick="waContact('${o.phone}','${o.name}','${o.id}')">💬 WhatsApp</button>
+        <button class="action-btn btn-cancel" onclick="cancelOrder('${o.id}',this)">✕ Cancel</button>`;
+    } else if(o.status === "ongoing"){
+      actionBtns = `
+        <button class="action-btn btn-result" onclick="openResultModal('${o.id}','${o.name}')">📋 Upload Results</button>
+        <button class="action-btn btn-whatsapp" onclick="waContact('${o.phone}','${o.name}','${o.id}')">💬 WhatsApp</button>
+        <button class="action-btn btn-complete" onclick="completeOrder('${o.id}',this)">✅ Mark Complete</button>`;
+    } else if(o.status === "completed"){
+      actionBtns = `
+        <button class="action-btn btn-whatsapp" onclick="waContact('${o.phone}','${o.name}','${o.id}')">💬 WhatsApp</button>
+        <button class="action-btn btn-view" onclick="toggleDetail('detail-${o.id}')">👁 View Details</button>`;
+    } else if(o.status === "cancelled"){
+      actionBtns = `
+        <button class="action-btn btn-start" onclick="restoreOrder('${o.id}',this)">↩ Restore</button>
+        <button class="action-btn btn-view" onclick="toggleDetail('detail-${o.id}')">👁 View Details</button>`;
+    }
+
+    card.innerHTML = `
+      <div class="order-top">
+        <div>
+          <div class="order-id">#${idx+1} &nbsp;•&nbsp; ${o.id}</div>
+          <div class="order-name">${o.name || "—"}</div>
+          <div class="order-contact">📞 ${o.phone||"—"} &nbsp;|&nbsp; ✉️ ${o.email||"—"}</div>
+        </div>
+        <div>
+          <span class="status-badge ${statusClass}">${statusLabel}</span>
+          <div class="order-time" style="margin-top:6px;text-align:right;">${time}</div>
+        </div>
+      </div>
+      <div class="order-meta">
+        <div class="meta-chip">📍 ${o.location||"—"}</div>
+        <div class="meta-chip">👤 ${o.sex||"—"}, ${o.age||"—"} yrs</div>
+        <div class="meta-chip">💳 ${o.payment||"—"}</div>
+        <div class="meta-chip">🧪 ${testsArr.length} test(s)</div>
+      </div>
+      <div class="order-tests">${testsHtml}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div class="order-total">${o.total||"UGX 0"}</div>
+        ${o.notes && o.notes !== "None" ? `<div class="meta-chip">📝 ${o.notes}</div>` : ""}
+      </div>
+      <div class="order-actions">${actionBtns}</div>
+      <div class="order-detail" id="detail-${o.id}">
+        <div class="detail-row"><span>Order ID</span><span>${o.id}</span></div>
+        <div class="detail-row"><span>Status</span><span>${statusLabel}</span></div>
+        <div class="detail-row"><span>Payment</span><span>${o.payment||"—"}</span></div>
+        <div class="detail-row"><span>Location</span><span>${o.location||"—"}</span></div>
+        <div class="detail-row"><span>Notes</span><span>${o.notes||"None"}</span></div>
+        ${o.cancelReason ? `<div class="detail-row"><span>Cancel Reason</span><span>${o.cancelReason}</span></div>` : ""}
+        ${o.resultText ? `<div class="detail-row"><span>Results</span><span>${o.resultText}</span></div>` : ""}
+        ${o.resultNotes ? `<div class="detail-row"><span>Doctor Notes</span><span>${o.resultNotes}</span></div>` : ""}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
 }
 </script>
+<script>
+// ── ORDER ACTIONS ──
+async function startOrder(orderId, btn){
+  btn.disabled = true; btn.innerText = "Starting...";
+  try{
+    await db.collection("orders").doc(orderId).update({
+      status:"ongoing",
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("🔬 Test started!");
+  } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="▶ Start Test"; }
+}
 
+async function completeOrder(orderId, btn){
+  if(!confirm("Mark this order as completed?")) return;
+  btn.disabled = true; btn.innerText = "Saving...";
+  try{
+    await db.collection("orders").doc(orderId).update({
+      status:"completed",
+      completedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("✅ Order marked complete!");
+  } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="✅ Mark Complete"; }
+}
+
+async function cancelOrder(orderId, btn){
+  const reason = prompt("Reason for cancellation?");
+  if(!reason) return;
+  btn.disabled = true; btn.innerText = "Cancelling...";
+  try{
+    await db.collection("orders").doc(orderId).update({
+      status:"cancelled",
+      cancelReason: reason,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("❌ Order cancelled");
+  } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="✕ Cancel"; }
+}
+
+async function restoreOrder(orderId, btn){
+  btn.disabled = true; btn.innerText = "Restoring...";
+  try{
+    await db.collection("orders").doc(orderId).update({
+      status:"pending",
+      cancelReason: firebase.firestore.FieldValue.delete(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("↩ Order restored to pending");
+  } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="↩ Restore"; }
+}
+
+// ── WHATSAPP CONTACT ──
+function waContact(phone, name, orderId){
+  if(!phone){ showToast("No phone number"); return; }
+  const msg = `Hello ${name}, this is Mobile Lab Mityana regarding your order ${orderId}. `;
+  window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
+}
+
+// ── RESULT MODAL ──
+function openResultModal(orderId, patientName){
+  resultTargetId = orderId;
+  document.getElementById("resultOrderId").value = orderId;
+  document.getElementById("resultPatientName").value = patientName;
+  document.getElementById("resultText").value = "";
+  document.getElementById("resultNotes").value = "";
+  document.getElementById("resultModal").classList.add("open");
+}
+
+document.getElementById("resultModal").addEventListener("click", e => {
+  if(e.target === e.currentTarget) e.currentTarget.classList.remove("open");
+});
+
+async function submitResult(){
+  const resultText = document.getElementById("resultText").value.trim();
+  const resultNotes = document.getElementById("resultNotes").value.trim();
+  if(!resultText){ showToast("Please enter test results"); return; }
+
+  const order = allOrders.find(o => o.id === resultTargetId);
+  try{
+    // Save results to order
+    await db.collection("orders").doc(resultTargetId).update({
+      status: "completed",
+      resultText,
+      resultNotes,
+      completedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Save to results collection so patient can see it
+    await db.collection("results").doc(resultTargetId).set({
+      orderId: resultTargetId,
+      userId: order?.userId || "",
+      patientName: order?.name || "",
+      resultText,
+      resultNotes,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Notify patient via WhatsApp
+    if(order?.phone){
+      const waMsg = `Hello ${order.name}, your lab results for order ${resultTargetId} are ready!\n\n📋 Results:\n${resultText}\n\n👨‍⚕️ Doctor's Notes:\n${resultNotes||"None"}\n\nMobile Lab – Mityana`;
+      window.open(`https://wa.me/${order.phone.replace(/^0/,"256")}?text=${encodeURIComponent(waMsg)}`);
+    }
+
+    document.getElementById("resultModal").classList.remove("open");
+    showToast("✅ Results saved & patient notified!");
+  } catch(err){ alert("Failed: "+err.message); }
+}
+
+// ── TOGGLE DETAIL ──
+function toggleDetail(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle("open");
+}
+
+// ── TOAST ──
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+</script>
 </body>
 </html>
