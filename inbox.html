@@ -201,6 +201,7 @@ function loadResults(userId){
       list.innerHTML = "";
       snapshot.forEach((doc, idx) => {
         const r = doc.data();
+        console.log("Result doc:", doc.id, r); // DEBUG — check in browser console
         const date = r.createdAt ? r.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"}) : "—";
         // Store result data in global map keyed by doc id
         resultDataMap[doc.id] = r;
