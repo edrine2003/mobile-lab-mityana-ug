@@ -119,7 +119,6 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
 .status-ongoing{background:rgba(14,165,233,0.12);color:#0369a1;}
 .status-completed{background:rgba(34,197,94,0.12);color:#15803d;}
 .status-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
-
 .order-tests{
   background:#f8fafc;border-radius:12px;padding:10px 12px;
   margin:10px 0;font-size:13px;font-weight:600;color:#0f172a;
@@ -219,7 +218,7 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
     <p>Mobile Lab – Mityana</p>
   </div>
   <div class="topbar-right">
-    <a class="topbar-btn" href="doctor_chat.html">
+    <a class="topbar-btn" href="doctor.html">
       💬 Chats <span id="chatNotifBadge">0</span>
     </a>
     <button class="topbar-btn" id="logoutBtn">🚪 Logout</button>
@@ -244,6 +243,10 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
     <div class="stat-icon" style="background:rgba(239,68,68,0.1);">❌</div>
     <div><div class="stat-val" id="statCancelled" style="color:#b91c1c;">0</div><div class="stat-lbl">Cancelled</div></div>
   </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(139,92,246,0.12);">📅</div>
+    <div><div class="stat-val" id="statAppointments" style="color:#7c3aed;">0</div><div class="stat-lbl">Appointments</div></div>
+  </div>
 </div>
 
 <!-- NAV TABS -->
@@ -253,20 +256,40 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   <button class="tab-btn" id="tab-completed" onclick="switchTab('completed')">✅ Completed <span class="tab-count" id="cnt-completed">0</span></button>
   <button class="tab-btn" id="tab-cancelled" onclick="switchTab('cancelled')">❌ Cancelled <span class="tab-count" id="cnt-cancelled">0</span></button>
   <button class="tab-btn" id="tab-all" onclick="switchTab('all')">📋 All Orders <span class="tab-count" id="cnt-all">0</span></button>
+  <button class="tab-btn" id="tab-appointments" onclick="switchTab('appointments')">📅 Appointments <span class="tab-count" id="cnt-appointments">0</span></button>
 </div>
 
 <!-- CONTENT -->
 <div class="content">
-  <div class="toolbar">
-    <input class="search-input" id="searchInput" placeholder="🔍 Search by name, phone, order ID..." oninput="filterOrders()">
-    <select class="filter-select" id="sortSelect" onchange="filterOrders()">
-      <option value="newest">Newest First</option>
-      <option value="oldest">Oldest First</option>
-      <option value="highest">Highest Total</option>
-    </select>
+  <div id="orders-section">
+    <div class="toolbar">
+      <input class="search-input" id="searchInput" placeholder="🔍 Search by name, phone, order ID..." oninput="filterOrders()">
+      <select class="filter-select" id="sortSelect" onchange="filterOrders()">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="highest">Highest Total</option>
+      </select>
+    </div>
+    <div class="orders-grid" id="ordersGrid">
+      <div class="empty-state"><div class="icon">⏳</div><p>Loading orders...</p></div>
+    </div>
   </div>
-  <div class="orders-grid" id="ordersGrid">
-    <div class="empty-state"><div class="icon">⏳</div><p>Loading orders...</p></div>
+
+  <!-- APPOINTMENTS SECTION -->
+  <div id="appointments-section" style="display:none;">
+    <div class="toolbar">
+      <input class="search-input" id="apptSearch" placeholder="🔍 Search appointments..." oninput="filterAppointments()">
+      <select class="filter-select" id="apptFilter" onchange="filterAppointments()">
+        <option value="all">All</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="orders-grid" id="apptGrid">
+      <div class="empty-state"><div class="icon">📅</div><p>Loading appointments...</p></div>
+    </div>
   </div>
 </div>
 
@@ -313,6 +336,7 @@ auth.onAuthStateChanged(async user => {
   }
   loadOrders();
   watchChatUnread();
+  loadAppointments();
 });
 
 document.getElementById("logoutBtn").onclick = async () => {
@@ -367,7 +391,11 @@ function switchTab(tab){
   currentTab = tab;
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   document.getElementById("tab-"+tab).classList.add("active");
-  filterOrders();
+  // Show/hide sections
+  document.getElementById("orders-section").style.display = tab === "appointments" ? "none" : "block";
+  document.getElementById("appointments-section").style.display = tab === "appointments" ? "block" : "none";
+  if(tab === "appointments") filterAppointments();
+  else filterOrders();
 }
 
 // ── FILTER + SORT ──
@@ -595,6 +623,147 @@ function showToast(msg){
   t.innerText = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2500);
+}
+</script>
+
+<script>
+// ── APPOINTMENTS ──
+let allAppointments = [];
+
+function loadAppointments(){
+  db.collection("appointments").orderBy("createdAt","desc").onSnapshot(snapshot => {
+    allAppointments = [];
+    snapshot.forEach(doc => allAppointments.push({ id: doc.id, ...doc.data() }));
+    // Update count badge
+    const pending = allAppointments.filter(a => a.status === "pending").length;
+    document.getElementById("cnt-appointments").innerText = allAppointments.length;
+    document.getElementById("statAppointments").innerText = pending;
+    filterAppointments();
+  });
+}
+
+function filterAppointments(){
+  const search = (document.getElementById("apptSearch")?.value || "").toLowerCase();
+  const filter = document.getElementById("apptFilter")?.value || "all";
+  let list = allAppointments.filter(a => {
+    const matchFilter = filter === "all" || a.status === filter;
+    const matchSearch = !search ||
+      (a.name||"").toLowerCase().includes(search) ||
+      (a.phone||"").toLowerCase().includes(search) ||
+      (a.service||"").toLowerCase().includes(search) ||
+      (a.date||"").includes(search);
+    return matchFilter && matchSearch;
+  });
+  renderAppointments(list);
+}
+
+function renderAppointments(list){
+  const grid = document.getElementById("apptGrid");
+  if(list.length === 0){
+    grid.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No appointments found</p></div>`;
+    return;
+  }
+  grid.innerHTML = "";
+  list.forEach((a, idx) => {
+    const card = document.createElement("div");
+    card.className = "order-card";
+    const statusClass = `status-${a.status||"pending"}`;
+    const statusLabel = {pending:"⏳ Pending",confirmed:"✅ Confirmed",completed:"✔ Done",cancelled:"❌ Cancelled"}[a.status] || a.status;
+    const createdAt = a.createdAt ? a.createdAt.toDate().toLocaleString("en-UG") : "—";
+
+    // Action buttons
+    let actions = "";
+    if(a.status === "pending"){
+      actions = `
+        <button class="action-btn btn-start" onclick="confirmAppt('${a.id}','${a.name}','${a.phone}',this)">✅ Confirm</button>
+        <button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button>
+        <button class="action-btn btn-cancel" onclick="cancelAppt('${a.id}',this)">✕ Cancel</button>`;
+    } else if(a.status === "confirmed"){
+      actions = `
+        <button class="action-btn btn-complete" onclick="doneAppt('${a.id}',this)">✔ Mark Done</button>
+        <button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button>
+        <button class="action-btn btn-cancel" onclick="cancelAppt('${a.id}',this)">✕ Cancel</button>`;
+    } else {
+      actions = `<button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button>`;
+    }
+
+    card.innerHTML = `
+      <div class="order-top">
+        <div>
+          <div class="order-id">#${idx+1} &nbsp;•&nbsp; ${a.apptId||a.id}</div>
+          <div class="order-name">${a.name||"—"}</div>
+          <div class="order-contact">📞 ${a.phone||"—"}</div>
+        </div>
+        <div>
+          <span class="status-badge ${statusClass}">${statusLabel}</span>
+          <div class="order-time" style="margin-top:6px;text-align:right;">${createdAt}</div>
+        </div>
+      </div>
+      <div class="order-meta">
+        <div class="meta-chip">🏥 ${a.service||"—"}</div>
+        <div class="meta-chip">📆 ${a.date||"—"}</div>
+        <div class="meta-chip">🕐 ${a.time||"—"}</div>
+        <div class="meta-chip">📍 ${a.location||"—"}</div>
+      </div>
+      ${a.notes && a.notes !== "None" ? `<div class="order-tests">📝 ${a.notes}</div>` : ""}
+      <div class="order-actions">${actions}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function confirmAppt(id, name, phone, btn){
+  btn.disabled = true; btn.innerText = "Confirming...";
+  try{
+    await db.collection("appointments").doc(id).update({
+      status: "confirmed",
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Notify patient on WhatsApp
+    const appt = allAppointments.find(a => a.id === id);
+    if(phone){
+      const msg = `✅ Hello ${name}, your appointment has been CONFIRMED!\n📆 Date: ${appt?.date||""}\n🕐 Time: ${appt?.time||""}\n🏥 Service: ${appt?.service||""}\n\nMobile Lab – Mityana`;
+      window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
+    }
+    showToast("✅ Appointment confirmed & patient notified!");
+  } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✅ Confirm"; }
+}
+
+async function doneAppt(id, btn){
+  btn.disabled = true; btn.innerText = "Saving...";
+  try{
+    await db.collection("appointments").doc(id).update({
+      status: "completed",
+      completedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("✔ Appointment marked as done!");
+  } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✔ Mark Done"; }
+}
+
+async function cancelAppt(id, btn){
+  const reason = prompt("Reason for cancellation?");
+  if(!reason) return;
+  btn.disabled = true; btn.innerText = "Cancelling...";
+  try{
+    const appt = allAppointments.find(a => a.id === id);
+    await db.collection("appointments").doc(id).update({
+      status: "cancelled",
+      cancelReason: reason,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Notify patient
+    if(appt?.phone){
+      const msg = `❌ Hello ${appt.name}, your appointment on ${appt.date} at ${appt.time} has been cancelled.\nReason: ${reason}\n\nPlease contact us to reschedule.\nMobile Lab – Mityana`;
+      window.open(`https://wa.me/${appt.phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
+    }
+    showToast("Appointment cancelled");
+  } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✕ Cancel"; }
+}
+
+function waAppt(phone, name, date, time){
+  if(!phone){ showToast("No phone number"); return; }
+  const msg = `Hello ${name}, this is Mobile Lab Mityana regarding your appointment on ${date} at ${time}. `;
+  window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
 }
 </script>
 </body>
