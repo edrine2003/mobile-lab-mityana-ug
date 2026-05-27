@@ -4,24 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mobile Lab Order – Mityana Uganda</title>
-
 <meta name="description" content="Book mobile lab tests in Mityana, Uganda.">
 <meta name="theme-color" content="#0ea5e9">
-
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
-
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  emailjs.init("QPXYuZG5LIiv_1x3H");
-</script>
-
+<script>emailjs.init("QPXYuZG5LIiv_1x3H");</script>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
 :root{
   --primary:#0ea5e9;
@@ -29,405 +23,501 @@
   --dark:#0f172a;
   --muted:#64748b;
   --border:rgba(15,23,42,0.12);
-  --card:rgba(255,255,255,0.92);
-  --shadow:0 12px 30px rgba(2,6,23,0.12);
+  --card:rgba(255,255,255,0.94);
+  --shadow:0 20px 60px rgba(2,6,23,0.18);
+  --glass:rgba(255,255,255,0.18);
+  --glass-border:rgba(255,255,255,0.35);
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0;}
 body{
-  font-family: Arial, sans-serif;
-  margin: 0;
-background:
-  linear-gradient(rgba(16,185,129,0.75), rgba(16,185,129,0.75)),
-  url("lab-bg.jpg") no-repeat center center fixed;
-background-size: cover;
-color: white;
+  font-family:'Nunito',Arial,sans-serif;
+  background:linear-gradient(135deg,#0ea5e9 0%,#14b8a6 40%,#10b981 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  color:white;
+  position:relative;
+  overflow-x:hidden;
 }
-.container{max-width: 900px;margin: 18px auto;padding: 16px;}
+/* Animated background blobs */
+body::before,body::after{
+  content:'';position:fixed;border-radius:50%;filter:blur(80px);opacity:0.35;pointer-events:none;z-index:0;
+}
+body::before{
+  width:500px;height:500px;background:radial-gradient(circle,#0ea5e9,transparent);
+  top:-100px;left:-100px;animation:blobMove1 12s ease-in-out infinite alternate;
+}
+body::after{
+  width:400px;height:400px;background:radial-gradient(circle,#14b8a6,transparent);
+  bottom:-80px;right:-80px;animation:blobMove2 10s ease-in-out infinite alternate;
+}
+@keyframes blobMove1{0%{transform:translate(0,0) scale(1);}100%{transform:translate(60px,40px) scale(1.15);}}
+@keyframes blobMove2{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-50px,-30px) scale(1.1);}}
+.container{max-width:900px;margin:24px auto;padding:16px;position:relative;z-index:1;}
+</style>
+<style>
+/* CARD */
 .card{
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
+  background:var(--card);
+  border:1px solid var(--glass-border);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  backdrop-filter:blur(20px);
+  animation:cardIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
 }
+@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(0.97);}to{opacity:1;transform:none;}}
+
+/* HEADER */
 .header{
-  background: linear-gradient(135deg, var(--primary), var(--primary2));
-  color:#fff;
-  padding: 18px 16px;
-  text-align:center;
-  position: relative;
+  background:linear-gradient(135deg,var(--primary),var(--primary2),#10b981);
+  background-size:300% 300%;
+  animation:gradShift 8s ease infinite;
+  color:#fff;padding:24px 20px;text-align:center;position:relative;overflow:hidden;
 }
-.header h2{margin: 0;font-size: 22px;}
-.header p{margin: 6px 0 0;font-size: 13px;opacity: 0.95;}
-.header-actions{
-  margin-top: 12px;
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap: wrap;
+.header::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;
 }
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.header h2{margin:0;font-size:26px;font-weight:900;letter-spacing:-0.5px;text-shadow:0 2px 10px rgba(0,0,0,0.15);}
+.header p{margin:8px 0 0;font-size:13px;opacity:0.92;font-weight:600;}
+.header-actions{margin-top:14px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+
+/* CALL BUTTONS with pulse */
 .call-btn{
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 13px;
-  color:#fff;
-  border: 1px solid rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.14);
+  text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+  padding:10px 14px;border-radius:999px;font-weight:800;font-size:13px;color:#fff;
+  border:1px solid var(--glass-border);background:var(--glass);
+  backdrop-filter:blur(10px);transition:all 0.2s;position:relative;
 }
-.call-btn:hover{background: rgba(255,255,255,0.22);}
-.form-body{padding: 18px;}
-.grid2{display: grid;grid-template-columns: 1fr 1fr;gap: 12px;}
-@media(max-width:720px){.grid2{grid-template-columns: 1fr;}}
-label{font-weight: 700;font-size: 13px;color: var(--dark);}
+.call-btn:hover{background:rgba(255,255,255,0.28);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.15);}
+.call-btn.pulse::after{
+  content:'';position:absolute;inset:-3px;border-radius:999px;
+  border:2px solid rgba(255,255,255,0.5);
+  animation:pulseRing 2s ease-out infinite;
+}
+@keyframes pulseRing{0%{transform:scale(1);opacity:0.8;}100%{transform:scale(1.25);opacity:0;}}
+
+/* PROGRESS STEPS */
+.progress-bar{
+  display:flex;align-items:center;justify-content:center;
+  padding:16px 20px 8px;gap:0;
+}
+.step{
+  display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;max-width:120px;
+}
+.step-circle{
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;border:2px solid var(--border);
+  background:#f1f5f9;color:var(--muted);transition:all 0.3s;
+}
+.step.active .step-circle{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(14,165,233,0.4);}
+.step.done .step-circle{background:linear-gradient(135deg,#10b981,#14b8a6);color:#fff;border-color:transparent;}
+.step-label{font-size:11px;font-weight:700;color:var(--muted);text-align:center;}
+.step.active .step-label{color:var(--primary);}
+.step.done .step-label{color:#10b981;}
+.step-line{flex:1;height:2px;background:var(--border);margin-bottom:20px;transition:background 0.3s;max-width:40px;}
+.step-line.done{background:linear-gradient(90deg,#10b981,#14b8a6);}
+
+/* FORM BODY */
+.form-body{padding:20px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+
+/* FLOATING LABEL */
+.field-wrap{position:relative;margin-bottom:4px;}
+.field-wrap label{
+  position:absolute;left:14px;top:14px;font-size:13px;font-weight:700;
+  color:var(--muted);pointer-events:none;transition:all 0.2s;background:transparent;
+  padding:0 2px;
+}
+.field-wrap input:focus ~ label,
+.field-wrap input:not(:placeholder-shown) ~ label,
+.field-wrap select:focus ~ label,
+.field-wrap select:not([value=""]) ~ label,
+.field-wrap textarea:focus ~ label,
+.field-wrap textarea:not(:placeholder-shown) ~ label{
+  top:-8px;left:10px;font-size:11px;color:var(--primary);
+  background:white;padding:0 4px;border-radius:4px;
+}
+</style>
+<style>
 input,select,textarea{
-  width:100%;
-  padding: 12px 12px;
-  margin: 6px 0 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.95);
-  outline: none;
-  transition: 0.2s;
+  width:100%;padding:14px 14px 10px;margin:6px 0 14px;
+  border-radius:14px;border:1.5px solid var(--border);
+  background:rgba(255,255,255,0.97);outline:none;
+  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
+  color:var(--dark);transition:all 0.25s;
 }
-input:focus, select:focus, textarea:focus{
-  border-color: rgba(14,165,233,0.7);
-  box-shadow: 0 0 0 4px rgba(14,165,233,0.18);
+input:focus,select:focus,textarea:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 4px rgba(14,165,233,0.15);
+  transform:translateY(-1px);
 }
-small.note{
-  display:block;
-  margin-top:-10px;
-  margin-bottom:12px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.tools-bar{display:flex;gap:10px;align-items:center;margin: 8px 0 12px;}
+small.note{display:block;margin-top:-10px;margin-bottom:12px;color:var(--muted);font-size:12px;font-weight:600;}
+label.section-label{font-weight:800;font-size:14px;color:var(--dark);display:block;margin-bottom:8px;margin-top:4px;}
+
+/* SEARCH + BADGE */
+.tools-bar{display:flex;gap:10px;align-items:center;margin:8px 0 12px;}
 .search{flex:1;margin:0;}
 .badge{
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: rgba(20,184,166,0.15);
-  border: 1px solid rgba(20,184,166,0.35);
-  color: #0f766e;
-  font-weight: 700;
+  font-size:12px;padding:8px 12px;border-radius:999px;
+  background:linear-gradient(135deg,rgba(14,165,233,0.15),rgba(20,184,166,0.15));
+  border:1px solid rgba(14,165,233,0.3);color:#0369a1;font-weight:800;
+  white-space:nowrap;transition:all 0.3s;
 }
-.tests-area{
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px;
-  background: rgba(255,255,255,0.65);
+.badge.has-items{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;border-color:transparent;
+  box-shadow:0 4px 12px rgba(14,165,233,0.35);
+  animation:badgePop 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
-.category{margin-bottom: 14px;}
-.cat-title{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 8px 0 10px;
+@keyframes badgePop{0%{transform:scale(0.8);}100%{transform:scale(1);}}
+
+/* TESTS AREA */
+.tests-area{border:1.5px solid var(--border);border-radius:18px;padding:14px;background:rgba(248,250,252,0.8);}
+.category{margin-bottom:16px;}
+.cat-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 10px;}
+.cat-title h3{font-size:14px;margin:0;color:var(--dark);font-weight:800;display:flex;align-items:center;gap:8px;}
+.cat-icon{
+  width:30px;height:30px;border-radius:10px;display:inline-flex;align-items:center;
+  justify-content:center;font-size:15px;
+  background:linear-gradient(135deg,rgba(14,165,233,0.15),rgba(20,184,166,0.15));
 }
-.cat-title h3{font-size: 14px;margin: 0;color: var(--dark);}
-.cat-title span{font-size: 12px;color: var(--muted);}
-.tests-grid{display:grid;grid-template-columns: 1fr 1fr;gap: 10px;}
-@media(max-width:720px){.tests-grid{grid-template-columns: 1fr;}}
+.cat-title span{font-size:12px;color:var(--muted);font-weight:700;}
+.tests-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:720px){.tests-grid{grid-template-columns:1fr;}}
+
+/* TEST ITEM — custom checkbox */
 .test-item{
-  display:flex;
-  gap: 10px;
-  padding: 10px 10px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.92);
-  cursor: pointer;
-  transition: 0.18s;
+  display:flex;gap:10px;padding:12px;
+  border:1.5px solid var(--border);border-radius:16px;
+  background:rgba(255,255,255,0.95);cursor:pointer;transition:all 0.2s;
+  align-items:flex-start;
 }
-.test-item:hover{
-  transform: translateY(-1px);
-  border-color: rgba(14,165,233,0.55);
-  box-shadow: 0 10px 18px rgba(2,6,23,0.08);
+.test-item:hover{transform:translateY(-2px);border-color:rgba(14,165,233,0.4);box-shadow:0 8px 20px rgba(2,6,23,0.08);}
+.test-item input[type="checkbox"]{display:none;}
+.custom-check{
+  width:22px;height:22px;min-width:22px;border-radius:8px;
+  border:2px solid var(--border);background:#f1f5f9;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;margin-top:1px;
 }
-.test-item input{width:auto;margin: 3px 0 0;}
-.test-name{font-weight: 700;font-size: 13px;margin: 0;}
-.test-price{font-size: 12px;color: var(--muted);margin: 3px 0 0;}
+.test-item input[type="checkbox"]:checked ~ .custom-check,
+.test-item.checked .custom-check{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  border-color:transparent;
+  box-shadow:0 3px 10px rgba(14,165,233,0.4);
+  animation:checkPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes checkPop{0%{transform:scale(0.7);}100%{transform:scale(1);}}
+.custom-check::after{content:'✓';color:#fff;font-size:13px;font-weight:900;opacity:0;transition:opacity 0.15s;}
+.test-item.checked .custom-check::after{opacity:1;}
+.test-name{font-weight:800;font-size:13px;margin:0;color:var(--dark);}
+.test-price{font-size:12px;color:var(--muted);margin:3px 0 0;font-weight:700;}
+.test-item.checked{border-color:rgba(14,165,233,0.5);background:rgba(14,165,233,0.05);}
+</style>
+<style>
+/* SELECTED CHIPS */
+.chips-area{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;min-height:0;}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;
+  background:linear-gradient(135deg,rgba(14,165,233,0.12),rgba(20,184,166,0.12));
+  border:1px solid rgba(14,165,233,0.3);color:#0369a1;
+  animation:chipIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes chipIn{from{opacity:0;transform:scale(0.7);}to{opacity:1;transform:scale(1);}}
+.chip-remove{cursor:pointer;font-size:14px;line-height:1;color:#0369a1;font-weight:900;}
+.chip-remove:hover{color:#ef4444;}
+
+/* PAYMENT DETAILS */
 .payment-details{
-  display:none;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  margin: -4px 0 12px;
-  font-size: 13px;
+  display:none;padding:14px;border-radius:16px;border:1.5px solid var(--border);
+  margin:-4px 0 14px;font-size:13px;font-weight:700;
+  animation:slideDown 0.25s ease;
 }
-#mtnDetails{background: rgba(245,158,11,0.12);}
-#airtelDetails{background: rgba(239,68,68,0.10);}
-.summary{display:grid;grid-template-columns: 1fr 1fr;gap: 12px;margin-top: 6px;}
-@media(max-width:720px){.summary{grid-template-columns: 1fr;}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
+#mtnDetails{background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(251,191,36,0.08));border-color:rgba(245,158,11,0.3);}
+#airtelDetails{background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(248,113,113,0.06));border-color:rgba(239,68,68,0.25);}
+
+/* SUMMARY */
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px;}
+@media(max-width:720px){.summary{grid-template-columns:1fr;}}
 .total-box{
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(14,165,233,0.08);
+  padding:16px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(14,165,233,0.08),rgba(20,184,166,0.08));
+  border:1.5px solid rgba(14,165,233,0.2);
 }
-.total-box label{display:block;margin-bottom: 6px;}
-.total-input{font-size: 20px;font-weight: 800;color: #0369a1;}
+.total-box label{display:block;margin-bottom:8px;font-weight:800;font-size:13px;color:var(--dark);}
+.total-input{
+  font-size:28px;font-weight:900;
+  background:linear-gradient(135deg,#0369a1,#0f766e);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  transition:all 0.3s;
+}
+.total-input.bump{animation:totalBump 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes totalBump{0%{transform:scale(1);}50%{transform:scale(1.12);}100%{transform:scale(1);}}
 .order-preview{
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.88);
-  max-height: 170px;
-  overflow: auto;
+  padding:14px;border-radius:18px;border:1.5px solid var(--border);
+  background:rgba(255,255,255,0.9);max-height:170px;overflow:auto;
+  font-size:13px;font-weight:600;color:var(--dark);
 }
-button{
-  background: linear-gradient(135deg, var(--primary), var(--primary2));
-  color:#fff;
-  padding: 13px 14px;
-  border:none;
-  border-radius: 14px;
-  cursor:pointer;
-  width:100%;
-  font-size: 16px;
-  font-weight: 800;
-  margin-top: 12px;
-  box-shadow: 0 12px 22px rgba(14,165,233,0.2);
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;color:var(--muted);gap:8px;
 }
-button:hover{filter: brightness(0.98);}
-#confirmation{text-align:center;font-weight:bold;margin-top: 14px;}
-.action-row{
-  display:flex;
-  gap:10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
+.empty-state .empty-icon{font-size:36px;opacity:0.5;}
+.empty-state p{font-size:13px;font-weight:700;}
+
+/* SUBMIT BUTTON */
+button.submit-btn{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;padding:16px 14px;border:none;border-radius:16px;cursor:pointer;
+  width:100%;font-size:17px;font-weight:900;margin-top:14px;
+  box-shadow:0 12px 30px rgba(14,165,233,0.3);
+  transition:all 0.25s;letter-spacing:0.3px;
+  font-family:'Nunito',Arial,sans-serif;
 }
+button.submit-btn:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(14,165,233,0.4);}
+button.submit-btn:active{transform:translateY(0);}
+
+/* CONFIRMATION */
+#confirmation{text-align:center;font-weight:800;margin-top:16px;font-size:15px;}
+.action-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
 .action-row a{
-  flex:1;
-  min-width: 180px;
-  text-decoration:none;
-  text-align:center;
-  padding:12px 12px;
-  border-radius: 14px;
-  font-weight: 800;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.88);
-  color: var(--dark);
+  flex:1;min-width:180px;text-decoration:none;text-align:center;
+  padding:13px 12px;border-radius:16px;font-weight:800;font-size:13px;
+  border:1.5px solid var(--border);background:rgba(255,255,255,0.9);
+  color:var(--dark);transition:all 0.2s;
 }
-.action-row a:hover{
-  box-shadow: 0 10px 18px rgba(2,6,23,0.10);
-  transform: translateY(-1px);
+.action-row a:hover{box-shadow:0 10px 20px rgba(2,6,23,0.1);transform:translateY(-2px);}
+.footer-note{font-size:12px;color:var(--muted);text-align:center;padding:12px 0 18px;font-weight:700;}
+
+/* STICKY TOTAL BAR */
+.sticky-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);
+  border-top:1.5px solid var(--border);
+  padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 -8px 30px rgba(2,6,23,0.12);
+  transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
 }
-.footer-note{
-  font-size: 12px;
-  color: var(--muted);
-  text-align:center;
-  padding: 10px 0 16px;
+.sticky-bar.visible{transform:translateY(0);}
+.sticky-total{font-size:20px;font-weight:900;background:linear-gradient(135deg,#0369a1,#0f766e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sticky-label{font-size:12px;font-weight:700;color:var(--muted);}
+.sticky-submit{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;padding:12px 20px;border:none;border-radius:14px;
+  font-size:14px;font-weight:900;cursor:pointer;
+  box-shadow:0 6px 18px rgba(14,165,233,0.35);
+  font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;
 }
-/* 🔐 Logout button – hidden by default */
+.sticky-submit:hover{transform:translateY(-1px);}
+</style>
+<style>
+/* LOGOUT BUTTON */
 #logoutBtn{
-  display: none;
-  position: fixed;
-  z-index: 9999;
-  border: none;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
-  font-weight: 900;
-  padding: 14px 18px;
-  cursor: pointer;
-  box-shadow: 0 10px 22px rgba(239,68,68,0.35);
+  display:block;position:fixed;bottom:80px;right:16px;z-index:9999;
+  border:none;border-radius:999px;background:#ef4444;color:#fff;
+  font-weight:900;padding:14px 18px;cursor:pointer;
+  box-shadow:0 10px 22px rgba(239,68,68,0.35);
+  font-family:'Nunito',Arial,sans-serif;font-size:14px;
+  transition:all 0.2s;
 }
+#logoutBtn:hover{filter:brightness(0.95);transform:translateY(-2px);}
 
-/* 📱 Mobile ONLY */
-#logoutBtn{
-  display: block;
-  position: fixed;
-  bottom: 20px;
-  right: 16px;
-  z-index: 9999;
-  border: none;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
-  font-weight: 900;
-  padding: 14px 18px;
-  cursor: pointer;
-  box-shadow: 0 10px 22px rgba(239,68,68,0.35);
-}
-
-#logoutBtn:hover{
-  filter: brightness(0.95);
-}
-
-/* 👤 Signed-in user profile */
+/* USER PROFILE */
 .user-profile{
-  margin: 16px;
-  padding: 14px;
-  border-radius: 14px;
-  background: rgba(14,165,233,0.08);
-  border: 1px solid var(--border);
+  margin:16px;padding:16px;border-radius:18px;
+  background:rgba(14,165,233,0.08);border:1.5px solid rgba(14,165,233,0.2);
+}
+.user-profile h3{margin:0 0 10px;font-size:15px;color:var(--dark);font-weight:800;}
+.user-profile p{margin:4px 0;font-size:13px;color:var(--dark);font-weight:600;}
+
+/* ADMIN PANEL BTN */
+#adminPanelBtn a{
+  display:inline-block;padding:12px 20px;border-radius:16px;font-weight:900;
+  background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;
+  text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,0.15);
+  transition:all 0.2s;
+}
+#adminPanelBtn a:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,0.2);}
+
+/* CONFETTI CANVAS */
+#confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;}
+
+/* SECTION DIVIDER */
+.section-divider{
+  height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);
+  margin:16px 0;
 }
 
-.user-profile h3{
-  margin: 0 0 8px;
-  font-size: 15px;
-  color: var(--dark);
-}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(14,165,233,0.3);border-radius:999px;}
 
-.user-profile p{
-  margin: 4px 0;
-  font-size: 13px;
-  color: var(--dark);
-}
-
-/* 📱 Mobile only */
-@media (max-width: 768px){
-  #logoutBtn{
-    display: block;
-    bottom: 20px;
-    right: 16px;
-  }
-}
-
-#logoutBtn:hover{filter:brightness(0.95);
+@media(max-width:768px){
+  #logoutBtn{bottom:80px;right:16px;}
+  .sticky-bar{padding:10px 14px;}
 }
 </style>
 </head>
-
 <body>
+<canvas id="confettiCanvas"></canvas>
+<button id="logoutBtn">🚪 Logout</button>
 
-<button id="logoutBtn">Logout</button>
+<!-- STICKY TOTAL BAR -->
+<div class="sticky-bar" id="stickyBar">
+  <div>
+    <div class="sticky-label">Total Amount</div>
+    <div class="sticky-total" id="stickyTotal">UGX 0</div>
+  </div>
+  <button class="sticky-submit" onclick="document.getElementById('orderForm').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}))">
+    🚀 Submit Order
+  </button>
+</div>
 
 <div class="container">
-  <div class="card">
-    <div class="header">
-      <h2>🧪 Mobile Lab Order Form</h2>
-      <p>For the love of your health • Mityana & Nearby Areas</p>
-      <div class="header-actions">
-        <a class="call-btn" href="tel:+256778379791">📞 Call MTN: +256 778 379 791</a>
-        <a class="call-btn" href="tel:0750992939">📞 Call Airtel: 0750 992 939</a>
-        <a class="call-btn" href="inbox.html">📥 Patient Inbox</a>
-        <!-- Admin Button (hidden by default) -->
-<div id="adminPanelBtn" style="display:none;text-align:center;margin:12px 0;">
-  <a href="new_requests.html" style="
-      display:inline-block;
-      padding:12px 18px;
-      border-radius:14px;
-      font-weight:800;
-      background:linear-gradient(135deg,#0ea5e9,#14b8a6);
-      color:#fff;
-      text-decoration:none;
-      box-shadow:0 10px 20px rgba(0,0,0,0.15);
-    ">
-    🧪 Open Admin Dashboard
-  </a>
-</div>
+<div class="card">
 
-<!-- 👤 Signed-in User Info -->
-<div id="userProfile" class="user-profile" style="display:none;">
-  <h3>👤 Signed in as</h3>
-  <p><b>Name:</b> <span id="uName">—</span></p>
-  <p><b>Email:</b> <span id="uEmail">—</span></p>
-  <p><b>Phone:</b> <span id="uPhone">—</span></p>
-  <p><b>Location:</b> <span id="uLocation">—</span></p>
-</div>
-
-<form id="orderForm" class="form-body">
-
-
-      <div class="grid2">
-        <div>
-          <label for="name">Full Name</label>
-          <input id="name" required placeholder="e.g. Namiyingo Joyce">
-        </div>
-
-        <div>
-          <label for="email">Email</label>
-          <input type="email" id="email" required placeholder="e.g. name@gmail.com">
-        </div>
-
-        <div>
-          <label for="age">Age</label>
-          <input type="number" id="age" required placeholder="e.g. 25">
-        </div>
-
-        <div>
-          <label for="sex">Sex</label>
-          <select id="sex" required>
-            <option value="">-- Select --</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="phone">Phone</label>
-          <input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX">
-          <small class="note">Example: 0750992939</small>
-        </div>
-
-        <div>
-          <label for="location">Location</label>
-          <input id="location" placeholder="Address or Google Maps link" required>
-          <small class="note">Add landmark for easy pickup</small>
-        </div>
+  <!-- HEADER -->
+  <div class="header">
+    <h2>🧪 Mobile Lab Order Form</h2>
+    <p>For the love of your health • Mityana &amp; Nearby Areas</p>
+    <div class="header-actions">
+      <a class="call-btn pulse" href="tel:+256778379791">📞 MTN: +256 778 379 791</a>
+      <a class="call-btn pulse" href="tel:0750992939">📞 Airtel: 0750 992 939</a>
+      <a class="call-btn" href="inbox.html">📥 Patient Inbox</a>
+      <div id="adminPanelBtn" style="display:none;text-align:center;margin:12px 0;">
+        <a href="new_requests.html">🧪 Open Admin Dashboard</a>
       </div>
+    </div>
 
-      <label>Select Tests</label>
-
-      <div class="tools-bar">
-        <input class="search" id="searchTests" placeholder="Search test (e.g. HIV, CBC, Widal, HVS)..." />
-        <div class="badge" id="selectedCount">0 selected</div>
-      </div>
-
-      <div class="tests-area" id="testsContainer"></div>
-
-      <label for="payment">Payment Method</label>
-      <select id="payment" required>
-        <option value="">-- Select --</option>
-        <option>Cash on Delivery</option>
-        <option>MTN Mobile Money</option>
-        <option>Airtel Money</option>
-      </select>
-
-      <div id="mtnDetails" class="payment-details">
-        MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b>
-      </div>
-
-      <div id="airtelDetails" class="payment-details">
-        Airtel Money: <b>0706559100 – Nambi Amina</b>
-      </div>
-
-      <label for="notes">Notes (Optional)</label>
-      <textarea id="notes" placeholder="Any extra info e.g. fasting, preferred time, symptoms..."></textarea>
-
-      <div class="summary">
-        <div class="total-box">
-          <label>Total (UGX)</label>
-          <div class="total-input" id="totalText">0</div>
-          <input id="total" readonly value="0" style="display:none">
-        </div>
-
-        <div class="order-preview" id="preview">No tests selected</div>
-      </div>
-
-      <button type="submit">Submit Order</button>
-
-      <div id="confirmation"></div>
-
-      <div class="action-row" id="afterActions" style="display:none;">
-        <a id="sendScreenshotBtn" href="#" target="_blank">📸 Send Screenshot of Order</a>
-        <a href="new_requests.html">📋 View Admin Orders</a>
-      </div>
-
-      <div class="footer-note">
-        Sample collection available within Mityana & nearby areas.
-      </div>
-
-    </form>
+    <!-- USER PROFILE -->
+    <div id="userProfile" class="user-profile" style="display:none;">
+      <h3>👤 Signed in as</h3>
+      <p><b>Name:</b> <span id="uName">—</span></p>
+      <p><b>Email:</b> <span id="uEmail">—</span></p>
+      <p><b>Phone:</b> <span id="uPhone">—</span></p>
+      <p><b>Location:</b> <span id="uLocation">—</span></p>
+    </div>
   </div>
-</div>
+
+  <!-- PROGRESS STEPS -->
+  <div class="progress-bar" id="progressBar">
+    <div class="step active" id="step1">
+      <div class="step-circle">👤</div>
+      <div class="step-label">Patient Info</div>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step" id="step2">
+      <div class="step-circle">🧪</div>
+      <div class="step-label">Select Tests</div>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step" id="step3">
+      <div class="step-circle">💳</div>
+      <div class="step-label">Payment</div>
+    </div>
+    <div class="step-line" id="line3"></div>
+    <div class="step" id="step4">
+      <div class="step-circle">✅</div>
+      <div class="step-label">Submit</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <form id="orderForm" class="form-body">
+    <div class="grid2">
+      <div>
+        <label class="section-label" for="name">Full Name</label>
+        <input id="name" required placeholder="e.g. Namiyingo Joyce">
+      </div>
+      <div>
+        <label class="section-label" for="email">Email</label>
+        <input type="email" id="email" required placeholder="e.g. name@gmail.com">
+      </div>
+      <div>
+        <label class="section-label" for="age">Age</label>
+        <input type="number" id="age" required placeholder="e.g. 25">
+      </div>
+      <div>
+        <label class="section-label" for="sex">Sex</label>
+        <select id="sex" required>
+          <option value="">-- Select --</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="section-label" for="phone">Phone</label>
+        <input id="phone" required pattern="^(07|2567)[0-9]{8}$" placeholder="07XXXXXXXX or 2567XXXXXXXX">
+        <small class="note">Example: 0750992939</small>
+      </div>
+      <div>
+        <label class="section-label" for="location">Location</label>
+        <input id="location" placeholder="Address or Google Maps link" required>
+        <small class="note">Add landmark for easy pickup</small>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+    <label class="section-label">Select Tests</label>
+    <div class="tools-bar">
+      <input class="search" id="searchTests" placeholder="🔍 Search test (e.g. HIV, CBC, Widal, HVS)..." />
+      <div class="badge" id="selectedCount">0 selected</div>
+    </div>
+    <div class="tests-area" id="testsContainer"></div>
+
+    <!-- CHIPS for selected tests -->
+    <div class="chips-area" id="chipsArea"></div>
+
+    <div class="section-divider"></div>
+    <label class="section-label" for="payment">Payment Method</label>
+    <select id="payment" required>
+      <option value="">-- Select --</option>
+      <option>Cash on Delivery</option>
+      <option>MTN Mobile Money</option>
+      <option>Airtel Money</option>
+    </select>
+    <div id="mtnDetails" class="payment-details">💛 MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b></div>
+    <div id="airtelDetails" class="payment-details">❤️ Airtel Money: <b>0706559100 – Nambi Amina</b></div>
+
+    <label class="section-label" for="notes">Notes (Optional)</label>
+    <textarea id="notes" placeholder="Any extra info e.g. fasting, preferred time, symptoms..."></textarea>
+
+    <div class="summary">
+      <div class="total-box">
+        <label>Total (UGX)</label>
+        <div class="total-input" id="totalText">0</div>
+        <input id="total" readonly value="0" style="display:none">
+      </div>
+      <div class="order-preview" id="preview">
+        <div class="empty-state">
+          <div class="empty-icon">🧪</div>
+          <p>No tests selected yet</p>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">🚀 Submit Order</button>
+    <div id="confirmation"></div>
+    <div class="action-row" id="afterActions" style="display:none;">
+      <a id="sendScreenshotBtn" href="#" target="_blank">📸 Send Screenshot of Order</a>
+      <a href="new_requests.html">📋 View Admin Orders</a>
+    </div>
+    <div class="footer-note">Sample collection available within Mityana &amp; nearby areas.</div>
+  </form>
+
+</div><!-- /card -->
+</div><!-- /container -->
+
+<!-- Screenshot library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
 // ✅ Firebase init
@@ -439,45 +529,31 @@ const firebaseConfig = {
   messagingSenderId: "624002906588",
   appId: "1:624002906588:web:08b4259f90ffa9adad7719",
 };
-
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ✅ Require login + auto-fill all details
-auth.onAuthStateChanged(async (user)=>{
-  if(!user){
-    window.location.href = "login.html";
-    return;
-  }
-
-  // 🔐 SHOW ADMIN BUTTON ONLY FOR ADMIN
+// ✅ Require login + auto-fill
+auth.onAuthStateChanged(async (user) => {
+  if(!user){ window.location.href = "login.html"; return; }
   if(user.email === "edrinehero@gmail.com"){
     const adminBtn = document.getElementById("adminPanelBtn");
     if(adminBtn) adminBtn.style.display = "block";
   }
-
   const profileBox = document.getElementById("userProfile");
-
   const doc = await db.collection("users").doc(user.uid).get();
   if(doc.exists){
     const data = doc.data();
-
-    // Autofill form
     nameInput.value = data.fullName || "";
     ageInput.value = data.age || "";
     sexInput.value = data.sex || "";
     phoneInput.value = data.phone || "";
     locationInput.value = data.location || "";
     emailInput.value = data.email || user.email || "";
-
-    // 👤 Fill profile display
     document.getElementById("uName").innerText = data.fullName || "—";
     document.getElementById("uEmail").innerText = data.email || user.email;
     document.getElementById("uPhone").innerText = data.phone || "—";
     document.getElementById("uLocation").innerText = data.location || "—";
-
     profileBox.style.display = "block";
   } else {
     document.getElementById("uEmail").innerText = user.email;
@@ -485,9 +561,8 @@ auth.onAuthStateChanged(async (user)=>{
   }
 });
 
-
-// ✅ Logout button
-document.getElementById("logoutBtn").addEventListener("click", async ()=>{
+// ✅ Logout
+document.getElementById("logoutBtn").addEventListener("click", async () => {
   await auth.signOut();
   window.location.href = "login.html";
 });
@@ -503,11 +578,12 @@ const airtelDetails = document.getElementById("airtelDetails");
 const confirmation = document.getElementById("confirmation");
 const searchTests = document.getElementById("searchTests");
 const selectedCount = document.getElementById("selectedCount");
-
 const afterActions = document.getElementById("afterActions");
 const sendScreenshotBtn = document.getElementById("sendScreenshotBtn");
+const chipsArea = document.getElementById("chipsArea");
+const stickyBar = document.getElementById("stickyBar");
+const stickyTotal = document.getElementById("stickyTotal");
 
-// ✅ INPUTS
 const nameInput = document.getElementById("name");
 const emailInput = document.getElementById("email");
 const ageInput = document.getElementById("age");
@@ -516,153 +592,196 @@ const phoneInput = document.getElementById("phone");
 const locationInput = document.getElementById("location");
 const notesInput = document.getElementById("notes");
 
-// ✅ YOUR WHATSAPP NUMBER
 const adminWhatsApp = "256750992939";
 
 // ---------- TESTS ----------
 const testCategories = [
-  {
-    title: "Blood Tests",
-    tests: [
-      {name:"CBC - Complete Blood Count",price:20000},
-      {name:"Blood Glucose",price:7000},
-      {name:"Blood Grouping",price:10000},
-      {name:"Bleeding & Clotting Test",price:15000},
-      {name:"malaria ( b/s)",price:5000},
-      {name:"Electrolytes",price:50000},
-      {name:"Lipid Profile",price:40000},
-      {name:"Liver Function Test (LFT)",price:50000},
-      {name:"Kidney Function Test (RFT)",price:50000},
-      {name:"PSA",price:25000},
-      {name:"HCG Blood",price:15000},
-      {name:"Sickling Test",price:40000},
-      {name:"DNA",price:600000}
-    ]
-  },
-  {
-    title: "Infections / STIs",
-    tests: [
-      {name:"HIV",price:7000},
-      {name:"Hepatitis B",price:10000},
-      {name:"Hepatitis C",price:10000},
-      {name:"RPR / Syphilis",price:8000},
-      {name:"Gonorrhea Test",price:15000},
-      {name:"Chlamydia Test",price:15000},
-      {name:"Brucella Test",price:10000}
-    ]
-  },
-  {
-    title: "Stool / Urine",
-    tests: [
-      {name:"Urinalysis",price:8000},
-      {name:"Stool Analysis",price:15000},
-      {name:"H. Pylori Stool",price:20000},
-      {name:"Widal Stool",price:20000}
-    ]
-  },
-  {
-    title: "H. Pylori / Gastro",
-    tests: [
-      {name:"H. Pylori Serum",price:8000}
-    ]
-  },
-  {
-    title: "Women's Health",
-    tests: [
-      {name:"Pregnancy Test (hCG)",price:5000},
-      {name:"High Vaginal Swab",price:10000},
-      {name:"High Vaginal Swab C&S",price:120000},
-      {name:"Gram Staining",price:10000}
-    ]
-  },
-  {
-    title: "Widal / Febrile Illness",
-    tests: [
-      {name:"Widal Serum",price:8000}
-    ]
-  },
-  {
-    title: "Autoimmune / Others",
-    tests: [
-      {name:"Rheumatoid Factor",price:15000}
-    ]
-  }
+  {icon:"🩸", title:"Blood Tests", tests:[
+    {name:"CBC - Complete Blood Count",price:20000},
+    {name:"Blood Glucose",price:7000},
+    {name:"Blood Grouping",price:10000},
+    {name:"Bleeding & Clotting Test",price:15000},
+    {name:"Malaria (B/S)",price:5000},
+    {name:"Electrolytes",price:50000},
+    {name:"Lipid Profile",price:40000},
+    {name:"Liver Function Test (LFT)",price:50000},
+    {name:"Kidney Function Test (RFT)",price:50000},
+    {name:"PSA",price:25000},
+    {name:"HCG Blood",price:15000},
+    {name:"Sickling Test",price:40000},
+    {name:"DNA",price:600000}
+  ]},
+  {icon:"🦠", title:"Infections / STIs", tests:[
+    {name:"HIV",price:7000},
+    {name:"Hepatitis B",price:10000},
+    {name:"Hepatitis C",price:10000},
+    {name:"RPR / Syphilis",price:8000},
+    {name:"Gonorrhea Test",price:15000},
+    {name:"Chlamydia Test",price:15000},
+    {name:"Brucella Test",price:10000}
+  ]},
+  {icon:"🧫", title:"Stool / Urine", tests:[
+    {name:"Urinalysis",price:8000},
+    {name:"Stool Analysis",price:15000},
+    {name:"H. Pylori Stool",price:20000},
+    {name:"Widal Stool",price:20000}
+  ]},
+  {icon:"🫁", title:"H. Pylori / Gastro", tests:[
+    {name:"H. Pylori Serum",price:8000}
+  ]},
+  {icon:"🌸", title:"Women's Health", tests:[
+    {name:"Pregnancy Test (hCG)",price:5000},
+    {name:"High Vaginal Swab",price:10000},
+    {name:"High Vaginal Swab C&S",price:120000},
+    {name:"Gram Staining",price:10000}
+  ]},
+  {icon:"🌡️", title:"Widal / Febrile Illness", tests:[
+    {name:"Widal Serum",price:8000}
+  ]},
+  {icon:"🔬", title:"Autoimmune / Others", tests:[
+    {name:"Rheumatoid Factor",price:15000}
+  ]}
 ];
-
-// ---------- RENDER ----------
+</script>
+<script>
+// ---------- RENDER TESTS ----------
 function renderTests(filterText=""){
   testsContainer.innerHTML = "";
-
-  testCategories.forEach(cat=>{
-    const filtered = cat.tests.filter(t =>
-      t.name.toLowerCase().includes(filterText.toLowerCase())
-    );
+  testCategories.forEach(cat => {
+    const filtered = cat.tests.filter(t => t.name.toLowerCase().includes(filterText.toLowerCase()));
     if(filtered.length === 0) return;
-
     const wrapper = document.createElement("div");
     wrapper.className = "category";
-
     const titleRow = document.createElement("div");
     titleRow.className = "cat-title";
-    titleRow.innerHTML = `<h3>✅ ${cat.title}</h3><span>${filtered.length} tests</span>`;
-
+    titleRow.innerHTML = `<h3><span class="cat-icon">${cat.icon}</span>${cat.title}</h3><span>${filtered.length} tests</span>`;
     const grid = document.createElement("div");
     grid.className = "tests-grid";
-
-    filtered.forEach(t=>{
+    filtered.forEach(t => {
       const label = document.createElement("label");
       label.className = "test-item";
-
       const cb = document.createElement("input");
       cb.type = "checkbox";
       cb.dataset.price = t.price;
       cb.value = t.name;
-      cb.onchange = updateTotal;
-
+      // restore checked state
+      if(selectedTests.has(t.name)) { cb.checked = true; label.classList.add("checked"); }
+      cb.onchange = () => {
+        if(cb.checked){ selectedTests.set(t.name, t.price); label.classList.add("checked"); }
+        else { selectedTests.delete(t.name); label.classList.remove("checked"); }
+        updateTotal();
+      };
+      const checkDiv = document.createElement("div");
+      checkDiv.className = "custom-check";
+      if(selectedTests.has(t.name)) checkDiv.style.cssText = "background:linear-gradient(135deg,#0ea5e9,#14b8a6);border-color:transparent;";
       const info = document.createElement("div");
-      info.innerHTML = `
-        <p class="test-name">${t.name}</p>
-        <p class="test-price">UGX ${t.price.toLocaleString()}</p>
-      `;
-
+      info.innerHTML = `<p class="test-name">${t.name}</p><p class="test-price">UGX ${t.price.toLocaleString()}</p>`;
       label.appendChild(cb);
+      label.appendChild(checkDiv);
       label.appendChild(info);
       grid.appendChild(label);
     });
-
     wrapper.appendChild(titleRow);
     wrapper.appendChild(grid);
     testsContainer.appendChild(wrapper);
   });
 }
+
+// Track selected tests across re-renders
+const selectedTests = new Map();
 renderTests();
 
 function updateTotal(){
-  let total = 0, list = [];
-  const checked = document.querySelectorAll("#testsContainer input[type='checkbox']:checked");
-
-  checked.forEach(cb=>{
-    total += Number(cb.dataset.price);
-    list.push(`${cb.value} (UGX ${Number(cb.dataset.price).toLocaleString()})`);
-  });
-
+  let total = 0;
+  selectedTests.forEach((price) => { total += price; });
   totalInput.value = total;
+
+  // Animate total
+  totalText.classList.remove("bump");
+  void totalText.offsetWidth;
+  totalText.classList.add("bump");
   totalText.innerText = total.toLocaleString();
 
-  selectedCount.innerText = `${checked.length} selected`;
-  preview.innerHTML = list.length ? list.join("<br>") : "No tests selected";
+  // Sticky bar
+  stickyTotal.innerText = "UGX " + total.toLocaleString();
+  if(selectedTests.size > 0){ stickyBar.classList.add("visible"); }
+  else { stickyBar.classList.remove("visible"); }
+
+  // Badge
+  selectedCount.innerText = `${selectedTests.size} selected`;
+  if(selectedTests.size > 0){ selectedCount.classList.add("has-items"); }
+  else { selectedCount.classList.remove("has-items"); }
+
+  // Preview
+  if(selectedTests.size === 0){
+    preview.innerHTML = `<div class="empty-state"><div class="empty-icon">🧪</div><p>No tests selected yet</p></div>`;
+  } else {
+    let lines = [];
+    selectedTests.forEach((price, name) => { lines.push(`✅ ${name} — UGX ${price.toLocaleString()}`); });
+    preview.innerHTML = lines.join("<br>");
+  }
+
+  // Chips
+  renderChips();
+  updateProgress();
 }
 
-searchTests.addEventListener("input", (e)=>{
+function renderChips(){
+  chipsArea.innerHTML = "";
+  selectedTests.forEach((price, name) => {
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.innerHTML = `${name} <span class="chip-remove" data-name="${name}">✕</span>`;
+    chipsArea.appendChild(chip);
+  });
+  chipsArea.querySelectorAll(".chip-remove").forEach(btn => {
+    btn.onclick = () => {
+      selectedTests.delete(btn.dataset.name);
+      // uncheck in DOM
+      testsContainer.querySelectorAll("input[type='checkbox']").forEach(cb => {
+        if(cb.value === btn.dataset.name){ cb.checked = false; cb.closest("label").classList.remove("checked"); }
+      });
+      updateTotal();
+    };
+  });
+}
+
+searchTests.addEventListener("input", (e) => {
   renderTests(e.target.value.trim());
-  updateTotal();
 });
 
 // ---------- PAYMENT ----------
-payment.onchange=()=>{
-  mtnDetails.style.display=payment.value==="MTN Mobile Money"?"block":"none";
-  airtelDetails.style.display=payment.value==="Airtel Money"?"block":"none";
+payment.onchange = () => {
+  mtnDetails.style.display = payment.value === "MTN Mobile Money" ? "block" : "none";
+  airtelDetails.style.display = payment.value === "Airtel Money" ? "block" : "none";
+  updateProgress();
 };
+
+// ---------- PROGRESS ----------
+function updateProgress(){
+  const hasInfo = nameInput.value && emailInput.value && phoneInput.value && locationInput.value;
+  const hasTests = selectedTests.size > 0;
+  const hasPayment = payment.value !== "";
+
+  const s1 = document.getElementById("step1"), l1 = document.getElementById("line1");
+  const s2 = document.getElementById("step2"), l2 = document.getElementById("line2");
+  const s3 = document.getElementById("step3"), l3 = document.getElementById("line3");
+  const s4 = document.getElementById("step4");
+
+  s1.className = "step " + (hasInfo ? "done" : "active");
+  l1.className = "step-line " + (hasInfo ? "done" : "");
+  s2.className = "step " + (hasTests && hasInfo ? "done" : hasInfo ? "active" : "");
+  l2.className = "step-line " + (hasTests && hasInfo ? "done" : "");
+  s3.className = "step " + (hasPayment && hasTests ? "done" : hasTests ? "active" : "");
+  l3.className = "step-line " + (hasPayment && hasTests ? "done" : "");
+  s4.className = "step " + (hasPayment && hasTests && hasInfo ? "active" : "");
+}
+
+["name","email","phone","location","age","sex"].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener("input", updateProgress);
+  if(el) el.addEventListener("change", updateProgress);
+});
 
 // ---------- SAVE ORDER LOCAL ----------
 function saveOrder(order){
@@ -672,22 +791,55 @@ function saveOrder(order){
   localStorage.setItem(key, JSON.stringify(existing));
 }
 
+// ---------- CONFETTI ----------
+function launchConfetti(){
+  const canvas = document.getElementById("confettiCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length:120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    r: Math.random() * 8 + 4,
+    d: Math.random() * 3 + 1,
+    color: ["#0ea5e9","#14b8a6","#10b981","#f59e0b","#ec4899","#8b5cf6"][Math.floor(Math.random()*6)],
+    tilt: Math.random() * 10 - 5,
+    tiltAngle: 0,
+    tiltSpeed: Math.random() * 0.1 + 0.05
+  }));
+  let frame = 0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p => {
+      ctx.beginPath();
+      ctx.lineWidth = p.r/2;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r/4, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r/4);
+      ctx.stroke();
+      p.y += p.d;
+      p.tiltAngle += p.tiltSpeed;
+      p.tilt = Math.sin(p.tiltAngle) * 12;
+      if(p.y > canvas.height){ p.y = -10; p.x = Math.random() * canvas.width; }
+    });
+    frame++;
+    if(frame < 200) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+</script>
+<script>
 // ---------- SUBMIT ----------
 document.getElementById("orderForm").onsubmit = async e => {
   e.preventDefault();
-
-  if(Number(totalInput.value) === 0){
-    alert("Please select at least one test");
-    return;
-  }
-
+  if(selectedTests.size === 0){ alert("Please select at least one test"); return; }
   const user = auth.currentUser;
-  if(!user){
-    alert("Please log in to submit your order.");
-    return;
-  }
+  if(!user){ alert("Please log in to submit your order."); return; }
 
   const orderId = "ML-" + Date.now();
+  let testsList = [];
+  selectedTests.forEach((price, name) => { testsList.push(`${name} (UGX ${price.toLocaleString()})`); });
 
   const params = {
     order_id: orderId,
@@ -696,7 +848,7 @@ document.getElementById("orderForm").onsubmit = async e => {
     age: ageInput.value,
     sex: sexInput.value,
     phone: phoneInput.value,
-    tests: preview.innerText,
+    tests: testsList.join("\n"),
     total: "UGX " + Number(totalInput.value).toLocaleString(),
     location: locationInput.value,
     payment: payment.value,
@@ -704,16 +856,12 @@ document.getElementById("orderForm").onsubmit = async e => {
   };
 
   try {
-    // Firestore write
-   await db.collection("orders").doc(orderId).set({
-  ...params,
-
-  // 🔑 REQUIRED FOR ADMIN DASHBOARD
-  userId: user.uid,
-  status: "pending",
-  createdAt: firebase.firestore.FieldValue.serverTimestamp()
-});
-
+    await db.collection("orders").doc(orderId).set({
+      ...params,
+      userId: user.uid,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
   } catch(err){
     console.error("Firestore write failed:", err);
     alert("⚠️ Failed to submit order: " + err.message);
@@ -721,90 +869,49 @@ document.getElementById("orderForm").onsubmit = async e => {
   }
 
   // WhatsApp notification
-  const waText = `Mobile Lab Order
-Order ID: ${orderId}
-Name: ${params.name}
-Phone: ${params.phone}
-Age: ${params.age}
-Sex: ${params.sex}
-Tests:
-${preview.innerText}
-Total: ${params.total}
-Location: ${params.location}
-Payment: ${params.payment}
-Notes: ${params.notes}`;
-
+  const waText = `Mobile Lab Order\nOrder ID: ${orderId}\nName: ${params.name}\nPhone: ${params.phone}\nAge: ${params.age}\nSex: ${params.sex}\nTests:\n${params.tests}\nTotal: ${params.total}\nLocation: ${params.location}\nPayment: ${params.payment}\nNotes: ${params.notes}`;
   window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(waText)}`);
 
-  const screenshotText = `Hello Doctor Edrine,
-I have submitted my Mobile Lab Order.
-
-Order ID: ${orderId}
-Name: ${params.name}
-Phone: ${params.phone}
-
-✅ I am sending the screenshot of my order now.`;
-
+  const screenshotText = `Hello Doctor Edrine,\nI have submitted my Mobile Lab Order.\nOrder ID: ${orderId}\nName: ${params.name}\nPhone: ${params.phone}\n✅ I am sending the screenshot of my order now.`;
   sendScreenshotBtn.href = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(screenshotText)}`;
 
   // EmailJS
-  emailjs.send("service_sjp4zrf","lab_order",params)
-  .then(()=>{
-    confirmation.innerHTML="✅ Order submitted successfully! Please send a screenshot of your order.";
-    afterActions.style.display="flex";
-    setTimeout(()=>{   
-      sendScreenshotToWhatsApp(orderId); 
-    }, 800);
-    e.target.reset();
-    preview.innerHTML="No tests selected";
-    totalInput.value="0";
-    totalText.innerText="0";
-    selectedCount.innerText="0 selected";
-    mtnDetails.style.display="none";
-    airtelDetails.style.display="none";
-    renderTests();
-  })
-  .catch(()=>{
-    confirmation.innerHTML="❌ Failed to send order";
-  });
+  emailjs.send("service_sjp4zrf","lab_order", params)
+    .then(() => {
+      confirmation.innerHTML = "✅ Order submitted successfully! Please send a screenshot of your order.";
+      afterActions.style.display = "flex";
+      launchConfetti();
+      setTimeout(() => { sendScreenshotToWhatsApp(orderId); }, 800);
+      e.target.reset();
+      selectedTests.clear();
+      preview.innerHTML = `<div class="empty-state"><div class="empty-icon">🧪</div><p>No tests selected yet</p></div>`;
+      totalInput.value = "0";
+      totalText.innerText = "0";
+      selectedCount.innerText = "0 selected";
+      selectedCount.classList.remove("has-items");
+      mtnDetails.style.display = "none";
+      airtelDetails.style.display = "none";
+      stickyBar.classList.remove("visible");
+      chipsArea.innerHTML = "";
+      renderTests();
+      updateProgress();
+    })
+    .catch(() => {
+      confirmation.innerHTML = "❌ Failed to send order";
+    });
 };
-</script>
-<!-- Screenshot library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<script>
-// ALL your existing JavaScript (your Firebase + order logic)
-
-// 👇 ADD THIS FUNCTION BELOW YOUR EXISTING CODE
+// ---------- SCREENSHOT ----------
 async function sendScreenshotToWhatsApp(orderId){
-  const card = document.querySelector(".card"); // captures whole form
-
+  const card = document.querySelector(".card");
   const canvas = await html2canvas(card);
   const image = canvas.toDataURL("image/png");
-
   const link = document.createElement("a");
   link.href = image;
   link.download = `Order_${orderId}.png`;
   link.click();
-
   alert("📸 Screenshot downloaded. Please send it on WhatsApp.");
 }
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
