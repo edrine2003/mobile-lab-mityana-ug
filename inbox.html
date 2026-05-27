@@ -166,6 +166,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 let currentUserData = {};
+const resultDataMap = {}; // stores result data by doc id
 
 auth.onAuthStateChanged(async user => {
   if(!user){ window.location.href = "login.html"; return; }
@@ -183,7 +184,6 @@ function loadResults(userId){
   const list = document.getElementById("resultsList");
 
   db.collection("results").where("userId","==",userId)
-    .orderBy("createdAt","desc")
     .onSnapshot(snapshot => {
       document.getElementById("heroSub").innerText =
         snapshot.size > 0 ? `${snapshot.size} result(s) available` : "No results yet";
@@ -202,6 +202,9 @@ function loadResults(userId){
       snapshot.forEach((doc, idx) => {
         const r = doc.data();
         const date = r.createdAt ? r.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"}) : "—";
+        // Store result data in global map keyed by doc id
+        resultDataMap[doc.id] = r;
+
         const card = document.createElement("div");
         card.className = "result-card";
         card.style.animationDelay = (idx * 0.08) + "s";
@@ -234,10 +237,6 @@ function loadResults(userId){
             </div>
           </div>
         `;
-
-        // Store data on element for PDF generation
-        card.dataset.resultId = doc.id;
-        card.dataset.result = JSON.stringify(r);
         list.appendChild(card);
       });
     }, err => {
@@ -279,9 +278,8 @@ function loadOrders(userId){
 
 // ── BUILD PDF HTML ──
 function buildPDFContent(docId){
-  const card = document.querySelector(`[data-result-id="${docId}"]`);
-  if(!card) return null;
-  const r = JSON.parse(card.dataset.result);
+  const r = resultDataMap[docId];
+  if(!r){ showToast("Result data not found"); return null; }
   const date = r.createdAt ? r.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"}) : new Date().toLocaleDateString();
   const name = r.patientName || currentUserData.fullName || "Patient";
   const phone = currentUserData.phone || "—";
@@ -391,9 +389,8 @@ function downloadPDF(docId){
 
 // ── SHARE VIA WHATSAPP ──
 function shareWA(docId){
-  const card = document.querySelector(`[data-result-id="${docId}"]`);
-  if(!card) return;
-  const r = JSON.parse(card.dataset.result);
+  const r = resultDataMap[docId];
+  if(!r){ showToast("Result not found"); return; }
   const msg = `🧪 My Lab Results from Mobile Lab Mityana\n\nPatient: ${r.patientName||currentUserData.fullName||"—"}\nOrder: ${r.orderId||docId}\n\n📋 Results:\n${r.resultText||"—"}\n\n👨‍⚕️ Doctor's Notes:\n${r.resultNotes||"None"}\n\nMobile Lab – Mityana | +256 778 379 791`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
 }
