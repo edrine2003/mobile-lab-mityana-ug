@@ -226,7 +226,7 @@ function loadResults(userId){
               <span class="meta-chip">⚧ ${currentUserData.sex || "—"}</span>
             </div>
             <div style="font-size:13px;font-weight:800;color:var(--muted);margin-bottom:6px;">📋 TEST RESULTS</div>
-            <div class="result-text">${r.resultText || "No results recorded"}</div>
+            <div class="result-text">${getResultDisplay(r)}</div>
             ${r.resultNotes ? `
             <div class="doctor-notes">
               <strong>👨‍⚕️ Doctor's Notes & Advice:</strong><br>${r.resultNotes}
@@ -329,7 +329,7 @@ function buildPDFContent(docId){
 
     <!-- RESULTS -->
     <div class="pdf-section-title">📋 Test Results</div>
-    <div class="pdf-results-box">${(r.resultText||"No results recorded").replace(/\n/g,"<br>")}</div>
+    <div class="pdf-results-box">${getResultDisplay(r).replace(/\n/g,"<br>")}</div>
 
     <!-- DOCTOR NOTES -->
     ${r.resultNotes ? `
@@ -431,6 +431,19 @@ function showToast(msg){
   t.innerText = msg;
   t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"),2500);
+}
+
+// ── HANDLE BOTH OLD & NEW RESULT FORMATS ──
+function getResultDisplay(r){
+  // New format: resultText is a plain string
+  if(r.resultText && r.resultText.trim()) return r.resultText;
+  // Old format: results is an object {testName: value}
+  if(r.results && typeof r.results === "object"){
+    return Object.entries(r.results)
+      .map(([test, val]) => `${test}: ${typeof val === "object" ? (val.value||"—") : (val||"—")}`)
+      .join("\n");
+  }
+  return "No results recorded";
 }
 </script>
 </body>
