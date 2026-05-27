@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointments – Mobile Lab</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;
+  --muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:40px;}
+
+/* TOPBAR */
+.topbar{
+  background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);
+  background-size:300% 300%;animation:gradShift 8s ease infinite;
+  padding:16px 18px;display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 4px 20px rgba(0,0,0,0.15);
+}
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.back-btn{
+  background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);
+  color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;
+  cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;
+}
+.topbar-title{color:#fff;font-size:18px;font-weight:900;flex:1;text-align:center;}
+.topbar-right{width:80px;display:flex;justify-content:flex-end;}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#0369a1,#0ea5e9);
+  padding:24px 20px 60px;color:#fff;text-align:center;
+  position:relative;overflow:hidden;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;height:40px;
+  background:var(--bg);border-radius:40px 40px 0 0;
+}
+.hero h2{font-size:22px;font-weight:900;margin-bottom:6px;}
+.hero p{font-size:13px;opacity:0.9;font-weight:600;}
+
+/* TABS */
+.tabs{
+  display:flex;gap:8px;padding:16px 16px 0;
+  overflow-x:auto;scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:9px 18px;border:none;border-radius:999px;cursor:pointer;
+  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;
+  background:#fff;color:var(--muted);white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:all 0.2s;
+}
+.tab.active{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);}
+
+/* BOOK FORM CARD */
+.form-card{
+  background:#fff;border-radius:24px;margin:16px;padding:20px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.08);border:1px solid var(--border);
+}
+.form-card h3{font-size:16px;font-weight:900;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.field{margin-bottom:14px;}
+.field label{font-size:13px;font-weight:800;color:var(--dark);display:block;margin-bottom:6px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:13px 14px;border-radius:14px;
+  border:1.5px solid var(--border);background:#f8fafc;
+  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
+  color:var(--dark);outline:none;transition:all 0.2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,0.12);background:#fff;
+}
+.field textarea{min-height:80px;resize:none;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.grid2{grid-template-columns:1fr;}}
+
+/* SERVICE CHIPS */
+.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+.service-chip{
+  background:#f8fafc;border:1.5px solid var(--border);border-radius:14px;
+  padding:12px 10px;text-align:center;cursor:pointer;transition:all 0.2s;
+  font-family:'Nunito',Arial,sans-serif;
+}
+.service-chip .s-icon{font-size:22px;display:block;margin-bottom:4px;}
+.service-chip .s-name{font-size:12px;font-weight:800;color:var(--dark);}
+.service-chip.selected{background:rgba(14,165,233,0.08);border-color:var(--primary);}
+.service-chip.selected .s-name{color:var(--primary);}
+
+/* TIME SLOTS */
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+@media(max-width:400px){.slots-grid{grid-template-columns:repeat(2,1fr);}}
+.slot{
+  padding:10px 6px;border:1.5px solid var(--border);border-radius:12px;
+  text-align:center;cursor:pointer;font-size:13px;font-weight:800;
+  color:var(--dark);background:#f8fafc;transition:all 0.2s;
+  font-family:'Nunito',Arial,sans-serif;
+}
+.slot:hover{border-color:var(--primary);}
+.slot.selected{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(14,165,233,0.3);}
+.slot.taken{background:#f1f5f9;color:#94a3b8;cursor:not-allowed;text-decoration:line-through;}
+
+/* SUBMIT BTN */
+.submit-btn{
+  width:100%;padding:15px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;font-size:16px;font-weight:900;cursor:pointer;
+  font-family:'Nunito',Arial,sans-serif;
+  box-shadow:0 8px 24px rgba(14,165,233,0.3);transition:all 0.2s;margin-top:4px;
+}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(14,165,233,0.4);}
+
+/* APPOINTMENT CARDS */
+.appt-list{padding:0 16px;}
+.appt-card{
+  background:#fff;border-radius:20px;padding:16px 18px;margin-bottom:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);
+  transition:all 0.2s;
+}
+.appt-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.1);}
+.appt-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.appt-service{font-size:16px;font-weight:900;color:var(--dark);margin-bottom:2px;}
+.appt-date{font-size:13px;font-weight:700;color:var(--muted);}
+.status-badge{
+  padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap;
+}
+.status-pending{background:rgba(245,158,11,0.12);color:#b45309;}
+.status-confirmed{background:rgba(34,197,94,0.12);color:#15803d;}
+.status-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
+.status-completed{background:rgba(14,165,233,0.12);color:#0369a1;}
+.appt-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.meta-chip{
+  background:#f1f5f9;border-radius:999px;padding:5px 10px;
+  font-size:12px;font-weight:700;color:#475569;display:flex;align-items:center;gap:4px;
+}
+.appt-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.appt-btn{
+  padding:8px 14px;border:none;border-radius:12px;cursor:pointer;
+  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;transition:all 0.2s;
+}
+.btn-cancel{background:#fff;color:#ef4444;border:1.5px solid rgba(239,68,68,0.3);}
+.btn-wa{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;}
+.btn-reschedule{background:#f1f5f9;color:var(--dark);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:50px 20px;color:#94a3b8;}
+.empty-state .icon{font-size:52px;opacity:0.35;margin-bottom:12px;}
+.empty-state p{font-size:15px;font-weight:700;}
+
+/* TOAST */
+.toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
+  background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;
+  font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* SECTION LABEL */
+.section-lbl{font-size:13px;font-weight:800;color:var(--dark);margin-bottom:8px;display:block;}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="back-btn" href="dashboard.html">← Back</a>
+  <div class="topbar-title">📅 Appointments</div>
+  <div class="topbar-right"></div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h2>Book an Appointment</h2>
+  <p>Schedule a home visit or lab visit in Mityana</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" id="tab-book" onclick="switchTab('book')">📅 Book New</button>
+  <button class="tab" id="tab-upcoming" onclick="switchTab('upcoming')">⏳ Upcoming</button>
+  <button class="tab" id="tab-past" onclick="switchTab('past')">✅ Past</button>
+</div>
+
+<!-- ══ BOOK TAB ══ -->
+<div id="page-book">
+  <div class="form-card">
+    <h3>🏥 Select Service</h3>
+    <div class="service-grid" id="serviceGrid"></div>
+
+    <h3 style="margin-bottom:12px;">📋 Your Details</h3>
+    <div class="grid2">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="apptName" placeholder="e.g. Namiyingo Joyce">
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input type="tel" id="apptPhone" placeholder="07XXXXXXXX">
+      </div>
+    </div>
+    <div class="field">
+      <label>Location / Address</label>
+      <input type="text" id="apptLocation" placeholder="e.g. Mityana Town, near market">
+    </div>
+
+    <h3 style="margin-bottom:12px;">📆 Pick a Date</h3>
+    <div class="field">
+      <input type="date" id="apptDate" onchange="loadSlots()">
+    </div>
+
+    <span class="section-lbl">🕐 Available Time Slots</span>
+    <div class="slots-grid" id="slotsGrid">
+      <div style="color:#94a3b8;font-size:13px;font-weight:700;grid-column:1/-1;">Select a date first</div>
+    </div>
+
+    <div class="field">
+      <label>Notes (Optional)</label>
+      <textarea id="apptNotes" placeholder="e.g. fasting required, bring previous results..."></textarea>
+    </div>
+
+    <button class="submit-btn" onclick="bookAppointment()">📅 Book Appointment</button>
+  </div>
+</div>
+
+<!-- ══ UPCOMING TAB ══ -->
+<div id="page-upcoming" style="display:none;">
+  <div style="padding:16px 16px 0;">
+    <input style="width:100%;padding:11px 16px;border-radius:999px;border:1.5px solid var(--border);background:#fff;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:600;outline:none;color:var(--dark);"
+      type="text" id="searchUpcoming" placeholder="🔍 Search appointments..." oninput="renderUpcoming()">
+  </div>
+  <div class="appt-list" id="upcomingList" style="margin-top:14px;"></div>
+</div>
+
+<!-- ══ PAST TAB ══ -->
+<div id="page-past" style="display:none;">
+  <div class="appt-list" id="pastList" style="margin-top:14px;"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+let selectedService = "";
+let selectedSlot = "";
+let allAppointments = [];
+const ADMIN_WA = "256750992939";
+
+const SERVICES = [
+  {icon:"🏠",name:"Home Visit",sub:"We come to you"},
+  {icon:"🧪",name:"Lab Visit",sub:"Visit our lab"},
+  {icon:"🩸",name:"Blood Draw",sub:"Sample collection"},
+  {icon:"💉",name:"Injection",sub:"At your location"},
+  {icon:"🩺",name:"Consultation",sub:"Doctor advice"},
+  {icon:"🤰",name:"Antenatal",sub:"Pregnancy care"},
+];
+
+const ALL_SLOTS = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM"];
+
+// ── AUTH ──
+auth.onAuthStateChanged(async user => {
+  if(!user){ window.location.href="login.html"; return; }
+  currentUser = user;
+  // Autofill name & phone
+  const doc = await db.collection("users").doc(user.uid).get();
+  if(doc.exists){
+    const d = doc.data();
+    document.getElementById("apptName").value = d.fullName || "";
+    document.getElementById("apptPhone").value = d.phone || "";
+    document.getElementById("apptLocation").value = d.location || "";
+  }
+  buildServices();
+  setMinDate();
+  loadAppointments();
+});
+
+// ── SERVICES ──
+function buildServices(){
+  const grid = document.getElementById("serviceGrid");
+  grid.innerHTML = "";
+  SERVICES.forEach(s => {
+    const chip = document.createElement("div");
+    chip.className = "service-chip";
+    chip.innerHTML = `<span class="s-icon">${s.icon}</span><span class="s-name">${s.name}</span><span style="font-size:11px;color:#94a3b8;font-weight:600;">${s.sub}</span>`;
+    chip.onclick = () => {
+      document.querySelectorAll(".service-chip").forEach(c => c.classList.remove("selected"));
+      chip.classList.add("selected");
+      selectedService = s.name;
+    };
+    grid.appendChild(chip);
+  });
+}
+
+// ── MIN DATE (today) ──
+function setMinDate(){
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("apptDate").min = today;
+}
+
+// ── LOAD SLOTS ──
+async function loadSlots(){
+  const date = document.getElementById("apptDate").value;
+  if(!date) return;
+  const grid = document.getElementById("slotsGrid");
+  grid.innerHTML = `<div style="color:#94a3b8;font-size:13px;font-weight:700;grid-column:1/-1;">Loading slots...</div>`;
+
+  // Get booked slots for this date
+  const snap = await db.collection("appointments").where("date","==",date).where("status","!=","cancelled").get();
+  const booked = new Set();
+  snap.forEach(doc => booked.add(doc.data().time));
+
+  grid.innerHTML = "";
+  selectedSlot = "";
+  ALL_SLOTS.forEach(slot => {
+    const btn = document.createElement("button");
+    btn.className = "slot" + (booked.has(slot) ? " taken" : "");
+    btn.innerText = slot;
+    btn.disabled = booked.has(slot);
+    btn.onclick = () => {
+      document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedSlot = slot;
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// ── BOOK ──
+async function bookAppointment(){
+  const name = document.getElementById("apptName").value.trim();
+  const phone = document.getElementById("apptPhone").value.trim();
+  const location = document.getElementById("apptLocation").value.trim();
+  const date = document.getElementById("apptDate").value;
+  const notes = document.getElementById("apptNotes").value.trim();
+
+  if(!selectedService){ showToast("Please select a service"); return; }
+  if(!name || !phone){ showToast("Please fill in your name and phone"); return; }
+  if(!date){ showToast("Please pick a date"); return; }
+  if(!selectedSlot){ showToast("Please select a time slot"); return; }
+
+  const apptId = "APT-" + Date.now();
+  const data = {
+    apptId, userId: currentUser.uid,
+    name, phone, location, date, time: selectedSlot,
+    service: selectedService, notes: notes || "None",
+    status: "pending",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  try{
+    await db.collection("appointments").doc(apptId).set(data);
+
+    // WhatsApp notification to admin
+    const waMsg = `📅 New Appointment Request!\n\nID: ${apptId}\nName: ${name}\nPhone: ${phone}\nService: ${selectedService}\nDate: ${date}\nTime: ${selectedSlot}\nLocation: ${location}\nNotes: ${notes||"None"}`;
+    window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(waMsg)}`);
+
+    showToast("✅ Appointment booked successfully!");
+    // Reset form
+    selectedService = ""; selectedSlot = "";
+    document.querySelectorAll(".service-chip").forEach(c => c.classList.remove("selected"));
+    document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+    document.getElementById("apptDate").value = "";
+    document.getElementById("apptNotes").value = "";
+    document.getElementById("slotsGrid").innerHTML = `<div style="color:#94a3b8;font-size:13px;font-weight:700;grid-column:1/-1;">Select a date first</div>`;
+    setTimeout(() => switchTab("upcoming"), 1200);
+  } catch(err){ showToast("❌ Failed: " + err.message); }
+}
+
+// ── LOAD APPOINTMENTS ──
+function loadAppointments(){
+  db.collection("appointments").where("userId","==",currentUser.uid)
+    .orderBy("createdAt","desc")
+    .onSnapshot(snapshot => {
+      allAppointments = [];
+      snapshot.forEach(doc => allAppointments.push({ id: doc.id, ...doc.data() }));
+      renderUpcoming();
+      renderPast();
+    });
+}
+
+function renderUpcoming(){
+  const search = (document.getElementById("searchUpcoming")?.value || "").toLowerCase();
+  const today = new Date().toISOString().split("T")[0];
+  const list = allAppointments.filter(a =>
+    (a.date >= today || a.status === "pending") &&
+    a.status !== "cancelled" && a.status !== "completed" &&
+    (!search || a.service?.toLowerCase().includes(search) || a.date?.includes(search))
+  );
+  renderApptList("upcomingList", list, true);
+}
+
+function renderPast(){
+  const today = new Date().toISOString().split("T")[0];
+  const list = allAppointments.filter(a =>
+    a.date < today || a.status === "completed" || a.status === "cancelled"
+  );
+  renderApptList("pastList", list, false);
+}
+
+function renderApptList(containerId, list, showActions){
+  const container = document.getElementById(containerId);
+  if(list.length === 0){
+    container.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No appointments here</p></div>`;
+    return;
+  }
+  container.innerHTML = "";
+  list.forEach(a => {
+    const card = document.createElement("div");
+    card.className = "appt-card";
+    const statusClass = `status-${a.status||"pending"}`;
+    const statusLabel = {pending:"⏳ Pending",confirmed:"✅ Confirmed",cancelled:"❌ Cancelled",completed:"✔ Completed"}[a.status] || a.status;
+
+    let actions = "";
+    if(showActions && a.status !== "cancelled"){
+      actions = `
+        <button class="appt-btn btn-wa" onclick="waAdmin('${a.apptId||a.id}','${a.name}')">💬 WhatsApp</button>
+        <button class="appt-btn btn-cancel" onclick="cancelAppt('${a.id}',this)">✕ Cancel</button>`;
+    }
+
+    card.innerHTML = `
+      <div class="appt-top">
+        <div>
+          <div class="appt-service">${a.service||"Appointment"}</div>
+          <div class="appt-date">📆 ${formatDate(a.date)} &nbsp;•&nbsp; 🕐 ${a.time||"—"}</div>
+        </div>
+        <span class="status-badge ${statusClass}">${statusLabel}</span>
+      </div>
+      <div class="appt-meta">
+        <div class="meta-chip">👤 ${a.name||"—"}</div>
+        <div class="meta-chip">📞 ${a.phone||"—"}</div>
+        <div class="meta-chip">📍 ${a.location||"—"}</div>
+      </div>
+      ${a.notes && a.notes !== "None" ? `<div style="font-size:13px;font-weight:600;color:#64748b;margin-bottom:10px;">📝 ${a.notes}</div>` : ""}
+      ${actions ? `<div class="appt-actions">${actions}</div>` : ""}
+    `;
+    container.appendChild(card);
+  });
+}
+
+async function cancelAppt(id, btn){
+  if(!confirm("Cancel this appointment?")) return;
+  btn.disabled = true; btn.innerText = "Cancelling...";
+  try{
+    await db.collection("appointments").doc(id).update({
+      status:"cancelled",
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("Appointment cancelled");
+  } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✕ Cancel"; }
+}
+
+function waAdmin(apptId, name){
+  const msg = `Hello, I'd like to follow up on my appointment.\nID: ${apptId}\nName: ${name}`;
+  window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`);
+}
+
+function formatDate(dateStr){
+  if(!dateStr) return "—";
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-UG",{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+}
+
+// ── TAB SWITCH ──
+function switchTab(tab){
+  ["book","upcoming","past"].forEach(t => {
+    document.getElementById("page-"+t).style.display = t===tab ? "block" : "none";
+    document.getElementById("tab-"+t).classList.toggle("active", t===tab);
+  });
+  if(tab==="upcoming") renderUpcoming();
+  if(tab==="past") renderPast();
+}
+
+// ── TOAST ──
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+</script>
+</body>
+</html>
