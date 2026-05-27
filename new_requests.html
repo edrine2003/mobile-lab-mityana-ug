@@ -173,7 +173,11 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   color:#0f172a;background:#fff;outline:none;margin-bottom:14px;
 }
 .modal input:focus,.modal select:focus,.modal textarea:focus{border-color:#0ea5e9;}
-.modal textarea{min-height:100px;resize:none;}
+.modal textarea{min-height:80px;resize:none;}
+.test-result-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;align-items:center;}
+.test-result-row .test-lbl{font-size:13px;font-weight:800;color:#0f172a;padding:10px 12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;}
+.test-result-row input{margin:0;padding:10px 12px;font-size:13px;}
+@media(max-width:480px){.test-result-row{grid-template-columns:1fr;}}
 .modal-btn{
   width:100%;padding:14px;border:none;border-radius:14px;
   background:linear-gradient(135deg,#0ea5e9,#14b8a6);
@@ -302,10 +306,12 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
     <input type="text" id="resultOrderId" readonly>
     <label>Patient Name</label>
     <input type="text" id="resultPatientName" readonly>
-    <label>Test Results Summary</label>
-    <textarea id="resultText" placeholder="e.g. CBC: Normal&#10;HIV: Non-reactive&#10;Blood Glucose: 5.2 mmol/L"></textarea>
-    <label>Doctor's Notes / Advice</label>
-    <textarea id="resultNotes" placeholder="e.g. Continue medication, drink more water..."></textarea>
+    <label>Tests Ordered</label>
+    <div id="resultTestsFields" style="margin-bottom:14px;"></div>
+    <label>Overall Summary / Extra Notes</label>
+    <textarea id="resultText" placeholder="e.g. All results within normal range..."></textarea>
+    <label>Doctor's Advice</label>
+    <textarea id="resultNotes" placeholder="e.g. Continue medication, drink more water, return in 2 weeks..."></textarea>
     <button class="modal-btn" onclick="submitResult()">✅ Save & Notify Patient</button>
   </div>
 </div>
@@ -568,6 +574,34 @@ function openResultModal(orderId, patientName){
   document.getElementById("resultPatientName").value = patientName;
   document.getElementById("resultText").value = "";
   document.getElementById("resultNotes").value = "";
+
+  // Build per-test input fields from the order
+  const order = allOrders.find(o => o.id === orderId);
+  const testsField = document.getElementById("resultTestsFields");
+  testsField.innerHTML = "";
+
+  if(order && order.tests){
+    const tests = order.tests.split("\n").filter(t => t.trim());
+    if(tests.length > 0){
+      tests.forEach((testLine, i) => {
+        // Strip price part e.g. "HIV (UGX 7,000)" → "HIV"
+        const testName = testLine.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim();
+        if(!testName) return;
+        const row = document.createElement("div");
+        row.className = "test-result-row";
+        row.innerHTML = `
+          <div class="test-lbl">🧪 ${testName}</div>
+          <input type="text" placeholder="Enter result..." id="testResult_${i}" data-test="${testName}">
+        `;
+        testsField.appendChild(row);
+      });
+    } else {
+      testsField.innerHTML = `<p style="font-size:13px;color:#64748b;font-weight:600;">No tests found — type results in the summary below.</p>`;
+    }
+  } else {
+    testsField.innerHTML = `<p style="font-size:13px;color:#64748b;font-weight:600;">No tests found — type results in the summary below.</p>`;
+  }
+
   document.getElementById("resultModal").classList.add("open");
 }
 
@@ -576,9 +610,23 @@ document.getElementById("resultModal").addEventListener("click", e => {
 });
 
 async function submitResult(){
-  const resultText = document.getElementById("resultText").value.trim();
+  // Build resultText from per-test fields
+  const testRows = document.querySelectorAll("#resultTestsFields .test-result-row input");
+  let builtText = "";
+  testRows.forEach(input => {
+    const testName = input.dataset.test;
+    const value = input.value.trim();
+    if(testName) builtText += `${testName}: ${value || "Pending"}\n`;
+  });
+
+  // Append manual summary if filled
+  const manualSummary = document.getElementById("resultText").value.trim();
+  if(manualSummary) builtText += `\n${manualSummary}`;
+
+  const resultText = builtText.trim();
   const resultNotes = document.getElementById("resultNotes").value.trim();
-  if(!resultText){ showToast("Please enter test results"); return; }
+
+  if(!resultText){ showToast("Please enter at least one test result"); return; }
 
   const order = allOrders.find(o => o.id === resultTargetId);
   try{
