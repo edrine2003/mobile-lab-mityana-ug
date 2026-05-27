@@ -1,161 +1,463 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Patient Chat</title>
-
-<style>
-body { font-family: Arial; background: #f4f6f8; }
-.chat-box {
-    height: 350px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    background: white;
-}
-.message { margin: 5px; padding: 8px; border-radius: 8px; }
-.patient { background: #d1e7dd; text-align: right; }
-.doctor { background: #f8d7da; text-align: left; }
-.controls { display: flex; gap: 5px; margin-top: 10px; }
-</style>
-
+<title>Chat with Doctor – Mobile Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',Arial,sans-serif;
+  background:linear-gradient(135deg,#0ea5e9,#14b8a6,#10b981);
+  background-attachment:fixed;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 12px 0;
+}
 
+/* HEADER */
+.chat-header{
+  width:100%;max-width:600px;
+  background:linear-gradient(135deg,#0ea5e9,#14b8a6);
+  border-radius:20px 20px 0 0;
+  padding:16px 18px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.15);
+}
+.doctor-avatar{
+  width:46px;height:46px;border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;border:2px solid rgba(255,255,255,0.5);
+  flex-shrink:0;
+}
+.doctor-info h3{color:#fff;font-size:16px;font-weight:800;margin:0;}
+.doctor-info p{color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;margin:2px 0 0;}
+.online-dot{
+  width:10px;height:10px;border-radius:50%;background:#4ade80;
+  display:inline-block;margin-right:5px;
+  box-shadow:0 0 0 2px rgba(74,222,128,0.3);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(74,222,128,0.3);}50%{box-shadow:0 0 0 5px rgba(74,222,128,0.1);}}
+.back-btn{
+  margin-left:auto;text-decoration:none;color:#fff;
+  background:rgba(255,255,255,0.2);border-radius:999px;
+  padding:7px 14px;font-size:13px;font-weight:800;
+  border:1px solid rgba(255,255,255,0.3);
+}
+
+/* CHAT WINDOW */
+.chat-window{
+  width:100%;max-width:600px;
+  background:#f0f4f8;
+  flex:1;min-height:0;
+  height:calc(100vh - 220px);
+  overflow-y:auto;
+  padding:16px 14px;
+  display:flex;flex-direction:column;gap:10px;
+  scroll-behavior:smooth;
+}
+.chat-window::-webkit-scrollbar{width:4px;}
+.chat-window::-webkit-scrollbar-thumb{background:rgba(14,165,233,0.3);border-radius:999px;}
+
+/* DATE DIVIDER */
+.date-divider{
+  text-align:center;font-size:11px;font-weight:700;
+  color:#94a3b8;background:rgba(148,163,184,0.15);
+  border-radius:999px;padding:4px 14px;
+  align-self:center;margin:4px 0;
+}
+
+/* MESSAGES */
+.msg-row{display:flex;flex-direction:column;max-width:78%;}
+.msg-row.patient{align-self:flex-end;align-items:flex-end;}
+.msg-row.doctor{align-self:flex-start;align-items:flex-start;}
+
+.bubble{
+  padding:10px 14px;border-radius:18px;
+  font-size:14px;font-weight:600;line-height:1.5;
+  word-break:break-word;position:relative;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.msg-row.patient .bubble{
+  background:linear-gradient(135deg,#0ea5e9,#14b8a6);
+  color:#fff;border-bottom-right-radius:4px;
+}
+.msg-row.doctor .bubble{
+  background:#fff;color:#0f172a;
+  border-bottom-left-radius:4px;
+  border:1px solid rgba(0,0,0,0.06);
+}
+.msg-time{font-size:11px;color:#94a3b8;font-weight:700;margin-top:3px;padding:0 4px;}
+.msg-row.patient .msg-time{text-align:right;}
+
+/* Sender name for doctor */
+.sender-name{font-size:11px;font-weight:800;color:#0ea5e9;margin-bottom:3px;padding:0 4px;}
+
+/* Image / Audio in bubble */
+.bubble img{max-width:200px;border-radius:12px;display:block;margin-top:4px;}
+.bubble audio{width:100%;margin-top:4px;}
+
+/* Read receipt */
+.read-tick{font-size:12px;color:rgba(255,255,255,0.7);margin-left:4px;}
+.read-tick.seen{color:#4ade80;}
+
+/* Typing indicator */
+.typing-indicator{
+  display:none;align-self:flex-start;
+  background:#fff;border-radius:18px;border-bottom-left-radius:4px;
+  padding:10px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.typing-indicator span{
+  display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:#94a3b8;margin:0 2px;
+  animation:typingBounce 1.2s infinite;
+}
+.typing-indicator span:nth-child(2){animation-delay:0.2s;}
+.typing-indicator span:nth-child(3){animation-delay:0.4s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+
+/* INPUT BAR */
+.input-bar{
+  width:100%;max-width:600px;
+  background:#fff;
+  border-radius:0 0 20px 20px;
+  padding:12px 14px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.12);
+  margin-bottom:16px;
+}
+.input-row{display:flex;gap:8px;align-items:center;}
+.msg-input{
+  flex:1;padding:12px 16px;border-radius:999px;
+  border:1.5px solid #e2e8f0;background:#f8fafc;
+  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
+  outline:none;transition:all 0.2s;color:#0f172a;
+}
+.msg-input:focus{border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,0.12);}
+.icon-btn{
+  width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  transition:all 0.2s;flex-shrink:0;
+}
+.send-btn{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;box-shadow:0 4px 12px rgba(14,165,233,0.35);}
+.send-btn:hover{transform:scale(1.08);}
+.attach-btn{background:#f1f5f9;color:#64748b;}
+.attach-btn:hover{background:#e2e8f0;}
+.mic-btn{background:#f1f5f9;color:#64748b;}
+.mic-btn.recording{background:#ef4444;color:#fff;animation:micPulse 1s infinite;}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+
+/* File preview */
+.file-preview{
+  display:none;align-items:center;gap:8px;
+  padding:8px 12px;background:#f0f9ff;border-radius:12px;
+  margin-bottom:8px;font-size:13px;font-weight:700;color:#0369a1;
+  border:1px solid rgba(14,165,233,0.2);
+}
+.file-preview.show{display:flex;}
+.file-preview-remove{cursor:pointer;color:#ef4444;font-size:16px;margin-left:auto;}
+#fileInput{display:none;}
+
+/* Empty state */
+.empty-chat{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;
+  color:#94a3b8;
+}
+.empty-chat .icon{font-size:52px;opacity:0.4;}
+.empty-chat p{font-size:14px;font-weight:700;}
+</style>
 </head>
-
 <body>
 
-<h2>Chat with Doctor</h2>
-
-<div class="chat-box" id="chatBox"></div>
-
-<div class="controls">
-    <input type="text" id="messageInput" placeholder="Type message...">
-    <input type="file" id="fileInput">
-    <button onclick="sendMessage()">Send</button>
+<!-- HEADER -->
+<div class="chat-header">
+  <div class="doctor-avatar">👨‍⚕️</div>
+  <div class="doctor-info">
+    <h3>Dr. Edrine</h3>
+    <p><span class="online-dot"></span>Mobile Lab – Mityana</p>
+  </div>
+  <a class="back-btn" href="index.html">← Back</a>
 </div>
 
-<div class="controls">
-    <button onclick="startRecording()">🎤 Start</button>
-    <button onclick="stopRecording()">⏹ Stop</button>
+<!-- CHAT WINDOW -->
+<div class="chat-window" id="chatBox">
+  <div class="empty-chat" id="emptyState">
+    <div class="icon">💬</div>
+    <p>Send a message to start chatting with the doctor</p>
+  </div>
+  <div class="typing-indicator" id="typingIndicator">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- INPUT BAR -->
+<div class="input-bar">
+  <div class="file-preview" id="filePreview">
+    <span id="filePreviewName">📎 file</span>
+    <span class="file-preview-remove" id="removeFile">✕</span>
+  </div>
+  <div class="input-row">
+    <button class="icon-btn attach-btn" onclick="document.getElementById('fileInput').click()" title="Attach file">📎</button>
+    <input type="file" id="fileInput" accept="image/*,audio/*">
+    <input class="msg-input" type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+    <button class="icon-btn mic-btn" id="micBtn" title="Voice message">🎤</button>
+    <button class="icon-btn send-btn" onclick="sendMessage()" title="Send">➤</button>
+  </div>
 </div>
 
 <script>
-// 🔥 REPLACE WITH YOUR FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId: "mobile-lab-mityana-aeae2",
   storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app"
 };
-
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
+const auth = firebase.auth();
 
-// UNIQUE PATIENT CHAT ID
-let chatId = localStorage.getItem("chatId");
-if (!chatId) {
-    chatId = "patient_" + Date.now();
-    localStorage.setItem("chatId", chatId);
-}
+let currentUser = null;
+let chatId = null;
+let patientName = "Patient";
 
-const chatBox = document.getElementById("chatBox");
+auth.onAuthStateChanged(async (user) => {
+  if(!user){ window.location.href = "login.html"; return; }
+  currentUser = user;
 
-// REAL-TIME LISTENER
-db.collection("chats").doc(chatId)
-.collection("messages")
-.orderBy("timestamp")
-.onSnapshot(snapshot => {
-    chatBox.innerHTML = "";
+  // Get patient name from Firestore
+  const doc = await db.collection("users").doc(user.uid).get();
+  if(doc.exists){ patientName = doc.data().fullName || user.email; }
 
-    snapshot.forEach(doc => {
-        const msg = doc.data();
-        const div = document.createElement("div");
-        div.className = "message " + msg.sender;
+  // Each patient gets their own chat room by uid
+  chatId = "chat_" + user.uid;
 
-        if (msg.type === "text") {
-            div.innerText = msg.text;
-        }
-        else if (msg.type === "image") {
-            div.innerHTML = `<img src="${msg.fileUrl}" width="120">`;
-        }
-        else if (msg.type === "audio") {
-            div.innerHTML = `<audio controls src="${msg.fileUrl}"></audio>`;
-        }
+  // Mark this chat with patient info so doctor can see it
+  await db.collection("chats").doc(chatId).set({
+    patientId: user.uid,
+    patientName: patientName,
+    patientEmail: user.email,
+    lastMessage: "",
+    lastTime: firebase.firestore.FieldValue.serverTimestamp(),
+    unreadDoctor: 0
+  }, { merge: true });
 
-        chatBox.appendChild(div);
-    });
-
-    chatBox.scrollTop = chatBox.scrollHeight;
+  listenMessages();
+  listenTyping();
 });
 
-// SEND MESSAGE
-async function sendMessage() {
-    const input = document.getElementById("messageInput");
-    const fileInput = document.getElementById("fileInput");
+const chatBox = document.getElementById("chatBox");
+const emptyState = document.getElementById("emptyState");
+const typingIndicator = document.getElementById("typingIndicator");
 
-    let data = {
-        sender: "patient",
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
+// ── LISTEN MESSAGES ──
+function listenMessages(){
+  db.collection("chats").doc(chatId).collection("messages")
+    .orderBy("timestamp")
+    .onSnapshot(snapshot => {
+      // Remove empty state once messages arrive
+      if(snapshot.size > 0 && emptyState) emptyState.remove();
 
-    if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const ref = storage.ref("chatFiles/" + Date.now() + "_" + file.name);
-        await ref.put(file);
-        const url = await ref.getDownloadURL();
+      chatBox.querySelectorAll(".msg-row, .date-divider").forEach(el => el.remove());
 
-        data.type = file.type.startsWith("audio") ? "audio" : "image";
-        data.fileUrl = url;
-    } else {
-        data.type = "text";
-        data.text = input.value;
-    }
+      let lastDate = "";
+      snapshot.forEach(docSnap => {
+        const msg = docSnap.data();
+        const ts = msg.timestamp ? msg.timestamp.toDate() : new Date();
+        const dateStr = ts.toLocaleDateString("en-UG",{weekday:"short",month:"short",day:"numeric"});
 
-    await db.collection("chats").doc(chatId)
-    .collection("messages").add(data);
+        if(dateStr !== lastDate){
+          const div = document.createElement("div");
+          div.className = "date-divider";
+          div.innerText = dateStr;
+          chatBox.insertBefore(div, typingIndicator);
+          lastDate = dateStr;
+        }
 
-    input.value = "";
-    fileInput.value = "";
+        const row = document.createElement("div");
+        row.className = "msg-row " + msg.sender;
+
+        // Doctor name label
+        if(msg.sender === "doctor"){
+          const name = document.createElement("div");
+          name.className = "sender-name";
+          name.innerText = "👨‍⚕️ Dr. Edrine";
+          row.appendChild(name);
+        }
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+
+        if(msg.type === "text"){
+          bubble.innerText = msg.text;
+          if(msg.sender === "patient"){
+            const tick = document.createElement("span");
+            tick.className = "read-tick" + (msg.seenByDoctor ? " seen" : "");
+            tick.innerText = msg.seenByDoctor ? " ✓✓" : " ✓";
+            bubble.appendChild(tick);
+          }
+        } else if(msg.type === "image"){
+          bubble.innerHTML = `<img src="${msg.fileUrl}" alt="image">`;
+        } else if(msg.type === "audio"){
+          bubble.innerHTML = `<audio controls src="${msg.fileUrl}"></audio>`;
+        }
+
+        const timeEl = document.createElement("div");
+        timeEl.className = "msg-time";
+        timeEl.innerText = ts.toLocaleTimeString("en-UG",{hour:"2-digit",minute:"2-digit"});
+
+        row.appendChild(bubble);
+        row.appendChild(timeEl);
+        chatBox.insertBefore(row, typingIndicator);
+      });
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Mark doctor messages as seen
+      snapshot.forEach(docSnap => {
+        const msg = docSnap.data();
+        if(msg.sender === "doctor" && !msg.seenByPatient){
+          docSnap.ref.update({ seenByPatient: true });
+        }
+      });
+    });
 }
 
-// 🎤 AUDIO RECORDING
-let recorder, chunks = [];
+// ── TYPING INDICATOR ──
+let typingTimeout;
+function listenTyping(){
+  db.collection("chats").doc(chatId).onSnapshot(snap => {
+    const data = snap.data();
+    if(data && data.doctorTyping){
+      typingIndicator.style.display = "flex";
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } else {
+      typingIndicator.style.display = "none";
+    }
+  });
+}
 
-async function startRecording() {
+document.getElementById("messageInput").addEventListener("input", () => {
+  db.collection("chats").doc(chatId).update({ patientTyping: true });
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    db.collection("chats").doc(chatId).update({ patientTyping: false });
+  }, 2000);
+});
+
+// ── SEND MESSAGE ──
+async function sendMessage(){
+  const input = document.getElementById("messageInput");
+  const fileInput = document.getElementById("fileInput");
+  const text = input.value.trim();
+  if(!text && fileInput.files.length === 0) return;
+
+  let data = {
+    sender: "patient",
+    senderName: patientName,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    seenByDoctor: false
+  };
+
+  if(fileInput.files.length > 0){
+    const file = fileInput.files[0];
+    const ref = storage.ref("chatFiles/" + chatId + "/" + Date.now() + "_" + file.name);
+    await ref.put(file);
+    const url = await ref.getDownloadURL();
+    data.type = file.type.startsWith("audio") ? "audio" : "image";
+    data.fileUrl = url;
+  } else {
+    data.type = "text";
+    data.text = text;
+  }
+
+  await db.collection("chats").doc(chatId).collection("messages").add(data);
+
+  // Update chat room metadata
+  await db.collection("chats").doc(chatId).update({
+    lastMessage: data.type === "text" ? text : `[${data.type}]`,
+    lastTime: firebase.firestore.FieldValue.serverTimestamp(),
+    patientTyping: false,
+    unreadDoctor: firebase.firestore.FieldValue.increment(1)
+  });
+
+  input.value = "";
+  fileInput.value = "";
+  hideFilePreview();
+  clearTimeout(typingTimeout);
+}
+
+// Enter key to send
+document.getElementById("messageInput").addEventListener("keydown", e => {
+  if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+
+// ── FILE PREVIEW ──
+document.getElementById("fileInput").addEventListener("change", () => {
+  const f = document.getElementById("fileInput").files[0];
+  if(f){
+    document.getElementById("filePreviewName").innerText = "📎 " + f.name;
+    document.getElementById("filePreview").classList.add("show");
+  }
+});
+document.getElementById("removeFile").onclick = () => {
+  document.getElementById("fileInput").value = "";
+  hideFilePreview();
+};
+function hideFilePreview(){
+  document.getElementById("filePreview").classList.remove("show");
+  document.getElementById("filePreviewName").innerText = "📎 file";
+}
+
+// ── VOICE RECORDING ──
+let recorder, chunks = [], isRecording = false;
+const micBtn = document.getElementById("micBtn");
+
+micBtn.addEventListener("click", async () => {
+  if(!isRecording){
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     recorder = new MediaRecorder(stream);
-
+    chunks = [];
     recorder.ondataavailable = e => chunks.push(e.data);
-
     recorder.onstop = async () => {
-        const blob = new Blob(chunks);
-        chunks = [];
-
-        const ref = storage.ref("chatAudio/" + Date.now() + ".webm");
-        await ref.put(blob);
-        const url = await ref.getDownloadURL();
-
-        await db.collection("chats").doc(chatId)
-        .collection("messages").add({
-            sender: "patient",
-            type: "audio",
-            fileUrl: url,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+      const blob = new Blob(chunks, { type: "audio/webm" });
+      const ref = storage.ref("chatAudio/" + chatId + "/" + Date.now() + ".webm");
+      await ref.put(blob);
+      const url = await ref.getDownloadURL();
+      await db.collection("chats").doc(chatId).collection("messages").add({
+        sender: "patient",
+        senderName: patientName,
+        type: "audio",
+        fileUrl: url,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        seenByDoctor: false
+      });
+      await db.collection("chats").doc(chatId).update({
+        lastMessage: "[voice message]",
+        lastTime: firebase.firestore.FieldValue.serverTimestamp(),
+        unreadDoctor: firebase.firestore.FieldValue.increment(1)
+      });
     };
-
     recorder.start();
-}
-
-function stopRecording() {
+    isRecording = true;
+    micBtn.classList.add("recording");
+    micBtn.title = "Stop recording";
+    micBtn.innerText = "⏹";
+  } else {
     recorder.stop();
-}
+    isRecording = false;
+    micBtn.classList.remove("recording");
+    micBtn.title = "Voice message";
+    micBtn.innerText = "🎤";
+  }
+});
 </script>
-
 </body>
 </html>
