@@ -388,10 +388,37 @@ async function sendMessage(){
     unreadDoctor: firebase.firestore.FieldValue.increment(1)
   });
 
+  // 📲 Notify doctor on WhatsApp (only for text messages)
+  if(data.type === "text"){
+    notifyDoctorWhatsApp(text);
+  }
+
   input.value = "";
   fileInput.value = "";
   hideFilePreview();
   clearTimeout(typingTimeout);
+}
+
+// ── WHATSAPP NOTIFICATION TO DOCTOR ──
+// Sends a WhatsApp ping to the doctor when patient sends a message.
+// Only fires once per session to avoid spamming.
+let waPingSentThisSession = false;
+function notifyDoctorWhatsApp(messageText){
+  if(waPingSentThisSession) return; // only ping once per session
+  waPingSentThisSession = true;
+  const doctorWhatsApp = "256750992939"; // Doctor's WhatsApp number
+  const waMsg = `🔔 New message from patient ${patientName}:\n\n"${messageText}"\n\nReply here: https://mobile-lab-mityana-aeae2.web.app/doctor_chat.html`;
+  // Open WhatsApp in background tab — doctor gets the ping
+  const waLink = `https://wa.me/${doctorWhatsApp}?text=${encodeURIComponent(waMsg)}`;
+  // Use a hidden link so it doesn't interrupt the patient's flow
+  const a = document.createElement("a");
+  a.href = waLink;
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 1000);
 }
 
 // Enter key to send
@@ -444,6 +471,7 @@ micBtn.addEventListener("click", async () => {
         lastTime: firebase.firestore.FieldValue.serverTimestamp(),
         unreadDoctor: firebase.firestore.FieldValue.increment(1)
       });
+      notifyDoctorWhatsApp("[sent a voice message 🎤]");
     };
     recorder.start();
     isRecording = true;
