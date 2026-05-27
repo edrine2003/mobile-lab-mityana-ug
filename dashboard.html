@@ -1,733 +1,478 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Mobile Lab Patient Dashboard</title>
-
+<title>Mobile Lab – Patient Dashboard</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0369a1">
-
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
+:root{
+  --primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;
+  --muted:#64748b;--border:rgba(0,0,0,0.07);--bg:#f1f5f9;--card:#fff;
 }
-
-body{
-font-family:Arial,sans-serif;
-background:#f1f5f9;
-color:#111827;
-transition:0.3s;
-}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:30px;transition:background 0.3s,color 0.3s;}
 
 /* LOADER */
 #loader{
-position:fixed;
-inset:0;
-background:white;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:22px;
-font-weight:bold;
-z-index:99999;
-color:#0369a1;
+  position:fixed;inset:0;background:#fff;z-index:99999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
 }
+.loader-ring{
+  width:56px;height:56px;border-radius:50%;
+  border:5px solid #e2e8f0;border-top-color:#0ea5e9;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loader p{font-size:15px;font-weight:700;color:#0ea5e9;}
 
 /* HEADER */
-header{
-background:linear-gradient(135deg,#0369a1,#0ea5e9);
-padding:20px;
-color:white;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
+.header{
+  background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);
+  background-size:300% 300%;animation:gradShift 8s ease infinite;
+  padding:24px 20px 28px;color:#fff;position:relative;overflow:hidden;
+}
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.header::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:220px;height:220px;border-radius:50%;
+  background:rgba(255,255,255,0.07);pointer-events:none;
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.header-actions{display:flex;gap:8px;}
+.hdr-btn{
+  background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);
+  color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;
+  cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;
+}
+.hdr-btn:hover{background:rgba(255,255,255,0.28);}
+.user-row{display:flex;align-items:center;gap:14px;}
+.avatar{
+  width:62px;height:62px;border-radius:50%;border:3px solid rgba(255,255,255,0.6);
+  object-fit:cover;background:#fff;flex-shrink:0;
+}
+.user-name{font-size:20px;font-weight:900;margin-bottom:3px;}
+.user-sub{font-size:13px;opacity:0.88;font-weight:600;}
+.online-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,0.18);border-radius:999px;
+  padding:4px 10px;font-size:12px;font-weight:700;margin-top:6px;
+}
+.online-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
+</style>
+<style>
+/* STATS */
+.stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  padding:0 16px;margin-top:-18px;position:relative;z-index:2;
+}
+@media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+.stat-card{
+  background:#fff;border-radius:16px;padding:14px 10px;text-align:center;
+  box-shadow:0 6px 20px rgba(0,0,0,0.1);border:1px solid var(--border);
+  animation:cardIn 0.5s ease both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+.stat-icon{font-size:22px;margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:900;color:var(--primary);}
+.stat-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px;}
+
+/* SECTION TITLE */
+.section-title{
+  font-size:15px;font-weight:900;color:var(--dark);
+  padding:20px 16px 10px;display:flex;align-items:center;gap:8px;
 }
 
-.user-box{
-display:flex;
-align-items:center;
-justify-content:center;
-gap:15px;
-flex-wrap:wrap;
-text-align:center;
+/* GRID CARDS */
+.cards-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  padding:0 16px;
 }
+@media(max-width:500px){.cards-grid{grid-template-columns:repeat(2,1fr);}}
+.dash-card{
+  background:#fff;border-radius:20px;padding:18px 12px;text-align:center;
+  cursor:pointer;transition:all 0.22s;border:1px solid var(--border);
+  box-shadow:0 4px 14px rgba(0,0,0,0.06);position:relative;overflow:hidden;
+  animation:cardIn 0.5s ease both;
+}
+.dash-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(0,0,0,0.12);}
+.dash-card:active{transform:scale(0.97);}
+.card-icon{
+  width:52px;height:52px;border-radius:16px;margin:0 auto 10px;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+}
+.card-label{font-size:13px;font-weight:800;color:var(--dark);}
+.card-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:3px;}
 
-.user-box img{
-width:70px;
-height:70px;
-border-radius:50%;
-object-fit:cover;
-border:3px solid white;
-background:white;
+/* BADGE on card */
+.card-badge{
+  position:absolute;top:10px;right:10px;
+  background:#ef4444;color:#fff;border-radius:999px;
+  font-size:10px;font-weight:900;padding:2px 7px;
+  animation:badgePop 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
-
-.user-box h2{
-margin-bottom:5px;
-}
-
-/* BUTTONS */
-.logout,
-#themeBtn{
-position:fixed;
-top:20px;
-border:none;
-padding:10px 14px;
-border-radius:10px;
-cursor:pointer;
-font-weight:bold;
-z-index:1000;
-}
-
-.logout{
-right:20px;
-background:#ef4444;
-color:white;
-}
-
-#themeBtn{
-left:20px;
-background:#111827;
-color:white;
-}
-
-/* WIDGETS */
-.top-widgets{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:15px;
-padding:20px;
-}
-
-.widget{
-background:white;
-padding:20px;
-border-radius:16px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-text-align:center;
-transition:0.3s;
-}
-
-.widget:hover{
-transform:translateY(-5px);
-}
-
-.widget h4{
-color:#0369a1;
-margin-bottom:10px;
-}
-
-.widget span{
-font-size:26px;
-font-weight:bold;
-}
-
-/* DASHBOARD */
-.dashboard{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
-padding:20px;
-}
-
-.card{
-background:linear-gradient(135deg,#ffffff,#e0f2fe);
-padding:25px;
-border-radius:18px;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
-text-align:center;
-cursor:pointer;
-transition:0.3s;
-}
-
-.card:hover{
-transform:translateY(-8px) scale(1.02);
-}
-
-.card img{
-width:70px;
-margin-bottom:12px;
-}
-
-.card h3{
-color:#0369a1;
-}
+@keyframes badgePop{from{transform:scale(0);}to{transform:scale(1);}}
 
 /* NOTIFICATIONS */
-.notifications{
-padding:20px;
+.notif-area{padding:0 16px;}
+.notif-card{
+  background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;
+  border-left:4px solid var(--primary);
+  box-shadow:0 3px 10px rgba(0,0,0,0.05);
+  display:flex;align-items:flex-start;gap:12px;
 }
+.notif-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.notif-title{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:2px;}
+.notif-msg{font-size:13px;font-weight:600;color:var(--muted);}
+.notif-time{font-size:11px;font-weight:700;color:#94a3b8;margin-top:4px;}
 
-.notifications h3{
-margin-bottom:15px;
-color:#0369a1;
+/* HEALTH TIPS */
+.tips-scroll{
+  display:flex;gap:12px;padding:0 16px;overflow-x:auto;
+  scrollbar-width:none;padding-bottom:4px;
 }
-
-.notification{
-background:white;
-padding:14px;
-margin-bottom:12px;
-border-left:5px solid #0ea5e9;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
+.tips-scroll::-webkit-scrollbar{display:none;}
+.tip-card{
+  min-width:200px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);
+  border-radius:18px;padding:16px;color:#fff;flex-shrink:0;
 }
+.tip-card .tip-icon{font-size:24px;margin-bottom:8px;}
+.tip-card p{font-size:13px;font-weight:700;line-height:1.5;}
 
-/* INSTALL BUTTON */
+/* INSTALL BTN */
 #installBtn{
-display:none;
-position:fixed;
-bottom:20px;
-right:20px;
-background:#22c55e;
-color:white;
-padding:14px 18px;
-border:none;
-border-radius:14px;
-font-weight:bold;
-cursor:pointer;
-box-shadow:0 4px 10px rgba(0,0,0,0.2);
-animation:pulse 1.5s infinite;
-z-index:999;
+  display:none;position:fixed;bottom:20px;right:16px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;
+  padding:13px 18px;border:none;border-radius:14px;font-weight:900;
+  cursor:pointer;box-shadow:0 6px 18px rgba(34,197,94,0.4);
+  font-family:'Nunito',Arial,sans-serif;font-size:14px;z-index:999;
+  animation:pulse 1.5s infinite;
 }
-
-@keyframes pulse{
-0%{transform:scale(1);}
-50%{transform:scale(1.08);}
-100%{transform:scale(1);}
-}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
 
 /* DARK MODE */
-.dark{
-background:#0f172a;
-color:white;
-}
-
-.dark .card,
-.dark .widget,
-.dark .notification{
-background:#1e293b;
-color:white;
-}
-
-.dark .card h3,
-.dark .widget h4,
-.dark .notifications h3{
-color:#38bdf8;
-}
-
-.dark #loader{
-background:#0f172a;
-color:white;
-}
-
-/* MOBILE */
-@media(max-width:600px){
-
-.logout,
-#themeBtn{
-position:static;
-margin:10px;
-}
-
-header{
-padding-top:10px;
-}
-
-}
-
+body.dark{--bg:#0f172a;--dark:#f1f5f9;--card:#1e293b;--border:rgba(255,255,255,0.08);}
+body.dark .stat-card,body.dark .dash-card,body.dark .notif-card{background:#1e293b;color:#f1f5f9;}
+body.dark .card-label,body.dark .notif-title{color:#f1f5f9;}
+body.dark #loader{background:#0f172a;}
+body.dark #loader p{color:#38bdf8;}
+body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
 </style>
-
 </head>
-
 <body>
 
 <!-- LOADER -->
 <div id="loader">
-Loading Dashboard...
+  <div class="loader-ring"></div>
+  <p>Loading your dashboard...</p>
 </div>
-
-<!-- DARK MODE -->
-<button id="themeBtn">🌙</button>
-
-<!-- LOGOUT -->
-<button class="logout" onclick="logout()">
-Logout
-</button>
 
 <!-- HEADER -->
-<header>
-
-<div class="user-box">
-
-<img id="profilePic" src="icons/user.png">
-
-<div>
-<h2>🧪 Mobile Lab Mityana</h2>
-<span id="userWelcome">Loading...</span>
+<div class="header">
+  <div class="header-top">
+    <div style="font-size:22px;font-weight:900;">🧪 Mobile Lab</div>
+    <div class="header-actions">
+      <button class="hdr-btn" id="themeBtn">🌙</button>
+      <button class="hdr-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </div>
+  <div class="user-row">
+    <img class="avatar" id="profilePic" src="icons/user.png" alt="avatar">
+    <div>
+      <div class="user-name" id="userWelcome">Welcome!</div>
+      <div class="user-sub">Mobile Lab – Mityana</div>
+      <div class="online-pill"><span class="online-dot"></span> Online</div>
+    </div>
+  </div>
 </div>
-
-</div>
-
-</header>
 
 <!-- STATS -->
-<div class="top-widgets">
-
-<div class="widget">
-<h4>Total Tests</h4>
-<span id="totalTests">0</span>
+<div class="stats-row">
+  <div class="stat-card" style="animation-delay:0.05s">
+    <div class="stat-icon">🧪</div>
+    <div class="stat-val" id="totalTests">0</div>
+    <div class="stat-lbl">Total Tests</div>
+  </div>
+  <div class="stat-card" style="animation-delay:0.1s">
+    <div class="stat-icon">⏳</div>
+    <div class="stat-val" id="pendingTests" style="color:#f59e0b;">0</div>
+    <div class="stat-lbl">Pending</div>
+  </div>
+  <div class="stat-card" style="animation-delay:0.15s">
+    <div class="stat-icon">✅</div>
+    <div class="stat-val" id="completedTests" style="color:#22c55e;">0</div>
+    <div class="stat-lbl">Completed</div>
+  </div>
+  <div class="stat-card" style="animation-delay:0.2s">
+    <div class="stat-icon">📅</div>
+    <div class="stat-val" id="appointmentsCount" style="color:#8b5cf6;">0</div>
+    <div class="stat-lbl">Appointments</div>
+  </div>
 </div>
 
-<div class="widget">
-<h4>Pending</h4>
-<span id="pendingTests">0</span>
-</div>
+<!-- QUICK ACTIONS -->
+<div class="section-title">⚡ Quick Actions</div>
+<div class="cards-grid">
 
-<div class="widget">
-<h4>Completed</h4>
-<span id="completedTests">0</span>
-</div>
+  <div class="dash-card" onclick="go('index.html')" style="animation-delay:0.05s">
+    <div class="card-icon" style="background:rgba(14,165,233,0.12);">🧪</div>
+    <div class="card-label">Order Test</div>
+    <div class="card-sub">Book a lab test</div>
+  </div>
 
-<div class="widget">
-<h4>Appointments</h4>
-<span id="appointmentsCount">0</span>
-</div>
+  <div class="dash-card" onclick="go('inbox.html')" style="animation-delay:0.1s">
+    <div class="card-icon" style="background:rgba(34,197,94,0.12);">📋</div>
+    <div class="card-label">My Results</div>
+    <div class="card-sub">View lab results</div>
+    <span class="card-badge" id="resultsBadge" style="display:none;">New</span>
+  </div>
 
-</div>
+  <div class="dash-card" onclick="go('chat.html')" style="animation-delay:0.15s">
+    <div class="card-icon" style="background:rgba(139,92,246,0.12);">💬</div>
+    <div class="card-label">Chat Doctor</div>
+    <div class="card-sub">Ask a question</div>
+    <span class="card-badge" id="chatBadge" style="display:none;">•</span>
+  </div>
 
-<!-- DASHBOARD -->
-<div class="dashboard">
+  <div class="dash-card" onclick="go('cycle.html')" style="animation-delay:0.2s">
+    <div class="card-icon" style="background:rgba(236,72,153,0.12);">🌸</div>
+    <div class="card-label">Cycle Tracker</div>
+    <div class="card-sub">Period & fertility</div>
+  </div>
 
-<div class="card" id="orderCard">
-<img src="icons/order.png">
-<h3>Order a Test</h3>
-</div>
+  <div class="dash-card" onclick="go('appointments.html')" style="animation-delay:0.25s">
+    <div class="card-icon" style="background:rgba(245,158,11,0.12);">📅</div>
+    <div class="card-label">Appointments</div>
+    <div class="card-sub">Book a visit</div>
+  </div>
 
-<div class="card" id="resultsCard">
-<img src="icons/results.png">
-<h3>Results</h3>
-</div>
+  <div class="dash-card" onclick="go('profile.html')" style="animation-delay:0.3s">
+    <div class="card-icon" style="background:rgba(14,165,233,0.1);">👤</div>
+    <div class="card-label">My Profile</div>
+    <div class="card-sub">Edit your info</div>
+  </div>
 
-<div class="card" id="cycleCard">
-<img src="icons/cycle.png">
-<h3>🩸 Cycle Tracker</h3>
-</div>
+  <div class="dash-card" onclick="go('about.html')" style="animation-delay:0.35s">
+    <div class="card-icon" style="background:rgba(20,184,166,0.12);">ℹ️</div>
+    <div class="card-label">About Us</div>
+    <div class="card-sub">Our services</div>
+  </div>
 
-<div class="card" id="appointmentCard">
-<img src="icons/calendar.png">
-<h3>Appointments</h3>
-</div>
+  <div class="dash-card" onclick="callEmergency()" style="animation-delay:0.4s;border-color:rgba(239,68,68,0.2);">
+    <div class="card-icon" style="background:rgba(239,68,68,0.1);">🚑</div>
+    <div class="card-label">Emergency</div>
+    <div class="card-sub">Call now</div>
+  </div>
 
-<div class="card" id="chatCard">
-<img src="icons/chat.png">
-<h3>Doctor Chat</h3>
-</div>
-
-<div class="card" id="contactCard">
-<img src="icons/contact.png">
-<h3>Contact Lab</h3>
-</div>
-
-<div class="card" id="profileCard">
-<img src="icons/profile.png">
-<h3>Profile</h3>
-</div>
-
-<div class="card" id="aboutCard">
-<img src="icons/about.png">
-<h3>About Us</h3>
-</div>
-
-<div class="card" onclick="callEmergency()">
-<img src="icons/emergency.png">
-<h3>🚑 Emergency</h3>
-</div>
+  <div class="dash-card" onclick="go('patient_chat.html')" style="animation-delay:0.45s">
+    <div class="card-icon" style="background:rgba(16,185,129,0.12);">📞</div>
+    <div class="card-label">Contact Lab</div>
+    <div class="card-sub">Get in touch</div>
+  </div>
 
 </div>
 
 <!-- NOTIFICATIONS -->
-<div class="notifications">
-
-<h3>🔔 Notifications</h3>
-
-<div id="notificationsBox">
-Loading...
-</div>
-
+<div class="section-title">🔔 Notifications</div>
+<div class="notif-area" id="notificationsBox">
+  <div class="notif-card">
+    <div class="notif-icon">⏳</div>
+    <div><div class="notif-title">Loading...</div></div>
+  </div>
 </div>
 
 <!-- HEALTH TIPS -->
-<div class="notifications">
-
-<h3>🩺 Health Tips</h3>
-
-<div class="notification">
-Drink enough clean water daily.
+<div class="section-title">🩺 Health Tips</div>
+<div class="tips-scroll">
+  <div class="tip-card"><div class="tip-icon">💧</div><p>Drink at least 8 glasses of clean water daily to stay hydrated.</p></div>
+  <div class="tip-card" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);"><div class="tip-icon">💊</div><p>Always complete your full antibiotic dosage even if you feel better.</p></div>
+  <div class="tip-card" style="background:linear-gradient(135deg,#f59e0b,#ef4444);"><div class="tip-icon">🧪</div><p>Go for regular medical checkups and laboratory tests every 6 months.</p></div>
+  <div class="tip-card" style="background:linear-gradient(135deg,#10b981,#0ea5e9);"><div class="tip-icon">🥗</div><p>Eat a balanced diet rich in fruits, vegetables and whole grains.</p></div>
+  <div class="tip-card" style="background:linear-gradient(135deg,#ec4899,#f43f5e);"><div class="tip-icon">😴</div><p>Get 7–8 hours of quality sleep every night for good health.</p></div>
 </div>
 
-<div class="notification">
-Always complete your antibiotics dosage fully.
-</div>
-
-<div class="notification">
-Go for regular medical checkups and laboratory tests.
-</div>
-
-</div>
-
-<!-- INSTALL -->
-<button id="installBtn">
-⬇ Install App
-</button>
-
-<!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<button id="installBtn">⬇ Install App</button>
 
 <script>
-
-/* FIREBASE */
-
 const firebaseConfig = {
-
-apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-
-authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
-
-projectId:"mobile-lab-mityana-aeae2"
-
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
 };
-
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* AUTH */
+function go(page){ window.location.href = page; }
+function callEmergency(){ window.location.href = "tel:+256778379591"; }
+function logout(){ auth.signOut().then(()=>{ location.href="login.html"; }); }
 
-auth.onAuthStateChanged(async user=>{
-
-if(!user){
-
-location.href="login.html";
-return;
-
-}
-
-try{
-
-const doc = await db.collection("users").doc(user.uid).get();
-
-let name="User";
-
-if(doc.exists){
-
-const data = doc.data();
-
-name = data.fullName || "User";
-
-document.getElementById("userWelcome").innerText =
-"Welcome " + name;
-
-if(data.photoURL){
-
-document.getElementById("profilePic").src =
-data.photoURL;
-
-}
-
-}
-
-loadStats(user.uid);
-loadNotifications(user.uid);
-listenForCompletedResults(user.uid);
-
-document.getElementById("loader").style.display="none";
-
-}catch(err){
-
-console.log(err);
-alert("Failed to load dashboard");
-
-}
-
+// ── AUTH ──
+auth.onAuthStateChanged(async user => {
+  if(!user){ location.href="login.html"; return; }
+  try{
+    const doc = await db.collection("users").doc(user.uid).get();
+    let name = "User";
+    if(doc.exists){
+      const data = doc.data();
+      name = data.fullName || user.email || "User";
+      if(data.photoURL) document.getElementById("profilePic").src = data.photoURL;
+    }
+    document.getElementById("userWelcome").innerText = "Welcome, " + name.split(" ")[0] + " 👋";
+    loadStats(user.uid);
+    loadNotifications(user.uid);
+    listenResults(user.uid);
+    listenChatUnread(user.uid);
+    document.getElementById("loader").style.display = "none";
+  } catch(err){
+    console.error(err);
+    document.getElementById("loader").style.display = "none";
+  }
 });
 
-/* STATS */
-
+// ── STATS ──
 async function loadStats(userId){
+  const orders = await db.collection("orders").where("userId","==",userId).get();
+  let total=0, pending=0, completed=0;
+  orders.forEach(doc => {
+    total++;
+    if(doc.data().status==="pending") pending++;
+    if(doc.data().status==="completed") completed++;
+  });
+  document.getElementById("totalTests").innerText = total;
+  document.getElementById("pendingTests").innerText = pending;
+  document.getElementById("completedTests").innerText = completed;
 
-let total=0;
-let pending=0;
-let completed=0;
-let appointments=0;
-
-/* ORDERS */
-
-const orders = await db.collection("orders")
-.where("userId","==",userId)
-.get();
-
-orders.forEach(doc=>{
-
-total++;
-
-const status = doc.data().status;
-
-if(status==="pending") pending++;
-
-if(status==="completed") completed++;
-
-});
-
-/* APPOINTMENTS */
-
-const appSnap = await db.collection("appointments")
-.where("userId","==",userId)
-.get();
-
-appointments = appSnap.size;
-
-/* DISPLAY */
-
-document.getElementById("totalTests").innerText = total;
-
-document.getElementById("pendingTests").innerText = pending;
-
-document.getElementById("completedTests").innerText = completed;
-
-document.getElementById("appointmentsCount").innerText = appointments;
-
+  const appts = await db.collection("appointments").where("userId","==",userId).get();
+  document.getElementById("appointmentsCount").innerText = appts.size;
 }
 
-/* NOTIFICATIONS */
-
+// ── NOTIFICATIONS ──
 function loadNotifications(userId){
-
-const box = document.getElementById("notificationsBox");
-
-db.collection("notifications")
-.where("userId","==",userId)
-.orderBy("time","desc")
-.limit(5)
-
-.onSnapshot(snapshot=>{
-
-if(snapshot.empty){
-
-box.innerHTML="<p>No notifications yet</p>";
-return;
-
+  const box = document.getElementById("notificationsBox");
+  db.collection("notifications").where("userId","==",userId)
+    .orderBy("time","desc").limit(6)
+    .onSnapshot(snapshot => {
+      if(snapshot.empty){
+        box.innerHTML = `<div class="notif-card"><div class="notif-icon">📭</div><div><div class="notif-title">No notifications yet</div><div class="notif-msg">You'll see updates here</div></div></div>`;
+        return;
+      }
+      box.innerHTML = "";
+      snapshot.forEach(doc => {
+        const n = doc.data();
+        const time = n.time ? n.time.toDate().toLocaleString("en-UG",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+        const div = document.createElement("div");
+        div.className = "notif-card";
+        div.innerHTML = `
+          <div class="notif-icon">${n.icon||"🔔"}</div>
+          <div>
+            <div class="notif-title">${n.title||"Update"}</div>
+            <div class="notif-msg">${n.message||""}</div>
+            <div class="notif-time">${time}</div>
+          </div>`;
+        box.appendChild(div);
+      });
+    });
 }
 
-box.innerHTML="";
-
-snapshot.forEach(doc=>{
-
-const n = doc.data();
-
-const div = document.createElement("div");
-
-div.className="notification";
-
-div.innerHTML = `
-<b>${n.title || "Update"}</b>
-<br>
-${n.message || ""}
-`;
-
-box.appendChild(div);
-
-});
-
-});
-
+// ── LISTEN FOR COMPLETED RESULTS ──
+function listenResults(userId){
+  db.collection("orders").where("userId","==",userId).where("status","==","completed")
+    .onSnapshot(snapshot => {
+      let newResults = 0;
+      snapshot.docChanges().forEach(change => {
+        if(change.type === "modified" || change.type === "added"){
+          if(!change.doc.data().seenByPatient) newResults++;
+        }
+      });
+      const badge = document.getElementById("resultsBadge");
+      if(newResults > 0){
+        badge.style.display = "block";
+        badge.innerText = newResults;
+        if(Notification.permission === "granted"){
+          new Notification("🧪 Lab Result Ready", { body:"Your lab result is now available. Tap to view." });
+        }
+      }
+    });
 }
 
-/* RESULT ALERTS */
-
-function listenForCompletedResults(userId){
-
-db.collection("orders")
-.where("userId","==",userId)
-.where("status","==","completed")
-
-.onSnapshot(snapshot=>{
-
-snapshot.docChanges().forEach(change=>{
-
-if(change.type==="modified"){
-
-if(Notification.permission==="granted"){
-
-new Notification("🧪 Lab Result Ready",{
-
-body:"Your lab result is now available."
-
-});
-
+// ── CHAT UNREAD BADGE ──
+function listenChatUnread(userId){
+  const chatId = "chat_" + userId;
+  db.collection("chats").doc(chatId).onSnapshot(snap => {
+    if(!snap.exists) return;
+    const data = snap.data();
+    // Count unread doctor messages
+    db.collection("chats").doc(chatId).collection("messages")
+      .where("sender","==","doctor").where("seenByPatient","==",false)
+      .onSnapshot(msgs => {
+        const badge = document.getElementById("chatBadge");
+        if(msgs.size > 0){
+          badge.style.display = "block";
+          badge.innerText = msgs.size;
+        } else {
+          badge.style.display = "none";
+        }
+      });
+  });
 }
 
+// ── NOTIFICATIONS PERMISSION ──
+if("Notification" in window && Notification.permission === "default"){
+  Notification.requestPermission();
 }
 
-});
-
-});
-
-}
-
-/* REQUEST NOTIFICATION */
-
-if("Notification" in window){
-
-Notification.requestPermission();
-
-}
-
-/* NAVIGATION */
-
-orderCard.onclick=()=>{
-location.href="index.html";
-};
-
-resultsCard.onclick=()=>{
-location.href="inbox.html";
-};
-
-cycleCard.onclick=()=>{
-location.href="cycle.html";
-};
-
-appointmentCard.onclick=()=>{
-location.href="appointments.html";
-};
-
-chatCard.onclick=()=>{
-location.href="doctor_chat.html";
-};
-
-contactCard.onclick=()=>{
-location.href="patient_chat.html";
-};
-
-profileCard.onclick=()=>{
-location.href="profile.html";
-};
-
-aboutCard.onclick=()=>{
-location.href="about.html";
-};
-
-/* EMERGENCY */
-
-function callEmergency(){
-
-window.location.href="tel:+256778379591";
-
-}
-
-/* LOGOUT */
-
-function logout(){
-
-auth.signOut()
-.then(()=>{
-
-location.href="login.html";
-
-});
-
-}
-
-/* DARK MODE */
-
+// ── DARK MODE ──
 const themeBtn = document.getElementById("themeBtn");
-
-themeBtn.onclick=()=>{
-
-document.body.classList.toggle("dark");
-
-localStorage.setItem(
-"theme",
-document.body.classList.contains("dark")
-? "dark"
-: "light"
-);
-
+if(localStorage.getItem("theme") === "dark"){
+  document.body.classList.add("dark");
+  themeBtn.innerText = "☀️";
+}
+themeBtn.onclick = () => {
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+  themeBtn.innerText = isDark ? "☀️" : "🌙";
 };
 
-/* LOAD THEME */
-
-if(localStorage.getItem("theme")==="dark"){
-
-document.body.classList.add("dark");
-
-}
-
-/* INSTALL APP */
-
+// ── INSTALL ──
 let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt",(e)=>{
-
-e.preventDefault();
-
-deferredPrompt=e;
-
-document.getElementById("installBtn").style.display="block";
-
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById("installBtn").style.display = "block";
 });
-
-installBtn.onclick=async()=>{
-
-if(!deferredPrompt){
-
-alert("Install not available");
-return;
-
-}
-
-deferredPrompt.prompt();
-
-await deferredPrompt.userChoice;
-
-deferredPrompt=null;
-
+document.getElementById("installBtn").onclick = async () => {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
 };
-
-window.addEventListener("appinstalled",()=>{
-
-installBtn.style.display="none";
-
+window.addEventListener("appinstalled", () => {
+  document.getElementById("installBtn").style.display = "none";
 });
 
-/* SERVICE WORKER */
+// ── SERVICE WORKER ──
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js"); }
 
-if("serviceWorker" in navigator){
-
-navigator.serviceWorker.register("sw.js");
-
-}
-
-/* ONLINE / OFFLINE */
-
-window.addEventListener("offline",()=>{
-
-alert("⚠ No internet connection");
-
+// ── ONLINE / OFFLINE ──
+window.addEventListener("offline", () => {
+  const t = document.createElement("div");
+  t.style.cssText = "position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:10px 20px;border-radius:999px;font-weight:800;z-index:9999;font-family:Nunito,Arial,sans-serif;";
+  t.innerText = "⚠️ No internet connection";
+  t.id = "offlineBanner";
+  document.body.appendChild(t);
 });
-
-window.addEventListener("online",()=>{
-
-alert("✅ Back online");
-
+window.addEventListener("online", () => {
+  const b = document.getElementById("offlineBanner");
+  if(b) b.remove();
 });
-
 </script>
-
 </body>
 </html>
