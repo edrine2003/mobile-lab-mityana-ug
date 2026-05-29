@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports – Mobile Lab Mityana</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.07);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:40px;}
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:14px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:26px;}
+.topbar-info h2{color:#fff;font-size:17px;font-weight:900;margin:0;}
+.topbar-info p{color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;margin:2px 0 0;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+/* LOADER */
+#loader{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+.loader-ring{width:52px;height:52px;border-radius:50%;border:5px solid #e2e8f0;border-top-color:#0ea5e9;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loader p{font-size:15px;font-weight:700;color:#0ea5e9;}
+/* SUMMARY CARDS */
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:20px 20px 0;}
+@media(max-width:700px){.summary-row{grid-template-columns:repeat(2,1fr);}}
+.sum-card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);display:flex;align-items:center;gap:12px;animation:cardIn 0.4s ease both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.sum-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.sum-val{font-size:22px;font-weight:900;line-height:1;}
+.sum-lbl{font-size:12px;font-weight:700;color:var(--muted);margin-top:2px;}
+/* SECTION */
+.section{padding:20px 20px 0;}
+.section-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+/* CHART CARD */
+.chart-card{background:var(--card);border-radius:20px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);}
+.chart-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.chart-toolbar h3{font-size:14px;font-weight:900;color:var(--dark);}
+.toggle-group{display:flex;gap:6px;}
+.toggle-btn{padding:7px 14px;border:1.5px solid var(--border);border-radius:999px;font-size:12px;font-weight:800;cursor:pointer;background:#fff;color:var(--muted);font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.toggle-btn.active{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(14,165,233,0.3);}
+.chart-wrap{position:relative;height:260px;}
+/* TWO COL GRID */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:700px){.two-col{grid-template-columns:1fr;}}
+/* TALLY TABLE */
+.tally-table{width:100%;border-collapse:collapse;font-size:13px;}
+.tally-table th{text-align:left;padding:8px 10px;font-size:12px;font-weight:800;color:var(--muted);border-bottom:2px solid var(--border);}
+.tally-table td{padding:9px 10px;border-bottom:1px solid var(--border);font-weight:700;}
+.tally-table tr:last-child td{border-bottom:none;}
+.tally-bar-bg{background:#f1f5f9;border-radius:999px;height:8px;min-width:60px;}
+.tally-bar-fill{height:8px;border-radius:999px;background:linear-gradient(90deg,#0ea5e9,#14b8a6);transition:width 0.6s ease;}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:8px;font-size:11px;font-weight:900;background:rgba(14,165,233,0.1);color:#0369a1;}
+/* BILLING TABLE */
+.billing-table{width:100%;border-collapse:collapse;font-size:13px;}
+.billing-table th{text-align:left;padding:8px 10px;font-size:12px;font-weight:800;color:var(--muted);border-bottom:2px solid var(--border);}
+.billing-table td{padding:9px 10px;border-bottom:1px solid var(--border);font-weight:700;}
+.billing-table tr:last-child td{border-bottom:none;}
+.status-pill{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;}
+.pill-pending{background:rgba(245,158,11,0.12);color:#b45309;}
+.pill-ongoing{background:rgba(14,165,233,0.12);color:#0369a1;}
+.pill-completed{background:rgba(34,197,94,0.12);color:#15803d;}
+.pill-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
+/* DATE FILTER */
+.date-filter{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.date-filter label{font-size:12px;font-weight:800;color:var(--muted);}
+.date-filter input,.date-filter select{padding:7px 12px;border-radius:10px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:12px;font-weight:700;color:var(--dark);background:#fff;outline:none;}
+.date-filter input:focus,.date-filter select:focus{border-color:var(--primary);}
+.apply-btn{padding:7px 16px;border:none;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;}
+</style>
+</head>
+<body>
+<div id="loader"><div class="loader-ring"></div><p>Loading reports...</p></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <span class="topbar-logo">📊</span>
+  <div class="topbar-info">
+    <h2>Reports & Analytics</h2>
+    <p>Mobile Lab – Mityana</p>
+  </div>
+  <div class="topbar-right">
+    <a class="topbar-btn" href="new_requests.html">🧪 Orders</a>
+    <a class="topbar-btn" href="dashboard.html">🏠 Dashboard</a>
+    <button class="topbar-btn" id="logoutBtn">🚪 Logout</button>
+  </div>
+</div>
+
+<!-- SUMMARY CARDS -->
+<div class="summary-row">
+  <div class="sum-card" style="animation-delay:0.05s">
+    <div class="sum-icon" style="background:rgba(14,165,233,0.12);">🧪</div>
+    <div><div class="sum-val" id="sumTotal" style="color:#0ea5e9;">0</div><div class="sum-lbl">Total Orders</div></div>
+  </div>
+  <div class="sum-card" style="animation-delay:0.1s">
+    <div class="sum-icon" style="background:rgba(34,197,94,0.12);">💰</div>
+    <div><div class="sum-val" id="sumRevenue" style="color:#15803d;">0</div><div class="sum-lbl">Total Revenue (UGX)</div></div>
+  </div>
+  <div class="sum-card" style="animation-delay:0.15s">
+    <div class="sum-icon" style="background:rgba(139,92,246,0.12);">👥</div>
+    <div><div class="sum-val" id="sumClients" style="color:#7c3aed;">0</div><div class="sum-lbl">Unique Clients</div></div>
+  </div>
+  <div class="sum-card" style="animation-delay:0.2s">
+    <div class="sum-icon" style="background:rgba(245,158,11,0.12);">📈</div>
+    <div><div class="sum-val" id="sumAvg" style="color:#b45309;">0</div><div class="sum-lbl">Avg Order (UGX)</div></div>
+  </div>
+</div>
+
+<!-- DATE FILTER -->
+<div class="section">
+  <div class="date-filter">
+    <label>From</label>
+    <input type="date" id="dateFrom">
+    <label>To</label>
+    <input type="date" id="dateTo">
+    <select id="quickRange">
+      <option value="">Quick range</option>
+      <option value="7">Last 7 days</option>
+      <option value="30">Last 30 days</option>
+      <option value="90">Last 90 days</option>
+      <option value="all">All time</option>
+    </select>
+    <button class="apply-btn" onclick="applyFilter()">Apply</button>
+  </div>
+</div>
+
+<!-- ORDERS BY STATUS CHART -->
+<div class="section">
+  <div class="section-title">📦 Client Orders by Status</div>
+  <div class="chart-card">
+    <div class="chart-toolbar">
+      <h3>Orders Distribution</h3>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="btnBar" onclick="switchOrderChart('bar')">📊 Bar</button>
+        <button class="toggle-btn" id="btnPie" onclick="switchOrderChart('pie')">🥧 Pie</button>
+        <button class="toggle-btn" id="btnDoughnut" onclick="switchOrderChart('doughnut')">⭕ Doughnut</button>
+      </div>
+    </div>
+    <div class="chart-wrap"><canvas id="ordersChart"></canvas></div>
+  </div>
+</div>
+
+<!-- CLIENT VISITS + BILLING ROW -->
+<div class="section">
+  <div class="two-col">
+    <!-- CLIENT VISITS OVER TIME -->
+    <div>
+      <div class="section-title">📅 Client Visits Over Time</div>
+      <div class="chart-card">
+        <div class="chart-toolbar">
+          <h3>Orders per Day</h3>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btnVisitLine" onclick="switchVisitChart('line')">📈 Line</button>
+            <button class="toggle-btn" id="btnVisitBar" onclick="switchVisitChart('bar')">📊 Bar</button>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="visitsChart"></canvas></div>
+      </div>
+    </div>
+    <!-- BILLING BY STATUS -->
+    <div>
+      <div class="section-title">💳 Billing by Status</div>
+      <div class="chart-card">
+        <div class="chart-toolbar"><h3>Revenue Breakdown</h3></div>
+        <div class="chart-wrap"><canvas id="billingChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT VISIT SUMMARY TABLE -->
+<div class="section">
+  <div class="section-title">👥 Client Visit Summary</div>
+  <div class="chart-card">
+    <table class="billing-table" id="visitSummaryTable">
+      <thead><tr><th>#</th><th>Client Name</th><th>Phone</th><th>Visits</th><th>Total Spent (UGX)</th><th>Last Visit</th><th>Status</th></tr></thead>
+      <tbody id="visitSummaryBody"><tr><td colspan="7" style="text-align:center;padding:20px;color:#94a3b8;font-weight:700;">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SERVICES TALLY SHEET -->
+<div class="section" style="padding-bottom:20px;">
+  <div class="section-title">🔬 Services Tally Sheet</div>
+  <div class="chart-card">
+    <div class="two-col" style="gap:20px;">
+      <div>
+        <div class="chart-wrap" style="height:320px;"><canvas id="tallyChart"></canvas></div>
+      </div>
+      <div style="overflow:auto;max-height:320px;">
+        <table class="tally-table" id="tallyTable">
+          <thead><tr><th>#</th><th>Test / Service</th><th>Count</th><th>Share</th></tr></thead>
+          <tbody id="tallyBody"><tr><td colspan="4" style="text-align:center;padding:20px;color:#94a3b8;font-weight:700;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let allOrders = [];
+let ordersChartInstance = null;
+let visitsChartInstance = null;
+let billingChartInstance = null;
+let tallyChartInstance = null;
+let currentOrderChartType = 'bar';
+let currentVisitChartType = 'line';
+
+// ── AUTH GUARD (admin only) ──
+auth.onAuthStateChanged(async user => {
+  if(!user){ window.location.href = "login.html"; return; }
+  const snap = await db.collection("users").doc(user.uid).get();
+  if(!snap.exists || snap.data().role !== "admin"){
+    alert("Access denied"); await auth.signOut(); window.location.href = "login.html"; return;
+  }
+  loadAllOrders();
+});
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await auth.signOut(); window.location.href = "login.html";
+};
+
+// ── SET DEFAULT DATE RANGE (last 30 days) ──
+(function setDefaultDates(){
+  const to = new Date();
+  const from = new Date(); from.setDate(from.getDate() - 30);
+  document.getElementById("dateTo").value = to.toISOString().split("T")[0];
+  document.getElementById("dateFrom").value = from.toISOString().split("T")[0];
+})();
+
+// ── QUICK RANGE ──
+document.getElementById("quickRange").onchange = function(){
+  if(!this.value) return;
+  const to = new Date();
+  const from = new Date();
+  if(this.value === "all"){ document.getElementById("dateFrom").value = "2024-01-01"; }
+  else { from.setDate(from.getDate() - parseInt(this.value)); document.getElementById("dateFrom").value = from.toISOString().split("T")[0]; }
+  document.getElementById("dateTo").value = to.toISOString().split("T")[0];
+  applyFilter();
+};
+
+// ── LOAD ORDERS ──
+function loadAllOrders(){
+  db.collection("orders").orderBy("createdAt","desc").onSnapshot(snapshot => {
+    allOrders = [];
+    snapshot.forEach(doc => allOrders.push({ id: doc.id, ...doc.data() }));
+    document.getElementById("loader").style.display = "none";
+    applyFilter();
+  }, err => {
+    document.getElementById("loader").style.display = "none";
+    console.error(err);
+  });
+}
+
+function applyFilter(){
+  const from = document.getElementById("dateFrom").value;
+  const to = document.getElementById("dateTo").value;
+  const fromDate = from ? new Date(from + "T00:00:00") : null;
+  const toDate = to ? new Date(to + "T23:59:59") : null;
+
+  const filtered = allOrders.filter(o => {
+    if(!o.createdAt) return true;
+    const d = o.createdAt.toDate();
+    if(fromDate && d < fromDate) return false;
+    if(toDate && d > toDate) return false;
+    return true;
+  });
+
+  renderSummaryCards(filtered);
+  renderOrdersChart(filtered);
+  renderVisitsChart(filtered);
+  renderBillingChart(filtered);
+  renderVisitSummary(filtered);
+  renderTallySheet(filtered);
+}
+
+// ── PARSE TOTAL ──
+function parseTotal(val){
+  if(!val) return 0;
+  return parseInt(String(val).replace(/[^0-9]/g,"")) || 0;
+}
+
+// ── SUMMARY CARDS ──
+function renderSummaryCards(orders){
+  const total = orders.length;
+  const revenue = orders.filter(o => o.status === "completed").reduce((s,o) => s + parseTotal(o.total), 0);
+  const clients = new Set(orders.map(o => o.phone || o.userId || o.email).filter(Boolean)).size;
+  const avg = total > 0 ? Math.round(orders.reduce((s,o) => s + parseTotal(o.total), 0) / total) : 0;
+  document.getElementById("sumTotal").innerText = total.toLocaleString();
+  document.getElementById("sumRevenue").innerText = revenue.toLocaleString();
+  document.getElementById("sumClients").innerText = clients.toLocaleString();
+  document.getElementById("sumAvg").innerText = avg.toLocaleString();
+}
+
+// ── ORDERS BY STATUS CHART ──
+function renderOrdersChart(orders){
+  const counts = { pending:0, ongoing:0, completed:0, cancelled:0 };
+  orders.forEach(o => { if(counts[o.status] !== undefined) counts[o.status]++; });
+  const labels = ["Pending","Ongoing","Completed","Cancelled"];
+  const data = [counts.pending, counts.ongoing, counts.completed, counts.cancelled];
+  const colors = ["#f59e0b","#0ea5e9","#22c55e","#ef4444"];
+
+  if(ordersChartInstance) ordersChartInstance.destroy();
+  const ctx = document.getElementById("ordersChart").getContext("2d");
+  ordersChartInstance = new Chart(ctx, {
+    type: currentOrderChartType,
+    data: {
+      labels,
+      datasets:[{
+        label:"Orders",
+        data,
+        backgroundColor: currentOrderChartType === 'bar'
+          ? colors.map(c => c + "33")
+          : colors,
+        borderColor: colors,
+        borderWidth: currentOrderChartType === 'bar' ? 2 : 0,
+        borderRadius: currentOrderChartType === 'bar' ? 8 : 0,
+        hoverOffset: 8
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display: currentOrderChartType !== 'bar', position:'bottom', labels:{ font:{ family:'Nunito', weight:'700' }, padding:16 } }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.parsed.y ?? ctx.parsed} orders` } } },
+      scales: currentOrderChartType === 'bar' ? { y:{ beginAtZero:true, ticks:{ font:{ family:'Nunito', weight:'700' }, stepSize:1 }, grid:{ color:'rgba(0,0,0,0.04)' } }, x:{ ticks:{ font:{ family:'Nunito', weight:'700' } }, grid:{ display:false } } } : {}
+    }
+  });
+}
+
+function switchOrderChart(type){
+  currentOrderChartType = type;
+  document.querySelectorAll("#btnBar,#btnPie,#btnDoughnut").forEach(b => b.classList.remove("active"));
+  document.getElementById("btn" + type.charAt(0).toUpperCase() + type.slice(1)).classList.add("active");
+  applyFilter();
+}
+</script>
+
+<script>
+// ── CLIENT VISITS CHART (orders per day) ──
+function renderVisitsChart(orders){
+  // Build day → count map
+  const dayMap = {};
+  orders.forEach(o => {
+    if(!o.createdAt) return;
+    const d = o.createdAt.toDate();
+    const key = d.toISOString().split("T")[0];
+    dayMap[key] = (dayMap[key] || 0) + 1;
+  });
+  const sortedDays = Object.keys(dayMap).sort();
+  const labels = sortedDays.map(d => {
+    const dt = new Date(d + "T12:00:00");
+    return dt.toLocaleDateString("en-UG",{ month:"short", day:"numeric" });
+  });
+  const data = sortedDays.map(d => dayMap[d]);
+
+  if(visitsChartInstance) visitsChartInstance.destroy();
+  const ctx = document.getElementById("visitsChart").getContext("2d");
+
+  const gradient = ctx.createLinearGradient(0,0,0,220);
+  gradient.addColorStop(0,"rgba(14,165,233,0.3)");
+  gradient.addColorStop(1,"rgba(14,165,233,0.02)");
+
+  visitsChartInstance = new Chart(ctx, {
+    type: currentVisitChartType,
+    data:{
+      labels,
+      datasets:[{
+        label:"Visits",
+        data,
+        backgroundColor: currentVisitChartType === 'line' ? gradient : "rgba(14,165,233,0.25)",
+        borderColor:"#0ea5e9",
+        borderWidth:2,
+        borderRadius: currentVisitChartType === 'bar' ? 6 : 0,
+        fill: currentVisitChartType === 'line',
+        tension:0.4,
+        pointBackgroundColor:"#0ea5e9",
+        pointRadius:4,
+        pointHoverRadius:6
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.parsed.y} visits` } } },
+      scales:{ y:{ beginAtZero:true, ticks:{ font:{ family:'Nunito', weight:'700' }, stepSize:1 }, grid:{ color:'rgba(0,0,0,0.04)' } }, x:{ ticks:{ font:{ family:'Nunito', weight:'700' }, maxTicksLimit:10 }, grid:{ display:false } } }
+    }
+  });
+}
+
+function switchVisitChart(type){
+  currentVisitChartType = type;
+  document.querySelectorAll("#btnVisitLine,#btnVisitBar").forEach(b => b.classList.remove("active"));
+  document.getElementById("btnVisit" + type.charAt(0).toUpperCase() + type.slice(1)).classList.add("active");
+  applyFilter();
+}
+
+// ── BILLING BY STATUS CHART ──
+function renderBillingChart(orders){
+  const revenue = { pending:0, ongoing:0, completed:0, cancelled:0 };
+  orders.forEach(o => {
+    const amt = parseTotal(o.total);
+    if(revenue[o.status] !== undefined) revenue[o.status] += amt;
+  });
+  const labels = ["Pending","Ongoing","Completed","Cancelled"];
+  const data = [revenue.pending, revenue.ongoing, revenue.completed, revenue.cancelled];
+  const colors = ["#f59e0b","#0ea5e9","#22c55e","#ef4444"];
+
+  if(billingChartInstance) billingChartInstance.destroy();
+  const ctx = document.getElementById("billingChart").getContext("2d");
+  billingChartInstance = new Chart(ctx, {
+    type:"doughnut",
+    data:{
+      labels,
+      datasets:[{ data, backgroundColor:colors, borderWidth:0, hoverOffset:10 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"bottom", labels:{ font:{ family:'Nunito', weight:'700' }, padding:14 } },
+        tooltip:{ callbacks:{ label: ctx => ` UGX ${ctx.parsed.toLocaleString()}` } }
+      },
+      cutout:"62%"
+    }
+  });
+}
+
+// ── CLIENT VISIT SUMMARY TABLE ──
+function renderVisitSummary(orders){
+  // Group by phone (unique client identifier)
+  const clientMap = {};
+  orders.forEach(o => {
+    const key = o.phone || o.email || o.userId || "unknown";
+    if(!clientMap[key]){
+      clientMap[key] = { name: o.name || "—", phone: o.phone || "—", visits:0, totalSpent:0, lastVisit: null, lastStatus: o.status };
+    }
+    clientMap[key].visits++;
+    clientMap[key].totalSpent += parseTotal(o.total);
+    const d = o.createdAt ? o.createdAt.toDate() : null;
+    if(d && (!clientMap[key].lastVisit || d > clientMap[key].lastVisit)){
+      clientMap[key].lastVisit = d;
+      clientMap[key].lastStatus = o.status;
+    }
+  });
+
+  const sorted = Object.values(clientMap).sort((a,b) => b.visits - a.visits);
+  const tbody = document.getElementById("visitSummaryBody");
+  if(sorted.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#94a3b8;font-weight:700;">No data in selected range</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sorted.map((c,i) => {
+    const lastVisitStr = c.lastVisit ? c.lastVisit.toLocaleDateString("en-UG",{ day:"numeric", month:"short", year:"numeric" }) : "—";
+    const pillClass = { pending:"pill-pending", ongoing:"pill-ongoing", completed:"pill-completed", cancelled:"pill-cancelled" }[c.lastStatus] || "pill-pending";
+    const pillLabel = { pending:"⏳ Pending", ongoing:"🔬 Ongoing", completed:"✅ Done", cancelled:"❌ Cancelled" }[c.lastStatus] || c.lastStatus;
+    return `<tr>
+      <td><span class="rank-badge">${i+1}</span></td>
+      <td style="font-weight:800;">${c.name}</td>
+      <td>${c.phone}</td>
+      <td style="color:#0ea5e9;font-weight:900;">${c.visits}</td>
+      <td style="font-weight:900;color:#15803d;">UGX ${c.totalSpent.toLocaleString()}</td>
+      <td>${lastVisitStr}</td>
+      <td><span class="status-pill ${pillClass}">${pillLabel}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+// ── SERVICES TALLY SHEET ──
+function renderTallySheet(orders){
+  const testMap = {};
+  orders.forEach(o => {
+    if(!o.tests) return;
+    const lines = o.tests.split("\n").filter(t => t.trim());
+    lines.forEach(line => {
+      // Strip price: "HIV (UGX 7,000)" → "HIV"
+      const name = line.replace(/\s*\(UGX[\s\d,]+\)/i,"").replace(/^[•\-]\s*/,"").trim();
+      if(!name) return;
+      testMap[name] = (testMap[name] || 0) + 1;
+    });
+  });
+
+  const sorted = Object.entries(testMap).sort((a,b) => b[1] - a[1]);
+  const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
+
+  // Tally table
+  const tbody = document.getElementById("tallyBody");
+  if(sorted.length === 0){
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#94a3b8;font-weight:700;">No data in selected range</td></tr>`;
+  } else {
+    const totalTests = sorted.reduce((s,[,c]) => s+c, 0);
+    tbody.innerHTML = sorted.map(([name, count], i) => {
+      const pct = Math.round((count / totalTests) * 100);
+      const barW = Math.round((count / maxCount) * 100);
+      return `<tr>
+        <td><span class="rank-badge">${i+1}</span></td>
+        <td style="font-weight:800;">${name}</td>
+        <td style="color:#0ea5e9;font-weight:900;">${count}</td>
+        <td style="min-width:100px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="tally-bar-bg" style="flex:1;"><div class="tally-bar-fill" style="width:${barW}%;"></div></div>
+            <span style="font-size:11px;font-weight:800;color:#64748b;">${pct}%</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  // Tally chart (top 10)
+  const top10 = sorted.slice(0,10);
+  if(tallyChartInstance) tallyChartInstance.destroy();
+  const ctx = document.getElementById("tallyChart").getContext("2d");
+  const palette = ["#0ea5e9","#14b8a6","#10b981","#f59e0b","#8b5cf6","#ec4899","#ef4444","#22c55e","#6366f1","#f97316"];
+  tallyChartInstance = new Chart(ctx, {
+    type:"bar",
+    data:{
+      labels: top10.map(([n]) => n.length > 20 ? n.slice(0,18)+"…" : n),
+      datasets:[{
+        label:"Orders",
+        data: top10.map(([,c]) => c),
+        backgroundColor: top10.map((_,i) => palette[i % palette.length] + "55"),
+        borderColor: top10.map((_,i) => palette[i % palette.length]),
+        borderWidth:2,
+        borderRadius:8
+      }]
+    },
+    options:{
+      indexAxis:"y",
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.parsed.x} orders` } } },
+      scales:{
+        x:{ beginAtZero:true, ticks:{ font:{ family:'Nunito', weight:'700' }, stepSize:1 }, grid:{ color:'rgba(0,0,0,0.04)' } },
+        y:{ ticks:{ font:{ family:'Nunito', weight:'700' } }, grid:{ display:false } }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
