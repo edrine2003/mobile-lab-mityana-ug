@@ -852,5 +852,173 @@ function waAppt(phone, name, date, time){
   window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
 }
 </script>
+
+<script>
+// ── WALLETS ──
+let allWallets = [];
+let allTopupRequests = [];
+let creditTargetUserId = "";
+
+function loadWallets(){
+  // Load top-up requests
+  db.collection("topup_requests").where("status","==","pending")
+    .onSnapshot(snap => {
+      allTopupRequests = [];
+      snap.forEach(doc => allTopupRequests.push({ id: doc.id, ...doc.data() }));
+      document.getElementById("cnt-wallets").innerText = allTopupRequests.length;
+      renderTopupRequests();
+    });
+
+  // Load all wallets
+  db.collection("wallets").onSnapshot(async snap => {
+    allWallets = [];
+    for(const doc of snap.docs){
+      const uid = doc.id;
+      const walletData = doc.data();
+      // Get patient name
+      const userDoc = await db.collection("users").doc(uid).get();
+      const name = userDoc.exists ? (userDoc.data().fullName || userDoc.data().email || uid) : uid;
+      const phone = userDoc.exists ? (userDoc.data().phone || "—") : "—";
+      allWallets.push({ uid, name, phone, ...walletData });
+    }
+    renderWallets();
+  });
+}
+
+function renderTopupRequests(){
+  const grid = document.getElementById("topupRequestsGrid");
+  if(allTopupRequests.length === 0){
+    grid.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>No pending top-up requests</p></div>`;
+    return;
+  }
+  grid.innerHTML = "";
+  allTopupRequests.forEach(r => {
+    const card = document.createElement("div");
+    card.className = "order-card";
+    const time = r.createdAt ? r.createdAt.toDate().toLocaleString("en-UG") : "—";
+    card.innerHTML = `
+      <div class="order-top">
+        <div>
+          <div class="order-id">Top-Up Request</div>
+          <div class="order-name">${r.userName || "—"}</div>
+          <div class="order-contact">💳 ${r.method||"—"} &nbsp;|&nbsp; Ref: ${r.ref||"N/A"}</div>
+        </div>
+        <div>
+          <div class="order-total">UGX ${(r.amount||0).toLocaleString()}</div>
+          <div class="order-time">${time}</div>
+        </div>
+      </div>
+      <div class="order-actions">
+        <button class="action-btn btn-start" onclick="approveTopup('${r.id}','${r.userId}','${r.userName}',${r.amount})">✅ Approve & Credit</button>
+        <button class="action-btn btn-cancel" onclick="rejectTopup('${r.id}')">✕ Reject</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterWallets(){
+  const search = (document.getElementById("walletSearch")?.value||"").toLowerCase();
+  const filtered = allWallets.filter(w => w.name.toLowerCase().includes(search) || w.phone.includes(search));
+  renderWallets(filtered);
+}
+
+function renderWallets(list){
+  const grid = document.getElementById("walletsGrid");
+  const data = list || allWallets;
+  if(data.length === 0){
+    grid.innerHTML = `<div class="empty-state"><div class="icon">💳</div><p>No wallet accounts yet</p></div>`;
+    return;
+  }
+  grid.innerHTML = "";
+  data.forEach(w => {
+    const card = document.createElement("div");
+    card.className = "order-card";
+    const updated = w.updatedAt ? w.updatedAt.toDate().toLocaleString("en-UG") : "—";
+    card.innerHTML = `
+      <div class="order-top">
+        <div>
+          <div class="order-name">${w.name}</div>
+          <div class="order-contact">📞 ${w.phone}</div>
+          <div class="order-time" style="margin-top:4px;">Updated: ${updated}</div>
+        </div>
+        <div class="order-total">UGX ${(w.balance||0).toLocaleString()}</div>
+      </div>
+      <div class="order-actions">
+        <button class="action-btn btn-start" onclick="openCreditModal('${w.uid}','${w.name}')">➕ Credit</button>
+        <button class="action-btn btn-cancel" onclick="openDebitModal('${w.uid}','${w.name}')">➖ Debit</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function approveTopup(reqId, userId, userName, amount){
+  if(!confirm(`Credit UGX ${Number(amount).toLocaleString()} to ${userName}?`)) return;
+  try{
+    // Credit wallet
+    await db.collection("wallets").doc(userId).set({
+      balance: firebase.firestore.FieldValue.increment(amount),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    // Log transaction
+    await db.collection("wallet_transactions").add({
+      userId, type:"credit", amount,
+      note: "Top-up approved by admin",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Mark request done
+    await db.collection("topup_requests").doc(reqId).update({ status:"approved" });
+    showToast("✅ Wallet credited!");
+  } catch(err){ showToast("Failed: "+err.message); }
+}
+
+async function rejectTopup(reqId){
+  await db.collection("topup_requests").doc(reqId).update({ status:"rejected" });
+  showToast("Top-up request rejected");
+}
+
+function openCreditModal(uid, name){
+  creditTargetUserId = uid;
+  document.getElementById("creditPatientName").value = name;
+  document.getElementById("creditType").value = "credit";
+  document.getElementById("creditAmount").value = "";
+  document.getElementById("creditNote").value = "";
+  document.getElementById("creditModal").classList.add("open");
+}
+function openDebitModal(uid, name){
+  creditTargetUserId = uid;
+  document.getElementById("creditPatientName").value = name;
+  document.getElementById("creditType").value = "debit";
+  document.getElementById("creditAmount").value = "";
+  document.getElementById("creditNote").value = "";
+  document.getElementById("creditModal").classList.add("open");
+}
+document.getElementById("creditModal").addEventListener("click", e => {
+  if(e.target === e.currentTarget) e.currentTarget.classList.remove("open");
+});
+
+async function submitCredit(){
+  const type = document.getElementById("creditType").value;
+  const amount = parseInt(document.getElementById("creditAmount").value);
+  const note = document.getElementById("creditNote").value.trim() || (type==="credit"?"Admin credit":"Admin debit");
+  if(!amount || amount < 1){ showToast("Enter a valid amount"); return; }
+
+  try{
+    const change = type === "credit" ? amount : -amount;
+    await db.collection("wallets").doc(creditTargetUserId).set({
+      balance: firebase.firestore.FieldValue.increment(change),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    await db.collection("wallet_transactions").add({
+      userId: creditTargetUserId, type, amount, note,
+      by: "admin",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById("creditModal").classList.remove("open");
+    showToast(`✅ Wallet ${type === "credit" ? "credited" : "debited"} — UGX ${amount.toLocaleString()}`);
+  } catch(err){ showToast("Failed: "+err.message); }
+}
+</script>
 </body>
 </html>
