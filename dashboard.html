@@ -269,11 +269,16 @@ body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
     <div class="card-label">Emergency</div>
     <div class="card-sub">Call now</div>
   </div>
-
   <div class="dash-card" onclick="go('patient_chat.html')" style="animation-delay:0.45s">
     <div class="card-icon" style="background:rgba(16,185,129,0.12);">📞</div>
     <div class="card-label">Contact Lab</div>
     <div class="card-sub">Get in touch</div>
+  </div>
+
+  <div class="dash-card" onclick="go('wallet.html')" style="animation-delay:0.5s">
+    <div class="card-icon" style="background:rgba(245,158,11,0.12);">💳</div>
+    <div class="card-label">My Wallet</div>
+    <div class="card-sub" id="dashWalletBal">Balance: UGX 0</div>
   </div>
 
 </div>
@@ -310,7 +315,7 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 function go(page){ window.location.href = page; }
-function callEmergency(){ window.location.href = "tel:+256778379591"; }
+function callEmergency(){ window.location.href = "emergency.html"; }
 function logout(){ auth.signOut().then(()=>{ location.href="login.html"; }); }
 
 // ── AUTH ──
