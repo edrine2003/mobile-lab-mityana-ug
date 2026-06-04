@@ -486,7 +486,11 @@ button.submit-btn:active{transform:translateY(0);}
       <option>Cash on Delivery</option>
       <option>MTN Mobile Money</option>
       <option>Airtel Money</option>
+      <option value="Wallet">💳 Pay from Wallet (Balance: <span id="walletBalanceOption">UGX 0</span>)</option>
     </select>
+    <div id="walletWarning" style="display:none;padding:10px 14px;background:rgba(239,68,68,0.08);border:1.5px solid rgba(239,68,68,0.25);border-radius:12px;font-size:13px;font-weight:700;color:#b91c1c;margin:-8px 0 12px;">
+      ⚠️ Insufficient wallet balance. Please top up or choose another payment method.
+    </div>
     <div id="mtnDetails" class="payment-details">💛 MTN Mobile Money: <b>0778379591 – Kwikiriza Jenipher</b></div>
     <div id="airtelDetails" class="payment-details">❤️ Airtel Money: <b>0706559100 – Nambi Amina</b></div>
 
@@ -561,6 +565,34 @@ auth.onAuthStateChanged(async (user) => {
   } else {
     document.getElementById("uEmail").innerText = user.email;
     profileBox.style.display = "block";
+  }
+  // Load wallet balance
+  listenWalletBalance(user.uid);
+});
+
+// ── WALLET BALANCE ──
+let currentWalletBalance = 0;
+function listenWalletBalance(uid){
+  db.collection("wallets").doc(uid).onSnapshot(snap => {
+    currentWalletBalance = snap.exists ? (snap.data().balance || 0) : 0;
+    const el = document.getElementById("walletBalanceOption");
+    if(el) el.innerText = "UGX " + currentWalletBalance.toLocaleString();
+  });
+}
+
+// Watch payment change for wallet warning
+document.addEventListener("DOMContentLoaded", () => {
+  const paymentEl = document.getElementById("payment");
+  if(paymentEl){
+    paymentEl.addEventListener("change", () => {
+      const warn = document.getElementById("walletWarning");
+      if(paymentEl.value === "Wallet"){
+        const total = Number(document.getElementById("total").value) || 0;
+        warn.style.display = (currentWalletBalance < total && total > 0) ? "block" : "none";
+      } else {
+        warn.style.display = "none";
+      }
+    });
   }
 });
 
@@ -865,6 +897,34 @@ document.getElementById("orderForm").onsubmit = async e => {
       status: "pending",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+
+    // ── AUTO-DEDUCT WALLET if paid from wallet ──
+    if(payment.value === "Wallet"){
+      const orderTotal = Number(totalInput.value);
+      // Check balance again before deducting
+      const walletSnap = await db.collection("wallets").doc(user.uid).get();
+      const currentBal = walletSnap.exists ? (walletSnap.data().balance || 0) : 0;
+      if(currentBal < orderTotal){
+        alert("⚠️ Insufficient wallet balance. Please top up or choose another payment method.");
+        // Delete the order we just created
+        await db.collection("orders").doc(orderId).delete();
+        return;
+      }
+      // Deduct balance
+      await db.collection("wallets").doc(user.uid).set({
+        balance: firebase.firestore.FieldValue.increment(-orderTotal),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      // Log transaction
+      await db.collection("wallet_transactions").add({
+        userId: user.uid,
+        type: "debit",
+        amount: orderTotal,
+        note: `Order payment – ${orderId}`,
+        orderId,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
   } catch(err){
     console.error("Firestore write failed:", err);
     alert("⚠️ Failed to submit order: " + err.message);
