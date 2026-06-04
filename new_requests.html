@@ -11,6 +11,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;color:#0f172a;}
+
 /* ── TOPBAR ── */
 .topbar{
   background:linear-gradient(135deg,#0ea5e9,#14b8a6);
@@ -34,15 +35,13 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   display:none;animation:badgePulse 2s infinite;
 }
 @keyframes badgePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+
 /* ── STATS ROW ── */
 .stats-row{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:14px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
   padding:18px 20px 0;
 }
-@media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:520px){.stats-row{grid-template-columns:1fr;}}
+@media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr);}}
 .stat-card{
   background:#fff;border-radius:18px;padding:16px;
   box-shadow:0 4px 14px rgba(0,0,0,0.06);
@@ -55,6 +54,7 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
 }
 .stat-val{font-size:24px;font-weight:900;line-height:1;}
 .stat-lbl{font-size:12px;font-weight:700;color:#64748b;margin-top:2px;}
+
 /* ── NAV TABS ── */
 .nav-tabs{
   display:flex;gap:8px;padding:16px 20px 0;
@@ -74,8 +74,10 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   padding:2px 7px;font-size:11px;font-weight:900;
 }
 .tab-btn:not(.active) .tab-count{background:rgba(14,165,233,0.1);color:#0ea5e9;}
+
 /* ── CONTENT AREA ── */
 .content{padding:16px 20px;}
+
 /* ── TOOLBAR ── */
 .toolbar{
   display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;
@@ -147,6 +149,7 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
 .btn-whatsapp{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;box-shadow:0 4px 12px rgba(37,211,102,0.3);}
 .btn-result{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 4px 12px rgba(139,92,246,0.3);}
 .btn-view{background:#f1f5f9;color:#0f172a;}
+
 /* ── RESULT MODAL ── */
 .modal-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;
@@ -182,12 +185,14 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   font-family:'Nunito',Arial,sans-serif;
   box-shadow:0 6px 18px rgba(14,165,233,0.3);margin-top:4px;
 }
+
 /* ── EMPTY STATE ── */
 .empty-state{
   text-align:center;padding:50px 20px;color:#94a3b8;
 }
 .empty-state .icon{font-size:52px;opacity:0.4;margin-bottom:12px;}
 .empty-state p{font-size:15px;font-weight:700;}
+
 /* ── TOAST ── */
 .toast{
   position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
@@ -195,6 +200,7 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
 /* ── DETAIL EXPAND ── */
 .order-detail{display:none;border-top:1px solid #f1f5f9;margin-top:12px;padding-top:12px;}
 .order-detail.open{display:block;}
@@ -204,8 +210,10 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
 </style>
 </head>
 <body>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
 <!-- TOPBAR -->
 <div class="topbar">
   <span class="topbar-logo">🧪</span>
@@ -220,6 +228,7 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
     <button class="topbar-btn" id="logoutBtn">🚪 Logout</button>
   </div>
 </div>
+
 <!-- STATS ROW -->
 <div class="stats-row">
   <div class="stat-card">
@@ -242,11 +251,8 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
     <div class="stat-icon" style="background:rgba(139,92,246,0.12);">📅</div>
     <div><div class="stat-val" id="statAppointments" style="color:#7c3aed;">0</div><div class="stat-lbl">Appointments</div></div>
   </div>
-  <a class="stat-card" href="reports.html" style="text-decoration:none;color:inherit;cursor:pointer;">
-    <div class="stat-icon" style="background:rgba(14,165,233,0.12);">📊</div>
-    <div><div class="stat-val" style="color:#0ea5e9;">View</div><div class="stat-lbl">Reports</div></div>
-  </a>
 </div>
+
 <!-- NAV TABS -->
 <div class="nav-tabs">
   <button class="tab-btn active" id="tab-pending" onclick="switchTab('pending')">⏳ Pending <span class="tab-count" id="cnt-pending">0</span></button>
@@ -255,7 +261,9 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   <button class="tab-btn" id="tab-cancelled" onclick="switchTab('cancelled')">❌ Cancelled <span class="tab-count" id="cnt-cancelled">0</span></button>
   <button class="tab-btn" id="tab-all" onclick="switchTab('all')">📋 All Orders <span class="tab-count" id="cnt-all">0</span></button>
   <button class="tab-btn" id="tab-appointments" onclick="switchTab('appointments')">📅 Appointments <span class="tab-count" id="cnt-appointments">0</span></button>
+  <button class="tab-btn" id="tab-wallets" onclick="switchTab('wallets')">💳 Wallets <span class="tab-count" id="cnt-wallets">0</span></button>
 </div>
+
 <!-- CONTENT -->
 <div class="content">
   <div id="orders-section">
@@ -271,6 +279,7 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
       <div class="empty-state"><div class="icon">⏳</div><p>Loading orders...</p></div>
     </div>
   </div>
+
   <!-- APPOINTMENTS SECTION -->
   <div id="appointments-section" style="display:none;">
     <div class="toolbar">
@@ -287,7 +296,44 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
       <div class="empty-state"><div class="icon">📅</div><p>Loading appointments...</p></div>
     </div>
   </div>
+
+  <!-- WALLETS SECTION -->
+  <div id="wallets-section" style="display:none;">
+    <div class="toolbar">
+      <input class="search-input" id="walletSearch" placeholder="🔍 Search patients..." oninput="filterWallets()">
+    </div>
+    <!-- TOP-UP REQUESTS -->
+    <div style="font-size:14px;font-weight:900;color:#0f172a;margin-bottom:10px;">⏳ Pending Top-Up Requests</div>
+    <div class="orders-grid" id="topupRequestsGrid">
+      <div class="empty-state"><div class="icon">💳</div><p>No pending requests</p></div>
+    </div>
+    <div style="font-size:14px;font-weight:900;color:#0f172a;margin:16px 0 10px;">👥 All Patient Wallets</div>
+    <div class="orders-grid" id="walletsGrid">
+      <div class="empty-state"><div class="icon">💳</div><p>Loading wallets...</p></div>
+    </div>
+  </div>
 </div>
+
+<!-- CREDIT MODAL -->
+<div class="modal-overlay" id="creditModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="creditModalTitle">💳 Update Wallet</h3>
+    <label>Patient</label>
+    <input type="text" id="creditPatientName" readonly>
+    <label>Action</label>
+    <select id="creditType">
+      <option value="credit">➕ Credit (Add Money)</option>
+      <option value="debit">➖ Debit (Deduct Money)</option>
+    </select>
+    <label>Amount (UGX)</label>
+    <input type="number" id="creditAmount" placeholder="e.g. 50000">
+    <label>Note</label>
+    <input type="text" id="creditNote" placeholder="e.g. MTN deposit confirmed">
+    <button class="modal-btn" onclick="submitCredit()">✅ Update Balance</button>
+  </div>
+</div>
+
 <!-- RESULT MODAL -->
 <div class="modal-overlay" id="resultModal">
   <div class="modal">
@@ -315,10 +361,12 @@ const firebaseConfig = {
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+
 let allOrders = [];
 let currentTab = "pending";
 let resultTargetId = "";
 const ADMIN_WHATSAPP = "256750992939";
+
 // ── AUTH ──
 auth.onAuthStateChanged(async user => {
   if(!user){ window.location.href="login.html"; return; }
@@ -333,10 +381,12 @@ auth.onAuthStateChanged(async user => {
   watchChatUnread();
   loadAppointments();
 });
+
 document.getElementById("logoutBtn").onclick = async () => {
   await auth.signOut();
   window.location.href="login.html";
 };
+
 // ── WATCH CHAT UNREAD ──
 function watchChatUnread(){
   db.collection("chats").onSnapshot(snapshot => {
@@ -351,6 +401,7 @@ function watchChatUnread(){
     }
   });
 }
+
 // ── LOAD ALL ORDERS REAL-TIME ──
 function loadOrders(){
   db.collection("orders").orderBy("createdAt","desc").onSnapshot(snapshot => {
@@ -362,6 +413,7 @@ function loadOrders(){
     document.getElementById("ordersGrid").innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>Error: ${err.message}</p></div>`;
   });
 }
+
 // ── STATS ──
 function updateStats(){
   const counts = { pending:0, ongoing:0, completed:0, cancelled:0 };
@@ -376,21 +428,25 @@ function updateStats(){
   document.getElementById("cnt-cancelled").innerText = counts.cancelled;
   document.getElementById("cnt-all").innerText = allOrders.length;
 }
+
 // ── TAB SWITCH ──
 function switchTab(tab){
   currentTab = tab;
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   document.getElementById("tab-"+tab).classList.add("active");
-  // Show/hide sections
-  document.getElementById("orders-section").style.display = tab === "appointments" ? "none" : "block";
+  document.getElementById("orders-section").style.display = (tab === "appointments" || tab === "wallets") ? "none" : "block";
   document.getElementById("appointments-section").style.display = tab === "appointments" ? "block" : "none";
+  document.getElementById("wallets-section").style.display = tab === "wallets" ? "block" : "none";
   if(tab === "appointments") filterAppointments();
+  else if(tab === "wallets") loadWallets();
   else filterOrders();
 }
+
 // ── FILTER + SORT ──
 function filterOrders(){
   const search = document.getElementById("searchInput").value.toLowerCase();
   const sort = document.getElementById("sortSelect").value;
+
   let filtered = allOrders.filter(o => {
     const matchTab = currentTab === "all" || o.status === currentTab;
     const matchSearch = !search ||
@@ -400,6 +456,7 @@ function filterOrders(){
       (o.location||"").toLowerCase().includes(search);
     return matchTab && matchSearch;
   });
+
   if(sort === "oldest") filtered.reverse();
   else if(sort === "highest"){
     filtered.sort((a,b) => {
@@ -408,8 +465,10 @@ function filterOrders(){
       return bTotal - aTotal;
     });
   }
+
   renderOrders(filtered);
 }
+
 // ── RENDER ORDERS ──
 function renderOrders(orders){
   const grid = document.getElementById("ordersGrid");
@@ -426,6 +485,7 @@ function renderOrders(orders){
     const testsHtml = testsArr.map(t=>`• ${t}`).join("<br>") || "—";
     const statusClass = `status-${o.status||"pending"}`;
     const statusLabel = {pending:"⏳ Pending",ongoing:"🔬 Ongoing",completed:"✅ Completed",cancelled:"❌ Cancelled"}[o.status] || o.status;
+
     // Action buttons based on status
     let actionBtns = "";
     if(o.status === "pending"){
@@ -447,6 +507,7 @@ function renderOrders(orders){
         <button class="action-btn btn-start" onclick="restoreOrder('${o.id}',this)">↩ Restore</button>
         <button class="action-btn btn-view" onclick="toggleDetail('detail-${o.id}')">👁 View Details</button>`;
     }
+
     card.innerHTML = `
       <div class="order-top">
         <div>
@@ -498,6 +559,7 @@ async function startOrder(orderId, btn){
     showToast("🔬 Test started!");
   } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="▶ Start Test"; }
 }
+
 async function completeOrder(orderId, btn){
   if(!confirm("Mark this order as completed?")) return;
   btn.disabled = true; btn.innerText = "Saving...";
@@ -509,6 +571,7 @@ async function completeOrder(orderId, btn){
     showToast("✅ Order marked complete!");
   } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="✅ Mark Complete"; }
 }
+
 async function cancelOrder(orderId, btn){
   const reason = prompt("Reason for cancellation?");
   if(!reason) return;
@@ -522,6 +585,7 @@ async function cancelOrder(orderId, btn){
     showToast("❌ Order cancelled");
   } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="✕ Cancel"; }
 }
+
 async function restoreOrder(orderId, btn){
   btn.disabled = true; btn.innerText = "Restoring...";
   try{
@@ -533,12 +597,14 @@ async function restoreOrder(orderId, btn){
     showToast("↩ Order restored to pending");
   } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="↩ Restore"; }
 }
+
 // ── WHATSAPP CONTACT ──
 function waContact(phone, name, orderId){
   if(!phone){ showToast("No phone number"); return; }
   const msg = `Hello ${name}, this is Mobile Lab Mityana regarding your order ${orderId}. `;
   window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
 }
+
 // ── RESULT MODAL ──
 function openResultModal(orderId, patientName){
   resultTargetId = orderId;
@@ -546,10 +612,12 @@ function openResultModal(orderId, patientName){
   document.getElementById("resultPatientName").value = patientName;
   document.getElementById("resultText").value = "";
   document.getElementById("resultNotes").value = "";
+
   // Build per-test input fields from the order
   const order = allOrders.find(o => o.id === orderId);
   const testsField = document.getElementById("resultTestsFields");
   testsField.innerHTML = "";
+
   if(order && order.tests){
     const tests = order.tests.split("\n").filter(t => t.trim());
     if(tests.length > 0){
@@ -571,11 +639,14 @@ function openResultModal(orderId, patientName){
   } else {
     testsField.innerHTML = `<p style="font-size:13px;color:#64748b;font-weight:600;">No tests found — type results in the summary below.</p>`;
   }
+
   document.getElementById("resultModal").classList.add("open");
 }
+
 document.getElementById("resultModal").addEventListener("click", e => {
   if(e.target === e.currentTarget) e.currentTarget.classList.remove("open");
 });
+
 async function submitResult(){
   // Build resultText from per-test fields
   const testRows = document.querySelectorAll("#resultTestsFields .test-result-row input");
@@ -585,12 +656,16 @@ async function submitResult(){
     const value = input.value.trim();
     if(testName) builtText += `${testName}: ${value || "Pending"}\n`;
   });
+
   // Append manual summary if filled
   const manualSummary = document.getElementById("resultText").value.trim();
   if(manualSummary) builtText += `\n${manualSummary}`;
+
   const resultText = builtText.trim();
   const resultNotes = document.getElementById("resultNotes").value.trim();
+
   if(!resultText){ showToast("Please enter at least one test result"); return; }
+
   const order = allOrders.find(o => o.id === resultTargetId);
   try{
     // Save results to order
@@ -600,6 +675,7 @@ async function submitResult(){
       resultNotes,
       completedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+
     // Save to results collection so patient can see it
     await db.collection("results").doc(resultTargetId).set({
       orderId: resultTargetId,
@@ -609,20 +685,24 @@ async function submitResult(){
       resultNotes,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+
     // Notify patient via WhatsApp
     if(order?.phone){
       const waMsg = `Hello ${order.name}, your lab results for order ${resultTargetId} are ready!\n\n📋 Results:\n${resultText}\n\n👨‍⚕️ Doctor's Notes:\n${resultNotes||"None"}\n\nMobile Lab – Mityana`;
       window.open(`https://wa.me/${order.phone.replace(/^0/,"256")}?text=${encodeURIComponent(waMsg)}`);
     }
+
     document.getElementById("resultModal").classList.remove("open");
     showToast("✅ Results saved & patient notified!");
   } catch(err){ alert("Failed: "+err.message); }
 }
+
 // ── TOGGLE DETAIL ──
 function toggleDetail(id){
   const el = document.getElementById(id);
   if(el) el.classList.toggle("open");
 }
+
 // ── TOAST ──
 function showToast(msg){
   const t = document.getElementById("toast");
@@ -631,9 +711,11 @@ function showToast(msg){
   setTimeout(() => t.classList.remove("show"), 2500);
 }
 </script>
+
 <script>
 // ── APPOINTMENTS ──
 let allAppointments = [];
+
 function loadAppointments(){
   db.collection("appointments").orderBy("createdAt","desc").onSnapshot(snapshot => {
     allAppointments = [];
@@ -645,6 +727,7 @@ function loadAppointments(){
     filterAppointments();
   });
 }
+
 function filterAppointments(){
   const search = (document.getElementById("apptSearch")?.value || "").toLowerCase();
   const filter = document.getElementById("apptFilter")?.value || "all";
@@ -659,6 +742,7 @@ function filterAppointments(){
   });
   renderAppointments(list);
 }
+
 function renderAppointments(list){
   const grid = document.getElementById("apptGrid");
   if(list.length === 0){
@@ -672,6 +756,7 @@ function renderAppointments(list){
     const statusClass = `status-${a.status||"pending"}`;
     const statusLabel = {pending:"⏳ Pending",confirmed:"✅ Confirmed",completed:"✔ Done",cancelled:"❌ Cancelled"}[a.status] || a.status;
     const createdAt = a.createdAt ? a.createdAt.toDate().toLocaleString("en-UG") : "—";
+
     // Action buttons
     let actions = "";
     if(a.status === "pending"){
@@ -687,6 +772,7 @@ function renderAppointments(list){
     } else {
       actions = `<button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button>`;
     }
+
     card.innerHTML = `
       <div class="order-top">
         <div>
@@ -711,6 +797,7 @@ function renderAppointments(list){
     grid.appendChild(card);
   });
 }
+
 async function confirmAppt(id, name, phone, btn){
   btn.disabled = true; btn.innerText = "Confirming...";
   try{
@@ -727,6 +814,7 @@ async function confirmAppt(id, name, phone, btn){
     showToast("✅ Appointment confirmed & patient notified!");
   } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✅ Confirm"; }
 }
+
 async function doneAppt(id, btn){
   btn.disabled = true; btn.innerText = "Saving...";
   try{
@@ -737,6 +825,7 @@ async function doneAppt(id, btn){
     showToast("✔ Appointment marked as done!");
   } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✔ Mark Done"; }
 }
+
 async function cancelAppt(id, btn){
   const reason = prompt("Reason for cancellation?");
   if(!reason) return;
@@ -756,6 +845,7 @@ async function cancelAppt(id, btn){
     showToast("Appointment cancelled");
   } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✕ Cancel"; }
 }
+
 function waAppt(phone, name, date, time){
   if(!phone){ showToast("No phone number"); return; }
   const msg = `Hello ${name}, this is Mobile Lab Mityana regarding your appointment on ${date} at ${time}. `;
