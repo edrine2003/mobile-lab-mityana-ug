@@ -54,7 +54,9 @@ body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark
 .user-row{display:flex;align-items:center;gap:14px;}
 .avatar{
   width:62px;height:62px;border-radius:50%;border:3px solid rgba(255,255,255,0.6);
-  object-fit:cover;background:#fff;flex-shrink:0;
+  object-fit:cover;background:rgba(255,255,255,0.3);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:900;color:#fff;overflow:hidden;
 }
 .user-name{font-size:20px;font-weight:900;margin-bottom:3px;}
 .user-sub{font-size:13px;opacity:0.88;font-weight:600;}
@@ -183,7 +185,7 @@ body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
     </div>
   </div>
   <div class="user-row">
-    <img class="avatar" id="profilePic" src="icons/user.png" alt="avatar">
+    <div class="avatar" id="profilePic">👤</div>
     <div>
       <div class="user-name" id="userWelcome">Welcome!</div>
       <div class="user-sub">Mobile Lab – Mityana</div>
@@ -327,7 +329,15 @@ auth.onAuthStateChanged(async user => {
     if(doc.exists){
       const data = doc.data();
       name = data.fullName || user.email || "User";
-      if(data.photoURL) document.getElementById("profilePic").src = data.photoURL;
+      const avatarEl = document.getElementById("profilePic");
+      if(data.photoURL){
+        // Show photo
+        avatarEl.innerHTML = `<img src="${data.photoURL}" style="width:62px;height:62px;border-radius:50%;object-fit:cover;" onerror="this.parentElement.innerHTML='👤'">`;
+      } else {
+        // Show initials
+        const initials = name.split(" ").map(n=>n[0]).slice(0,2).join("").toUpperCase();
+        avatarEl.innerText = initials || "👤";
+      }
     }
     document.getElementById("userWelcome").innerText = "Welcome, " + name.split(" ")[0] + " 👋";
     loadStats(user.uid);
