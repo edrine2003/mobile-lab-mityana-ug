@@ -3,261 +3,594 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mobile Lab – Mityana Registration</title>
-
+<title>Register – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
 <style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(15,23,42,0.12);--red:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
 body{
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#0284c7,#0ea5e9);
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  font-family:'Nunito',Arial,sans-serif;
   min-height:100vh;
+  background:linear-gradient(135deg,#0ea5e9,#14b8a6,#10b981);
+  background-size:300% 300%;
+  animation:gradShift 8s ease infinite;
+  display:flex;justify-content:center;align-items:flex-start;
+  padding:24px 16px 48px;position:relative;overflow-x:hidden;
 }
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+body::before,body::after{content:'';position:fixed;border-radius:50%;filter:blur(80px);opacity:0.25;pointer-events:none;z-index:0;}
+body::before{width:400px;height:400px;background:radial-gradient(circle,#0ea5e9,transparent);top:-80px;left:-80px;}
+body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,transparent);bottom:-60px;right:-60px;}
+
+/* CARD */
 .card{
-  width:100%;
-  max-width:600px;
-  background:white;
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 25px 60px rgba(0,0,0,0.2);
+  width:100%;max-width:520px;
+  background:rgba(255,255,255,0.97);
+  border-radius:28px;
+  box-shadow:0 24px 60px rgba(2,6,23,0.2);
+  overflow:hidden;
+  animation:cardIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+  position:relative;z-index:1;
 }
-h2{text-align:center;margin-bottom:5px;}
-.subtitle{text-align:center;color:#666;font-size:14px;margin-bottom:15px;}
-input,select{
-  width:100%;
-  padding:12px;
-  margin:6px 0 14px;
-  border-radius:10px;
-  border:1px solid #ccc;
+@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(0.96);}to{opacity:1;transform:none;}}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  background-size:300% 300%;animation:gradShift 8s ease infinite;
+  padding:24px 20px;text-align:center;color:#fff;position:relative;overflow:hidden;
 }
-input:focus,select:focus{
-  border-color:#0ea5e9;
-  outline:none;
+.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.08);}
+.hero h2{font-size:22px;font-weight:900;margin:0 0 5px;}
+.hero p{font-size:13px;opacity:0.9;font-weight:600;margin:3px 0;}
+
+/* PROGRESS STEPS */
+.steps{display:flex;align-items:center;justify-content:center;padding:16px 20px 0;gap:0;}
+.step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;max-width:100px;}
+.step-circle{
+  width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;border:2px solid var(--border);
+  background:#f1f5f9;color:var(--muted);transition:all 0.3s;
 }
-button{
-  width:100%;
-  padding:14px;
-  background:#0ea5e9;
-  border:none;
-  color:white;
-  font-weight:bold;
-  border-radius:10px;
-  cursor:pointer;
+.step.active .step-circle{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(14,165,233,0.4);}
+.step.done .step-circle{background:linear-gradient(135deg,#10b981,#14b8a6);color:#fff;border-color:transparent;}
+.step-lbl{font-size:11px;font-weight:700;color:var(--muted);}
+.step.active .step-lbl{color:var(--primary);}
+.step.done .step-lbl{color:#10b981;}
+.step-line{flex:1;height:2px;background:var(--border);margin-bottom:18px;max-width:40px;transition:background 0.3s;}
+.step-line.done{background:linear-gradient(90deg,#10b981,#14b8a6);}
+
+/* FORM PAGES */
+.form-page{display:none;padding:20px 24px;}
+.form-page.active{display:block;}
+.page-title{font-size:16px;font-weight:900;color:var(--dark);margin-bottom:16px;}
+
+/* FIELDS */
+.field{margin-bottom:14px;}
+.field label{font-size:13px;font-weight:800;color:var(--dark);display:block;margin-bottom:5px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px;border-radius:14px;
+  border:1.5px solid var(--border);background:#f8fafc;
+  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
+  color:var(--dark);outline:none;transition:all 0.2s;
 }
-button:hover{background:#0284c7;}
+.field input:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,0.12);background:#fff;}
+.field input.error{border-color:var(--red);background:rgba(239,68,68,0.04);}
+.field-error{font-size:12px;font-weight:700;color:var(--red);margin-top:4px;display:none;}
+.field-error.show{display:block;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.grid2{grid-template-columns:1fr;}}
+
+/* PASSWORD WRAP */
+.pwd-wrap{position:relative;}
+.pwd-wrap input{padding-right:44px;}
+.pwd-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:var(--muted);}
+.pwd-eye:hover{color:var(--primary);}
+
+/* AVATAR UPLOAD */
+.avatar-upload{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.avatar-preview{
+  width:64px;height:64px;border-radius:50%;object-fit:cover;
+  border:2px solid var(--border);background:#f1f5f9;
+  display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;
+}
+.avatar-preview img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+.avatar-btn{
+  padding:9px 16px;border:1.5px solid var(--primary);border-radius:12px;
+  background:#fff;color:var(--primary);font-size:13px;font-weight:800;
+  cursor:pointer;font-family:'Nunito',Arial,sans-serif;
+}
+#profilePicInput{display:none;}
+
+/* CHECKBOX */
+.check-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;}
+.check-row input{width:auto;margin:0;accent-color:var(--primary);}
+.check-row span{font-size:13px;font-weight:700;color:var(--dark);}
+.check-row a{color:var(--primary);font-weight:800;text-decoration:none;}
+
+/* NOTE */
 .note{
-  font-size:13px;
-  background:#e0f2fe;
-  padding:10px;
-  border-radius:8px;
-  margin-bottom:15px;
+  background:rgba(14,165,233,0.08);border-radius:12px;
+  padding:10px 14px;font-size:13px;font-weight:700;color:#0369a1;
+  margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;
 }
-.checkbox{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:15px;
+
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:6px;}
+.btn-next,.btn-submit{
+  flex:1;padding:14px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;font-size:15px;font-weight:900;cursor:pointer;
+  font-family:'Nunito',Arial,sans-serif;
+  box-shadow:0 6px 20px rgba(14,165,233,0.3);transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
 }
-#msg{text-align:center;font-weight:bold;margin-top:10px;}
+.btn-next:hover,.btn-submit:hover{transform:translateY(-2px);}
+.btn-next:disabled,.btn-submit:disabled{opacity:0.7;cursor:not-allowed;transform:none;}
+.btn-back{
+  padding:14px 18px;border:1.5px solid var(--border);border-radius:14px;
+  background:#fff;color:var(--muted);font-size:15px;font-weight:800;
+  cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;
+}
+.btn-spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(255,255,255,0.4);border-top-color:#fff;animation:spin 0.7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading .btn-text{display:none;}
+.loading .btn-spinner{display:block;}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;}
+.divider hr{flex:1;border:none;border-top:1px solid var(--border);}
+.divider span{font-size:12px;font-weight:700;color:var(--muted);}
+
+/* GOOGLE BTN */
+.google-btn{
+  width:100%;padding:12px;border:1.5px solid var(--border);border-radius:14px;
+  background:#fff;font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:800;
+  color:var(--dark);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all 0.2s;
+}
+.google-btn:hover{background:#f8fafc;border-color:rgba(14,165,233,0.3);}
+
+/* MSG */
+.msg{text-align:center;font-size:13px;font-weight:700;padding:10px 14px;border-radius:12px;margin-top:12px;display:none;}
+.msg.success{background:rgba(34,197,94,0.1);color:#15803d;display:block;}
+.msg.error{background:rgba(239,68,68,0.08);color:#b91c1c;display:block;}
+
+/* FOOTER */
+.footer{text-align:center;font-size:13px;color:var(--muted);padding:14px 24px 20px;font-weight:600;}
+.footer a{color:var(--primary);font-weight:800;text-decoration:none;}
 </style>
 </head>
 <body>
-
 <div class="card">
 
-<h2>🧪 Mobile Lab Registration</h2>
-<div class="subtitle">Serving Mityana District Only</div>
+  <!-- HERO -->
+  <div class="hero">
+    <h2>🧪 Create Your Account</h2>
+    <p>Mobile Lab Mityana – Serving Mityana &amp; nearby areas</p>
+  </div>
 
-<div class="note">
-📱 Please register using a WhatsApp number for faster communication.
-</div>
+  <!-- PROGRESS -->
+  <div class="steps">
+    <div class="step active" id="s1"><div class="step-circle">1</div><div class="step-lbl">Personal</div></div>
+    <div class="step-line" id="l1"></div>
+    <div class="step" id="s2"><div class="step-circle">2</div><div class="step-lbl">Location</div></div>
+    <div class="step-line" id="l2"></div>
+    <div class="step" id="s3"><div class="step-circle">3</div><div class="step-lbl">Security</div></div>
+  </div>
 
-<form id="registerForm">
+  <!-- PAGE 1: PERSONAL INFO -->
+  <div class="form-page active" id="page1">
+    <div class="page-title">👤 Personal Information</div>
 
-<input type="text" id="fullName" placeholder="Full Name" required>
-<input type="email" id="email" placeholder="Email" required>
-<input type="text" id="phone" placeholder="Phone (07XXXXXXXX)" required>
+    <div class="note">📱 Use your WhatsApp number for faster communication.</div>
 
-<select id="nationality" required>
-<option value="">Nationality</option>
-<option>Ugandan</option>
-<option>Other</option>
-</select>
+    <!-- AVATAR -->
+    <div class="avatar-upload">
+      <div class="avatar-preview" id="avatarPreview">👤</div>
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--dark);margin-bottom:6px;">Profile Picture <span style="color:var(--muted);font-weight:600;">(Optional)</span></div>
+        <button class="avatar-btn" onclick="document.getElementById('profilePicInput').click()" type="button">📷 Choose Photo</button>
+        <input type="file" id="profilePicInput" accept="image/*" onchange="previewAvatar(this)">
+      </div>
+    </div>
 
-<label>Date of Birth</label>
-<input type="date" id="dob" required>
-<input type="number" id="age" placeholder="Age (Auto)" readonly>
+    <div class="field">
+      <label>Full Name *</label>
+      <input type="text" id="fullName" placeholder="e.g. Namiyingo Joyce">
+      <div class="field-error" id="err-fullName">Please enter your full name</div>
+    </div>
 
-<input type="text" value="Mityana District" readonly>
+    <div class="grid2">
+      <div class="field">
+        <label>Email *</label>
+        <input type="email" id="email" placeholder="name@gmail.com">
+        <div class="field-error" id="err-email">Enter a valid email</div>
+      </div>
+      <div class="field">
+        <label>Phone (WhatsApp) *</label>
+        <input type="tel" id="phone" placeholder="07XXXXXXXX">
+        <div class="field-error" id="err-phone">Use format 07XXXXXXXX</div>
+      </div>
+    </div>
 
-<select id="subcounty" required>
-<option value="">Select Subcounty</option>
-<option value="Mityana Town Council">Mityana Town Council</option>
-<option value="Busunju">Busunju</option>
-<option value="Bulera">Bulera</option>
-<option value="Kikandwa">Kikandwa</option>
-<option value="Malangala">Malangala</option>
-</select>
+    <div class="grid2">
+      <div class="field">
+        <label>Date of Birth *</label>
+        <input type="date" id="dob" onchange="calcAge()">
+        <div class="field-error" id="err-dob">Select your date of birth</div>
+      </div>
+      <div class="field">
+        <label>Age</label>
+        <input type="number" id="age" placeholder="Auto-calculated" readonly style="background:#f1f5f9;color:var(--muted);">
+      </div>
+    </div>
 
-<select id="parish" required>
-<option value="">Select Parish</option>
-</select>
+    <div class="grid2">
+      <div class="field">
+        <label>Sex *</label>
+        <select id="sex">
+          <option value="">-- Select --</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+        <div class="field-error" id="err-sex">Please select your sex</div>
+      </div>
+      <div class="field">
+        <label>Nationality</label>
+        <select id="nationality">
+          <option value="">-- Select --</option>
+          <option>Ugandan</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
 
-<input type="date" id="pickupDate" required>
-<input type="time" id="pickupTime" required>
+    <div class="btn-row">
+      <button class="btn-next" onclick="goPage2()" type="button">Next → Location</button>
+    </div>
+  </div>
 
-<div class="checkbox">
-<input type="checkbox" id="emergency">
-<label for="emergency">Emergency Case</label>
-</div>
+  <!-- PAGE 2: LOCATION -->
+  <div class="form-page" id="page2">
+    <div class="page-title">📍 Your Location</div>
 
-<label>Profile Picture (Optional)</label>
-<input type="file" id="profilePic" accept="image/*">
+    <div class="field">
+      <label>District</label>
+      <input type="text" value="Mityana District" readonly style="background:#f1f5f9;color:var(--muted);">
+    </div>
 
-<input type="password" id="password" placeholder="Password (min 6 characters)" required>
+    <div class="field">
+      <label>Subcounty *</label>
+      <select id="subcounty" onchange="loadParishes()">
+        <option value="">-- Select Subcounty --</option>
+        <option>Mityana Town Council</option>
+        <option>Busunju</option>
+        <option>Bulera</option>
+        <option>Kikandwa</option>
+        <option>Malangala</option>
+      </select>
+      <div class="field-error" id="err-subcounty">Please select your subcounty</div>
+    </div>
 
-<button type="submit">Create Account</button>
+    <div class="field">
+      <label>Parish *</label>
+      <select id="parish">
+        <option value="">-- Select Parish --</option>
+      </select>
+      <div class="field-error" id="err-parish">Please select your parish</div>
+    </div>
 
-<p id="msg"></p>
+    <div class="field">
+      <label>Specific Address / Landmark</label>
+      <input type="text" id="address" placeholder="e.g. Near Mityana market, behind school...">
+    </div>
 
-</form>
+    <div class="check-row">
+      <input type="checkbox" id="emergency">
+      <span>🚨 This is an <b>Emergency Case</b></span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goPage(1)" type="button">← Back</button>
+      <button class="btn-next" onclick="goPage3()" type="button">Next → Security</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3: SECURITY -->
+  <div class="form-page" id="page3">
+    <div class="page-title">🔐 Set Your Password</div>
+
+    <div class="field">
+      <label>Password *</label>
+      <div class="pwd-wrap">
+        <input type="password" id="password" placeholder="Min 6 characters">
+        <span class="pwd-eye" onclick="togglePwd('password','eye1')" id="eye1">👁</span>
+      </div>
+      <div class="field-error" id="err-password">Password must be at least 6 characters</div>
+    </div>
+
+    <div class="field">
+      <label>Confirm Password *</label>
+      <div class="pwd-wrap">
+        <input type="password" id="confirmPassword" placeholder="Repeat your password">
+        <span class="pwd-eye" onclick="togglePwd('confirmPassword','eye2')" id="eye2">👁</span>
+      </div>
+      <div class="field-error" id="err-confirmPassword">Passwords do not match</div>
+    </div>
+
+    <div class="check-row">
+      <input type="checkbox" id="terms">
+      <span>I agree to the <a href="#" onclick="return false;">Terms &amp; Privacy Policy</a></span>
+    </div>
+    <div class="field-error" id="err-terms" style="margin-top:-8px;margin-bottom:12px;">Please accept the terms</div>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goPage(2)" type="button">← Back</button>
+      <button class="btn-submit" id="submitBtn" onclick="register()" type="button">
+        <span class="btn-text">✅ Create Account</span>
+        <div class="btn-spinner"></div>
+      </button>
+    </div>
+
+    <div class="divider"><hr><span>or sign up with</span><hr></div>
+
+    <button class="google-btn" onclick="registerGoogle()" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="footer">
+    Already have an account? <a href="login.html">Sign in</a>
+  </div>
+
 </div>
 
 <script>
-
-// ✅ YOUR REAL FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
   projectId: "mobile-lab-mityana-aeae2",
   storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
   messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719",
-  measurementId: "G-RWW6TCR0CD"
+  appId: "1:624002906588:web:08b4259f90ffa9adad7719"
 };
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-firebase.initializeApp(firebaseConfig);
-
-const auth=firebase.auth();
-const db=firebase.firestore();
-const storage=firebase.storage();
-const msg=document.getElementById("msg");
-
-// Auto Age Calculation
-const dobInput=document.getElementById("dob");
-const ageInput=document.getElementById("age");
-
-dobInput.addEventListener("change",()=>{
-  const birth=new Date(dobInput.value);
-  const diff=Date.now()-birth.getTime();
-  const ageDate=new Date(diff);
-  ageInput.value=Math.abs(ageDate.getUTCFullYear()-1970);
+// ── REDIRECT IF ALREADY LOGGED IN ──
+auth.onAuthStateChanged(user => {
+  if(user) window.location.href = "dashboard.html";
 });
 
-// Parish dropdown
-const parishData={
-"Mityana Town Council":["Central","Nakibanga","Ttamu"],
-"Busunju":["Busunju Central","Kasaalu"],
-"Bulera":["Bulera","Kigalama"],
-"Kikandwa":["Kikandwa","Kisita"],
-"Malangala":["Malangala","Kibibi"]
+// ── PARISHES ──
+const parishData = {
+  "Mityana Town Council": ["Central","Nakibanga","Ttamu"],
+  "Busunju": ["Busunju Central","Kasaalu"],
+  "Bulera": ["Bulera","Kigalama"],
+  "Kikandwa": ["Kikandwa","Kisita"],
+  "Malangala": ["Malangala","Kibibi"]
 };
+function loadParishes(){
+  const sub = document.getElementById("subcounty").value;
+  const parish = document.getElementById("parish");
+  parish.innerHTML = "<option value=''>-- Select Parish --</option>";
+  (parishData[sub]||[]).forEach(p => { parish.innerHTML += `<option>${p}</option>`; });
+}
 
-const subcounty=document.getElementById("subcounty");
-const parish=document.getElementById("parish");
+// ── AGE CALCULATOR ──
+function calcAge(){
+  const dob = new Date(document.getElementById("dob").value);
+  if(isNaN(dob)) return;
+  const age = Math.floor((Date.now() - dob.getTime()) / (365.25*24*60*60*1000));
+  document.getElementById("age").value = age;
+}
 
-subcounty.addEventListener("change",()=>{
-  parish.innerHTML="<option value=''>Select Parish</option>";
-  parishData[subcounty.value]?.forEach(p=>{
-    parish.innerHTML+=`<option>${p}</option>`;
-  });
-});
+// ── AVATAR PREVIEW ──
+function previewAvatar(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById("avatarPreview").innerHTML = `<img src="${e.target.result}" alt="avatar">`;
+  };
+  reader.readAsDataURL(file);
+}
 
+// ── SHOW/HIDE PASSWORD ──
+function togglePwd(id, eyeId){
+  const input = document.getElementById(id);
+  const eye = document.getElementById(eyeId);
+  if(input.type === "password"){ input.type = "text"; eye.innerText = "🙈"; }
+  else { input.type = "password"; eye.innerText = "👁"; }
+}
+
+// ── PROGRESS STEPS ──
+function setStep(n){
+  for(let i=1;i<=3;i++){
+    const s = document.getElementById("s"+i);
+    s.className = "step" + (i < n ? " done" : i===n ? " active" : "");
+  }
+  for(let i=1;i<=2;i++){
+    const l = document.getElementById("l"+i);
+    l.className = "step-line" + (i < n ? " done" : "");
+  }
+}
+function goPage(n){
+  document.querySelectorAll(".form-page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page"+n).classList.add("active");
+  setStep(n);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+// ── FIELD VALIDATION HELPERS ──
+function showErr(id, show){
+  const el = document.getElementById("err-"+id);
+  const input = document.getElementById(id);
+  if(el) el.classList.toggle("show", show);
+  if(input) input.classList.toggle("error", show);
+  return show;
+}
+function clearErr(id){ showErr(id, false); }
+
+// ── PAGE 1 VALIDATION ──
+function goPage2(){
+  let valid = true;
+  if(!document.getElementById("fullName").value.trim()) valid = showErr("fullName",true)||false; else clearErr("fullName");
+  const email = document.getElementById("email").value.trim();
+  if(!email || !/\S+@\S+\.\S+/.test(email)) valid = showErr("email",true)||false; else clearErr("email");
+  const phone = document.getElementById("phone").value.trim();
+  if(!phone || !/^07[0-9]{8}$/.test(phone)) valid = showErr("phone",true)||false; else clearErr("phone");
+  if(!document.getElementById("dob").value) valid = showErr("dob",true)||false; else clearErr("dob");
+  if(!document.getElementById("sex").value) valid = showErr("sex",true)||false; else clearErr("sex");
+  if(valid) goPage(2);
+}
+
+// ── PAGE 2 VALIDATION ──
+function goPage3(){
+  let valid = true;
+  if(!document.getElementById("subcounty").value) valid = showErr("subcounty",true)||false; else clearErr("subcounty");
+  if(!document.getElementById("parish").value) valid = showErr("parish",true)||false; else clearErr("parish");
+  if(valid) goPage(3);
+}
+
+// ── GENERATE PATIENT ID ──
 function generatePatientID(){
-  return "MLM-"+Math.floor(100000+Math.random()*900000);
+  return "MLM-" + Math.floor(100000 + Math.random()*900000);
 }
 
-document.getElementById("registerForm").onsubmit=async(e)=>{
-e.preventDefault();
-msg.style.color="red";
-msg.innerText="";
+// ── REGISTER ──
+async function register(){
+  const password = document.getElementById("password").value;
+  const confirm = document.getElementById("confirmPassword").value;
+  const terms = document.getElementById("terms").checked;
+  let valid = true;
 
-try{
+  if(password.length < 6) valid = showErr("password",true)||false; else clearErr("password");
+  if(password !== confirm) valid = showErr("confirmPassword",true)||false; else clearErr("confirmPassword");
+  if(!terms){ document.getElementById("err-terms").classList.add("show"); valid = false; }
+  else { document.getElementById("err-terms").classList.remove("show"); }
+  if(!valid) return;
 
-const fullName=document.getElementById("fullName").value.trim();
-const userEmail=document.getElementById("email").value.trim();
-const phone=document.getElementById("phone").value.trim();
-const nationality=document.getElementById("nationality").value;
-const sub=subcounty.value;
-const par=parish.value;
-const emergency=document.getElementById("emergency").checked;
-const pickupDate=document.getElementById("pickupDate").value;
-const pickupTime=document.getElementById("pickupTime").value;
-const password=document.getElementById("password").value;
+  const btn = document.getElementById("submitBtn");
+  btn.classList.add("loading"); btn.disabled = true;
 
-if(!/^07[0-9]{8}$/.test(phone))
-throw new Error("Use valid Ugandan number (07XXXXXXXX)");
+  try{
+    const email = document.getElementById("email").value.trim();
+    const fullName = document.getElementById("fullName").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const dob = document.getElementById("dob").value;
+    const age = document.getElementById("age").value;
+    const sex = document.getElementById("sex").value;
+    const nationality = document.getElementById("nationality").value;
+    const subcounty = document.getElementById("subcounty").value;
+    const parish = document.getElementById("parish").value;
+    const address = document.getElementById("address").value.trim();
+    const emergency = document.getElementById("emergency").checked;
 
-if(password.length<6)
-throw new Error("Password must be at least 6 characters");
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = cred.user.uid;
 
-const userCred=await auth.createUserWithEmailAndPassword(userEmail,password);
-const uid=userCred.user.uid;
+    // Upload profile pic if selected
+    let photoURL = "";
+    const file = document.getElementById("profilePicInput").files[0];
+    if(file && file.size < 5 * 1024 * 1024){ // max 5MB
+      const ref = storage.ref("profiles/" + uid);
+      await ref.put(file);
+      photoURL = await ref.getDownloadURL();
+    }
 
-let photoURL="";
-const file=document.getElementById("profilePic").files[0];
-if(file){
-  const ref=storage.ref("profiles/"+uid);
-  await ref.put(file);
-  photoURL=await ref.getDownloadURL();
+    // Get GPS location (optional — won't block registration)
+    let latitude = null, longitude = null;
+    try{
+      const pos = await new Promise((res,rej) => navigator.geolocation.getCurrentPosition(res, rej, {timeout:5000}));
+      latitude = pos.coords.latitude;
+      longitude = pos.coords.longitude;
+    } catch(e){ /* GPS optional */ }
+
+    // Save to Firestore
+    await db.collection("users").doc(uid).set({
+      patientID: generatePatientID(),
+      fullName, email, phone, dob,
+      age: age || null,
+      sex, nationality,
+      district: "Mityana District",
+      subcounty, parish,
+      location: address || subcounty + ", " + parish,
+      address, emergency,
+      photoURL,
+      latitude, longitude,
+      role: "user",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Update display name
+    await cred.user.updateProfile({ displayName: fullName, photoURL });
+
+    // Sign out so they can log in fresh
+    await auth.signOut();
+
+    showMsg("✅ Account created! Redirecting to login...", "success");
+    setTimeout(() => window.location.href = "login.html", 1800);
+
+  } catch(err){
+    btn.classList.remove("loading"); btn.disabled = false;
+    const msgs = {
+      "auth/email-already-in-use": "An account with this email already exists.",
+      "auth/invalid-email": "Please enter a valid email address.",
+      "auth/weak-password": "Password is too weak. Use at least 6 characters."
+    };
+    showMsg(msgs[err.code] || err.message, "error");
+  }
 }
 
-// GPS
-navigator.geolocation.getCurrentPosition(async(pos)=>{
-
-await db.collection("users").doc(uid).set({
-  patientID:generatePatientID(),
-  fullName,
-  email:userEmail,
-  phone,
-  nationality,
-  dob:dobInput.value,
-  age:ageInput.value,
-  district:"Mityana District",
-  subcounty:sub,
-  parish:par,
-  emergency,
-  pickupDate,
-  pickupTime,
-  photoURL,
-  latitude:pos.coords.latitude,
-  longitude:pos.coords.longitude,
-  role:"user",
-  created_at:firebase.firestore.FieldValue.serverTimestamp()
-});
-
-msg.style.color="green";
-msg.innerText="Registration successful!";
-setTimeout(()=>window.location.href="login.html",1500);
-
-},()=>{
-msg.innerText="Please allow GPS location.";
-});
-
-}catch(err){
-msg.innerText=err.message;
+// ── GOOGLE REGISTER ──
+async function registerGoogle(){
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try{
+    const result = await auth.signInWithPopup(provider);
+    const user = result.user;
+    const ref = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    if(!snap.exists){
+      await ref.set({
+        patientID: generatePatientID(),
+        fullName: user.displayName || "",
+        email: user.email,
+        photoURL: user.photoURL || "",
+        role: "user",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    await auth.signOut();
+    showMsg("✅ Account created! Redirecting to login...", "success");
+    setTimeout(() => window.location.href = "login.html", 1800);
+  } catch(err){
+    if(err.code !== "auth/popup-closed-by-user") showMsg(err.message, "error");
+  }
 }
 
-};
-
+function showMsg(text, type){
+  const msg = document.getElementById("msg");
+  msg.innerText = text;
+  msg.className = "msg " + type;
+}
 </script>
-
 </body>
 </html>
