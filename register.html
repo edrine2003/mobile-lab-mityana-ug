@@ -327,7 +327,7 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
 
     <div class="check-row">
       <input type="checkbox" id="terms">
-      <span>I agree to the <a href="#" onclick="return false;">Terms &amp; Privacy Policy</a></span>
+      <span>I agree to the <a href="terms.html" target="_blank">Terms &amp; Privacy Policy</a></span>
     </div>
     <div class="field-error" id="err-terms" style="margin-top:-8px;margin-bottom:12px;">Please accept the terms</div>
 
@@ -377,6 +377,15 @@ const storage = firebase.storage();
 // ── REDIRECT IF ALREADY LOGGED IN ──
 auth.onAuthStateChanged(user => {
   if(user) window.location.href = "dashboard.html";
+});
+
+// ── AUTO-CHECK TERMS IF RETURNING FROM TERMS PAGE ──
+window.addEventListener("load", () => {
+  if(sessionStorage.getItem("termsAccepted") === "yes"){
+    const cb = document.getElementById("terms");
+    if(cb) cb.checked = true;
+    sessionStorage.removeItem("termsAccepted");
+  }
 });
 
 // ── PARISHES ──
