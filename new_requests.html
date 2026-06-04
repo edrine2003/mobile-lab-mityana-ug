@@ -546,8 +546,7 @@ function renderOrders(orders){
     grid.appendChild(card);
   });
 }
-</script>
-<script>
+
 // ── ORDER ACTIONS ──
 async function startOrder(orderId, btn){
   btn.disabled = true; btn.innerText = "Starting...";
@@ -710,9 +709,7 @@ function showToast(msg){
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2500);
 }
-</script>
 
-<script>
 // ── APPOINTMENTS ──
 let allAppointments = [];
 
@@ -851,9 +848,7 @@ function waAppt(phone, name, date, time){
   const msg = `Hello ${name}, this is Mobile Lab Mityana regarding your appointment on ${date} at ${time}. `;
   window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
 }
-</script>
 
-<script>
 // ── WALLETS ──
 let allWallets = [];
 let allTopupRequests = [];
