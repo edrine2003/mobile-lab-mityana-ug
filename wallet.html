@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Wallet – Mobile Lab</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:40px;}
+
+.topbar{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);background-size:300% 300%;animation:gradShift 8s ease infinite;padding:16px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.back-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;text-decoration:none;}
+.topbar-title{color:#fff;font-size:18px;font-weight:900;flex:1;text-align:center;}
+
+/* BALANCE CARD */
+.balance-hero{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);background-size:300% 300%;animation:gradShift 8s ease infinite;margin:16px;border-radius:24px;padding:28px 24px;color:#fff;position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(3,105,161,0.35);}
+.balance-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,0.07);}
+.balance-hero::after{content:'';position:absolute;bottom:-50px;left:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.balance-label{font-size:13px;font-weight:700;opacity:0.85;margin-bottom:8px;}
+.balance-amount{font-size:42px;font-weight:900;letter-spacing:-1px;margin-bottom:4px;}
+.balance-sub{font-size:12px;font-weight:600;opacity:0.8;}
+.balance-actions{display:flex;gap:10px;margin-top:20px;position:relative;z-index:1;}
+.bal-btn{flex:1;padding:12px;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.bal-btn-primary{background:#fff;color:#0369a1;}
+.bal-btn-primary:hover{transform:translateY(-1px);}
+.bal-btn-secondary{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);}
+
+/* QUICK STATS */
+.quick-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 16px 16px;}
+.qs-card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.qs-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.qs-val{font-size:18px;font-weight:900;}
+.qs-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px;}
+
+/* TOP-UP MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:#fff;border-radius:28px 28px 0 0;padding:24px 20px 36px;width:100%;max-width:500px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:999px;margin:0 auto 20px;}
+.modal h3{font-size:18px;font-weight:900;color:var(--dark);margin-bottom:6px;}
+.modal p{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:16px;}
+.modal label{font-size:13px;font-weight:800;color:var(--dark);display:block;margin-bottom:6px;}
+.modal input,.modal select{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:15px;font-weight:700;color:var(--dark);background:#f8fafc;outline:none;margin-bottom:14px;}
+.modal input:focus,.modal select:focus{border-color:var(--primary);background:#fff;}
+.modal-btn{width:100%;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;box-shadow:0 6px 20px rgba(14,165,233,0.3);}
+.quick-amounts{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.qa-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:999px;background:#f8fafc;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;color:var(--dark);transition:all 0.2s;}
+.qa-btn:hover,.qa-btn.selected{background:rgba(14,165,233,0.1);border-color:var(--primary);color:var(--primary);}
+
+/* TRANSACTIONS */
+.section-title{font-size:15px;font-weight:900;color:var(--dark);padding:4px 16px 10px;display:flex;align-items:center;gap:8px;}
+.txn-list{padding:0 16px;}
+.txn-item{background:#fff;border-radius:18px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);}
+.txn-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.txn-icon.credit{background:rgba(34,197,94,0.12);}
+.txn-icon.debit{background:rgba(239,68,68,0.1);}
+.txn-info{flex:1;}
+.txn-note{font-size:14px;font-weight:800;color:var(--dark);}
+.txn-date{font-size:12px;font-weight:600;color:var(--muted);margin-top:2px;}
+.txn-amount{font-size:16px;font-weight:900;}
+.txn-amount.credit{color:#15803d;}
+.txn-amount.debit{color:#b91c1c;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-state .icon{font-size:48px;opacity:0.3;margin-bottom:10px;}
+.empty-state p{font-size:14px;font-weight:700;}
+
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="back-btn" href="dashboard.html">← Back</a>
+  <div class="topbar-title">💳 My Wallet</div>
+  <div style="width:70px;"></div>
+</div>
+
+<!-- BALANCE CARD -->
+<div class="balance-hero">
+  <div class="balance-label">Available Balance</div>
+  <div class="balance-amount" id="balanceAmount">UGX 0</div>
+  <div class="balance-sub" id="balanceSub">Last updated: —</div>
+  <div class="balance-actions">
+    <button class="bal-btn bal-btn-primary" onclick="openTopupModal()">➕ Request Top-Up</button>
+    <button class="bal-btn bal-btn-secondary" onclick="showPage('history')">📋 History</button>
+  </div>
+</div>
+
+<!-- QUICK STATS -->
+<div class="quick-stats">
+  <div class="qs-card">
+    <div class="qs-icon" style="background:rgba(34,197,94,0.12);">⬆️</div>
+    <div><div class="qs-val" id="totalDeposited" style="color:#15803d;">0</div><div class="qs-lbl">Total Deposited</div></div>
+  </div>
+  <div class="qs-card">
+    <div class="qs-icon" style="background:rgba(239,68,68,0.1);">⬇️</div>
+    <div><div class="qs-val" id="totalSpent" style="color:#b91c1c;">0</div><div class="qs-lbl">Total Spent</div></div>
+  </div>
+</div>
+
+<!-- TRANSACTIONS -->
+<div class="section-title">📋 Transaction History</div>
+<div class="txn-list" id="txnList">
+  <div class="empty-state"><div class="icon">💳</div><p>No transactions yet</p></div>
+</div>
+
+<!-- TOP-UP MODAL -->
+<div class="modal-overlay" id="topupModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>➕ Request Top-Up</h3>
+    <p>Send payment via MTN/Airtel then submit this request. Admin will credit your account.</p>
+    <label>Amount (UGX)</label>
+    <div class="quick-amounts">
+      <button class="qa-btn" onclick="setAmount(10000)">10,000</button>
+      <button class="qa-btn" onclick="setAmount(20000)">20,000</button>
+      <button class="qa-btn" onclick="setAmount(50000)">50,000</button>
+      <button class="qa-btn" onclick="setAmount(100000)">100,000</button>
+    </div>
+    <input type="number" id="topupAmount" placeholder="Enter amount e.g. 25000">
+    <label>Payment Method</label>
+    <select id="topupMethod">
+      <option value="MTN Mobile Money">MTN Mobile Money – 0778379791</option>
+      <option value="Airtel Money">Airtel Money – 0706559100</option>
+    </select>
+    <label>Transaction Reference (Optional)</label>
+    <input type="text" id="topupRef" placeholder="e.g. MTN ref number">
+    <button class="modal-btn" onclick="submitTopup()">📲 Send Top-Up Request</button>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const ADMIN_WA = "256750992939";
+
+let currentUser = null;
+let userName = "";
+
+auth.onAuthStateChanged(async user => {
+  if(!user){ window.location.href = "login.html"; return; }
+  currentUser = user;
+  const doc = await db.collection("users").doc(user.uid).get();
+  if(doc.exists) userName = doc.data().fullName || user.email;
+  listenWallet();
+  listenTransactions();
+});
+
+// ── LISTEN WALLET ──
+function listenWallet(){
+  db.collection("wallets").doc(currentUser.uid).onSnapshot(snap => {
+    if(!snap.exists){
+      document.getElementById("balanceAmount").innerText = "UGX 0";
+      document.getElementById("balanceSub").innerText = "No balance yet";
+      return;
+    }
+    const data = snap.data();
+    const bal = data.balance || 0;
+    document.getElementById("balanceAmount").innerText = "UGX " + bal.toLocaleString();
+    const updated = data.updatedAt ? data.updatedAt.toDate().toLocaleString("en-UG") : "—";
+    document.getElementById("balanceSub").innerText = "Last updated: " + updated;
+  });
+}
+
+// ── LISTEN TRANSACTIONS ──
+function listenTransactions(){
+  db.collection("wallet_transactions")
+    .where("userId","==",currentUser.uid)
+    .orderBy("createdAt","desc")
+    .onSnapshot(snapshot => {
+      const list = document.getElementById("txnList");
+      let totalIn = 0, totalOut = 0;
+
+      if(snapshot.empty){
+        list.innerHTML = `<div class="empty-state"><div class="icon">💳</div><p>No transactions yet</p></div>`;
+        return;
+      }
+
+      list.innerHTML = "";
+      snapshot.forEach(doc => {
+        const t = doc.data();
+        const date = t.createdAt ? t.createdAt.toDate().toLocaleString("en-UG",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
+        const isCredit = t.type === "credit";
+        if(isCredit) totalIn += t.amount || 0;
+        else totalOut += t.amount || 0;
+
+        const item = document.createElement("div");
+        item.className = "txn-item";
+        item.innerHTML = `
+          <div class="txn-icon ${t.type}">${isCredit ? "⬆️" : "⬇️"}</div>
+          <div class="txn-info">
+            <div class="txn-note">${t.note || (isCredit ? "Deposit" : "Payment")}</div>
+            <div class="txn-date">${date}</div>
+          </div>
+          <div class="txn-amount ${t.type}">${isCredit ? "+" : "-"}UGX ${(t.amount||0).toLocaleString()}</div>
+        `;
+        list.appendChild(item);
+      });
+
+      document.getElementById("totalDeposited").innerText = "UGX " + totalIn.toLocaleString();
+      document.getElementById("totalSpent").innerText = "UGX " + totalOut.toLocaleString();
+    }, err => {
+      // If index not ready, load without orderBy
+      db.collection("wallet_transactions")
+        .where("userId","==",currentUser.uid)
+        .onSnapshot(snapshot => {
+          const list = document.getElementById("txnList");
+          if(snapshot.empty){ list.innerHTML = `<div class="empty-state"><div class="icon">💳</div><p>No transactions yet</p></div>`; return; }
+          list.innerHTML = "";
+          snapshot.forEach(doc => {
+            const t = doc.data();
+            const isCredit = t.type === "credit";
+            const item = document.createElement("div");
+            item.className = "txn-item";
+            item.innerHTML = `<div class="txn-icon ${t.type}">${isCredit?"⬆️":"⬇️"}</div><div class="txn-info"><div class="txn-note">${t.note||""}</div></div><div class="txn-amount ${t.type}">${isCredit?"+":"-"}UGX ${(t.amount||0).toLocaleString()}</div>`;
+            list.appendChild(item);
+          });
+        });
+    });
+}
+
+// ── TOP-UP MODAL ──
+function openTopupModal(){
+  document.getElementById("topupModal").classList.add("open");
+}
+document.getElementById("topupModal").addEventListener("click", e => {
+  if(e.target === e.currentTarget) e.currentTarget.classList.remove("open");
+});
+function setAmount(val){
+  document.getElementById("topupAmount").value = val;
+  document.querySelectorAll(".qa-btn").forEach(b => b.classList.remove("selected"));
+  event.target.classList.add("selected");
+}
+
+async function submitTopup(){
+  const amount = parseInt(document.getElementById("topupAmount").value);
+  const method = document.getElementById("topupMethod").value;
+  const ref = document.getElementById("topupRef").value.trim();
+  if(!amount || amount < 1000){ showToast("Enter a valid amount (min 1,000)"); return; }
+
+  // Save top-up request to Firestore
+  await db.collection("topup_requests").add({
+    userId: currentUser.uid,
+    userName,
+    amount,
+    method,
+    ref: ref || "N/A",
+    status: "pending",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  // WhatsApp to admin
+  const msg = `💳 Top-Up Request!\n\nPatient: ${userName}\nAmount: UGX ${amount.toLocaleString()}\nMethod: ${method}\nRef: ${ref||"N/A"}\n\nPlease credit their account in the admin dashboard.`;
+  window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`);
+
+  document.getElementById("topupModal").classList.remove("open");
+  document.getElementById("topupAmount").value = "";
+  document.getElementById("topupRef").value = "";
+  showToast("✅ Top-up request sent to admin!");
+}
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+</script>
+</body>
+</html>
