@@ -12,276 +12,219 @@
 <style>
 :root{
   --pink:#db2777;--pink2:#ec4899;--pink3:#f9a8d4;
-  --purple:#a855f7;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;
-  --dark:#1e1b2e;--muted:#94a3b8;--card:#fff;
-  --bg:#fff0f6;--border:rgba(219,39,119,0.12);
+  --purple:#a855f7;--green:#22c55e;--red:#ef4444;
+  --blue:#3b82f6;--dark:#1e1b2e;--muted:#94a3b8;
+  --card:#fff;--bg:#fff0f6;--border:rgba(219,39,119,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:90px;}
 
-/* ── TOP BAR ── */
-.topbar{
-  background:linear-gradient(135deg,var(--pink),var(--pink2));
-  padding:18px 20px 14px;
-  display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
-  box-shadow:0 4px 20px rgba(219,39,119,0.25);
-}
+/* TOP BAR */
+.topbar{background:linear-gradient(135deg,var(--pink),var(--pink2));padding:18px 20px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(219,39,119,0.25);}
 .topbar h1{color:#fff;font-size:20px;font-weight:900;}
 .topbar-right{display:flex;gap:10px;align-items:center;}
 .icon-btn{background:rgba(255,255,255,0.2);border:none;border-radius:999px;padding:8px 12px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;}
 
-/* ── BOTTOM NAV ── */
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:100;
-  background:#fff;border-top:1px solid var(--border);
-  display:flex;justify-content:space-around;padding:10px 0 14px;
-  box-shadow:0 -4px 20px rgba(0,0,0,0.08);
-}
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0 14px;box-shadow:0 -4px 20px rgba(0,0,0,0.08);}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;border-radius:14px;transition:all 0.2s;border:none;background:none;font-family:'Nunito',Arial,sans-serif;}
 .nav-item .nav-icon{font-size:22px;}
 .nav-item .nav-label{font-size:11px;font-weight:700;color:var(--muted);}
 .nav-item.active .nav-label{color:var(--pink);}
 .nav-item.active .nav-icon{transform:scale(1.15);}
 
-/* ── PAGES ── */
+/* PAGES */
 .page{display:none;padding:16px;}
 .page.active{display:block;}
 
-/* ── RING ── */
-.ring-section{
-  background:linear-gradient(160deg,#fce7f3,#fdf2f8);
-  border-radius:28px;padding:28px 20px;text-align:center;
-  margin-bottom:18px;position:relative;overflow:hidden;
-  box-shadow:0 8px 30px rgba(219,39,119,0.12);
-}
-.ring-section::before{
-  content:'';position:absolute;top:-60px;right:-60px;
-  width:200px;height:200px;border-radius:50%;
-  background:radial-gradient(circle,rgba(236,72,153,0.12),transparent);
-}
+/* RING */
+.ring-section{background:linear-gradient(160deg,#fce7f3,#fdf2f8);border-radius:28px;padding:28px 20px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(219,39,119,0.12);}
+.ring-section::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(236,72,153,0.12),transparent);}
 .ring-wrap{position:relative;width:200px;height:200px;margin:0 auto 16px;}
 .ring-svg{width:200px;height:200px;transform:rotate(-90deg);}
 .ring-bg{fill:none;stroke:#fce7f3;stroke-width:14;}
 .ring-fill{fill:none;stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
-.ring-center{
-  position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .ring-day{font-size:42px;font-weight:900;line-height:1;}
 .ring-label{font-size:13px;font-weight:700;color:var(--muted);margin-top:4px;}
 .ring-phase{font-size:18px;font-weight:900;color:var(--pink);margin-bottom:6px;}
 .ring-sub{font-size:13px;color:var(--muted);font-weight:600;}
-.ring-next{
-  display:inline-block;margin-top:14px;
-  background:linear-gradient(135deg,var(--pink),var(--pink2));
-  color:#fff;padding:10px 24px;border-radius:999px;
-  font-size:14px;font-weight:800;
-  box-shadow:0 4px 14px rgba(219,39,119,0.3);
-}
-</style>
-<style>
-/* ── LOG PERIOD BUTTON ── */
-.log-btn{
-  width:100%;padding:16px;border:none;border-radius:18px;
-  background:linear-gradient(135deg,var(--pink),var(--pink2));
-  color:#fff;font-size:16px;font-weight:900;cursor:pointer;
-  box-shadow:0 8px 24px rgba(219,39,119,0.3);
-  font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;
-  margin-bottom:16px;
-}
-.log-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(219,39,119,0.4);}
-.log-btn.secondary{background:#fff;color:var(--pink);border:2px solid var(--pink);box-shadow:none;}
+.ring-next{display:inline-block;margin-top:14px;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;padding:10px 24px;border-radius:999px;font-size:14px;font-weight:800;box-shadow:0 4px 14px rgba(219,39,119,0.3);cursor:pointer;}
 
-/* ── QUICK STATS ── */
+/* QUICK STATS */
 .quick-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;}
-.stat-card{
-  background:#fff;border-radius:18px;padding:14px 10px;text-align:center;
-  box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);
-}
+.stat-card{background:#fff;border-radius:18px;padding:14px 10px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);}
 .stat-icon{font-size:22px;margin-bottom:4px;}
 .stat-val{font-size:20px;font-weight:900;color:var(--pink);}
 .stat-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px;}
 
-/* ── INSIGHT CARDS ── */
-.insight-card{
-  background:#fff;border-radius:20px;padding:16px;margin-bottom:12px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);
-  display:flex;align-items:center;gap:14px;
-}
-.insight-icon{
-  width:48px;height:48px;border-radius:16px;
-  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
-}
+/* INSIGHT CARDS */
+.insight-card{background:#fff;border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);display:flex;align-items:center;gap:14px;}
+.insight-icon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
 .insight-title{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:3px;}
 .insight-text{font-size:13px;font-weight:600;color:var(--muted);line-height:1.5;}
 
-/* ── CALENDAR PAGE ── */
+/* LOG BUTTONS */
+.log-btn{width:100%;padding:16px;border:none;border-radius:18px;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 8px 24px rgba(219,39,119,0.3);font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;margin-bottom:12px;}
+.log-btn:hover{transform:translateY(-2px);}
+.log-btn.secondary{background:#fff;color:var(--pink);border:2px solid var(--pink);box-shadow:none;}
+.log-btn.danger{background:linear-gradient(135deg,#ef4444,#f97316);}
+</style>
+
+<style>
+/* ══ CALENDAR ══ */
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .cal-header h2{font-size:18px;font-weight:900;color:var(--dark);}
-.cal-nav{background:#fff;border:1.5px solid var(--border);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:800;cursor:pointer;color:var(--pink);font-family:'Nunito',Arial,sans-serif;}
-.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;}
-.cal-weekday{text-align:center;font-size:12px;font-weight:800;color:var(--muted);padding:6px 0;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-nav{background:#fff;border:1.5px solid var(--border);border-radius:999px;padding:8px 18px;font-size:16px;font-weight:900;cursor:pointer;color:var(--pink);font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.cal-nav:hover{background:var(--pink);color:#fff;}
+
+/* Weekday labels */
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;}
+.cal-weekday{text-align:center;font-size:12px;font-weight:800;color:var(--muted);padding:6px 0;background:#fff;border-radius:8px;}
+
+/* Calendar grid */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+
+/* Every single day cell */
 .cal-day{
-  aspect-ratio:1;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:13px;font-weight:700;cursor:pointer;
-  transition:all 0.15s;position:relative;
+  aspect-ratio:1;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all 0.15s;
+  position:relative;
+  background:#fff;
+  border:1px solid rgba(219,39,119,0.07);
+  min-height:42px;
 }
-.cal-day:hover{background:rgba(219,39,119,0.1);}
-.cal-day.today{border:2px solid var(--pink);color:var(--pink);}
-.cal-day.period{background:var(--red);color:#fff;}
-.cal-day.fertile{background:rgba(34,197,94,0.2);color:#15803d;}
-.cal-day.ovulation{background:var(--purple);color:#fff;}
-.cal-day.predicted-period{background:rgba(239,68,68,0.15);color:var(--red);}
-.cal-day.empty{pointer-events:none;}
-.cal-day.logged{position:relative;}
-.cal-day.logged::after{content:'•';position:absolute;bottom:2px;font-size:8px;color:var(--pink);}
+.cal-day:hover{transform:scale(1.08);z-index:2;box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+.cal-day.empty{background:transparent;border:none;pointer-events:none;}
 
-/* ── LEGEND ── */
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+/* TODAY — pink border ring */
+.cal-day.today{border:2.5px solid var(--pink);color:var(--pink);font-weight:900;}
+
+/* PERIOD — red fill */
+.cal-day.period{background:#ef4444;color:#fff;border-color:transparent;}
+
+/* PREDICTED PERIOD — light red */
+.cal-day.predicted-period{background:rgba(239,68,68,0.15);color:#b91c1c;border-color:rgba(239,68,68,0.3);}
+
+/* FERTILE WINDOW — green */
+.cal-day.fertile{background:rgba(34,197,94,0.18);color:#15803d;border-color:rgba(34,197,94,0.4);}
+
+/* OVULATION DAY — purple star */
+.cal-day.ovulation{background:#a855f7;color:#fff;border-color:transparent;}
+
+/* LOGGED (has diary entry) — pink dot under number */
+.cal-day.logged::after{
+  content:'';
+  position:absolute;
+  bottom:4px;
+  left:50%;
+  transform:translateX(-50%);
+  width:5px;height:5px;
+  border-radius:50%;
+  background:var(--pink);
+}
+.cal-day.period.logged::after,.cal-day.ovulation.logged::after{background:#fff;}
+
+/* Day number */
+.cal-day-num{font-size:13px;font-weight:800;line-height:1;}
+/* Mini label under date */
+.cal-day-tag{font-size:8px;font-weight:800;line-height:1;margin-top:2px;opacity:0.85;text-align:center;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;background:#fff;border-radius:18px;padding:14px;box-shadow:0 3px 10px rgba(0,0,0,0.05);}
+.legend-title{width:100%;font-size:13px;font-weight:900;color:var(--dark);margin-bottom:4px;}
 .leg-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--dark);}
-.leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.leg-dot{width:14px;height:14px;border-radius:5px;flex-shrink:0;}
 
-/* ── FUTURE CYCLES ── */
+/* FUTURE CYCLES */
 .future-cycles{margin-top:18px;}
 .future-cycles h3{font-size:15px;font-weight:800;color:var(--dark);margin-bottom:10px;}
-.cycle-row{
-  background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:8px;
-  display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);
-}
+.cycle-row{background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);}
 .cycle-row-left h4{font-size:14px;font-weight:800;color:var(--dark);margin:0;}
 .cycle-row-left p{font-size:12px;font-weight:600;color:var(--muted);margin:3px 0 0;}
-.cycle-badge{
-  padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;
-  background:rgba(219,39,119,0.1);color:var(--pink);
-}
+.cycle-badge{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;background:rgba(219,39,119,0.1);color:var(--pink);}
 </style>
+
 <style>
-/* ── LOG PAGE ── */
-.section-title{font-size:16px;font-weight:900;color:var(--dark);margin:18px 0 10px;}
+/* LOG PAGE */
+.section-title{font-size:16px;font-weight:900;color:var(--dark);margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
 .symptom-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-.sym-btn{
-  background:#fff;border:1.5px solid var(--border);border-radius:16px;
-  padding:14px 8px;text-align:center;cursor:pointer;transition:all 0.2s;
-  font-family:'Nunito',Arial,sans-serif;
-}
+.sym-btn{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center;cursor:pointer;transition:all 0.2s;font-family:'Nunito',Arial,sans-serif;}
 .sym-btn .sym-icon{font-size:24px;display:block;margin-bottom:4px;}
 .sym-btn .sym-name{font-size:12px;font-weight:700;color:var(--dark);}
 .sym-btn.selected{background:rgba(219,39,119,0.1);border-color:var(--pink);}
 .sym-btn.selected .sym-name{color:var(--pink);}
 
 /* MOOD */
-.mood-row{display:flex;gap:10px;justify-content:space-between;margin-bottom:16px;}
-.mood-btn{
-  flex:1;background:#fff;border:1.5px solid var(--border);border-radius:16px;
-  padding:12px 6px;text-align:center;cursor:pointer;transition:all 0.2s;
-  font-family:'Nunito',Arial,sans-serif;
-}
-.mood-btn .mood-icon{font-size:26px;display:block;margin-bottom:4px;}
+.mood-row{display:flex;gap:8px;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;}
+.mood-btn{flex:1;min-width:60px;background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:12px 6px;text-align:center;cursor:pointer;transition:all 0.2s;font-family:'Nunito',Arial,sans-serif;}
+.mood-btn .mood-icon{font-size:24px;display:block;margin-bottom:4px;}
 .mood-btn .mood-name{font-size:11px;font-weight:700;color:var(--muted);}
 .mood-btn.selected{background:rgba(219,39,119,0.1);border-color:var(--pink);}
 .mood-btn.selected .mood-name{color:var(--pink);}
 
 /* FLOW */
-.flow-row{display:flex;gap:10px;margin-bottom:16px;}
-.flow-btn{
-  flex:1;background:#fff;border:1.5px solid var(--border);border-radius:14px;
-  padding:12px 6px;text-align:center;cursor:pointer;transition:all 0.2s;
-  font-size:13px;font-weight:800;color:var(--dark);
-  font-family:'Nunito',Arial,sans-serif;
-}
+.flow-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.flow-btn{flex:1;min-width:70px;background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:800;color:var(--dark);font-family:'Nunito',Arial,sans-serif;}
 .flow-btn.selected{background:rgba(239,68,68,0.1);border-color:var(--red);color:var(--red);}
 
 /* NOTES */
-.notes-input{
-  width:100%;padding:14px;border-radius:16px;border:1.5px solid var(--border);
-  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
-  color:var(--dark);background:#fff;outline:none;resize:none;min-height:100px;
-  margin-bottom:16px;
-}
+.notes-input{width:100%;padding:14px;border-radius:16px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:var(--dark);background:#fff;outline:none;resize:none;min-height:90px;margin-bottom:16px;}
 .notes-input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(219,39,119,0.1);}
 
-/* ── ANALYTICS PAGE ── */
-.analytics-hero{
-  background:linear-gradient(135deg,var(--pink),var(--pink2));
-  border-radius:24px;padding:24px;color:#fff;margin-bottom:16px;
-  box-shadow:0 8px 24px rgba(219,39,119,0.3);
-}
+/* ANALYTICS */
+.analytics-hero{background:linear-gradient(135deg,var(--pink),var(--pink2));border-radius:24px;padding:24px;color:#fff;margin-bottom:16px;box-shadow:0 8px 24px rgba(219,39,119,0.3);}
 .analytics-hero h2{font-size:18px;font-weight:900;margin-bottom:14px;}
 .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .a-stat{background:rgba(255,255,255,0.2);border-radius:16px;padding:14px;text-align:center;}
 .a-stat-val{font-size:26px;font-weight:900;}
 .a-stat-lbl{font-size:12px;font-weight:700;opacity:0.85;margin-top:2px;}
-
-.history-item{
-  background:#fff;border-radius:18px;padding:16px;margin-bottom:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);
-}
+.history-item{background:#fff;border-radius:18px;padding:16px;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);}
 .history-item h4{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:6px;}
-.history-item p{font-size:13px;font-weight:600;color:var(--muted);}
+.history-item p{font-size:13px;font-weight:600;color:var(--muted);line-height:1.6;}
 .history-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-.h-chip{
-  padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;
-  background:rgba(219,39,119,0.1);color:var(--pink);
-}
+.h-chip{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(219,39,119,0.1);color:var(--pink);}
 
-/* ── SETTINGS PAGE ── */
-.settings-item{
-  background:#fff;border-radius:18px;padding:16px 18px;margin-bottom:10px;
-  display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);
-}
+/* SETTINGS */
+.settings-item{background:#fff;border-radius:18px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);}
 .settings-item-left{display:flex;align-items:center;gap:12px;}
 .settings-icon{font-size:22px;}
 .settings-label{font-size:14px;font-weight:800;color:var(--dark);}
 .settings-sub{font-size:12px;font-weight:600;color:var(--muted);margin-top:2px;}
-.settings-val{font-size:14px;font-weight:800;color:var(--pink);}
-select.settings-select{
-  border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;
-  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:700;
-  color:var(--dark);background:#fff;outline:none;cursor:pointer;
-}
+select.settings-select{border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:700;color:var(--dark);background:#fff;outline:none;cursor:pointer;}
 select.settings-select:focus{border-color:var(--pink);}
 
-/* ── MODAL ── */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;
-  display:flex;align-items:flex-end;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity 0.3s;
-}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal{
-  background:#fff;border-radius:28px 28px 0 0;padding:24px 20px 36px;
-  width:100%;max-width:500px;
-  transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-}
+.modal{background:#fff;border-radius:28px 28px 0 0;padding:24px 20px 36px;width:100%;max-width:500px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);}
 .modal-overlay.open .modal{transform:translateY(0);}
 .modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:999px;margin:0 auto 20px;}
 .modal h3{font-size:18px;font-weight:900;color:var(--dark);margin-bottom:16px;}
 .modal label{font-size:13px;font-weight:800;color:var(--dark);display:block;margin-bottom:6px;}
-.modal input,.modal select{
-  width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--border);
-  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
-  color:var(--dark);background:#fff;outline:none;margin-bottom:14px;
-}
+.modal input,.modal select{width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:var(--dark);background:#fff;outline:none;margin-bottom:14px;}
 .modal input:focus,.modal select:focus{border-color:var(--pink);}
-.modal-btn{
-  width:100%;padding:15px;border:none;border-radius:16px;
-  background:linear-gradient(135deg,var(--pink),var(--pink2));
-  color:#fff;font-size:16px;font-weight:900;cursor:pointer;
-  font-family:'Nunito',Arial,sans-serif;
-  box-shadow:0 6px 20px rgba(219,39,119,0.3);
-}
+.modal-btn{width:100%;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;box-shadow:0 6px 20px rgba(219,39,119,0.3);}
 
-/* ── TOAST ── */
-.toast{
-  position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
-  background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;
-  font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;
-  white-space:nowrap;
-}
+/* DAY DETAIL MODAL */
+.day-detail-modal{background:#fff;border-radius:28px 28px 0 0;padding:24px 20px 36px;width:100%;max-width:500px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);max-height:85vh;overflow-y:auto;}
+.modal-overlay.open .day-detail-modal{transform:translateY(0);}
+.detail-phase-badge{display:inline-block;padding:6px 16px;border-radius:999px;font-size:13px;font-weight:800;margin-bottom:14px;}
+.detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-label{font-weight:700;color:var(--muted);}
+.detail-value{font-weight:800;color:var(--dark);}
+
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
@@ -301,8 +244,6 @@ select.settings-select:focus{border-color:var(--pink);}
 
 <!-- ══════════ PAGE: HOME ══════════ -->
 <div class="page active" id="page-home">
-
-  <!-- RING -->
   <div class="ring-section">
     <div class="ring-phase" id="ringPhase">Loading...</div>
     <div class="ring-wrap">
@@ -323,7 +264,7 @@ select.settings-select:focus{border-color:var(--pink);}
       </div>
     </div>
     <div class="ring-sub" id="ringSub">Set up your cycle to begin</div>
-    <div class="ring-next" id="ringNext">📅 Set up cycle</div>
+    <div class="ring-next" id="ringNext" onclick="openSetupModal()">📅 Set up cycle</div>
   </div>
 
   <!-- QUICK STATS -->
@@ -345,13 +286,9 @@ select.settings-select:focus{border-color:var(--pink);}
     </div>
   </div>
 
-  <!-- LOG PERIOD -->
   <button class="log-btn" onclick="logPeriodToday()">🩸 Period Started Today</button>
   <button class="log-btn secondary" onclick="showPage('log')">📝 Log Symptoms & Mood</button>
-
-  <!-- INSIGHTS -->
   <div id="insightsArea"></div>
-
 </div>
 
 <!-- ══════════ PAGE: CALENDAR ══════════ -->
@@ -361,20 +298,33 @@ select.settings-select:focus{border-color:var(--pink);}
     <h2 id="calMonthLabel">Month Year</h2>
     <button class="cal-nav" onclick="changeMonth(1)">›</button>
   </div>
+
+  <!-- Weekday headers -->
   <div class="cal-weekdays">
-    <div class="cal-weekday">Su</div><div class="cal-weekday">Mo</div>
-    <div class="cal-weekday">Tu</div><div class="cal-weekday">We</div>
-    <div class="cal-weekday">Th</div><div class="cal-weekday">Fr</div>
-    <div class="cal-weekday">Sa</div>
+    <div class="cal-weekday">Sun</div>
+    <div class="cal-weekday">Mon</div>
+    <div class="cal-weekday">Tue</div>
+    <div class="cal-weekday">Wed</div>
+    <div class="cal-weekday">Thu</div>
+    <div class="cal-weekday">Fri</div>
+    <div class="cal-weekday">Sat</div>
   </div>
+
+  <!-- All days rendered here -->
   <div class="cal-grid" id="calGrid"></div>
+
+  <!-- COLOR LEGEND explained -->
   <div class="legend">
-    <div class="leg-item"><div class="leg-dot" style="background:#ef4444"></div>Period</div>
-    <div class="leg-item"><div class="leg-dot" style="background:rgba(34,197,94,0.5)"></div>Fertile</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#a855f7"></div>Ovulation</div>
-    <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,0.2)"></div>Predicted</div>
-    <div class="leg-item"><div class="leg-dot" style="border:2px solid #db2777;background:transparent"></div>Today</div>
+    <div class="legend-title">📖 What each colour means</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#ef4444"></div> <b>Red</b> — Period days (flow logged)</div>
+    <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,0.25);border:1px solid #ef4444"></div> <b>Light red</b> — Predicted next period</div>
+    <div class="leg-item"><div class="leg-dot" style="background:rgba(34,197,94,0.4)"></div> <b>Green</b> — Fertile window (days you can get pregnant)</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#a855f7"></div> <b>Purple</b> — Ovulation day (egg released, highest fertility)</div>
+    <div class="leg-item"><div class="leg-dot" style="border:2.5px solid #db2777;background:#fff0f6"></div> <b>Pink border</b> — Today</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#fff;border:1px solid #e2e8f0"></div> <b>White</b> — Normal day (no event)</div>
+    <div class="leg-item" style="width:100%;"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--pink);margin-right:6px;vertical-align:middle;"></span> <b>Pink dot</b> — You have a diary log for this day (tap to view)</div>
   </div>
+
   <div class="future-cycles" id="futureCycles"></div>
 </div>
 
@@ -392,18 +342,20 @@ select.settings-select:focus{border-color:var(--pink);}
   <div class="section-title">🩸 Flow Intensity</div>
   <div class="flow-row">
     <button class="flow-btn" data-flow="None" onclick="selectFlow(this)">None</button>
+    <button class="flow-btn" data-flow="Spotting" onclick="selectFlow(this)">🔴 Spotting</button>
     <button class="flow-btn" data-flow="Light" onclick="selectFlow(this)">🩸 Light</button>
     <button class="flow-btn" data-flow="Medium" onclick="selectFlow(this)">🩸🩸 Medium</button>
     <button class="flow-btn" data-flow="Heavy" onclick="selectFlow(this)">🩸🩸🩸 Heavy</button>
   </div>
 
-  <div class="section-title">🩺 Symptoms</div>
+  <div class="section-title">🩺 Symptoms <span style="font-size:12px;font-weight:600;color:var(--muted);">(tap all that apply)</span></div>
   <div class="symptom-grid" id="symptomGrid"></div>
 
   <div class="section-title">📝 Notes</div>
-  <textarea class="notes-input" id="logNotes" placeholder="How are you feeling? Any observations..."></textarea>
+  <textarea class="notes-input" id="logNotes" placeholder="How are you feeling? Any observations, pains, medications..."></textarea>
 
   <button class="log-btn" onclick="saveLog()">💾 Save Today's Log</button>
+  <button class="log-btn danger" onclick="markPeriodEnded()">🛑 Mark Period as Ended Today</button>
 </div>
 
 <!-- ══════════ PAGE: ANALYTICS ══════════ -->
@@ -425,28 +377,37 @@ select.settings-select:focus{border-color:var(--pink);}
 <div class="page" id="page-settings">
   <div class="section-title">⚙️ Cycle Settings</div>
   <div class="settings-item">
-    <div class="settings-item-left"><span class="settings-icon">📏</span><div><div class="settings-label">Cycle Length</div><div class="settings-sub">Average days between periods</div></div></div>
+    <div class="settings-item-left">
+      <span class="settings-icon">📏</span>
+      <div><div class="settings-label">Cycle Length</div><div class="settings-sub">Days between periods (usually 21–35)</div></div>
+    </div>
     <select class="settings-select" id="setCycleLen" onchange="saveSettings()">
       <option value="21">21</option><option value="24">24</option><option value="26">26</option>
-      <option value="28" selected>28</option><option value="30">30</option>
-      <option value="32">32</option><option value="35">35</option>
+      <option value="28" selected>28</option><option value="30">30</option><option value="32">32</option><option value="35">35</option>
     </select>
   </div>
   <div class="settings-item">
-    <div class="settings-item-left"><span class="settings-icon">🩸</span><div><div class="settings-label">Period Duration</div><div class="settings-sub">How many days your period lasts</div></div></div>
+    <div class="settings-item-left">
+      <span class="settings-icon">🩸</span>
+      <div><div class="settings-label">Period Duration</div><div class="settings-sub">How many days your period lasts</div></div>
+    </div>
     <select class="settings-select" id="setPeriodLen" onchange="saveSettings()">
       <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option>
       <option value="5">5</option><option value="6">6</option><option value="7">7</option>
     </select>
   </div>
   <div class="settings-item">
-    <div class="settings-item-left"><span class="settings-icon">🎯</span><div><div class="settings-label">Goal</div><div class="settings-sub">What are you tracking for?</div></div></div>
+    <div class="settings-item-left">
+      <span class="settings-icon">🎯</span>
+      <div><div class="settings-label">Goal</div><div class="settings-sub">What are you tracking for?</div></div>
+    </div>
     <select class="settings-select" id="setGoal" onchange="saveSettings()">
       <option value="track">Track cycle</option>
       <option value="conceive">Get pregnant</option>
       <option value="avoid">Avoid pregnancy</option>
     </select>
   </div>
+
   <div class="section-title">🔗 Quick Links</div>
   <div class="settings-item" onclick="window.location.href='index.html'" style="cursor:pointer;">
     <div class="settings-item-left"><span class="settings-icon">🧪</span><div><div class="settings-label">Order Lab Tests</div><div class="settings-sub">Mobile Lab – Mityana</div></div></div>
@@ -456,6 +417,9 @@ select.settings-select:focus{border-color:var(--pink);}
     <div class="settings-item-left"><span class="settings-icon">💬</span><div><div class="settings-label">Chat with Doctor</div><div class="settings-sub">Ask health questions</div></div></div>
     <span style="color:var(--muted);">›</span>
   </div>
+
+  <div class="section-title" style="margin-top:20px;">⚠️ Data</div>
+  <button class="log-btn danger" onclick="resetAllData()">🗑️ Reset All Cycle Data</button>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -474,22 +438,31 @@ select.settings-select:focus{border-color:var(--pink);}
     <h3>🌸 Set Up Your Cycle</h3>
     <label>First day of your last period</label>
     <input type="date" id="setupDate">
-    <label>Cycle length (days)</label>
+    <label>Cycle length (days between periods)</label>
     <select id="setupCycleLen">
-      <option value="21">21 days</option><option value="24">24 days</option>
-      <option value="26">26 days</option><option value="28" selected>28 days</option>
-      <option value="30">30 days</option><option value="32">32 days</option>
-      <option value="35">35 days</option>
+      <option value="21">21 days</option><option value="24">24 days</option><option value="26">26 days</option>
+      <option value="28" selected>28 days</option><option value="30">30 days</option>
+      <option value="32">32 days</option><option value="35">35 days</option>
     </select>
-    <label>Period duration (days)</label>
+    <label>Period duration (how many days it lasts)</label>
     <select id="setupPeriodLen">
-      <option value="2">2 days</option><option value="3">3 days</option>
-      <option value="4" selected>4 days</option><option value="5">5 days</option>
-      <option value="6">6 days</option><option value="7">7 days</option>
+      <option value="2">2 days</option><option value="3">3 days</option><option value="4" selected>4 days</option>
+      <option value="5">5 days</option><option value="6">6 days</option><option value="7">7 days</option>
     </select>
     <button class="modal-btn" onclick="saveSetup()">✅ Save & Start Tracking</button>
   </div>
 </div>
+
+<!-- DAY DETAIL MODAL -->
+<div class="modal-overlay" id="dayModal">
+  <div class="day-detail-modal">
+    <div class="modal-handle"></div>
+    <h3 id="dayModalTitle">Day Details</h3>
+    <div id="dayModalContent"></div>
+    <button class="modal-btn" style="margin-top:16px;" onclick="closeDayModal()">Close</button>
+  </div>
+</div>
+
 <script>
 // ── FIREBASE ──
 const firebaseConfig = {
@@ -504,8 +477,8 @@ const auth = firebase.auth();
 // ── STATE ──
 let settings = { cycleLen:28, periodLen:4, goal:"track" };
 let lastPeriodDate = null;
-let cycleHistory = []; // [{start, cycleLen, periodLen}]
-let logs = {}; // {dateStr: {mood, flow, symptoms, notes}}
+let cycleHistory = [];
+let logs = {};
 let calViewDate = new Date();
 let selectedMood = "";
 let selectedFlow = "None";
@@ -513,12 +486,10 @@ let selectedSymptoms = [];
 let currentUser = null;
 
 const SYMPTOMS = [
-  {icon:"😣",name:"Cramps"},{icon:"😤",name:"Mood Swings"},
-  {icon:"🤕",name:"Headache"},{icon:"😓",name:"Fatigue"},
-  {icon:"🤢",name:"Nausea"},{icon:"🎈",name:"Bloating"},
-  {icon:"🌡️",name:"Fever"},{icon:"💤",name:"Insomnia"},
-  {icon:"🍫",name:"Cravings"},{icon:"💧",name:"Discharge"},
-  {icon:"🔙",name:"Back Pain"},{icon:"🫀",name:"Breast Pain"}
+  {icon:"😣",name:"Cramps"},{icon:"😤",name:"Mood Swings"},{icon:"🤕",name:"Headache"},
+  {icon:"😓",name:"Fatigue"},{icon:"🤢",name:"Nausea"},{icon:"🎈",name:"Bloating"},
+  {icon:"🌡️",name:"Fever"},{icon:"💤",name:"Insomnia"},{icon:"🍫",name:"Cravings"},
+  {icon:"💧",name:"Discharge"},{icon:"🔙",name:"Back Pain"},{icon:"🫀",name:"Breast Pain"}
 ];
 
 // ── AUTH ──
@@ -528,26 +499,60 @@ auth.onAuthStateChanged(user => {
   loadData();
 });
 
-// ── LOAD / SAVE ──
+// ── LOAD DATA (localStorage first, then sync from Firestore) ──
 function loadData(){
+  // Load from localStorage immediately for fast startup
   const raw = localStorage.getItem("flo_data");
   if(raw){
-    const d = JSON.parse(raw);
-    settings = d.settings || settings;
-    lastPeriodDate = d.lastPeriodDate ? new Date(d.lastPeriodDate) : null;
-    cycleHistory = d.cycleHistory || [];
-    logs = d.logs || {};
+    try{
+      const d = JSON.parse(raw);
+      settings = d.settings || settings;
+      lastPeriodDate = d.lastPeriodDate ? new Date(d.lastPeriodDate) : null;
+      cycleHistory = d.cycleHistory || [];
+      logs = d.logs || {};
+    }catch(e){}
   }
-  applySettings();
-  buildSymptomGrid();
-  refreshHome();
-  renderCalendar();
-  renderAnalytics();
-  if(!lastPeriodDate) setTimeout(openSetupModal, 600);
+  // Also load from Firestore to sync across devices
+  if(currentUser){
+    db.collection("cycle_tracker").doc(currentUser.uid).get().then(snap => {
+      if(snap.exists){
+        const d = snap.data();
+        // Firestore data wins if it has more history
+        const fsHistory = d.cycleHistory || [];
+        if(fsHistory.length >= cycleHistory.length){
+          settings = d.settings || settings;
+          lastPeriodDate = d.lastPeriodDate ? new Date(d.lastPeriodDate) : null;
+          cycleHistory = fsHistory;
+          logs = d.logs || {};
+          // Update localStorage too
+          localStorage.setItem("flo_data", JSON.stringify(d));
+        }
+      }
+      applySettings();
+      buildSymptomGrid();
+      refreshHome();
+      renderCalendar();
+      renderAnalytics();
+      if(!lastPeriodDate) setTimeout(openSetupModal, 600);
+    }).catch(() => {
+      // Firestore failed, use local data
+      applySettings();
+      buildSymptomGrid();
+      refreshHome();
+      renderCalendar();
+      renderAnalytics();
+      if(!lastPeriodDate) setTimeout(openSetupModal, 600);
+    });
+  }
 }
 
 function saveData(){
-  const d = { settings, lastPeriodDate: lastPeriodDate ? lastPeriodDate.toISOString() : null, cycleHistory, logs };
+  const d = {
+    settings,
+    lastPeriodDate: lastPeriodDate ? lastPeriodDate.toISOString() : null,
+    cycleHistory,
+    logs
+  };
   localStorage.setItem("flo_data", JSON.stringify(d));
   if(currentUser){
     db.collection("cycle_tracker").doc(currentUser.uid).set(d).catch(()=>{});
@@ -596,14 +601,11 @@ document.getElementById("setupModal").addEventListener("click", e => { if(e.targ
 function saveSetup(){
   const dateVal = document.getElementById("setupDate").value;
   if(!dateVal){ showToast("Please select your last period date"); return; }
-  lastPeriodDate = new Date(dateVal);
+  lastPeriodDate = new Date(dateVal + "T00:00:00");
   settings.cycleLen = parseInt(document.getElementById("setupCycleLen").value);
   settings.periodLen = parseInt(document.getElementById("setupPeriodLen").value);
-
-  // Add to history if new
   const existing = cycleHistory.find(h => h.start === dateVal);
   if(!existing) cycleHistory.unshift({ start: dateVal, cycleLen: settings.cycleLen, periodLen: settings.periodLen });
-
   saveData();
   closeSetupModal();
   refreshHome();
@@ -614,46 +616,38 @@ function saveSetup(){
 // ── CYCLE CALCULATIONS ──
 function getCycleInfo(){
   if(!lastPeriodDate) return null;
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const start = new Date(lastPeriodDate);
-  start.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
   const cycleLen = settings.cycleLen;
   const periodLen = settings.periodLen;
 
-  // Find current cycle start (may be multiple cycles ago)
-  let cycleStart = new Date(start);
+  // Walk forward from lastPeriodDate to find current cycle start
+  let cycleStart = new Date(lastPeriodDate); cycleStart.setHours(0,0,0,0);
   while(true){
-    const nextStart = new Date(cycleStart);
-    nextStart.setDate(cycleStart.getDate() + cycleLen);
-    if(nextStart > today) break;
-    cycleStart = nextStart;
+    const next = new Date(cycleStart);
+    next.setDate(cycleStart.getDate() + cycleLen);
+    if(next > today) break;
+    cycleStart = next;
   }
 
-  const dayOfCycle = Math.floor((today - cycleStart) / (1000*60*60*24)) + 1;
-  const ovulationDay = cycleLen - 14;
-  const ovulationDate = new Date(cycleStart);
-  ovulationDate.setDate(cycleStart.getDate() + ovulationDay - 1);
-  const fertileStart = new Date(ovulationDate);
-  fertileStart.setDate(ovulationDate.getDate() - 5);
-  const fertileEnd = new Date(ovulationDate);
-  fertileEnd.setDate(ovulationDate.getDate() + 1);
-  const nextPeriod = new Date(cycleStart);
-  nextPeriod.setDate(cycleStart.getDate() + cycleLen);
+  const dayOfCycle = Math.floor((today - cycleStart)/(1000*60*60*24)) + 1;
+  const ovulDay = cycleLen - 14; // ovulation is 14 days before next period
+  const ovulDate = new Date(cycleStart); ovulDate.setDate(cycleStart.getDate() + ovulDay - 1);
+  const fertileStart = new Date(ovulDate); fertileStart.setDate(ovulDate.getDate() - 5);
+  const fertileEnd = new Date(ovulDate); fertileEnd.setDate(ovulDate.getDate() + 1);
+  const nextPeriod = new Date(cycleStart); nextPeriod.setDate(cycleStart.getDate() + cycleLen);
+  const daysToNextPeriod = Math.floor((nextPeriod - today)/(1000*60*60*24));
+  const daysToOvul = Math.floor((ovulDate - today)/(1000*60*60*24));
+  const daysToFertile = Math.floor((fertileStart - today)/(1000*60*60*24));
 
-  const daysToNextPeriod = Math.floor((nextPeriod - today) / (1000*60*60*24));
-  const daysToOvulation = Math.floor((ovulationDate - today) / (1000*60*60*24));
-  const daysToFertile = Math.floor((fertileStart - today) / (1000*60*60*24));
+  let phase, phaseColor;
+  if(dayOfCycle <= periodLen){ phase="🩸 Menstrual Phase"; phaseColor="#ef4444"; }
+  else if(today.toDateString()===ovulDate.toDateString()){ phase="💜 Ovulation Day"; phaseColor="#a855f7"; }
+  else if(today>=fertileStart && today<=fertileEnd){ phase="🌱 Fertile Window"; phaseColor="#22c55e"; }
+  else if(dayOfCycle < ovulDay-5){ phase="🌼 Follicular Phase"; phaseColor="#f59e0b"; }
+  else { phase="🌙 Luteal Phase"; phaseColor="#8b5cf6"; }
 
-  // Phase — ovulation must be checked BEFORE fertile window
-  let phase = "", phaseColor = "#db2777";
-  if(dayOfCycle <= periodLen){ phase = "🩸 Menstrual Phase"; phaseColor = "#ef4444"; }
-  else if(today.toDateString() === ovulationDate.toDateString()){ phase = "💜 Ovulation Day"; phaseColor = "#a855f7"; }
-  else if(today >= fertileStart && today <= fertileEnd){ phase = "🌱 Fertile Window"; phaseColor = "#22c55e"; }
-  else if(dayOfCycle < ovulationDay - 5){ phase = "🌼 Follicular Phase"; phaseColor = "#f59e0b"; }
-  else { phase = "🌙 Luteal Phase"; phaseColor = "#8b5cf6"; }
-
-  return { cycleStart, dayOfCycle, cycleLen, periodLen, ovulationDate, fertileStart, fertileEnd, nextPeriod, daysToNextPeriod, daysToOvulation, daysToFertile, phase, phaseColor };
+  return { cycleStart, dayOfCycle, cycleLen, periodLen, ovulDate, fertileStart, fertileEnd,
+           nextPeriod, daysToNextPeriod, daysToOvul, daysToFertile, phase, phaseColor };
 }
 
 // ── REFRESH HOME ──
@@ -662,113 +656,94 @@ function refreshHome(){
   if(!info){
     document.getElementById("ringPhase").innerText = "Set up your cycle";
     document.getElementById("ringDay").innerText = "—";
-    document.getElementById("ringDayLabel").innerText = "Day of cycle";
     document.getElementById("ringSub").innerText = "Tap Setup to begin";
     document.getElementById("ringNext").innerText = "📅 Set up cycle";
     document.getElementById("ringNext").onclick = openSetupModal;
-    document.getElementById("statPeriodIn").innerText = "—";
-    document.getElementById("statFertileIn").innerText = "—";
-    document.getElementById("statOvulIn").innerText = "—";
+    ["statPeriodIn","statFertileIn","statOvulIn"].forEach(id => document.getElementById(id).innerText = "—");
     document.getElementById("insightsArea").innerHTML = "";
     return;
   }
-
-  // Ring — precise circumference for r=86
+  const circumference = 2 * Math.PI * 86;
   const progress = Math.min(info.dayOfCycle / info.cycleLen, 1);
-  const circumference = 2 * Math.PI * 86; // ~540.35
-  const offset = circumference - (progress * circumference);
-  document.getElementById("ringFill").style.strokeDashoffset = offset;
+  document.getElementById("ringFill").style.strokeDashoffset = circumference - progress * circumference;
   document.getElementById("ringFill").style.stroke = info.phaseColor;
   document.getElementById("ringPhase").innerText = info.phase;
   document.getElementById("ringPhase").style.color = info.phaseColor;
   document.getElementById("ringDay").innerText = info.dayOfCycle;
   document.getElementById("ringDayLabel").innerText = "of " + info.cycleLen + " days";
 
-  // Sub text
   if(info.daysToNextPeriod === 0) document.getElementById("ringSub").innerText = "🩸 Period expected today";
   else if(info.daysToNextPeriod === 1) document.getElementById("ringSub").innerText = "🩸 Period expected tomorrow";
   else document.getElementById("ringSub").innerText = "Next period in " + info.daysToNextPeriod + " days";
 
-  document.getElementById("ringNext").innerText = "📅 " + info.nextPeriod.toDateString();
+  document.getElementById("ringNext").innerText = "📅 " + info.nextPeriod.toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"});
   document.getElementById("ringNext").onclick = () => showPage("calendar");
 
-  // Stats
-  document.getElementById("statPeriodIn").innerText = info.daysToNextPeriod <= 0 ? "Today" : info.daysToNextPeriod + "d";
-  document.getElementById("statFertileIn").innerText = info.daysToFertile < 0 ? "Now" : (info.daysToFertile === 0 ? "Today" : info.daysToFertile + "d");
-  document.getElementById("statOvulIn").innerText = info.daysToOvulation < 0 ? "Past" : (info.daysToOvulation === 0 ? "Today" : info.daysToOvulation + "d");
+  document.getElementById("statPeriodIn").innerText = info.daysToNextPeriod <= 0 ? "Today" : info.daysToNextPeriod+"d";
+  document.getElementById("statFertileIn").innerText = info.daysToFertile < 0 ? "Now" : (info.daysToFertile===0?"Today":info.daysToFertile+"d");
+  document.getElementById("statOvulIn").innerText = info.daysToOvul < 0 ? "Past" : (info.daysToOvul===0?"Today":info.daysToOvul+"d");
 
-  // Insights
   renderInsights(info);
 }
 
-// ── INSIGHTS ──
 function renderInsights(info){
   const area = document.getElementById("insightsArea");
-  area.innerHTML = "";
   const cards = [];
+  if(info.dayOfCycle <= info.periodLen)
+    cards.push({icon:"🩸",bg:"rgba(239,68,68,0.1)",title:"You're on your period",text:"Day "+info.dayOfCycle+" of your period. Rest, drink warm water, and take iron-rich foods."});
+  if(info.daysToOvul >= 0 && info.daysToOvul <= 2)
+    cards.push({icon:"💜",bg:"rgba(168,85,247,0.1)",title:"Ovulation is very close",text:info.daysToOvul===0?"Today is your ovulation day — peak fertility!":"Ovulation in "+info.daysToOvul+" day(s). Highest chance of conception."});
+  if(info.daysToFertile >= 0 && info.daysToFertile <= 3 && info.daysToOvul > 2)
+    cards.push({icon:"🌱",bg:"rgba(34,197,94,0.1)",title:"Fertile window approaching",text:"Your fertile window starts in "+info.daysToFertile+" day(s). You can get pregnant in this window."});
+  if(info.daysToNextPeriod <= 3 && info.daysToNextPeriod >= 0)
+    cards.push({icon:"📅",bg:"rgba(219,39,119,0.1)",title:"Period coming soon",text:"Your period is expected in "+info.daysToNextPeriod+" day(s). You may feel bloating, cramps or mood changes (PMS)."});
+  if(settings.goal==="conceive" && info.daysToFertile<=5 && info.daysToFertile>=0)
+    cards.push({icon:"👶",bg:"rgba(251,191,36,0.1)",title:"Best time to conceive",text:"You're in or near your fertile window. This is the best time to try for a baby."});
+  if(settings.goal==="avoid" && info.daysToFertile<=2 && info.daysToOvul>=-1)
+    cards.push({icon:"⚠️",bg:"rgba(239,68,68,0.1)",title:"High risk days",text:"You are in your fertile window. Avoid unprotected sex or use protection."});
+  if(cards.length===0)
+    cards.push({icon:"✨",bg:"rgba(219,39,119,0.08)",title:"Cycle day "+info.dayOfCycle,text:"You're in the "+info.phase.replace(/[^\w\s]/gi,"").trim()+" phase. Keep logging your symptoms daily."});
 
-  if(info.dayOfCycle <= info.periodLen){
-    cards.push({icon:"🩸",bg:"rgba(239,68,68,0.1)",title:"You're on your period",text:"Day "+info.dayOfCycle+" of your period. Stay hydrated and rest well."});
-  }
-  if(info.daysToOvulation >= 0 && info.daysToOvulation <= 2){
-    cards.push({icon:"💜",bg:"rgba(168,85,247,0.1)",title:"Ovulation is very close",text:info.daysToOvulation===0?"Today is your ovulation day — peak fertility!":"Ovulation in "+info.daysToOvulation+" day(s). Highest chance of conception."});
-  }
-  if(info.daysToFertile >= 0 && info.daysToFertile <= 3 && info.daysToOvulation > 2){
-    cards.push({icon:"🌱",bg:"rgba(34,197,94,0.1)",title:"Fertile window approaching",text:"Your fertile window starts in "+info.daysToFertile+" day(s)."});
-  }
-  if(info.daysToNextPeriod <= 3 && info.daysToNextPeriod >= 0){
-    cards.push({icon:"📅",bg:"rgba(219,39,119,0.1)",title:"Period coming soon",text:"Your period is expected in "+info.daysToNextPeriod+" day(s). You may feel PMS symptoms."});
-  }
-
-  // Goal-based tip
-  if(settings.goal === "conceive" && info.daysToFertile <= 5 && info.daysToFertile >= 0){
-    cards.push({icon:"👶",bg:"rgba(251,191,36,0.1)",title:"Best time to conceive",text:"You're in or near your fertile window. This is the best time to try."});
-  }
-  if(settings.goal === "avoid" && info.daysToFertile <= 2 && info.daysToOvulation >= -1){
-    cards.push({icon:"⚠️",bg:"rgba(239,68,68,0.1)",title:"High risk days",text:"You are in your fertile window. Avoid unprotected sex."});
-  }
-
-  if(cards.length === 0){
-    cards.push({icon:"✨",bg:"rgba(219,39,119,0.08)",title:"Cycle day "+info.dayOfCycle,text:"You're in the "+info.phase.replace(/[^\w\s]/gi,"").trim()+" phase. Keep logging your symptoms."});
-  }
-
-  cards.forEach(c => {
-    area.innerHTML += `
-      <div class="insight-card">
-        <div class="insight-icon" style="background:${c.bg}">${c.icon}</div>
-        <div><div class="insight-title">${c.title}</div><div class="insight-text">${c.text}</div></div>
-      </div>`;
-  });
+  area.innerHTML = cards.map(c=>`
+    <div class="insight-card">
+      <div class="insight-icon" style="background:${c.bg}">${c.icon}</div>
+      <div><div class="insight-title">${c.title}</div><div class="insight-text">${c.text}</div></div>
+    </div>`).join("");
 }
 
 // ── LOG PERIOD TODAY ──
 function logPeriodToday(){
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
   const dateStr = today.toISOString().split("T")[0];
-
-  // Check if already logged today
-  if(lastPeriodDate && lastPeriodDate.toISOString().split("T")[0] === dateStr){
-    showToast("Already logged period for today");
-    return;
+  if(lastPeriodDate && lastPeriodDate.toISOString().split("T")[0]===dateStr){
+    showToast("Already logged period for today"); return;
   }
-
   lastPeriodDate = today;
-  cycleHistory.unshift({ start: dateStr, cycleLen: settings.cycleLen, periodLen: settings.periodLen });
-  // Keep max 12 cycles
-  if(cycleHistory.length > 12) cycleHistory = cycleHistory.slice(0, 12);
-
-  // Auto log flow as Medium
+  const existing = cycleHistory.find(h => h.start===dateStr);
+  if(!existing) cycleHistory.unshift({ start:dateStr, cycleLen:settings.cycleLen, periodLen:settings.periodLen });
+  if(cycleHistory.length > 24) cycleHistory = cycleHistory.slice(0,24);
   if(!logs[dateStr]) logs[dateStr] = {};
   logs[dateStr].flow = "Medium";
-
   saveData();
   refreshHome();
   renderCalendar();
   showToast("🩸 Period logged for today!");
 }
 
-// ── CALENDAR ──
+function markPeriodEnded(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dateStr = today.toISOString().split("T")[0];
+  if(!logs[dateStr]) logs[dateStr] = {};
+  logs[dateStr].periodEnded = true;
+  logs[dateStr].flow = "None";
+  saveData();
+  renderCalendar();
+  showToast("✅ Period end marked for today");
+}
+</script>
+
+<script>
+// ══════════ CALENDAR ══════════
 function renderCalendar(){
   const grid = document.getElementById("calGrid");
   const label = document.getElementById("calMonthLabel");
@@ -776,62 +751,67 @@ function renderCalendar(){
 
   const year = calViewDate.getFullYear();
   const month = calViewDate.getMonth();
-  label.innerText = calViewDate.toLocaleDateString("en-UG",{month:"long",year:"numeric"});
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month+1, 0).getDate();
   const today = new Date(); today.setHours(0,0,0,0);
 
-  // Build sets of special dates
-  const periodDates = new Set();
-  const fertileDates = new Set();
-  const ovulationDates = new Set();
-  const predictedDates = new Set();
+  label.innerText = calViewDate.toLocaleDateString("en-UG",{month:"long",year:"numeric"});
 
-  // Past logged periods
-  cycleHistory.forEach(h => {
-    const s = new Date(h.start); s.setHours(0,0,0,0);
-    for(let i=0; i<(h.periodLen||settings.periodLen); i++){
-      const d = new Date(s); d.setDate(s.getDate()+i);
-      periodDates.add(d.toDateString());
-    }
-  });
+  // Build lookup sets for this month
+  const periodSet = new Set();      // confirmed period days
+  const predictedSet = new Set();   // predicted future period days
+  const fertileSet = new Set();     // fertile window days
+  const ovulSet = new Set();        // ovulation days
 
-  // Current + next 3 predicted cycles
   if(lastPeriodDate){
+    // Find the cycle start closest to the beginning of this view month
     let cycleStart = new Date(lastPeriodDate); cycleStart.setHours(0,0,0,0);
-    // Find current cycle
+
+    // Walk forward so we are at the earliest cycle that could affect the visible month
     while(true){
-      const next = new Date(cycleStart); next.setDate(cycleStart.getDate()+settings.cycleLen);
+      const next = new Date(cycleStart);
+      next.setDate(cycleStart.getDate() + settings.cycleLen);
       if(next > today) break;
       cycleStart = next;
     }
-    for(let c=0; c<4; c++){
-      const cs = new Date(cycleStart); cs.setDate(cycleStart.getDate() + c*settings.cycleLen);
-      // Period days
+    // Go back 2 cycles to cover the whole view range safely
+    for(let c = -2; c <= 6; c++){
+      const cs = new Date(cycleStart);
+      cs.setDate(cycleStart.getDate() + c * settings.cycleLen);
+
+      const isPast = cs <= today;
+
+      // Period days (past = confirmed/red, future = predicted/light red)
       for(let i=0; i<settings.periodLen; i++){
         const d = new Date(cs); d.setDate(cs.getDate()+i);
-        if(c===0 && d <= today) periodDates.add(d.toDateString());
-        else predictedDates.add(d.toDateString());
+        const key = d.toDateString();
+        if(isPast && c <= 0){
+          periodSet.add(key);      // solid red — already happened
+        } else {
+          predictedSet.add(key);   // light red — predicted future
+        }
       }
-      // Ovulation
+
+      // Ovulation: 14 days before next period
       const ovDay = settings.cycleLen - 14;
-      const ov = new Date(cs); ov.setDate(cs.getDate()+ovDay-1);
-      ovulationDates.add(ov.toDateString());
-      // Fertile
+      const ov = new Date(cs); ov.setDate(cs.getDate() + ovDay - 1);
+      ovulSet.add(ov.toDateString());
+
+      // Fertile window: 5 days before ovulation + 1 day after
       for(let i=-5; i<=1; i++){
         const d = new Date(ov); d.setDate(ov.getDate()+i);
-        if(!ovulationDates.has(d.toDateString())) fertileDates.add(d.toDateString());
+        if(!ovulSet.has(d.toDateString())) fertileSet.add(d.toDateString());
       }
     }
   }
 
-  // Empty cells
-  for(let i=0; i<firstDay; i++){
+  // Empty cells before day 1
+  const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Sun
+  for(let i=0; i<firstDayOfWeek; i++){
     const empty = document.createElement("div");
     empty.className = "cal-day empty";
     grid.appendChild(empty);
   }
+
+  const daysInMonth = new Date(year, month+1, 0).getDate();
 
   for(let d=1; d<=daysInMonth; d++){
     const date = new Date(year, month, d);
@@ -841,65 +821,144 @@ function renderCalendar(){
 
     const cell = document.createElement("div");
     cell.className = "cal-day";
-    cell.innerText = d;
 
-    if(ovulationDates.has(ds)) cell.classList.add("ovulation");
-    else if(periodDates.has(ds)) cell.classList.add("period");
-    else if(fertileDates.has(ds)) cell.classList.add("fertile");
-    else if(predictedDates.has(ds)) cell.classList.add("predicted-period");
+    // ── Assign colour class (priority order matters) ──
+    let tagText = "";
+    if(ovulSet.has(ds)){
+      cell.classList.add("ovulation");
+      tagText = "Ovul.";
+    } else if(periodSet.has(ds)){
+      cell.classList.add("period");
+      tagText = "Period";
+    } else if(fertileSet.has(ds)){
+      cell.classList.add("fertile");
+      tagText = "Fertile";
+    } else if(predictedSet.has(ds)){
+      cell.classList.add("predicted-period");
+      tagText = "~Period";
+    }
 
+    // Today marker
     if(date.toDateString() === today.toDateString()) cell.classList.add("today");
-    if(logs[dateStr] && (logs[dateStr].mood || logs[dateStr].flow)) cell.classList.add("logged");
 
-    cell.onclick = () => onCalDayClick(date, dateStr);
+    // Logged diary entry dot
+    const hasLog = logs[dateStr] && (logs[dateStr].mood || (logs[dateStr].flow && logs[dateStr].flow !== "None") || (logs[dateStr].symptoms && logs[dateStr].symptoms.length > 0));
+    if(hasLog) cell.classList.add("logged");
+
+    // Day number + mini tag
+    cell.innerHTML = `<span class="cal-day-num">${d}</span>${tagText ? `<span class="cal-day-tag">${tagText}</span>` : ""}`;
+
+    // Click opens day detail
+    cell.addEventListener("click", () => openDayModal(date, dateStr, ds, {
+      isPeriod: periodSet.has(ds),
+      isFertile: fertileSet.has(ds),
+      isOvul: ovulSet.has(ds),
+      isPredicted: predictedSet.has(ds),
+      hasLog
+    }));
+
     grid.appendChild(cell);
   }
 
   renderFutureCycles();
 }
 
-function onCalDayClick(date, dateStr){
-  const today = new Date(); today.setHours(0,0,0,0);
-  if(date > today){ showToast("Can't log future dates"); return; }
-  showPage("log");
-  // Pre-fill log date context
-  showToast("Logging for " + date.toDateString());
-}
-
 function changeMonth(dir){
-  calViewDate.setMonth(calViewDate.getMonth() + dir);
+  calViewDate.setMonth(calViewDate.getMonth()+dir);
   renderCalendar();
 }
+
+// ── DAY DETAIL MODAL ──
+function openDayModal(date, dateStr, ds, flags){
+  const info = getCycleInfo();
+  const dayLog = logs[dateStr] || {};
+
+  let phaseName = "Regular day";
+  let phaseColor = "#64748b";
+  let explanation = "No special cycle event on this day.";
+
+  if(flags.isOvul){
+    phaseName = "💜 Ovulation Day";
+    phaseColor = "#a855f7";
+    explanation = "Your egg is released today. This is the day you are MOST fertile. If you want to get pregnant, today is the best day. If not, avoid unprotected sex.";
+  } else if(flags.isPeriod){
+    phaseName = "🩸 Period Day";
+    phaseColor = "#ef4444";
+    explanation = "You are on your period. Rest, drink water, eat iron-rich foods like beans and meat. Cramps are normal — a hot water bottle can help.";
+  } else if(flags.isFertile){
+    phaseName = "🌱 Fertile Window";
+    phaseColor = "#22c55e";
+    explanation = "You can get pregnant on this day. Your fertile window lasts about 6 days (5 days before ovulation + ovulation day). Sperm can survive up to 5 days inside.";
+  } else if(flags.isPredicted){
+    phaseName = "📅 Predicted Period";
+    phaseColor = "#ef4444";
+    explanation = "Your period is predicted to start around this day based on your cycle length. Prepare pads or other period products. You may feel PMS symptoms a few days before.";
+  } else if(info){
+    const cycleDay = Math.floor((date - info.cycleStart)/(1000*60*60*24)) + 1;
+    if(cycleDay > 0 && cycleDay <= info.cycleLen){
+      if(cycleDay <= 7){
+        phaseName = "🌼 Follicular Phase";
+        phaseColor = "#f59e0b";
+        explanation = "Your body is building up for ovulation. Estrogen rises, energy increases. Good days for exercise and new activities.";
+      } else if(cycleDay > info.cycleLen - 14){
+        phaseName = "🌙 Luteal Phase";
+        phaseColor = "#8b5cf6";
+        explanation = "After ovulation, progesterone rises to prepare for possible pregnancy. You may feel more tired, emotional, or bloated near the end of this phase (PMS).";
+      }
+    }
+  }
+
+  document.getElementById("dayModalTitle").innerText =
+    date.toLocaleDateString("en-UG",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+
+  let html = `<div class="detail-phase-badge" style="background:${phaseColor}20;color:${phaseColor};">${phaseName}</div>`;
+  html += `<p style="font-size:13px;font-weight:600;color:var(--muted);line-height:1.6;margin-bottom:16px;">${explanation}</p>`;
+
+  html += `<div class="detail-row"><span class="detail-label">Flow</span><span class="detail-value">${dayLog.flow || "Not logged"}</span></div>`;
+  html += `<div class="detail-row"><span class="detail-label">Mood</span><span class="detail-value">${dayLog.mood || "Not logged"}</span></div>`;
+  html += `<div class="detail-row"><span class="detail-label">Symptoms</span><span class="detail-value">${dayLog.symptoms && dayLog.symptoms.length ? dayLog.symptoms.join(", ") : "None"}</span></div>`;
+  html += `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${dayLog.notes || "—"}</span></div>`;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(date <= today){
+    html += `<button class="log-btn" style="margin-top:16px;" onclick="closeDayModal();showPage('log');">📝 Log This Day</button>`;
+  }
+
+  document.getElementById("dayModalContent").innerHTML = html;
+  document.getElementById("dayModal").classList.add("open");
+}
+
+function closeDayModal(){ document.getElementById("dayModal").classList.remove("open"); }
+document.getElementById("dayModal").addEventListener("click", e => { if(e.target===e.currentTarget) closeDayModal(); });
 
 function renderFutureCycles(){
   const area = document.getElementById("futureCycles");
   if(!lastPeriodDate){ area.innerHTML=""; return; }
-  area.innerHTML = "<h3>📅 Upcoming Periods</h3>";
-
-  let cycleStart = new Date(lastPeriodDate); cycleStart.setHours(0,0,0,0);
   const today = new Date(); today.setHours(0,0,0,0);
+  let cycleStart = new Date(lastPeriodDate); cycleStart.setHours(0,0,0,0);
   while(true){
     const next = new Date(cycleStart); next.setDate(cycleStart.getDate()+settings.cycleLen);
     if(next > today) break;
     cycleStart = next;
   }
-
+  let html = "<h3>📅 Upcoming Periods (next 4 cycles)</h3>";
   for(let i=1; i<=4; i++){
     const nextPeriod = new Date(cycleStart); nextPeriod.setDate(cycleStart.getDate() + i*settings.cycleLen);
     const ovDay = settings.cycleLen - 14;
     const ov = new Date(cycleStart); ov.setDate(cycleStart.getDate() + i*settings.cycleLen + ovDay - 1);
     const daysAway = Math.floor((nextPeriod - today)/(1000*60*60*24));
-    area.innerHTML += `
-      <div class="cycle-row">
-        <div class="cycle-row-left">
-          <h4>🩸 ${nextPeriod.toDateString()}</h4>
-          <p>💜 Ovulation: ${ov.toDateString()}</p>
-        </div>
-        <div class="cycle-badge">${daysAway > 0 ? "in "+daysAway+"d" : "Today"}</div>
-      </div>`;
+    html += `<div class="cycle-row">
+      <div class="cycle-row-left">
+        <h4>🩸 ${nextPeriod.toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"})}</h4>
+        <p>💜 Ovulation: ${ov.toLocaleDateString("en-UG",{day:"numeric",month:"long"})}</p>
+      </div>
+      <div class="cycle-badge">${daysAway > 0 ? "in "+daysAway+"d" : daysAway===0?"Today":"Passed"}</div>
+    </div>`;
   }
+  area.innerHTML = html;
 }
 </script>
+
 <script>
 // ── LOG PAGE ──
 function buildSymptomGrid(){
@@ -917,54 +976,47 @@ function buildSymptomGrid(){
 
 function toggleSymptom(btn, name){
   if(selectedSymptoms.includes(name)){
-    selectedSymptoms = selectedSymptoms.filter(s => s !== name);
+    selectedSymptoms = selectedSymptoms.filter(s=>s!==name);
     btn.classList.remove("selected");
   } else {
     selectedSymptoms.push(name);
     btn.classList.add("selected");
   }
 }
-
 function selectMood(btn){
-  document.querySelectorAll(".mood-btn").forEach(b => b.classList.remove("selected"));
+  document.querySelectorAll(".mood-btn").forEach(b=>b.classList.remove("selected"));
   btn.classList.add("selected");
   selectedMood = btn.dataset.mood;
 }
-
 function selectFlow(btn){
-  document.querySelectorAll(".flow-btn").forEach(b => b.classList.remove("selected"));
+  document.querySelectorAll(".flow-btn").forEach(b=>b.classList.remove("selected"));
   btn.classList.add("selected");
   selectedFlow = btn.dataset.flow;
 }
-
 function resetLogForm(){
-  selectedMood = "";
-  selectedFlow = "None";
-  selectedSymptoms = [];
-  document.querySelectorAll(".mood-btn").forEach(b => b.classList.remove("selected"));
-  document.querySelectorAll(".flow-btn").forEach(b => b.classList.remove("selected"));
-  document.querySelectorAll(".sym-btn").forEach(b => b.classList.remove("selected"));
-  document.getElementById("logNotes").value = "";
+  selectedMood=""; selectedFlow="None"; selectedSymptoms=[];
+  document.querySelectorAll(".mood-btn,.flow-btn,.sym-btn").forEach(b=>b.classList.remove("selected"));
+  document.getElementById("logNotes").value="";
 }
 
 function saveLog(){
   const today = new Date();
   const dateStr = today.toISOString().split("T")[0];
   if(!logs[dateStr]) logs[dateStr] = {};
-  logs[dateStr].mood = selectedMood;
-  logs[dateStr].flow = selectedFlow;
-  logs[dateStr].symptoms = [...selectedSymptoms];
-  logs[dateStr].notes = document.getElementById("logNotes").value;
+  if(selectedMood) logs[dateStr].mood = selectedMood;
+  if(selectedFlow !== "None") logs[dateStr].flow = selectedFlow;
+  if(selectedSymptoms.length) logs[dateStr].symptoms = [...selectedSymptoms];
+  if(document.getElementById("logNotes").value) logs[dateStr].notes = document.getElementById("logNotes").value;
   logs[dateStr].date = dateStr;
 
-  // If flow is not None, treat as period day
-  if(selectedFlow !== "None" && selectedFlow !== ""){
+  // Auto-add to period history if flow is logged
+  if(selectedFlow && selectedFlow !== "None"){
     const todayDate = new Date(); todayDate.setHours(0,0,0,0);
-    const existing = cycleHistory.find(h => h.start === dateStr);
-    if(!existing && (!lastPeriodDate || Math.abs(todayDate - lastPeriodDate) > 5*24*60*60*1000)){
+    const existing = cycleHistory.find(h=>h.start===dateStr);
+    if(!existing && (!lastPeriodDate || Math.abs(todayDate-lastPeriodDate) > 5*24*60*60*1000)){
       lastPeriodDate = todayDate;
-      cycleHistory.unshift({ start: dateStr, cycleLen: settings.cycleLen, periodLen: settings.periodLen });
-      if(cycleHistory.length > 12) cycleHistory = cycleHistory.slice(0,12);
+      cycleHistory.unshift({start:dateStr,cycleLen:settings.cycleLen,periodLen:settings.periodLen});
+      if(cycleHistory.length>24) cycleHistory=cycleHistory.slice(0,24);
     }
   }
 
@@ -972,60 +1024,63 @@ function saveLog(){
   refreshHome();
   renderCalendar();
   showToast("✅ Log saved for today!");
-  setTimeout(() => showPage("home"), 800);
+  setTimeout(()=>showPage("home"), 800);
 }
 
 // ── ANALYTICS ──
 function renderAnalytics(){
-  // Compute averages from history
-  const hist = cycleHistory.slice(0, 12);
-  if(hist.length < 2){
-    document.getElementById("aAvgCycle").innerText = settings.cycleLen + "d";
-    document.getElementById("aAvgPeriod").innerText = settings.periodLen + "d";
+  const hist = cycleHistory.slice(0,12);
+  if(hist.length < 1){
+    document.getElementById("aAvgCycle").innerText = settings.cycleLen+"d";
+    document.getElementById("aAvgPeriod").innerText = settings.periodLen+"d";
     document.getElementById("aShortest").innerText = "—";
     document.getElementById("aLongest").innerText = "—";
-    document.getElementById("historyList").innerHTML = `<div style="text-align:center;color:#94a3b8;padding:30px;font-weight:700;">Log more cycles to see insights</div>`;
+    document.getElementById("historyList").innerHTML =
+      `<div style="text-align:center;color:#94a3b8;padding:30px;font-weight:700;">Log more cycles to see insights</div>`;
     return;
   }
-
-  const cycleLens = hist.map(h => h.cycleLen);
+  const cycleLens = hist.map(h=>h.cycleLen);
   const avg = Math.round(cycleLens.reduce((a,b)=>a+b,0)/cycleLens.length);
   const shortest = Math.min(...cycleLens);
   const longest = Math.max(...cycleLens);
   const avgPeriod = Math.round(hist.map(h=>h.periodLen||settings.periodLen).reduce((a,b)=>a+b,0)/hist.length);
+  document.getElementById("aAvgCycle").innerText = avg+"d";
+  document.getElementById("aAvgPeriod").innerText = avgPeriod+"d";
+  document.getElementById("aShortest").innerText = shortest+"d";
+  document.getElementById("aLongest").innerText = longest+"d";
 
-  document.getElementById("aAvgCycle").innerText = avg + "d";
-  document.getElementById("aAvgPeriod").innerText = avgPeriod + "d";
-  document.getElementById("aShortest").innerText = shortest + "d";
-  document.getElementById("aLongest").innerText = longest + "d";
-
-  // History list
   const list = document.getElementById("historyList");
   list.innerHTML = "";
-  hist.forEach((h, i) => {
+  hist.forEach((h,i) => {
     const start = new Date(h.start);
-    const end = new Date(h.start); end.setDate(start.getDate() + (h.periodLen||settings.periodLen) - 1);
     const ov = new Date(h.start); ov.setDate(start.getDate() + h.cycleLen - 14 - 1);
-
-    // Collect logs for this period
-    const logChips = [];
+    const chips = [];
     for(let d=0; d<(h.periodLen||settings.periodLen); d++){
       const ds = new Date(h.start); ds.setDate(ds.getDate()+d);
       const key = ds.toISOString().split("T")[0];
       if(logs[key]){
-        if(logs[key].mood) logChips.push(logs[key].mood);
-        if(logs[key].symptoms) logs[key].symptoms.forEach(s => { if(!logChips.includes(s)) logChips.push(s); });
+        if(logs[key].mood && !chips.includes(logs[key].mood)) chips.push(logs[key].mood);
+        (logs[key].symptoms||[]).forEach(s=>{ if(!chips.includes(s)) chips.push(s); });
       }
     }
-
-    list.innerHTML += `
-      <div class="history-item">
-        <h4>🩸 Cycle ${hist.length - i} — ${start.toDateString()}</h4>
-        <p>Duration: ${h.periodLen||settings.periodLen} days &nbsp;|&nbsp; Cycle: ${h.cycleLen} days</p>
-        <p>💜 Ovulation: ~${ov.toDateString()}</p>
-        ${logChips.length ? `<div class="history-chips">${logChips.slice(0,6).map(c=>`<span class="h-chip">${c}</span>`).join("")}</div>` : ""}
-      </div>`;
+    list.innerHTML += `<div class="history-item">
+      <h4>🩸 Cycle ${hist.length-i} — ${start.toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"})}</h4>
+      <p>Period: ${h.periodLen||settings.periodLen} days &nbsp;|&nbsp; Cycle: ${h.cycleLen} days<br>
+      💜 Ovulation: ~${ov.toLocaleDateString("en-UG",{day:"numeric",month:"long"})}</p>
+      ${chips.length ? `<div class="history-chips">${chips.slice(0,6).map(c=>`<span class="h-chip">${c}</span>`).join("")}</div>` : ""}
+    </div>`;
   });
+}
+
+function resetAllData(){
+  if(!confirm("Are you sure you want to delete all cycle data? This cannot be undone.")) return;
+  settings = {cycleLen:28,periodLen:4,goal:"track"};
+  lastPeriodDate = null; cycleHistory = []; logs = {};
+  localStorage.removeItem("flo_data");
+  if(currentUser) db.collection("cycle_tracker").doc(currentUser.uid).delete().catch(()=>{});
+  applySettings(); refreshHome(); renderCalendar(); renderAnalytics();
+  showToast("🗑️ All data cleared");
+  setTimeout(openSetupModal, 600);
 }
 
 // ── TOAST ──
@@ -1033,17 +1088,8 @@ function showToast(msg){
   const t = document.getElementById("toast");
   t.innerText = msg;
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2500);
+  setTimeout(()=>t.classList.remove("show"), 2500);
 }
-
-// ── INIT ──
-// loadData is called by auth.onAuthStateChanged, not window.onload
-window.onload = () => {
-  // Notification permission only
-  if("Notification" in window && Notification.permission === "default"){
-    Notification.requestPermission();
-  }
-};
 </script>
 </body>
 </html>
