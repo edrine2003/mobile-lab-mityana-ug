@@ -16,158 +16,101 @@
   --muted:#64748b;--border:rgba(0,0,0,0.07);--bg:#f1f5f9;--card:#fff;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:30px;transition:background 0.3s,color 0.3s;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:40px;transition:background 0.3s,color 0.3s;}
 
 /* LOADER */
-#loader{
-  position:fixed;inset:0;background:#fff;z-index:99999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-}
-.loader-ring{
-  width:56px;height:56px;border-radius:50%;
-  border:5px solid #e2e8f0;border-top-color:#0ea5e9;
-  animation:spin 0.8s linear infinite;
-}
+#loader{position:fixed;inset:0;background:#fff;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+.loader-ring{width:56px;height:56px;border-radius:50%;border:5px solid #e2e8f0;border-top-color:#0ea5e9;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 #loader p{font-size:15px;font-weight:700;color:#0ea5e9;}
 
 /* HEADER */
-.header{
-  background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);
-  background-size:300% 300%;animation:gradShift 8s ease infinite;
-  padding:24px 20px 28px;color:#fff;position:relative;overflow:hidden;
-}
+.header{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);background-size:300% 300%;animation:gradShift 8s ease infinite;padding:24px 20px 28px;color:#fff;position:relative;overflow:hidden;}
 @keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
-.header::before{
-  content:'';position:absolute;top:-60px;right:-60px;
-  width:220px;height:220px;border-radius:50%;
-  background:rgba(255,255,255,0.07);pointer-events:none;
-}
+.header::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .header-actions{display:flex;gap:8px;}
-.hdr-btn{
-  background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);
-  color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;
-  cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;
-}
+.hdr-btn{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
 .hdr-btn:hover{background:rgba(255,255,255,0.28);}
 .user-row{display:flex;align-items:center;gap:14px;}
-.avatar{
-  width:62px;height:62px;border-radius:50%;border:3px solid rgba(255,255,255,0.6);
-  object-fit:cover;background:rgba(255,255,255,0.3);flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;font-weight:900;color:#fff;overflow:hidden;
-}
+.avatar{width:62px;height:62px;border-radius:50%;border:3px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;overflow:hidden;}
 .user-name{font-size:20px;font-weight:900;margin-bottom:3px;}
 .user-sub{font-size:13px;opacity:0.88;font-weight:600;}
-.online-pill{
-  display:inline-flex;align-items:center;gap:5px;
-  background:rgba(255,255,255,0.18);border-radius:999px;
-  padding:4px 10px;font-size:12px;font-weight:700;margin-top:6px;
-}
+.online-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.18);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;margin-top:6px;}
 .online-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:blink 2s infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
-</style>
-<style>
+
 /* STATS */
-.stats-row{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
-  padding:0 16px;margin-top:-18px;position:relative;z-index:2;
-}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;margin-top:-18px;position:relative;z-index:2;}
 @media(max-width:600px){.stats-row{grid-template-columns:repeat(2,1fr);}}
-.stat-card{
-  background:#fff;border-radius:16px;padding:14px 10px;text-align:center;
-  box-shadow:0 6px 20px rgba(0,0,0,0.1);border:1px solid var(--border);
-  animation:cardIn 0.5s ease both;
-}
+.stat-card{background:#fff;border-radius:16px;padding:14px 10px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.1);border:1px solid var(--border);animation:cardIn 0.5s ease both;}
 @keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
 .stat-icon{font-size:22px;margin-bottom:4px;}
 .stat-val{font-size:22px;font-weight:900;color:var(--primary);}
 .stat-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px;}
 
 /* SECTION TITLE */
-.section-title{
-  font-size:15px;font-weight:900;color:var(--dark);
-  padding:20px 16px 10px;display:flex;align-items:center;gap:8px;
-}
+.section-title{font-size:15px;font-weight:900;color:var(--dark);padding:20px 16px 10px;display:flex;align-items:center;gap:8px;}
 
 /* GRID CARDS */
-.cards-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
-  padding:0 16px;
-}
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 16px;}
 @media(max-width:500px){.cards-grid{grid-template-columns:repeat(2,1fr);}}
-.dash-card{
-  background:#fff;border-radius:20px;padding:18px 12px;text-align:center;
-  cursor:pointer;transition:all 0.22s;border:1px solid var(--border);
-  box-shadow:0 4px 14px rgba(0,0,0,0.06);position:relative;overflow:hidden;
-  animation:cardIn 0.5s ease both;
-}
+.dash-card{background:#fff;border-radius:20px;padding:18px 12px;text-align:center;cursor:pointer;transition:all 0.22s;border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,0.06);position:relative;overflow:hidden;animation:cardIn 0.5s ease both;text-decoration:none;display:block;}
 .dash-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(0,0,0,0.12);}
 .dash-card:active{transform:scale(0.97);}
-.card-icon{
-  width:52px;height:52px;border-radius:16px;margin:0 auto 10px;
-  display:flex;align-items:center;justify-content:center;font-size:26px;
-}
+.card-icon{width:52px;height:52px;border-radius:16px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:26px;}
 .card-label{font-size:13px;font-weight:800;color:var(--dark);}
 .card-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:3px;}
-
-/* BADGE on card */
-.card-badge{
-  position:absolute;top:10px;right:10px;
-  background:#ef4444;color:#fff;border-radius:999px;
-  font-size:10px;font-weight:900;padding:2px 7px;
-  animation:badgePop 0.3s cubic-bezier(0.34,1.56,0.64,1);
-}
+.card-badge{position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;border-radius:999px;font-size:10px;font-weight:900;padding:2px 7px;animation:badgePop 0.3s cubic-bezier(0.34,1.56,0.64,1);}
 @keyframes badgePop{from{transform:scale(0);}to{transform:scale(1);}}
+
+/* RECENT ORDERS */
+.recent-area{padding:0 16px;}
+.order-row{background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;}
+.order-row:hover{transform:translateX(4px);box-shadow:0 6px 18px rgba(0,0,0,0.09);}
+.order-left h4{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:3px;}
+.order-left p{font-size:12px;font-weight:600;color:var(--muted);}
+.status-pill{padding:5px 12px;border-radius:999px;font-size:11px;font-weight:800;}
+.pill-pending{background:rgba(245,158,11,0.12);color:#b45309;}
+.pill-ongoing{background:rgba(14,165,233,0.12);color:#0369a1;}
+.pill-completed{background:rgba(34,197,94,0.12);color:#15803d;}
+.pill-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
 
 /* NOTIFICATIONS */
 .notif-area{padding:0 16px;}
-.notif-card{
-  background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;
-  border-left:4px solid var(--primary);
-  box-shadow:0 3px 10px rgba(0,0,0,0.05);
-  display:flex;align-items:flex-start;gap:12px;
-}
+.notif-card{background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;border-left:4px solid var(--primary);box-shadow:0 3px 10px rgba(0,0,0,0.05);display:flex;align-items:flex-start;gap:12px;}
 .notif-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
 .notif-title{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:2px;}
 .notif-msg{font-size:13px;font-weight:600;color:var(--muted);}
 .notif-time{font-size:11px;font-weight:700;color:#94a3b8;margin-top:4px;}
 
 /* HEALTH TIPS */
-.tips-scroll{
-  display:flex;gap:12px;padding:0 16px;overflow-x:auto;
-  scrollbar-width:none;padding-bottom:4px;
-}
+.tips-scroll{display:flex;gap:12px;padding:0 16px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
 .tips-scroll::-webkit-scrollbar{display:none;}
-.tip-card{
-  min-width:200px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);
-  border-radius:18px;padding:16px;color:#fff;flex-shrink:0;
-}
+.tip-card{min-width:200px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);border-radius:18px;padding:16px;color:#fff;flex-shrink:0;}
 .tip-card .tip-icon{font-size:24px;margin-bottom:8px;}
 .tip-card p{font-size:13px;font-weight:700;line-height:1.5;}
 
 /* INSTALL BTN */
-#installBtn{
-  display:none;position:fixed;bottom:20px;right:16px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;
-  padding:13px 18px;border:none;border-radius:14px;font-weight:900;
-  cursor:pointer;box-shadow:0 6px 18px rgba(34,197,94,0.4);
-  font-family:'Nunito',Arial,sans-serif;font-size:14px;z-index:999;
-  animation:pulse 1.5s infinite;
-}
-@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+#installBtn{display:none;position:fixed;bottom:20px;right:16px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;padding:13px 18px;border:none;border-radius:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(34,197,94,0.4);font-family:'Nunito',Arial,sans-serif;font-size:14px;z-index:999;animation:pulseBtn 1.5s infinite;}
+@keyframes pulseBtn{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+
+/* OFFLINE BANNER */
+.offline-banner{position:fixed;top:0;left:0;right:0;background:#ef4444;color:#fff;text-align:center;padding:10px;font-weight:800;font-size:13px;z-index:99998;display:none;}
 
 /* DARK MODE */
 body.dark{--bg:#0f172a;--dark:#f1f5f9;--card:#1e293b;--border:rgba(255,255,255,0.08);}
-body.dark .stat-card,body.dark .dash-card,body.dark .notif-card{background:#1e293b;color:#f1f5f9;}
-body.dark .card-label,body.dark .notif-title{color:#f1f5f9;}
+body.dark .stat-card,body.dark .dash-card,body.dark .notif-card,body.dark .order-row{background:#1e293b;color:#f1f5f9;}
+body.dark .card-label,body.dark .notif-title,body.dark .order-left h4{color:#f1f5f9;}
+body.dark .section-title{color:#f1f5f9;}
 body.dark #loader{background:#0f172a;}
 body.dark #loader p{color:#38bdf8;}
 body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
 </style>
 </head>
 <body>
+
+<div class="offline-banner" id="offlineBanner">⚠️ No internet connection</div>
 
 <!-- LOADER -->
 <div id="loader">
@@ -198,23 +141,23 @@ body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
 <div class="stats-row">
   <div class="stat-card" style="animation-delay:0.05s">
     <div class="stat-icon">🧪</div>
-    <div class="stat-val" id="totalTests">0</div>
+    <div class="stat-val" id="totalTests">—</div>
     <div class="stat-lbl">Total Tests</div>
   </div>
   <div class="stat-card" style="animation-delay:0.1s">
     <div class="stat-icon">⏳</div>
-    <div class="stat-val" id="pendingTests" style="color:#f59e0b;">0</div>
+    <div class="stat-val" id="pendingTests" style="color:#f59e0b;">—</div>
     <div class="stat-lbl">Pending</div>
   </div>
   <div class="stat-card" style="animation-delay:0.15s">
     <div class="stat-icon">✅</div>
-    <div class="stat-val" id="completedTests" style="color:#22c55e;">0</div>
+    <div class="stat-val" id="completedTests" style="color:#22c55e;">—</div>
     <div class="stat-lbl">Completed</div>
   </div>
   <div class="stat-card" style="animation-delay:0.2s">
-    <div class="stat-icon">📅</div>
-    <div class="stat-val" id="appointmentsCount" style="color:#8b5cf6;">0</div>
-    <div class="stat-lbl">Appointments</div>
+    <div class="stat-icon">💳</div>
+    <div class="stat-val" id="walletStat" style="color:#8b5cf6;">—</div>
+    <div class="stat-lbl">Wallet (UGX)</div>
   </div>
 </div>
 
@@ -222,76 +165,93 @@ body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
 <div class="section-title">⚡ Quick Actions</div>
 <div class="cards-grid">
 
-  <div class="dash-card" onclick="go('index.html')" style="animation-delay:0.05s">
+  <a class="dash-card" href="index.html" style="animation-delay:0.05s">
     <div class="card-icon" style="background:rgba(14,165,233,0.12);">🧪</div>
     <div class="card-label">Order Test</div>
     <div class="card-sub">Book a lab test</div>
-  </div>
+  </a>
 
-  <div class="dash-card" onclick="go('inbox.html')" style="animation-delay:0.1s">
+  <a class="dash-card" href="inbox.html" style="animation-delay:0.1s">
     <div class="card-icon" style="background:rgba(34,197,94,0.12);">📋</div>
     <div class="card-label">My Results</div>
     <div class="card-sub">View lab results</div>
     <span class="card-badge" id="resultsBadge" style="display:none;">New</span>
-  </div>
+  </a>
 
-  <div class="dash-card" onclick="go('chat.html')" style="animation-delay:0.15s">
+  <a class="dash-card" href="chat.html" style="animation-delay:0.15s">
     <div class="card-icon" style="background:rgba(139,92,246,0.12);">💬</div>
     <div class="card-label">Chat Doctor</div>
     <div class="card-sub">Ask a question</div>
     <span class="card-badge" id="chatBadge" style="display:none;">•</span>
-  </div>
+  </a>
 
-  <div class="dash-card" onclick="go('cycle.html')" style="animation-delay:0.2s">
+  <a class="dash-card" href="cycle.html" style="animation-delay:0.2s">
     <div class="card-icon" style="background:rgba(236,72,153,0.12);">🌸</div>
     <div class="card-label">Cycle Tracker</div>
     <div class="card-sub">Period & fertility</div>
-  </div>
+  </a>
 
-  <div class="dash-card" onclick="go('appointments.html')" style="animation-delay:0.25s">
-    <div class="card-icon" style="background:rgba(245,158,11,0.12);">📅</div>
-    <div class="card-label">Appointments</div>
-    <div class="card-sub">Book a visit</div>
-  </div>
+  <a class="dash-card" href="tests-guide.html" style="animation-delay:0.25s">
+    <div class="card-icon" style="background:rgba(14,165,233,0.12);">📖</div>
+    <div class="card-label">Tests Guide</div>
+    <div class="card-sub">Learn about tests</div>
+  </a>
 
-  <div class="dash-card" onclick="go('profile.html')" style="animation-delay:0.3s">
-    <div class="card-icon" style="background:rgba(14,165,233,0.1);">👤</div>
-    <div class="card-label">My Profile</div>
-    <div class="card-sub">Edit your info</div>
-  </div>
-
-  <div class="dash-card" onclick="go('about.html')" style="animation-delay:0.35s">
-    <div class="card-icon" style="background:rgba(20,184,166,0.12);">ℹ️</div>
-    <div class="card-label">About Us</div>
-    <div class="card-sub">Our services</div>
-  </div>
-
-  <div class="dash-card" onclick="callEmergency()" style="animation-delay:0.4s;border-color:rgba(239,68,68,0.2);">
-    <div class="card-icon" style="background:rgba(239,68,68,0.1);">🚑</div>
-    <div class="card-label">Emergency</div>
-    <div class="card-sub">Call now</div>
-  </div>
-  <div class="dash-card" onclick="go('patient_chat.html')" style="animation-delay:0.45s">
-    <div class="card-icon" style="background:rgba(16,185,129,0.12);">📞</div>
-    <div class="card-label">Contact Lab</div>
-    <div class="card-sub">Get in touch</div>
-  </div>
-
-  <div class="dash-card" onclick="go('wallet.html')" style="animation-delay:0.5s">
+  <a class="dash-card" href="wallet.html" style="animation-delay:0.3s">
     <div class="card-icon" style="background:rgba(245,158,11,0.12);">💳</div>
     <div class="card-label">My Wallet</div>
     <div class="card-sub" id="dashWalletBal">Balance: UGX 0</div>
-  </div>
+  </a>
 
+  <a class="dash-card" href="appointments.html" style="animation-delay:0.35s">
+    <div class="card-icon" style="background:rgba(245,158,11,0.12);">📅</div>
+    <div class="card-label">Appointments</div>
+    <div class="card-sub">Book a visit</div>
+  </a>
+
+  <a class="dash-card" href="profile.html" style="animation-delay:0.4s">
+    <div class="card-icon" style="background:rgba(14,165,233,0.1);">👤</div>
+    <div class="card-label">My Profile</div>
+    <div class="card-sub">Edit your info</div>
+  </a>
+
+  <a class="dash-card" href="reports.html" style="animation-delay:0.45s">
+    <div class="card-icon" style="background:rgba(139,92,246,0.12);">📊</div>
+    <div class="card-label">Reports</div>
+    <div class="card-sub">Analytics</div>
+  </a>
+
+  <a class="dash-card" href="about.html" style="animation-delay:0.5s">
+    <div class="card-icon" style="background:rgba(20,184,166,0.12);">ℹ️</div>
+    <div class="card-label">About Us</div>
+    <div class="card-sub">Our services</div>
+  </a>
+
+  <!-- Emergency — direct call, no page needed -->
+  <a class="dash-card" href="tel:+256778379791" style="animation-delay:0.55s;border-color:rgba(239,68,68,0.2);">
+    <div class="card-icon" style="background:rgba(239,68,68,0.1);">🚑</div>
+    <div class="card-label">Emergency</div>
+    <div class="card-sub">Call MTN now</div>
+  </a>
+
+  <a class="dash-card" href="tel:0750992939" style="animation-delay:0.6s">
+    <div class="card-icon" style="background:rgba(16,185,129,0.12);">📞</div>
+    <div class="card-label">Contact Lab</div>
+    <div class="card-sub">Call Airtel</div>
+  </a>
+
+</div>
+
+<!-- RECENT ORDERS -->
+<div class="section-title">🧪 Recent Orders</div>
+<div class="recent-area" id="recentOrders">
+  <div class="notif-card"><div class="notif-icon">⏳</div><div><div class="notif-title">Loading orders...</div></div></div>
 </div>
 
 <!-- NOTIFICATIONS -->
 <div class="section-title">🔔 Notifications</div>
 <div class="notif-area" id="notificationsBox">
-  <div class="notif-card">
-    <div class="notif-icon">⏳</div>
-    <div><div class="notif-title">Loading...</div></div>
-  </div>
+  <div class="notif-card"><div class="notif-icon">⏳</div><div><div class="notif-title">Loading...</div></div></div>
 </div>
 
 <!-- HEALTH TIPS -->
@@ -299,9 +259,10 @@ body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
 <div class="tips-scroll">
   <div class="tip-card"><div class="tip-icon">💧</div><p>Drink at least 8 glasses of clean water daily to stay hydrated.</p></div>
   <div class="tip-card" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);"><div class="tip-icon">💊</div><p>Always complete your full antibiotic dosage even if you feel better.</p></div>
-  <div class="tip-card" style="background:linear-gradient(135deg,#f59e0b,#ef4444);"><div class="tip-icon">🧪</div><p>Go for regular medical checkups and laboratory tests every 6 months.</p></div>
-  <div class="tip-card" style="background:linear-gradient(135deg,#10b981,#0ea5e9);"><div class="tip-icon">🥗</div><p>Eat a balanced diet rich in fruits, vegetables and whole grains.</p></div>
+  <div class="tip-card" style="background:linear-gradient(135deg,#f59e0b,#ef4444);"><div class="tip-icon">🧪</div><p>Go for regular medical checkups and lab tests every 6 months.</p></div>
+  <div class="tip-card" style="background:linear-gradient(135deg,#10b981,#0ea5e9);"><div class="tip-icon">🥗</div><p>Eat a balanced diet rich in fruits, vegetables, and whole grains.</p></div>
   <div class="tip-card" style="background:linear-gradient(135deg,#ec4899,#f43f5e);"><div class="tip-icon">😴</div><p>Get 7–8 hours of quality sleep every night for good health.</p></div>
+  <div class="tip-card" style="background:linear-gradient(135deg,#0369a1,#14b8a6);"><div class="tip-icon">🚶</div><p>Walk at least 30 minutes a day to keep your heart healthy.</p></div>
 </div>
 
 <button id="installBtn">⬇ Install App</button>
@@ -310,72 +271,146 @@ body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
 const firebaseConfig = {
   apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
   authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId:"mobile-lab-mityana-aeae2"
+  projectId:"mobile-lab-mityana-aeae2",
+  storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",
+  messagingSenderId:"624002906588",
+  appId:"1:624002906588:web:08b4259f90ffa9adad7719"
 };
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-function go(page){ window.location.href = page; }
-function callEmergency(){ window.location.href = "emergency.html"; }
-function logout(){ auth.signOut().then(()=>{ location.href="login.html"; }); }
+// Keep all active listeners so we can clean them up
+const unsubs = [];
+
+function logout(){
+  unsubs.forEach(u => u && u());
+  auth.signOut().then(() => location.href = "login.html");
+}
 
 // ── AUTH ──
 auth.onAuthStateChanged(async user => {
-  if(!user){ location.href="login.html"; return; }
+  if(!user){ location.href = "login.html"; return; }
   try{
     const doc = await db.collection("users").doc(user.uid).get();
-    let name = "User";
+    let name = user.email || "User";
     if(doc.exists){
       const data = doc.data();
-      name = data.fullName || user.email || "User";
+      name = data.fullName || name;
       const avatarEl = document.getElementById("profilePic");
       if(data.photoURL){
-        // Show photo
-        avatarEl.innerHTML = `<img src="${data.photoURL}" style="width:62px;height:62px;border-radius:50%;object-fit:cover;" onerror="this.parentElement.innerHTML='👤'">`;
+        avatarEl.innerHTML = `<img src="${data.photoURL}" style="width:62px;height:62px;border-radius:50%;object-fit:cover;" onerror="this.parentElement.innerText='👤'">`;
       } else {
-        // Show initials
         const initials = name.split(" ").map(n=>n[0]).slice(0,2).join("").toUpperCase();
         avatarEl.innerText = initials || "👤";
       }
     }
     document.getElementById("userWelcome").innerText = "Welcome, " + name.split(" ")[0] + " 👋";
     loadStats(user.uid);
+    loadWallet(user.uid);
+    loadRecentOrders(user.uid);
     loadNotifications(user.uid);
-    listenResults(user.uid);
+    listenResultsBadge(user.uid);
     listenChatUnread(user.uid);
     document.getElementById("loader").style.display = "none";
   } catch(err){
-    console.error(err);
+    console.error("Dashboard load error:", err);
     document.getElementById("loader").style.display = "none";
+    document.getElementById("userWelcome").innerText = "Welcome 👋";
   }
 });
 
-// ── STATS ──
-async function loadStats(userId){
-  const orders = await db.collection("orders").where("userId","==",userId).get();
-  let total=0, pending=0, completed=0;
-  orders.forEach(doc => {
-    total++;
-    if(doc.data().status==="pending") pending++;
-    if(doc.data().status==="completed") completed++;
-  });
-  document.getElementById("totalTests").innerText = total;
-  document.getElementById("pendingTests").innerText = pending;
-  document.getElementById("completedTests").innerText = completed;
-
-  const appts = await db.collection("appointments").where("userId","==",userId).get();
-  document.getElementById("appointmentsCount").innerText = appts.size;
+// ── STATS (live listener) ──
+function loadStats(userId){
+  const unsub = db.collection("orders")
+    .where("userId","==",userId)
+    .onSnapshot(snapshot => {
+      let total=0, pending=0, completed=0;
+      snapshot.forEach(doc => {
+        total++;
+        const s = doc.data().status;
+        if(s === "pending" || s === "ongoing") pending++;
+        if(s === "completed") completed++;
+      });
+      document.getElementById("totalTests").innerText = total;
+      document.getElementById("pendingTests").innerText = pending;
+      document.getElementById("completedTests").innerText = completed;
+    }, err => {
+      console.error("Stats error:", err);
+      ["totalTests","pendingTests","completedTests"].forEach(id => {
+        document.getElementById(id).innerText = "—";
+      });
+    });
+  unsubs.push(unsub);
 }
 
-// ── NOTIFICATIONS ──
-function loadNotifications(userId){
-  const box = document.getElementById("notificationsBox");
-  db.collection("notifications").where("userId","==",userId)
-    .orderBy("time","desc").limit(6)
+// ── WALLET (live listener) ──
+function loadWallet(userId){
+  const unsub = db.collection("wallets").doc(userId).onSnapshot(snap => {
+    const bal = snap.exists ? (snap.data().balance || 0) : 0;
+    const formatted = bal.toLocaleString();
+    document.getElementById("walletStat").innerText = formatted;
+    document.getElementById("dashWalletBal").innerText = "Balance: UGX " + formatted;
+  }, err => {
+    console.error("Wallet error:", err);
+    document.getElementById("walletStat").innerText = "0";
+  });
+  unsubs.push(unsub);
+}
+
+// ── RECENT ORDERS (live, last 5) ──
+function loadRecentOrders(userId){
+  const area = document.getElementById("recentOrders");
+  const unsub = db.collection("orders")
+    .where("userId","==",userId)
+    .orderBy("createdAt","desc")
+    .limit(5)
     .onSnapshot(snapshot => {
       if(snapshot.empty){
-        box.innerHTML = `<div class="notif-card"><div class="notif-icon">📭</div><div><div class="notif-title">No notifications yet</div><div class="notif-msg">You'll see updates here</div></div></div>`;
+        area.innerHTML = `<div class="notif-card"><div class="notif-icon">📭</div><div><div class="notif-title">No orders yet</div><div class="notif-msg">Book your first lab test to get started</div></div></div>`;
+        return;
+      }
+      area.innerHTML = "";
+      snapshot.forEach(doc => {
+        const o = doc.data();
+        const date = o.createdAt ? o.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric"}) : "—";
+        const statusLabels = {pending:"⏳ Pending", ongoing:"🔬 Ongoing", completed:"✅ Done", cancelled:"❌ Cancelled"};
+        const pillClasses = {pending:"pill-pending", ongoing:"pill-ongoing", completed:"pill-completed", cancelled:"pill-cancelled"};
+        const statusText = statusLabels[o.status] || o.status;
+        const pillClass = pillClasses[o.status] || "pill-pending";
+        // Show first 2 tests from the tests string
+        const testLines = (o.tests || "").split("\n").filter(Boolean).slice(0,2);
+        const testPreview = testLines.map(t => t.replace(/\s*\(UGX[\s\d,]+\)/i,"")).join(", ");
+        const row = document.createElement("div");
+        row.className = "order-row";
+        row.innerHTML = `
+          <div class="order-left">
+            <h4>${o.order_id || doc.id}</h4>
+            <p>${testPreview || "—"}</p>
+            <p style="margin-top:2px;">${date}</p>
+          </div>
+          <span class="status-pill ${pillClass}">${statusText}</span>
+        `;
+        row.onclick = () => window.location.href = "inbox.html";
+        area.appendChild(row);
+      });
+    }, err => {
+      console.error("Recent orders error:", err);
+      area.innerHTML = `<div class="notif-card"><div class="notif-icon">⚠️</div><div><div class="notif-title">Could not load orders</div><div class="notif-msg">Check your connection and try again</div></div></div>`;
+    });
+  unsubs.push(unsub);
+}
+
+// ── NOTIFICATIONS (live) ──
+function loadNotifications(userId){
+  const box = document.getElementById("notificationsBox");
+  const unsub = db.collection("notifications")
+    .where("userId","==",userId)
+    .orderBy("time","desc")
+    .limit(6)
+    .onSnapshot(snapshot => {
+      if(snapshot.empty){
+        box.innerHTML = `<div class="notif-card"><div class="notif-icon">📭</div><div><div class="notif-title">No notifications yet</div><div class="notif-msg">You'll see order updates and messages here</div></div></div>`;
         return;
       }
       box.innerHTML = "";
@@ -393,54 +428,55 @@ function loadNotifications(userId){
           </div>`;
         box.appendChild(div);
       });
+    }, err => {
+      console.error("Notifications error:", err);
+      box.innerHTML = `<div class="notif-card"><div class="notif-icon">⚠️</div><div><div class="notif-title">Could not load notifications</div></div></div>`;
     });
+  unsubs.push(unsub);
 }
 
-// ── LISTEN FOR COMPLETED RESULTS ──
-function listenResults(userId){
-  db.collection("orders").where("userId","==",userId).where("status","==","completed")
+// ── RESULTS BADGE (completed & unseen) ──
+function listenResultsBadge(userId){
+  const unsub = db.collection("orders")
+    .where("userId","==",userId)
+    .where("status","==","completed")
     .onSnapshot(snapshot => {
-      let newResults = 0;
-      snapshot.docChanges().forEach(change => {
-        if(change.type === "modified" || change.type === "added"){
-          if(!change.doc.data().seenByPatient) newResults++;
-        }
+      let unseen = 0;
+      snapshot.forEach(doc => {
+        if(!doc.data().seenByPatient) unseen++;
       });
       const badge = document.getElementById("resultsBadge");
-      if(newResults > 0){
+      if(unseen > 0){
         badge.style.display = "block";
-        badge.innerText = newResults;
-        if(Notification.permission === "granted"){
-          new Notification("🧪 Lab Result Ready", { body:"Your lab result is now available. Tap to view." });
+        badge.innerText = unseen;
+        // Push notification if permission granted
+        if(Notification.permission === "granted" && unseen > 0){
+          new Notification("🧪 Lab Result Ready",{body:"Your lab result is now available."});
         }
+      } else {
+        badge.style.display = "none";
       }
     });
+  unsubs.push(unsub);
 }
 
-// ── CHAT UNREAD BADGE ──
+// ── CHAT UNREAD BADGE (single listener, no nesting) ──
 function listenChatUnread(userId){
   const chatId = "chat_" + userId;
-  db.collection("chats").doc(chatId).onSnapshot(snap => {
-    if(!snap.exists) return;
-    const data = snap.data();
-    // Count unread doctor messages
-    db.collection("chats").doc(chatId).collection("messages")
-      .where("sender","==","doctor").where("seenByPatient","==",false)
-      .onSnapshot(msgs => {
-        const badge = document.getElementById("chatBadge");
-        if(msgs.size > 0){
-          badge.style.display = "block";
-          badge.innerText = msgs.size;
-        } else {
-          badge.style.display = "none";
-        }
-      });
-  });
-}
-
-// ── NOTIFICATIONS PERMISSION ──
-if("Notification" in window && Notification.permission === "default"){
-  Notification.requestPermission();
+  const unsub = db.collection("chats").doc(chatId)
+    .collection("messages")
+    .where("sender","==","doctor")
+    .where("seenByPatient","==",false)
+    .onSnapshot(msgs => {
+      const badge = document.getElementById("chatBadge");
+      if(msgs.size > 0){
+        badge.style.display = "block";
+        badge.innerText = msgs.size;
+      } else {
+        badge.style.display = "none";
+      }
+    }, () => {/* ignore — chat may not exist yet */});
+  unsubs.push(unsub);
 }
 
 // ── DARK MODE ──
@@ -456,7 +492,12 @@ themeBtn.onclick = () => {
   themeBtn.innerText = isDark ? "☀️" : "🌙";
 };
 
-// ── INSTALL ──
+// ── NOTIFICATIONS PERMISSION ──
+if("Notification" in window && Notification.permission === "default"){
+  Notification.requestPermission();
+}
+
+// ── PWA INSTALL ──
 let deferredPrompt;
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
@@ -468,26 +509,21 @@ document.getElementById("installBtn").onclick = async () => {
   deferredPrompt.prompt();
   await deferredPrompt.userChoice;
   deferredPrompt = null;
+  document.getElementById("installBtn").style.display = "none";
 };
 window.addEventListener("appinstalled", () => {
   document.getElementById("installBtn").style.display = "none";
 });
 
 // ── SERVICE WORKER ──
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js"); }
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
 
 // ── ONLINE / OFFLINE ──
-window.addEventListener("offline", () => {
-  const t = document.createElement("div");
-  t.style.cssText = "position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:10px 20px;border-radius:999px;font-weight:800;z-index:9999;font-family:Nunito,Arial,sans-serif;";
-  t.innerText = "⚠️ No internet connection";
-  t.id = "offlineBanner";
-  document.body.appendChild(t);
-});
-window.addEventListener("online", () => {
-  const b = document.getElementById("offlineBanner");
-  if(b) b.remove();
-});
+const banner = document.getElementById("offlineBanner");
+window.addEventListener("offline", () => banner.style.display = "block");
+window.addEventListener("online",  () => banner.style.display = "none");
 </script>
 </body>
 </html>
