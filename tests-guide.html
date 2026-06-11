@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Tests Guide – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0ea5e9;--primary2:#14b8a6;--green:#22c55e;
+  --red:#ef4444;--orange:#f59e0b;--purple:#8b5cf6;
+  --dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);
+  --bg:#f0f9ff;--card:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0ea5e9,#14b8a6,#10b981);padding:32px 20px 28px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;}
+.hero h1{color:#fff;font-size:26px;font-weight:900;text-shadow:0 2px 10px rgba(0,0,0,0.15);}
+.hero p{color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;margin-top:8px;}
+.hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.hero-btn{text-decoration:none;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:800;color:#fff;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);transition:all 0.2s;}
+.hero-btn:hover{background:rgba(255,255,255,0.35);}
+
+/* SEARCH BAR */
+.search-wrap{max-width:700px;margin:20px auto 0;padding:0 16px;}
+.search-box{width:100%;padding:14px 18px;border-radius:16px;border:2px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:15px;font-weight:600;outline:none;box-shadow:0 4px 20px rgba(0,0,0,0.08);transition:all 0.2s;}
+.search-box:focus{border-color:var(--primary);box-shadow:0 4px 20px rgba(14,165,233,0.2);}
+
+/* CATEGORY TABS */
+.tabs-wrap{max-width:900px;margin:20px auto 0;padding:0 16px;}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.tab{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;border:2px solid var(--border);background:#fff;color:var(--muted);transition:all 0.2s;font-family:'Nunito',Arial,sans-serif;}
+.tab.active,.tab:hover{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(14,165,233,0.3);}
+
+/* RESULTS COUNT */
+.results-info{max-width:900px;margin:12px auto 0;padding:0 16px;font-size:13px;font-weight:700;color:var(--muted);}
+
+/* GRID */
+.grid{max-width:900px;margin:16px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:650px){.grid{grid-template-columns:1fr;}}
+
+/* TEST CARD */
+.test-card{background:var(--card);border-radius:22px;box-shadow:0 4px 20px rgba(0,0,0,0.07);border:1px solid var(--border);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;animation:fadeUp 0.4s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+.test-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,0.12);}
+.test-card.hidden{display:none;}
+
+/* CARD HEADER */
+.card-head{padding:16px 18px 12px;display:flex;align-items:flex-start;gap:12px;}
+.card-icon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.card-title{font-size:16px;font-weight:900;color:var(--dark);margin-bottom:3px;}
+.card-category{font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;display:inline-block;}
+.card-price{margin-top:6px;font-size:13px;font-weight:800;color:var(--primary);}
+
+/* SECTIONS INSIDE CARD */
+.card-body{padding:0 18px 18px;}
+.card-section{margin-bottom:12px;}
+.card-section-title{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
+.card-section-text{font-size:13px;font-weight:600;color:#334155;line-height:1.6;}
+
+/* OUTCOME BOXES */
+.outcome-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.outcome-box{padding:10px 12px;border-radius:14px;font-size:12px;font-weight:700;line-height:1.5;}
+.outcome-pos{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#991b1b;}
+.outcome-neg{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:#14532d;}
+.outcome-label{font-size:11px;font-weight:900;display:block;margin-bottom:3px;}
+
+/* PREPARE BOX */
+.prepare-box{background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.15);border-radius:14px;padding:10px 12px;font-size:12px;font-weight:700;color:#0369a1;margin-bottom:12px;}
+
+/* BOOK BUTTON */
+.book-btn{display:block;width:100%;padding:12px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:14px;font-weight:900;text-align:center;text-decoration:none;font-family:'Nunito',Arial,sans-serif;border:none;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 14px rgba(14,165,233,0.3);}
+.book-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(14,165,233,0.4);}
+
+/* SYMPTOMS LIST */
+.symptoms-list{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.symptoms-list li{background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.2);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;color:#0369a1;}
+
+/* NO RESULTS */
+.no-results{text-align:center;padding:60px 20px;color:var(--muted);font-weight:700;font-size:15px;grid-column:1/-1;}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🔬 Lab Tests Guide</h1>
+  <p>Mobile Lab – Mityana | Know your test before you book</p>
+  <div class="hero-btns">
+    <a class="hero-btn" href="index.html">🧪 Book a Test</a>
+    <a class="hero-btn" href="dashboard.html">🏠 Dashboard</a>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <input class="search-box" id="searchBox" placeholder="🔍 Search test e.g. HIV, Malaria, Liver, Pregnancy..." oninput="filterCards()">
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="filterByTab(this,'all')">All Tests</button>
+    <button class="tab" onclick="filterByTab(this,'blood')">🩸 Blood</button>
+    <button class="tab" onclick="filterByTab(this,'infections')">🦠 Infections</button>
+    <button class="tab" onclick="filterByTab(this,'urine-stool')">🧫 Urine & Stool</button>
+    <button class="tab" onclick="filterByTab(this,'womens')">🌸 Women's Health</button>
+    <button class="tab" onclick="filterByTab(this,'autoimmune')">🔬 Other</button>
+  </div>
+</div>
+
+<div class="results-info" id="resultsInfo">Showing all 31 tests</div>
+
+<!-- CARDS GRID -->
+<div class="grid" id="cardsGrid"></div>
+
+<script>
+const TESTS = [
+  {
+    id:"cbc", name:"CBC – Complete Blood Count", icon:"🩸",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 20,000",
+    what:"A CBC measures different parts of your blood — red cells, white cells, and platelets. It gives a full picture of your overall health.",
+    when:["Feeling very tired or weak","Frequent infections","Unexplained bruising or bleeding","Pale skin or lips","Dizziness","Routine health check"],
+    prepare:"No fasting needed. A small blood sample is taken from your arm.",
+    positive:"Abnormal results can point to anaemia (low red cells), infection or inflammation (high white cells), or clotting problems (low platelets). Your doctor will advise the next step.",
+    negative:"All blood cell counts are within normal range — your blood is healthy."
+  },
+  {
+    id:"glucose", name:"Blood Glucose", icon:"🍬",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 7,000",
+    what:"Measures the amount of sugar (glucose) in your blood. Used to check for diabetes or pre-diabetes.",
+    when:["Frequent urination","Excessive thirst","Unexplained weight loss","Blurred vision","Fatigue","Family history of diabetes","Routine check"],
+    prepare:"For fasting glucose: do NOT eat or drink anything except water for 8 hours before the test.",
+    positive:"High blood sugar may indicate diabetes or pre-diabetes. You will need to see a doctor for diet advice and possibly medication.",
+    negative:"Blood sugar is within normal range. If you have risk factors, repeat the test annually."
+  },
+  {
+    id:"bloodgroup", name:"Blood Grouping", icon:"🅰️",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 10,000",
+    what:"Determines your blood type (A, B, AB, or O) and Rhesus factor (positive or negative). Essential for transfusions and pregnancy.",
+    when:["Before any surgery","During pregnancy (especially first time)","Before donating blood","If you don't know your blood group"],
+    prepare:"No fasting needed. A small blood sample is collected.",
+    positive:"Not applicable — this test gives you a result (your blood type), not a positive/negative diagnosis.",
+    negative:"Not applicable — know your blood group and keep a record of it for emergencies."
+  },
+  {
+    id:"clotting", name:"Bleeding & Clotting Test", icon:"🩹",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 15,000",
+    what:"Checks how well your blood clots after an injury. Measures clotting time and bleeding time.",
+    when:["Cuts that bleed for a long time","Easy bruising","Blood in urine or stool","Before surgery","Heavy menstrual periods"],
+    prepare:"No fasting needed. Avoid aspirin or blood thinners 48 hours before if possible.",
+    positive:"Prolonged clotting or bleeding time may indicate a clotting disorder, low platelet count, or liver disease. Seek medical attention.",
+    negative:"Clotting is within normal range. Your blood clots as expected."
+  },
+  {
+    id:"malaria", name:"Malaria (Blood Smear / B/S)", icon:"🦟",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 5,000",
+    what:"Detects malaria parasites in your blood under a microscope. One of the most common tests in Uganda.",
+    when:["Fever (especially high fever at night)","Chills and sweating","Headache","Body aches","Nausea or vomiting","Fatigue after being in a malaria-prone area"],
+    prepare:"No fasting needed. A finger-prick blood sample is used.",
+    positive:"Malaria parasites found. You will be prescribed anti-malarial drugs (e.g. Coartem). Complete the full course even if you feel better.",
+    negative:"No malaria parasites detected. If symptoms continue, other causes of fever will be investigated."
+  },
+  {
+    id:"electrolytes", name:"Electrolytes", icon:"⚡",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 50,000",
+    what:"Measures salts in your blood — sodium, potassium, chloride, and bicarbonate. These control fluid balance, nerve signals, and muscle function.",
+    when:["Vomiting or diarrhea for more than 2 days","Muscle cramps or weakness","Confusion or dizziness","Heart palpitations","Monitoring kidney disease or on dialysis"],
+    prepare:"No special preparation needed. Blood drawn from arm vein.",
+    positive:"Imbalanced electrolytes (too high or too low) require treatment with IV fluids or supplements. Severe imbalances can be dangerous — seek care immediately.",
+    negative:"Electrolytes are balanced. Your body's fluid and mineral system is working well."
+  },
+  {
+    id:"lipid", name:"Lipid Profile", icon:"🫀",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 40,000",
+    what:"Measures cholesterol and triglycerides in your blood. High levels increase the risk of heart disease and stroke.",
+    when:["Family history of heart disease","Obesity or overweight","High blood pressure","Diabetes","Routine check after age 35","Chest pain or shortness of breath"],
+    prepare:"Fast for 9–12 hours before the test. Drink water only.",
+    positive:"High LDL (bad cholesterol) or triglycerides increase heart attack and stroke risk. Lifestyle changes (diet, exercise) and possibly medication will be recommended.",
+    negative:"Cholesterol levels are within healthy range. Maintain a healthy diet and exercise regularly."
+  },
+  {
+    id:"lft", name:"Liver Function Test (LFT)", icon:"🫁",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 50,000",
+    what:"Checks how well your liver is working by measuring enzymes and proteins it produces. Detects liver damage, disease, or inflammation.",
+    when:["Yellowing of skin or eyes (jaundice)","Dark urine","Abdominal pain (right side)","Alcohol use","On long-term medication","Nausea, loss of appetite","Hepatitis B or C diagnosis"],
+    prepare:"Avoid alcohol for 24 hours. Fasting for 10–12 hours is recommended.",
+    positive:"Elevated liver enzymes (ALT, AST, ALP) indicate liver damage, hepatitis, fatty liver, or bile duct problems. Further tests and medical review needed.",
+    negative:"Liver enzymes are within normal range. Your liver is functioning well."
+  },
+  {
+    id:"rft", name:"Kidney Function Test (RFT)", icon:"🫘",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 50,000",
+    what:"Measures creatinine, urea, and uric acid in the blood to check how well your kidneys are filtering waste.",
+    when:["Swelling of legs, feet, or face","Reduced urine output","Back pain near kidney area","High blood pressure","Diabetes","Frequent urinary infections","Nausea and fatigue"],
+    prepare:"Stay well hydrated. Avoid heavy exercise the day before. No fasting required.",
+    positive:"High creatinine or urea means kidneys are not filtering properly. This could indicate chronic kidney disease — you need specialist care and dietary changes.",
+    negative:"Kidney function is normal. Stay hydrated and avoid excess painkillers to keep kidneys healthy."
+  },
+  {
+    id:"psa", name:"PSA – Prostate Specific Antigen", icon:"👨",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 25,000",
+    what:"A blood test for men that measures PSA protein made by the prostate gland. Used to screen for prostate cancer or prostate problems.",
+    when:["Difficulty urinating","Frequent urination at night","Weak urine stream","Blood in urine or semen","Age 45+ (routine screening for men)","Family history of prostate cancer"],
+    prepare:"Avoid ejaculation 48 hours before the test. Avoid cycling or prostate massage before the test.",
+    positive:"Elevated PSA may indicate prostate cancer, enlarged prostate (BPH), or prostatitis. Does not confirm cancer — a biopsy is needed for diagnosis. See a urologist.",
+    negative:"PSA is within normal range. Annual screening is recommended for men over 50."
+  },
+  {
+    id:"hcgblood", name:"HCG Blood Test", icon:"🤰",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 15,000",
+    what:"Detects the pregnancy hormone (Human Chorionic Gonadotropin) in blood. More sensitive and earlier than urine pregnancy tests.",
+    when:["Suspected pregnancy","Missed period","Monitoring early pregnancy","Checking for ectopic pregnancy","After miscarriage to confirm completion"],
+    prepare:"No fasting needed. Can be done at any time of day.",
+    positive:"HCG detected — you are pregnant. See a doctor for antenatal care as soon as possible.",
+    negative:"HCG not detected. You are likely not pregnant. If your period is still missing, repeat in 1 week."
+  },
+  {
+    id:"sickling", name:"Sickling Test", icon:"🧬",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 40,000",
+    what:"Checks for sickle cell disease or sickle cell trait. Sickle cell is a genetic condition where red blood cells become crescent-shaped and block blood flow.",
+    when:["Family history of sickle cell disease","Before marriage (to check compatibility)","Recurrent painful crises","Frequent infections in children","Unexplained anaemia","Pre-pregnancy planning"],
+    prepare:"No fasting needed. A blood sample is taken.",
+    positive:"SS (sickle cell disease) — you have the condition and will need lifelong management. AS (sickle cell trait) — you are a carrier and can pass it to children. Genetic counselling is recommended.",
+    negative:"AA result — no sickle cell genes detected. You are not a carrier."
+  },
+  {
+    id:"dna", name:"DNA Test", icon:"🧬",
+    category:"blood", catLabel:"Blood Test", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+    price:"UGX 600,000",
+    what:"Analyzes genetic material (DNA) to confirm biological relationships — most commonly paternity testing (father-child) or maternity.",
+    when:["Confirming parentage","Legal cases (custody, inheritance)","Immigration purposes","Identifying genetic disorders"],
+    prepare:"A blood or cheek swab sample is collected from all parties. No fasting needed.",
+    positive:"Match confirmed — biological relationship is verified (99.9%+ accuracy).",
+    negative:"No match — the tested individuals are not biologically related."
+  },
+  // INFECTIONS
+  {
+    id:"hiv", name:"HIV Test", icon:"🎗️",
+    category:"infections", catLabel:"Infection / STI", catColor:"rgba(168,85,246,0.12)", catText:"#7c3aed",
+    price:"UGX 7,000",
+    what:"Detects antibodies to the HIV virus in your blood. HIV attacks the immune system and if untreated leads to AIDS.",
+    when:["Unprotected sex with a new partner","Shared needles","Pregnancy (routine test)","Blood transfusion in the past","Unexplained weight loss","Frequent infections","Routine annual check"],
+    prepare:"No fasting needed. A finger-prick or blood draw is used. Results take 15–30 minutes.",
+    positive:"You are HIV positive. This is NOT a death sentence. Start Antiretroviral Therapy (ART) immediately — people on ART live long, healthy lives. Go to your nearest health center (ART is FREE in Uganda).",
+    negative:"No HIV antibodies detected. Practice safe sex and retest if you had a recent exposure (test again at 6 weeks and 3 months)."
+  },
+  {
+    id:"hepb", name:"Hepatitis B", icon:"🟡",
+    category:"infections", catLabel:"Infection / STI", catColor:"rgba(168,85,246,0.12)", catText:"#7c3aed",
+    price:"UGX 10,000",
+    what:"Detects the Hepatitis B virus which infects the liver. It spreads through blood, unprotected sex, and from mother to child during birth.",
+    when:["Unprotected sex","Blood transfusion or needle sharing","Yellowing of eyes or skin","Dark urine","Routine check (especially before pregnancy)","Healthcare workers"],
+    prepare:"No fasting needed. Blood sample from arm.",
+    positive:"You have Hepatitis B infection. See a doctor — some need antiviral treatment. Avoid alcohol. Inform close contacts so they can get vaccinated.",
+    negative:"No Hepatitis B detected. If you are not vaccinated, consider getting the Hepatitis B vaccine for protection."
+  },
+  {
+    id:"hepc", name:"Hepatitis C", icon:"🟠",
+    category:"infections", catLabel:"Infection / STI", catColor:"rgba(168,85,246,0.12)", catText:"#7c3aed",
+    price:"UGX 10,000",
+    what:"Detects Hepatitis C virus which damages the liver over time. Spreads mainly through blood contact.",
+    when:["History of IV drug use or needle sharing","Blood transfusion (before 1992)","Unexplained liver disease","Fatigue and abdominal pain","Routine screening"],
+    prepare:"No fasting needed. Blood sample from arm.",
+    positive:"Hepatitis C infection detected. Modern treatments (Direct-Acting Antivirals) can cure Hepatitis C in 8–12 weeks. See a hepatologist or general doctor.",
+    negative:"No Hepatitis C detected. There is no vaccine — prevention is through avoiding blood contact."
+  },
+  {
+    id:"syphilis", name:"RPR / Syphilis", icon:"🔴",
+    category:"infections", catLabel:"Infection / STI", catColor:"rgba(168,85,246,0.12)", catText:"#7c3aed",
+    price:"UGX 8,000",
+    what:"Tests for Syphilis, a bacterial sexually transmitted infection (STI) that causes sores, rashes, and if untreated, serious organ damage.",
+    when:["Unprotected sex","Sores or ulcers on genitals, mouth, or hands","Rash on palms or soles of feet","Pregnancy routine screening","Partner diagnosed with STI"],
+    prepare:"No fasting needed. Blood sample.",
+    positive:"Syphilis infection detected. Treatable with a single injection of Penicillin (or course of antibiotics). Notify recent sexual partners. Avoid sex until treatment is complete.",
+    negative:"No syphilis antibodies detected. Practice safe sex to prevent infection."
+  },
+  {
+    id:"gonorrhea", name:"Gonorrhea Test", icon:"⚠️",
+    category:"infections", catLabel:"Infection / STI", catColor:"rgba(168,85,246,0.12)", catText:"#7c3aed",
+    price:"UGX 15,000",
+    what:"Detects Neisseria gonorrhoeae bacteria — a common STI that affects the genitals, rectum, and throat.",
+    when:["Burning sensation when urinating","Unusual discharge (yellow/green) from penis or vagina","Pelvic or testicular pain","Partner diagnosed with gonorrhea","Routine STI screening"],
+    prepare:"No fasting. Urine or swab sample may be collected. Avoid urinating for 1 hour before urine test.",
+    positive:"Gonorrhea detected. Treated with antibiotics (usually a dual injection + tablets). Avoid sex until cleared. Notify partners. Untreated gonorrhea can cause infertility.",
+    negative:"No gonorrhea detected. Use condoms consistently to prevent future infections."
+  },
+  {
+    id:"chlamydia", name:"Chlamydia Test", icon:"🧫",
+    category:"infections", catLabel:"Infection / STI", catColor:"rgba(168,85,246,0.12)", catText:"#7c3aed",
+    price:"UGX 15,000",
+    what:"Detects Chlamydia trachomatis — the most common bacterial STI. Often has NO symptoms, which is why testing is important.",
+    when:["No symptoms but sexually active (screen annually)","Unusual discharge","Burning urination","Pelvic pain or pain during sex","Partner diagnosed with chlamydia","Pregnancy screening"],
+    prepare:"No fasting. Urine or swab sample. Avoid urinating 1 hour before urine test.",
+    positive:"Chlamydia detected. Easily treated with antibiotics (Azithromycin or Doxycycline). Untreated chlamydia can cause infertility and pelvic inflammatory disease (PID). Notify partners.",
+    negative:"No chlamydia detected. Continue to practice safe sex."
+  },
+  {
+    id:"brucella", name:"Brucella Test", icon:"🐄",
+    category:"infections", catLabel:"Infection", catColor:"rgba(168,85,246,0.12)", catText:"#7c3aed",
+    price:"UGX 10,000",
+    what:"Detects Brucellosis — a bacterial infection caught from animals (cattle, goats, pigs) or unpasteurized dairy products. Common in rural Uganda.",
+    when:["Prolonged fever (weeks or months)","Joint and muscle pain","Fatigue and sweating","Contact with livestock","Drinking raw milk or eating raw meat","Unexplained weight loss"],
+    prepare:"No fasting needed. Blood sample from arm.",
+    positive:"Brucellosis confirmed. Treated with a combination of antibiotics (Doxycycline + Rifampicin) for 6 weeks. Avoid contact with livestock during treatment.",
+    negative:"No brucella antibodies detected. If symptoms persist, other causes of fever will be investigated."
+  },
+  // URINE / STOOL
+  {
+    id:"urinalysis", name:"Urinalysis", icon:"💧",
+    category:"urine-stool", catLabel:"Urine Test", catColor:"rgba(14,165,233,0.12)", catText:"#0369a1",
+    price:"UGX 8,000",
+    what:"Examines your urine for signs of infection, kidney disease, diabetes, or other conditions. Checks color, protein, sugar, cells, and bacteria.",
+    when:["Burning or pain when urinating","Frequent urination","Cloudy or smelly urine","Blood in urine","Suspected urinary tract infection (UTI)","Pregnancy routine check","Lower abdominal pain","Kidney disease monitoring"],
+    prepare:"Collect midstream urine (let some urine out first, then collect in a clean container). Do not contaminate the sample.",
+    positive:"Abnormal results (bacteria, blood, protein, glucose) may indicate UTI, kidney disease, diabetes, or kidney stones. Doctor will prescribe appropriate treatment.",
+    negative:"Urine is normal. No infection or disease signs detected."
+  },
+  {
+    id:"stool", name:"Stool Analysis", icon:"🔬",
+    category:"urine-stool", catLabel:"Stool Test", catColor:"rgba(14,165,233,0.12)", catText:"#0369a1",
+    price:"UGX 15,000",
+    what:"Examines a stool sample for intestinal parasites, bacteria, blood, and signs of digestive problems.",
+    when:["Diarrhea lasting more than 3 days","Blood or mucus in stool","Abdominal cramps","Unexplained weight loss","Nausea after eating","Children with pot belly or worm symptoms"],
+    prepare:"Collect a fresh stool sample in a clean container. Bring it to the lab within 2 hours. Do not contaminate with urine.",
+    positive:"Parasites (e.g. hookworm, amoeba), bacteria, or blood found. Treatment depends on what is found — usually anti-parasitic or antibiotic medication.",
+    negative:"No parasites, bacteria, or blood detected. Your digestive system appears healthy."
+  },
+  {
+    id:"hpylstool", name:"H. Pylori Stool Test", icon:"🧫",
+    category:"urine-stool", catLabel:"Stool Test", catColor:"rgba(14,165,233,0.12)", catText:"#0369a1",
+    price:"UGX 20,000",
+    what:"Detects H. Pylori bacteria in the stool. H. Pylori is the most common cause of stomach ulcers worldwide.",
+    when:["Burning stomach pain (especially when hungry)","Bloating after meals","Frequent burping","Nausea","Dark tarry stools","Unexplained loss of appetite"],
+    prepare:"Stop proton pump inhibitors (Omeprazole, Pantoprazole) and antibiotics 2 weeks before the test. Collect fresh stool sample.",
+    positive:"H. Pylori detected. Treated with Triple Therapy: two antibiotics + an acid reducer for 14 days. Re-test after 4 weeks to confirm clearance.",
+    negative:"No H. Pylori detected. Stomach symptoms may have another cause — see a doctor for further evaluation."
+  },
+  {
+    id:"widalstool", name:"Widal Stool Test", icon:"🌡️",
+    category:"urine-stool", catLabel:"Stool Test", catColor:"rgba(14,165,233,0.12)", catText:"#0369a1",
+    price:"UGX 20,000",
+    what:"Checks for Salmonella typhi bacteria in stool — the cause of Typhoid fever. Stool test is useful in the later stages of typhoid.",
+    when:["Prolonged fever (more than 1 week)","Headache and body aches","Constipation then diarrhea","Rose-colored spots on abdomen","Weakness and loss of appetite","Suspected typhoid after travel"],
+    prepare:"Collect fresh stool sample in a clean container. No fasting needed.",
+    positive:"Typhoid (Salmonella typhi) detected. Treated with antibiotics (Ciprofloxacin or Ceftriaxone). Stay hydrated, avoid solid foods initially, rest.",
+    negative:"No typhoid bacteria in stool. If fever continues, a Widal blood serum test or blood culture is recommended."
+  },
+  // GASTRO
+  {
+    id:"hpylserum", name:"H. Pylori Serum Test", icon:"🩸",
+    category:"autoimmune", catLabel:"Gastro / Blood", catColor:"rgba(245,158,11,0.12)", catText:"#b45309",
+    price:"UGX 8,000",
+    what:"Detects antibodies to H. Pylori bacteria in the blood. Confirms whether the body has been exposed to H. Pylori.",
+    when:["Stomach ulcer symptoms","Burning upper abdominal pain","Nausea and loss of appetite","Recurrent indigestion","Dark or tarry stools"],
+    prepare:"No fasting needed. Blood sample from arm.",
+    positive:"H. Pylori antibodies found — you have been infected. Requires Triple Therapy (two antibiotics + acid reducer). Note: antibodies may persist after treatment, so stool test is used to confirm cure.",
+    negative:"No H. Pylori antibodies. Your stomach symptoms have another cause — see a doctor."
+  },
+  // WOMEN'S HEALTH
+  {
+    id:"pregnancy", name:"Pregnancy Test (hCG Urine)", icon:"🤰",
+    category:"womens", catLabel:"Women's Health", catColor:"rgba(236,72,153,0.12)", catText:"#be185d",
+    price:"UGX 5,000",
+    what:"Detects the pregnancy hormone (hCG) in urine. Quick and reliable way to confirm pregnancy.",
+    when:["Missed period","Breast tenderness","Nausea or morning sickness","Frequent urination","Fatigue without cause"],
+    prepare:"Use first morning urine for best accuracy (hCG is most concentrated). Do not drink large amounts of water before.",
+    positive:"You are pregnant. Book antenatal care (ANC) as early as possible. Take folic acid supplements. Avoid alcohol and unprescribed drugs.",
+    negative:"Not pregnant. If your period is still missing after a week, repeat the test or do an hCG blood test."
+  },
+  {
+    id:"hvs", name:"High Vaginal Swab (HVS)", icon:"🌸",
+    category:"womens", catLabel:"Women's Health", catColor:"rgba(236,72,153,0.12)", catText:"#be185d",
+    price:"UGX 10,000",
+    what:"A swab taken from inside the vagina to check for infections — bacterial vaginosis, yeast infection (thrush), or STIs.",
+    when:["Unusual vaginal discharge (yellow, green, grey, or smelly)","Itching or burning in the vagina","Pain during sex","Pelvic pain","Recurrent vaginal infections","Before gynecological procedures"],
+    prepare:"Do not use vaginal creams or wash inside the vagina 24 hours before the test. A female nurse or doctor collects the swab.",
+    positive:"Infection detected (e.g. Bacterial Vaginosis, Candida/Thrush, Trichomonas, or STI). Treatment depends on the organism found — antifungal, antibiotic, or antiparasitic medication.",
+    negative:"No infection detected. Normal vaginal flora. If symptoms continue, see a gynecologist."
+  },
+  {
+    id:"hvscs", name:"High Vaginal Swab C&S", icon:"🌸",
+    category:"womens", catLabel:"Women's Health", catColor:"rgba(236,72,153,0.12)", catText:"#be185d",
+    price:"UGX 120,000",
+    what:"Culture and Sensitivity (C&S) test. The swab is grown in the lab to identify the exact bacteria and determine which antibiotic will work best.",
+    when:["Recurrent vaginal infections not responding to treatment","Pelvic inflammatory disease (PID)","Severe or unusual discharge","Before surgery","Pregnancy with infection symptoms"],
+    prepare:"Avoid vaginal creams or antibiotics 48 hours before. Swab collected by healthcare worker.",
+    positive:"Specific bacteria cultured and identified. The lab also reports which antibiotics kill it (sensitivity). Your doctor prescribes the exact right antibiotic — avoiding trial and error.",
+    negative:"No significant bacterial growth. Infection may be viral or fungal — further specific tests may be needed."
+  },
+  {
+    id:"gram", name:"Gram Staining", icon:"🔬",
+    category:"womens", catLabel:"Women's Health / Lab", catColor:"rgba(236,72,153,0.12)", catText:"#be185d",
+    price:"UGX 10,000",
+    what:"A microscope technique that stains bacteria to classify them as Gram-positive (purple) or Gram-negative (pink). Helps identify the type of bacteria quickly.",
+    when:["Vaginal discharge investigation","Suspected gonorrhea","Wound infection","Unusual discharge from any body site","Needed alongside HVS"],
+    prepare:"No special preparation. Sample collected by swab or wound scraping.",
+    positive:"Bacteria detected and classified. Combined with culture results, guides antibiotic choice. Gram-negative diplococci strongly suggest Gonorrhea.",
+    negative:"No bacteria seen under microscope. Infection may be viral or fungal."
+  },
+  // WIDAL
+  {
+    id:"widalserum", name:"Widal Serum Test", icon:"🌡️",
+    category:"autoimmune", catLabel:"Febrile Illness", catColor:"rgba(245,158,11,0.12)", catText:"#b45309",
+    price:"UGX 8,000",
+    what:"A blood test that detects antibodies against Salmonella typhi — the bacteria causing Typhoid fever. Most commonly used typhoid test in Uganda.",
+    when:["Fever lasting more than 5 days","Severe headache","Abdominal pain or distension","Constipation followed by diarrhea","Loss of appetite","Fatigue and weakness","Rose-coloured spots on belly"],
+    prepare:"No fasting needed. Best done after 7–10 days of illness when antibodies peak.",
+    positive:"Typhoid fever confirmed (titre ≥ 1:160 is significant). Treated with antibiotics — Ciprofloxacin, Azithromycin, or Ceftriaxone. Rest, fluids, and soft diet important.",
+    negative:"No significant Widal titres. Typhoid unlikely. Other causes of prolonged fever (malaria, brucella, UTI) should be investigated."
+  },
+  // AUTOIMMUNE
+  {
+    id:"rf", name:"Rheumatoid Factor (RF)", icon:"🦴",
+    category:"autoimmune", catLabel:"Autoimmune", catColor:"rgba(139,92,246,0.12)", catText:"#6d28d9",
+    price:"UGX 15,000",
+    what:"Detects Rheumatoid Factor — an antibody present in people with Rheumatoid Arthritis (RA), an autoimmune disease that causes joint inflammation.",
+    when:["Joint pain and stiffness (especially in the morning)","Swollen joints in hands, wrists, knees","Fatigue and low-grade fever","Symptoms worse after rest","Family history of arthritis"],
+    prepare:"No fasting needed. Blood sample from arm.",
+    positive:"RF detected — likely Rheumatoid Arthritis or another autoimmune condition. Refer to a rheumatologist. Treatment includes anti-inflammatory drugs (NSAIDs), DMARDs, and physiotherapy.",
+    negative:"RF not detected. Arthritis may still exist (seronegative RA) or may be another type. Clinical examination by a doctor is needed."
+  }
+];
+
+let activeTab = "all";
+let searchTerm = "";
+
+function renderCards(){
+  const grid = document.getElementById("cardsGrid");
+  grid.innerHTML = "";
+  let shown = 0;
+
+  TESTS.forEach((t, i) => {
+    const matchesTab = activeTab === "all" || t.category === activeTab;
+    const matchesSearch = !searchTerm ||
+      t.name.toLowerCase().includes(searchTerm) ||
+      t.what.toLowerCase().includes(searchTerm) ||
+      t.when.some(w => w.toLowerCase().includes(searchTerm));
+
+    if(!matchesTab || !matchesSearch) return;
+    shown++;
+
+    const symptomHtml = t.when.map(s => `<li>${s}</li>`).join("");
+
+    const card = document.createElement("div");
+    card.className = "test-card";
+    card.style.animationDelay = (shown * 0.04) + "s";
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="card-icon" style="background:${t.catColor}">${t.icon}</div>
+        <div>
+          <div class="card-title">${t.name}</div>
+          <span class="card-category" style="background:${t.catColor};color:${t.catText}">${t.catLabel}</span>
+          <div class="card-price">💰 ${t.price}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-section">
+          <div class="card-section-title" style="color:var(--primary)">📋 What is this test?</div>
+          <div class="card-section-text">${t.what}</div>
+        </div>
+
+        <div class="card-section">
+          <div class="card-section-title" style="color:var(--orange)">🚨 When should you test?</div>
+          <ul class="symptoms-list">${symptomHtml}</ul>
+        </div>
+
+        <div class="prepare-box">
+          <strong>⚗️ How to prepare:</strong> ${t.prepare}
+        </div>
+
+        <div class="card-section">
+          <div class="card-section-title" style="color:#6b7280">📊 What the result means</div>
+          <div class="outcome-row">
+            <div class="outcome-box outcome-pos">
+              <span class="outcome-label">🔴 IF POSITIVE</span>
+              ${t.positive}
+            </div>
+            <div class="outcome-box outcome-neg">
+              <span class="outcome-label">🟢 IF NEGATIVE</span>
+              ${t.negative}
+            </div>
+          </div>
+        </div>
+
+        <a class="book-btn" href="index.html">🧪 Book This Test – ${t.price}</a>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  if(shown === 0){
+    grid.innerHTML = `<div class="no-results">😕 No tests found for "<b>${searchTerm || activeTab}</b>"<br><br>Try a different search term.</div>`;
+  }
+
+  document.getElementById("resultsInfo").innerText =
+    `Showing ${shown} of ${TESTS.length} tests` + (searchTerm ? ` matching "${searchTerm}"` : "");
+}
+
+function filterByTab(btn, tab){
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+  activeTab = tab;
+  renderCards();
+}
+
+function filterCards(){
+  searchTerm = document.getElementById("searchBox").value.toLowerCase().trim();
+  renderCards();
+}
+
+// Initial render
+renderCards();
+</script>
+</body>
+</html>
