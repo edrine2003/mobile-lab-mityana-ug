@@ -230,6 +230,34 @@ auth.onAuthStateChanged(async user=>{
   addServiceRow();
 });
 
+// ── AUTO-FILL from admin (sessionStorage) ──
+window.addEventListener("load",()=>{
+  const raw=sessionStorage.getItem("prefillOrder");
+  if(!raw)return;
+  try{
+    const d=JSON.parse(raw);
+    sessionStorage.removeItem("prefillOrder");
+    document.getElementById("rName").value=d.name||"";
+    document.getElementById("rPhone").value=d.phone||"";
+    document.getElementById("rLocation").value=d.location||"";
+    document.getElementById("rOrderId").value=d.orderId||"";
+    if(d.payment)document.getElementById("rPayment").value=d.payment;
+    if(d.status)document.getElementById("rStatus").value=d.status;
+    if(d.notes)document.getElementById("rNotes").value=d.notes;
+    if(d.amountPaid)document.getElementById("rPaid").value=d.amountPaid;
+    // Parse tests
+    document.getElementById("servicesContainer").innerHTML="";
+    if(d.tests){
+      d.tests.split("\n").filter(Boolean).forEach(line=>{
+        const match=line.match(/(.+)\s*\(UGX\s*([\d,]+)\)/i);
+        if(match){addServiceRow(match[1].trim(),parseInt(match[2].replace(/,/g,""))||0);}
+        else{addServiceRow(line.replace(/^[•\-]\s*/,"").trim(),"");}
+      });
+    }else{addServiceRow();}
+    updateTotals();
+  }catch(e){}
+});
+
 // ── ADD SERVICE ROW ──
 function addServiceRow(name="",price=""){
   const c=document.getElementById("servicesContainer");
