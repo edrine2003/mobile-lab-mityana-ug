@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Receipts – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:24px;}
+.topbar-info h2{color:#fff;font-size:17px;font-weight:900;margin:0;}
+.topbar-info p{color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;margin:2px 0 0;}
+.topbar-right{margin-left:auto;display:flex;gap:8px;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+.loader-ring{width:52px;height:52px;border-radius:50%;border:5px solid #e2e8f0;border-top-color:#0ea5e9;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loader p{font-size:15px;font-weight:700;color:#0ea5e9;}
+
+.page-wrap{max-width:700px;margin:24px auto;padding:0 16px;}
+
+/* SUMMARY CARDS */
+.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:500px){.summary-row{grid-template-columns:repeat(2,1fr);}}
+.sum-card{background:#fff;border-radius:18px;padding:16px 12px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.07);border:1px solid var(--border);}
+.sum-val{font-size:22px;font-weight:900;color:var(--primary);}
+.sum-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-top:4px;}
+
+/* RECEIPT CARD LIST */
+.receipt-card{background:#fff;border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.07);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;}
+.receipt-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.1);}
+.rc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.rc-no{font-size:14px;font-weight:900;color:var(--dark);}
+.rc-date{font-size:12px;font-weight:600;color:var(--muted);margin-top:3px;}
+.status-pill{padding:5px 12px;border-radius:999px;font-size:11px;font-weight:800;}
+.pill-paid{background:rgba(34,197,94,0.12);color:#15803d;}
+.pill-partial{background:rgba(245,158,11,0.12);color:#b45309;}
+.pill-pending{background:rgba(239,68,68,0.1);color:#b91c1c;}
+.rc-services{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;line-height:1.6;}
+.rc-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.rc-total{font-size:18px;font-weight:900;color:var(--primary);}
+.rc-payment{font-size:12px;font-weight:700;color:var(--muted);}
+.rc-actions{display:flex;gap:8px;}
+.rc-btn{padding:8px 14px;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.rc-btn:hover{transform:translateY(-1px);}
+.btn-view{background:rgba(14,165,233,0.1);color:var(--primary);}
+.btn-dl{background:rgba(139,92,246,0.1);color:#7c3aed;}
+.btn-wa{background:rgba(34,197,94,0.1);color:#15803d;}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-state .empty-icon{font-size:54px;margin-bottom:16px;}
+.empty-state h3{font-size:18px;font-weight:900;color:var(--dark);margin-bottom:8px;}
+.empty-state p{font-size:14px;font-weight:600;color:var(--muted);}
+
+/* MODAL OVERLAY */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);padding:0 0 30px;}
+.modal-overlay.open .modal-box{transform:translateY(0);}
+.modal-handle-bar{width:40px;height:4px;background:#e2e8f0;border-radius:999px;margin:14px auto 0;}
+.modal-actions{display:flex;gap:10px;padding:16px 20px 0;flex-wrap:wrap;}
+.modal-action-btn{flex:1;min-width:110px;padding:12px;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.modal-action-btn:hover{transform:translateY(-1px);}
+
+/* RECEIPT DOC inside modal */
+#modalReceiptDoc{padding:24px 20px;}
+</style>
+<style>
+/* Receipt doc styles (shared with receipt.html) */
+.rec-header{text-align:center;border-bottom:2px solid #0ea5e9;padding-bottom:16px;margin-bottom:16px;}
+.rec-logo{font-size:36px;margin-bottom:6px;}
+.rec-clinic{font-size:20px;font-weight:900;color:#0369a1;margin-bottom:2px;}
+.rec-sub{font-size:12px;font-weight:600;color:var(--muted);}
+.rec-title{font-size:18px;font-weight:900;color:#0f172a;margin:14px 0 4px;letter-spacing:1px;text-transform:uppercase;}
+.rec-id{font-size:12px;font-weight:700;color:var(--muted);}
+.rec-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0;}
+.rec-meta-item label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:2px;}
+.rec-meta-item span{font-size:13px;font-weight:700;color:var(--dark);}
+.rec-table{width:100%;border-collapse:collapse;margin:14px 0;}
+.rec-table th{text-align:left;font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;padding:8px 10px;border-bottom:2px solid #e2e8f0;}
+.rec-table td{padding:9px 10px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:var(--dark);}
+.rec-totals{border-top:2px solid #e2e8f0;padding-top:12px;margin-top:4px;}
+.rec-total-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;font-weight:700;}
+.rec-total-row.grand{font-size:16px;font-weight:900;color:#0369a1;border-top:1px solid #e2e8f0;padding-top:10px;margin-top:6px;}
+.rec-footer{text-align:center;margin-top:20px;padding-top:16px;border-top:1px dashed #e2e8f0;}
+.rec-footer p{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;}
+.rec-stamp{display:inline-block;border:2px solid #22c55e;border-radius:8px;padding:6px 16px;color:#15803d;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-top:10px;}
+.rec-sig{margin-top:18px;display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);}
+.rec-sig div{text-align:center;border-top:1px solid #e2e8f0;padding-top:6px;width:120px;}
+/* Toast */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:400;opacity:0;transition:all 0.3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media print{
+  body *{visibility:hidden;}
+  #modalReceiptDoc,#modalReceiptDoc *{visibility:visible;}
+  #modalReceiptDoc{position:fixed;top:0;left:0;width:100%;padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- LOADER -->
+<div id="loader"><div class="loader-ring"></div><p>Loading receipts...</p></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <span class="topbar-logo">🧾</span>
+  <div class="topbar-info">
+    <h2>My Receipts</h2>
+    <p>Mobile Lab – Mityana</p>
+  </div>
+  <div class="topbar-right">
+    <a class="topbar-btn" href="index.html">🧪 Order</a>
+    <a class="topbar-btn" href="dashboard.html">🏠 Home</a>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <!-- SUMMARY -->
+  <div class="summary-row">
+    <div class="sum-card">
+      <div style="font-size:22px;margin-bottom:4px;">🧾</div>
+      <div class="sum-val" id="sumTotal">0</div>
+      <div class="sum-lbl">Total Receipts</div>
+    </div>
+    <div class="sum-card">
+      <div style="font-size:22px;margin-bottom:4px;">💰</div>
+      <div class="sum-val" id="sumPaid" style="color:#15803d;">0</div>
+      <div class="sum-lbl">Total Paid (UGX)</div>
+    </div>
+    <div class="sum-card">
+      <div style="font-size:22px;margin-bottom:4px;">⏳</div>
+      <div class="sum-val" id="sumBalance" style="color:#ef4444;">0</div>
+      <div class="sum-lbl">Balance Due</div>
+    </div>
+  </div>
+
+  <!-- RECEIPTS LIST -->
+  <div id="receiptsList"></div>
+</div>
+
+<!-- RECEIPT DETAIL MODAL -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal-box">
+    <div class="modal-handle-bar"></div>
+    <div class="modal-actions">
+      <button class="modal-action-btn" style="background:rgba(14,165,233,0.1);color:var(--primary);" onclick="printModal()">🖨️ Print</button>
+      <button class="modal-action-btn" style="background:rgba(139,92,246,0.1);color:#7c3aed;" onclick="downloadModal()">⬇️ Download</button>
+      <button class="modal-action-btn" style="background:rgba(34,197,94,0.1);color:#15803d;" onclick="shareWhatsApp()">💬 WhatsApp</button>
+      <button class="modal-action-btn" style="background:rgba(239,68,68,0.1);color:#b91c1c;" onclick="closeModal()">✕ Close</button>
+    </div>
+    <div id="modalReceiptDoc"></div>
+  </div>
+</div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+let activeReceipt=null;
+
+// ── AUTH ──
+auth.onAuthStateChanged(async user=>{
+  if(!user){window.location.href="login.html";return;}
+  // Get patient phone to match receipts
+  const userDoc=await db.collection("users").doc(user.uid).get();
+  const phone=userDoc.exists?(userDoc.data().phone||""):"";
+  loadReceipts(user.uid, user.email, phone);
+});
+
+// ── LOAD RECEIPTS ──
+// Receipts are matched by userId OR by phone (for walk-in patients added manually)
+async function loadReceipts(userId, email, phone){
+  try{
+    // Query by userId first
+    const byUser=await db.collection("receipts")
+      .where("userId","==",userId)
+      .orderBy("createdAt","desc").get().catch(()=>({docs:[]}));
+
+    // Query by phone (walk-in receipts admin created manually)
+    let byPhone={docs:[]};
+    if(phone){
+      byPhone=await db.collection("receipts")
+        .where("phone","==",phone)
+        .orderBy("createdAt","desc").get().catch(()=>({docs:[]}));
+    }
+
+    // Also get receipts from orders that belong to this user
+    const byOrders=await db.collection("receipts")
+      .where("orderId",">=","ML-")
+      .orderBy("orderId","desc").get().catch(()=>({docs:[]}));
+
+    // Merge and deduplicate by receiptNo
+    const seen=new Set();
+    const allDocs=[];
+    [...byUser.docs,...byPhone.docs,...byOrders.docs].forEach(d=>{
+      if(!seen.has(d.id)){
+        // Only include receipts that match this user's phone or were linked to their orders
+        const data=d.data();
+        const matchesPhone=phone&&data.phone===phone;
+        const matchesUser=data.userId===userId;
+        const matchesEmail=email&&data.email===email;
+        if(matchesPhone||matchesUser||matchesEmail){
+          seen.add(d.id);
+          allDocs.push(d);
+        }
+      }
+    });
+
+    document.getElementById("loader").style.display="none";
+    renderReceipts(allDocs);
+  }catch(e){
+    document.getElementById("loader").style.display="none";
+    document.getElementById("receiptsList").innerHTML=`
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Could not load receipts</h3>
+        <p>${e.message}</p>
+      </div>`;
+  }
+}
+
+function renderReceipts(docs){
+  const list=document.getElementById("receiptsList");
+  if(docs.length===0){
+    list.innerHTML=`
+      <div class="empty-state">
+        <div class="empty-icon">🧾</div>
+        <h3>No receipts yet</h3>
+        <p>Your receipts will appear here after the lab confirms your payment.</p>
+        <a href="index.html" style="display:inline-block;margin-top:20px;padding:14px 28px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;border-radius:14px;font-weight:900;text-decoration:none;">🧪 Book a Test</a>
+      </div>`;
+    document.getElementById("sumTotal").innerText="0";
+    document.getElementById("sumPaid").innerText="0";
+    document.getElementById("sumBalance").innerText="0";
+    return;
+  }
+
+  // Summary stats
+  let totalPaid=0,totalBalance=0;
+  docs.forEach(d=>{
+    const r=d.data();
+    totalPaid+=r.paid||0;
+    totalBalance+=r.balance||0;
+  });
+  document.getElementById("sumTotal").innerText=docs.length;
+  document.getElementById("sumPaid").innerText=totalPaid.toLocaleString();
+  document.getElementById("sumBalance").innerText=totalBalance.toLocaleString();
+
+  list.innerHTML="";
+  docs.forEach((d,i)=>{
+    const r=d.data();
+    const pillClass={PAID:"pill-paid",PARTIAL:"pill-partial",PENDING:"pill-pending"}[r.status]||"pill-pending";
+    const pillLabel={PAID:"✅ Paid",PARTIAL:"⚠️ Partial",PENDING:"⏳ Pending"}[r.status]||r.status;
+    const serviceNames=(r.services||[]).map(s=>s.name).join(", ")||"—";
+    const servicePreview=serviceNames.length>60?serviceNames.slice(0,60)+"...":serviceNames;
+
+    const card=document.createElement("div");
+    card.className="receipt-card";
+    card.style.animationDelay=(i*0.05)+"s";
+    card.innerHTML=`
+      <div class="rc-top">
+        <div>
+          <div class="rc-no">🧾 ${r.receiptNo||d.id}</div>
+          <div class="rc-date">${r.date||""} ${r.time?("at "+r.time):""}</div>
+        </div>
+        <span class="status-pill ${pillClass}">${pillLabel}</span>
+      </div>
+      <div class="rc-services">${servicePreview}</div>
+      <div class="rc-bottom">
+        <div>
+          <div class="rc-total">UGX ${(r.paid||0).toLocaleString()} paid</div>
+          <div class="rc-payment">${r.payment||""} ${r.balance>0?"· Balance: UGX "+r.balance.toLocaleString():""}</div>
+        </div>
+        <div class="rc-actions">
+          <button class="rc-btn btn-view" onclick="event.stopPropagation();viewReceipt('${d.id}')">👁️ View</button>
+          <button class="rc-btn btn-dl" onclick="event.stopPropagation();downloadReceipt('${d.id}')">⬇️</button>
+          <button class="rc-btn btn-wa" onclick="event.stopPropagation();waReceipt('${d.id}')">💬</button>
+        </div>
+      </div>`;
+    card.onclick=()=>viewReceipt(d.id);
+    // Store data on element for quick access
+    card.dataset.receiptId=d.id;
+    card._receiptData=r;
+    list.appendChild(card);
+  });
+  // Store all receipt data globally for modal access
+  window._allReceipts={};
+  docs.forEach(d=>{ window._allReceipts[d.id]=d.data(); });
+}
+
+// ── VIEW RECEIPT (full) ──
+function viewReceipt(id){
+  const r=window._allReceipts[id];
+  if(!r){showToast("Receipt not found");return;}
+  activeReceipt=r;
+  document.getElementById("modalReceiptDoc").innerHTML=buildReceiptHTML(r);
+  document.getElementById("receiptModal").classList.add("open");
+}
+
+function buildReceiptHTML(r){
+  const statusColors={PAID:"#15803d",PARTIAL:"#b45309",PENDING:"#b91c1c"};
+  const statusColor=statusColors[r.status]||"#15803d";
+  const serviceRows=(r.services||[]).map((s,i)=>`
+    <tr><td>${i+1}</td><td>${s.name}</td><td style="text-align:right;">UGX ${(s.price||0).toLocaleString()}</td></tr>`).join("");
+  return `
+    <div class="rec-header">
+      <div class="rec-logo">🧪</div>
+      <div class="rec-clinic">Mobile Lab – Mityana</div>
+      <div class="rec-sub">For the love of your health</div>
+      <div class="rec-sub">📞 MTN: +256 778 379 791 &nbsp;|&nbsp; Airtel: 0750 992 939</div>
+      <div class="rec-sub">📍 Mityana, Uganda</div>
+      <div class="rec-title">Receipt</div>
+      <div class="rec-id">Receipt No: <b>${r.receiptNo||"—"}</b> &nbsp;|&nbsp; Order: <b>${r.orderId||"—"}</b></div>
+    </div>
+    <div class="rec-meta">
+      <div class="rec-meta-item"><label>Patient Name</label><span>${r.name||"—"}</span></div>
+      <div class="rec-meta-item"><label>Phone</label><span>${r.phone||"—"}</span></div>
+      <div class="rec-meta-item"><label>Location</label><span>${r.location||"—"}</span></div>
+      <div class="rec-meta-item"><label>Date &amp; Time</label><span>${r.date||"—"} ${r.time?("at "+r.time):""}</span></div>
+      <div class="rec-meta-item"><label>Payment Method</label><span>${r.payment||"—"}</span></div>
+      <div class="rec-meta-item"><label>Served by</label><span>Dr. Edrine – Mobile Lab</span></div>
+    </div>
+    <table class="rec-table">
+      <thead><tr><th>#</th><th>Service / Test</th><th style="text-align:right;">Amount (UGX)</th></tr></thead>
+      <tbody>${serviceRows}</tbody>
+    </table>
+    <div class="rec-totals">
+      <div class="rec-total-row"><span>Subtotal</span><span>UGX ${(r.subtotal||0).toLocaleString()}</span></div>
+      ${r.discount>0?`<div class="rec-total-row"><span>Discount</span><span style="color:#22c55e;">- UGX ${r.discount.toLocaleString()}</span></div>`:""}
+      <div class="rec-total-row grand"><span>TOTAL</span><span>UGX ${(r.total||0).toLocaleString()}</span></div>
+      <div class="rec-total-row"><span>Amount Paid</span><span style="color:#15803d;font-weight:900;">UGX ${(r.paid||0).toLocaleString()}</span></div>
+      ${r.balance>0?`<div class="rec-total-row"><span>Balance Due</span><span style="color:#ef4444;font-weight:900;">UGX ${r.balance.toLocaleString()}</span></div>`:""}
+    </div>
+    ${r.notes?`<div style="margin-top:12px;padding:10px 12px;background:#f8fafc;border-radius:10px;font-size:12px;font-weight:700;color:var(--muted);"><b>Notes:</b> ${r.notes}</div>`:""}
+    <div class="rec-footer">
+      <div class="rec-stamp" style="border-color:${statusColor};color:${statusColor};">${r.status==="PAID"?"✅":r.status==="PARTIAL"?"⚠️":"⏳"} ${r.status||"PENDING"}</div>
+      <div class="rec-sig">
+        <div>Patient Signature</div>
+        <div>Authorized by<br><b>Mobile Lab Mityana</b></div>
+      </div>
+      <p style="margin-top:16px;">Thank you for choosing Mobile Lab Mityana 💙</p>
+      <p>This is an official receipt. Please keep it for your records.</p>
+    </div>`;
+}
+
+function closeModal(){document.getElementById("receiptModal").classList.remove("open");}
+document.getElementById("receiptModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
+
+function printModal(){window.print();}
+
+async function downloadModal(){
+  if(!activeReceipt){return;}
+  showToast("Preparing...");
+  const el=document.getElementById("modalReceiptDoc");
+  const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:"#fff"});
+  const link=document.createElement("a");
+  link.download=`Receipt_${activeReceipt.receiptNo||Date.now()}.png`;
+  link.href=canvas.toDataURL("image/png");
+  link.click();
+  showToast("Downloaded ✓");
+}
+
+async function downloadReceipt(id){
+  const r=window._allReceipts[id];if(!r)return;
+  activeReceipt=r;
+  document.getElementById("modalReceiptDoc").innerHTML=buildReceiptHTML(r);
+  await downloadModal();
+}
+
+function shareWhatsApp(){
+  if(!activeReceipt)return;
+  waFromData(activeReceipt);
+}
+
+function waReceipt(id){
+  const r=window._allReceipts[id];if(!r)return;
+  waFromData(r);
+}
+
+function waFromData(r){
+  const serviceList=(r.services||[]).map(s=>`  • ${s.name} — UGX ${(s.price||0).toLocaleString()}`).join("\n");
+  const msg=`🧾 *RECEIPT – Mobile Lab Mityana*\n━━━━━━━━━━━━━━━━━━\nReceipt No: *${r.receiptNo||"—"}*\nOrder: ${r.orderId||"—"}\nDate: ${r.date||"—"}\n━━━━━━━━━━━━━━━━━━\nPatient: *${r.name||"—"}*\nPhone: ${r.phone||"—"}\n━━━━━━━━━━━━━━━━━━\n*SERVICES:*\n${serviceList}\n━━━━━━━━━━━━━━━━━━\n*TOTAL: UGX ${(r.total||0).toLocaleString()}*\nPaid: UGX ${(r.paid||0).toLocaleString()}${r.balance>0?`\nBalance: UGX ${r.balance.toLocaleString()}`:""}\nPayment: ${r.payment||"—"}\nStatus: *${r.status||"—"}*\n━━━━━━━━━━━━━━━━━━\nThank you for choosing Mobile Lab Mityana 💙`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,"_blank");
+}
+
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.innerText=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+</script>
+</body>
+</html>
