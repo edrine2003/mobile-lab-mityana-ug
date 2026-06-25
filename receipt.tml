@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Receipt Generator – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100;}
+.topbar h2{color:#fff;font-size:18px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+.container{max-width:860px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:700px){.container{grid-template-columns:1fr;}}
+</style>
+<style>
+/* FORM PANEL */
+.panel{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 4px 20px rgba(0,0,0,0.07);border:1px solid var(--border);}
+.panel-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:13px;font-weight:800;color:var(--dark);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:var(--dark);background:#fff;outline:none;transition:all 0.2s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,0.12);}
+.field textarea{resize:vertical;min-height:90px;}
+.field small{display:block;margin-top:4px;font-size:12px;font-weight:600;color:var(--muted);}
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:16px 0;}
+.service-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.service-row input{flex:2;}
+.service-row input.price-input{flex:1;}
+.service-row button{background:#ef4444;color:#fff;border:none;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:14px;font-family:'Nunito',Arial,sans-serif;font-weight:800;}
+.add-service-btn{background:rgba(14,165,233,0.1);color:var(--primary);border:1.5px dashed var(--primary);border-radius:10px;padding:10px;width:100%;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;margin-bottom:14px;transition:all 0.2s;}
+.add-service-btn:hover{background:rgba(14,165,233,0.18);}
+.generate-btn{width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;box-shadow:0 6px 20px rgba(14,165,233,0.3);transition:all 0.2s;margin-top:6px;}
+.generate-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(14,165,233,0.4);}
+/* ORDER SEARCH */
+.search-orders{display:flex;gap:8px;margin-bottom:16px;}
+.search-orders input{flex:1;padding:11px 14px;border-radius:12px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:var(--dark);outline:none;}
+.search-orders input:focus{border-color:var(--primary);}
+.search-orders button{padding:11px 16px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;font-size:13px;}
+.order-result{background:rgba(14,165,233,0.06);border:1.5px solid rgba(14,165,233,0.2);border-radius:14px;padding:12px 14px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;}
+.order-result:hover{background:rgba(14,165,233,0.12);}
+.order-result h4{font-size:14px;font-weight:800;color:var(--dark);}
+.order-result p{font-size:12px;font-weight:600;color:var(--muted);margin-top:3px;}
+</style>
+<style>
+/* RECEIPT PREVIEW */
+.receipt-preview{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 4px 20px rgba(0,0,0,0.07);border:1px solid var(--border);display:flex;flex-direction:column;}
+#receiptDoc{background:#fff;border-radius:14px;padding:28px 24px;border:1px solid #e2e8f0;flex:1;}
+.rec-header{text-align:center;border-bottom:2px solid #0ea5e9;padding-bottom:16px;margin-bottom:16px;}
+.rec-logo{font-size:36px;margin-bottom:6px;}
+.rec-clinic{font-size:20px;font-weight:900;color:#0369a1;margin-bottom:2px;}
+.rec-sub{font-size:12px;font-weight:600;color:var(--muted);}
+.rec-title{font-size:18px;font-weight:900;color:#0f172a;margin:14px 0 4px;letter-spacing:1px;text-transform:uppercase;}
+.rec-id{font-size:12px;font-weight:700;color:var(--muted);}
+.rec-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0;}
+.rec-meta-item label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:2px;}
+.rec-meta-item span{font-size:13px;font-weight:700;color:var(--dark);}
+.rec-table{width:100%;border-collapse:collapse;margin:14px 0;}
+.rec-table th{text-align:left;font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;padding:8px 10px;border-bottom:2px solid #e2e8f0;}
+.rec-table td{padding:9px 10px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:var(--dark);}
+.rec-table tr:last-child td{border-bottom:none;}
+.rec-totals{border-top:2px solid #e2e8f0;padding-top:12px;margin-top:4px;}
+.rec-total-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;font-weight:700;}
+.rec-total-row.grand{font-size:16px;font-weight:900;color:#0369a1;border-top:1px solid #e2e8f0;padding-top:10px;margin-top:6px;}
+.rec-footer{text-align:center;margin-top:20px;padding-top:16px;border-top:1px dashed #e2e8f0;}
+.rec-footer p{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;}
+.rec-stamp{display:inline-block;border:2px solid #22c55e;border-radius:8px;padding:6px 16px;color:#15803d;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-top:10px;}
+.rec-sig{margin-top:18px;display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);}
+.rec-sig div{text-align:center;border-top:1px solid #e2e8f0;padding-top:6px;width:120px;}
+/* Action buttons under receipt */
+.receipt-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.rec-btn{flex:1;min-width:120px;padding:12px;border:none;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.rec-btn:hover{transform:translateY(-1px);}
+.btn-print{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);}
+.btn-download{background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;box-shadow:0 4px 14px rgba(139,92,246,0.3);}
+.btn-whatsapp{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 4px 14px rgba(34,197,94,0.3);}
+.btn-save{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 4px 14px rgba(245,158,11,0.3);}
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media print{
+  body *{visibility:hidden;}
+  #receiptDoc,#receiptDoc *{visibility:visible;}
+  #receiptDoc{position:fixed;top:0;left:0;width:100%;padding:20px;}
+}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <span style="font-size:24px;">🧾</span>
+  <h2>Receipt Generator</h2>
+  <a class="topbar-btn" href="new_requests.html">📋 Orders</a>
+  <a class="topbar-btn" href="dashboard.html">🏠 Home</a>
+</div>
+
+<div class="container">
+
+  <!-- LEFT: FORM -->
+  <div>
+    <!-- Search existing order -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-title">🔍 Load from Order ID</div>
+      <div class="search-orders">
+        <input type="text" id="orderIdSearch" placeholder="e.g. ML-1234567890">
+        <button onclick="loadOrder()">Load</button>
+      </div>
+      <div id="orderResults"></div>
+    </div>
+
+    <!-- Receipt form -->
+    <div class="panel">
+      <div class="panel-title">✏️ Receipt Details</div>
+
+      <div class="field">
+        <label>Patient Full Name</label>
+        <input type="text" id="rName" placeholder="e.g. Namiyingo Joyce">
+      </div>
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="text" id="rPhone" placeholder="e.g. 0750992939">
+      </div>
+      <div class="field">
+        <label>Location / Address</label>
+        <input type="text" id="rLocation" placeholder="e.g. Mityana Town">
+      </div>
+      <div class="field">
+        <label>Order / Reference ID</label>
+        <input type="text" id="rOrderId" placeholder="Auto-generated if blank">
+      </div>
+
+      <div class="section-divider"></div>
+      <div class="panel-title" style="margin-bottom:12px;">🧪 Services Rendered</div>
+
+      <div id="servicesContainer"></div>
+      <button class="add-service-btn" onclick="addServiceRow()">+ Add Service</button>
+
+      <div class="section-divider"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="field">
+          <label>Discount (UGX)</label>
+          <input type="number" id="rDiscount" placeholder="0" value="0" oninput="updateTotals()">
+        </div>
+        <div class="field">
+          <label>Amount Paid (UGX)</label>
+          <input type="number" id="rPaid" placeholder="0" oninput="updateTotals()">
+          <small>Confirm exact cash/MoMo received</small>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Payment Method</label>
+        <select id="rPayment">
+          <option value="Cash">Cash</option>
+          <option value="MTN Mobile Money">MTN Mobile Money</option>
+          <option value="Airtel Money">Airtel Money</option>
+          <option value="Wallet">Patient Wallet</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Notes (Optional)</label>
+        <textarea id="rNotes" placeholder="Any extra info e.g. balance due, follow-up date..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Receipt Status</label>
+        <select id="rStatus">
+          <option value="PAID">✅ PAID IN FULL</option>
+          <option value="PARTIAL">⚠️ PARTIAL PAYMENT</option>
+          <option value="PENDING">⏳ PAYMENT PENDING</option>
+        </select>
+      </div>
+
+      <button class="generate-btn" onclick="generateReceipt()">🧾 Generate Receipt</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="receipt-preview">
+    <div class="panel-title">👁️ Receipt Preview</div>
+
+    <div id="receiptDoc">
+      <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
+        <div style="font-size:48px;margin-bottom:12px;">🧾</div>
+        <div style="font-size:15px;font-weight:700;">Fill in the form and click<br><b>Generate Receipt</b></div>
+      </div>
+    </div>
+
+    <div class="receipt-actions" id="receiptActions" style="display:none;">
+      <button class="rec-btn btn-print" onclick="printReceipt()">🖨️ Print</button>
+      <button class="rec-btn btn-download" onclick="downloadReceipt()">⬇️ Download</button>
+      <button class="rec-btn btn-whatsapp" onclick="sendWhatsApp()">💬 WhatsApp</button>
+      <button class="rec-btn btn-save" onclick="saveToFirestore()">☁️ Save</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Firebase
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+const ADMIN_WA="256750992939";
+let currentReceiptData=null;
+
+// Auth guard — admin only
+auth.onAuthStateChanged(async user=>{
+  if(!user){window.location.href="login.html";return;}
+  const snap=await db.collection("users").doc(user.uid).get();
+  if(!snap.exists||snap.data().role!=="admin"){
+    if(user.email!=="edrinehero@gmail.com"){
+      alert("Access denied");await auth.signOut();window.location.href="login.html";return;
+    }
+  }
+  // Start with one service row
+  addServiceRow();
+});
+
+// ── ADD SERVICE ROW ──
+function addServiceRow(name="",price=""){
+  const c=document.getElementById("servicesContainer");
+  const row=document.createElement("div");
+  row.className="service-row";
+  row.innerHTML=`
+    <input type="text" placeholder="Service name e.g. HIV Test" value="${name}" oninput="updateTotals()">
+    <input type="number" class="price-input" placeholder="Price (UGX)" value="${price}" oninput="updateTotals()">
+    <button onclick="this.parentElement.remove();updateTotals();">✕</button>`;
+  c.appendChild(row);
+  updateTotals();
+}
+
+// ── UPDATE TOTALS (live) ──
+function updateTotals(){
+  let sub=0;
+  document.querySelectorAll(".service-row").forEach(r=>{
+    const p=parseFloat(r.querySelectorAll("input")[1].value)||0;
+    sub+=p;
+  });
+  const disc=parseFloat(document.getElementById("rDiscount").value)||0;
+  const total=Math.max(0,sub-disc);
+  // auto-fill paid if empty
+  const paidEl=document.getElementById("rPaid");
+  if(!paidEl.dataset.manuallySet) paidEl.value=total||"";
+}
+document.getElementById("rPaid").addEventListener("input",function(){this.dataset.manuallySet="1";});
+
+// ── LOAD ORDER FROM FIRESTORE ──
+async function loadOrder(){
+  const id=document.getElementById("orderIdSearch").value.trim();
+  if(!id){showToast("Enter an Order ID");return;}
+  const resultsEl=document.getElementById("orderResults");
+  resultsEl.innerHTML=`<p style="font-size:13px;font-weight:700;color:var(--muted);">Searching...</p>`;
+  try{
+    const doc=await db.collection("orders").doc(id).get();
+    if(!doc.exists){
+      // Try searching by order_id field
+      const q=await db.collection("orders").where("order_id","==",id).limit(1).get();
+      if(q.empty){resultsEl.innerHTML=`<p style="font-size:13px;font-weight:700;color:#ef4444;">Order not found.</p>`;return;}
+      fillFromOrder(q.docs[0].id,q.docs[0].data(),resultsEl);
+    } else {
+      fillFromOrder(doc.id,doc.data(),resultsEl);
+    }
+  }catch(e){resultsEl.innerHTML=`<p style="color:#ef4444;font-size:13px;font-weight:700;">Error: ${e.message}</p>`;}
+}
+
+function fillFromOrder(docId,data,resultsEl){
+  resultsEl.innerHTML=`<div class="order-result" onclick="applyOrder('${docId}')">
+    <h4>✅ Found: ${data.order_id||docId}</h4>
+    <p>${data.name||"—"} · ${data.phone||"—"}</p>
+    <p>Total: ${data.total||"—"} · ${data.payment||"—"}</p>
+    <p style="color:var(--primary);font-weight:800;margin-top:4px;">Tap to fill form →</p>
+  </div>`;
+  resultsEl._data={id:docId,...data};
+}
+
+function applyOrder(id){
+  const resultsEl=document.getElementById("orderResults");
+  const d=resultsEl._data;
+  if(!d) return;
+  document.getElementById("rName").value=d.name||"";
+  document.getElementById("rPhone").value=d.phone||"";
+  document.getElementById("rLocation").value=d.location||"";
+  document.getElementById("rOrderId").value=d.order_id||id;
+  document.getElementById("rPayment").value=d.payment||"Cash";
+  // Parse tests string into rows
+  document.getElementById("servicesContainer").innerHTML="";
+  if(d.tests){
+    d.tests.split("\n").filter(Boolean).forEach(line=>{
+      const match=line.match(/(.+)\s*\(UGX\s*([\d,]+)\)/i);
+      if(match){
+        const name=match[1].trim();
+        const price=parseInt(match[2].replace(/,/g,""))||0;
+        addServiceRow(name,price);
+      } else {
+        addServiceRow(line.trim(),"");
+      }
+    });
+  } else {
+    addServiceRow();
+  }
+  const totalNum=parseInt(String(d.total||"0").replace(/[^0-9]/g,""))||0;
+  document.getElementById("rPaid").value=totalNum;
+  document.getElementById("rDiscount").value=0;
+  updateTotals();
+  showToast("Order loaded ✓");
+}
+</script>
+
+<script>
+// ── GENERATE RECEIPT ──
+function generateReceipt(){
+  const name=document.getElementById("rName").value.trim();
+  if(!name){showToast("Enter patient name");return;}
+
+  // Collect services
+  const services=[];
+  let subtotal=0;
+  document.querySelectorAll(".service-row").forEach(r=>{
+    const inputs=r.querySelectorAll("input");
+    const sName=inputs[0].value.trim();
+    const sPrice=parseFloat(inputs[1].value)||0;
+    if(sName){services.push({name:sName,price:sPrice});subtotal+=sPrice;}
+  });
+  if(services.length===0){showToast("Add at least one service");return;}
+
+  const discount=parseFloat(document.getElementById("rDiscount").value)||0;
+  const total=Math.max(0,subtotal-discount);
+  const paid=parseFloat(document.getElementById("rPaid").value)||0;
+  const balance=Math.max(0,total-paid);
+  const payment=document.getElementById("rPayment").value;
+  const notes=document.getElementById("rNotes").value.trim();
+  const status=document.getElementById("rStatus").value;
+  const orderId=document.getElementById("rOrderId").value.trim()||"RCP-"+Date.now();
+  const receiptNo="RCP-"+Date.now().toString().slice(-8);
+  const now=new Date();
+  const dateStr=now.toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"});
+  const timeStr=now.toLocaleTimeString("en-UG",{hour:"2-digit",minute:"2-digit"});
+  const phone=document.getElementById("rPhone").value.trim();
+  const location=document.getElementById("rLocation").value.trim();
+
+  // Status color
+  const statusColors={PAID:"#15803d",PARTIAL:"#b45309",PENDING:"#b91c1c"};
+  const statusColor=statusColors[status]||"#15803d";
+
+  // Services rows HTML
+  const serviceRows=services.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${s.name}</td>
+      <td style="text-align:right;">UGX ${s.price.toLocaleString()}</td>
+    </tr>`).join("");
+
+  const html=`
+    <div class="rec-header">
+      <div class="rec-logo">🧪</div>
+      <div class="rec-clinic">Mobile Lab – Mityana</div>
+      <div class="rec-sub">For the love of your health</div>
+      <div class="rec-sub">📞 MTN: +256 778 379 791 &nbsp;|&nbsp; Airtel: 0750 992 939</div>
+      <div class="rec-sub">📍 Mityana, Uganda</div>
+      <div class="rec-title">Receipt</div>
+      <div class="rec-id">Receipt No: <b>${receiptNo}</b> &nbsp;|&nbsp; Order: <b>${orderId}</b></div>
+    </div>
+
+    <div class="rec-meta">
+      <div class="rec-meta-item"><label>Patient Name</label><span>${name}</span></div>
+      <div class="rec-meta-item"><label>Phone</label><span>${phone||"—"}</span></div>
+      <div class="rec-meta-item"><label>Location</label><span>${location||"—"}</span></div>
+      <div class="rec-meta-item"><label>Date &amp; Time</label><span>${dateStr} at ${timeStr}</span></div>
+      <div class="rec-meta-item"><label>Payment Method</label><span>${payment}</span></div>
+      <div class="rec-meta-item"><label>Served by</label><span>Dr. Edrine – Mobile Lab</span></div>
+    </div>
+
+    <table class="rec-table">
+      <thead><tr><th>#</th><th>Service / Test</th><th style="text-align:right;">Amount (UGX)</th></tr></thead>
+      <tbody>${serviceRows}</tbody>
+    </table>
+
+    <div class="rec-totals">
+      <div class="rec-total-row"><span>Subtotal</span><span>UGX ${subtotal.toLocaleString()}</span></div>
+      ${discount>0?`<div class="rec-total-row"><span>Discount</span><span style="color:#22c55e;">- UGX ${discount.toLocaleString()}</span></div>`:""}
+      <div class="rec-total-row grand"><span>TOTAL</span><span>UGX ${total.toLocaleString()}</span></div>
+      <div class="rec-total-row"><span>Amount Paid</span><span style="color:#15803d;font-weight:900;">UGX ${paid.toLocaleString()}</span></div>
+      ${balance>0?`<div class="rec-total-row"><span>Balance Due</span><span style="color:#ef4444;font-weight:900;">UGX ${balance.toLocaleString()}</span></div>`:""}
+    </div>
+
+    ${notes?`<div style="margin-top:12px;padding:10px 12px;background:#f8fafc;border-radius:10px;font-size:12px;font-weight:700;color:var(--muted);"><b>Notes:</b> ${notes}</div>`:""}
+
+    <div class="rec-footer">
+      <div class="rec-stamp" style="border-color:${statusColor};color:${statusColor};">${status==="PAID"?"✅":status==="PARTIAL"?"⚠️":"⏳"} ${status}</div>
+      <div class="rec-sig">
+        <div>Patient Signature</div>
+        <div>Authorized by<br><b>Mobile Lab Mityana</b></div>
+      </div>
+      <p style="margin-top:16px;">Thank you for choosing Mobile Lab Mityana 💙</p>
+      <p>This is an official receipt. Please keep it for your records.</p>
+    </div>`;
+
+  document.getElementById("receiptDoc").innerHTML=html;
+  document.getElementById("receiptActions").style.display="flex";
+
+  // Store for save/whatsapp
+  currentReceiptData={
+    receiptNo,orderId,name,phone,location,services,subtotal,discount,total,
+    paid,balance,payment,status,notes,date:dateStr,time:timeStr,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  showToast("Receipt generated ✓");
+}
+
+// ── PRINT ──
+function printReceipt(){
+  if(!currentReceiptData){showToast("Generate receipt first");return;}
+  window.print();
+}
+
+// ── DOWNLOAD as image ──
+async function downloadReceipt(){
+  if(!currentReceiptData){showToast("Generate receipt first");return;}
+  showToast("Preparing download...");
+  const el=document.getElementById("receiptDoc");
+  const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:"#fff"});
+  const link=document.createElement("a");
+  link.download=`Receipt_${currentReceiptData.receiptNo}.png`;
+  link.href=canvas.toDataURL("image/png");
+  link.click();
+  showToast("Downloaded ✓");
+}
+
+// ── SEND WHATSAPP ──
+function sendWhatsApp(){
+  if(!currentReceiptData){showToast("Generate receipt first");return;}
+  const r=currentReceiptData;
+  const serviceList=r.services.map(s=>`  • ${s.name} — UGX ${s.price.toLocaleString()}`).join("\n");
+  const msg=
+`🧾 *RECEIPT – Mobile Lab Mityana*
+━━━━━━━━━━━━━━━━━━
+Receipt No: *${r.receiptNo}*
+Order: ${r.orderId}
+Date: ${r.date} at ${r.time}
+━━━━━━━━━━━━━━━━━━
+Patient: *${r.name}*
+Phone: ${r.phone||"—"}
+Location: ${r.location||"—"}
+━━━━━━━━━━━━━━━━━━
+*SERVICES:*
+${serviceList}
+━━━━━━━━━━━━━━━━━━
+Subtotal: UGX ${r.subtotal.toLocaleString()}${r.discount>0?`\nDiscount: - UGX ${r.discount.toLocaleString()}`:""}
+*TOTAL: UGX ${r.total.toLocaleString()}*
+Paid: UGX ${r.paid.toLocaleString()}${r.balance>0?`\nBalance Due: UGX ${r.balance.toLocaleString()}`:""}
+Payment: ${r.payment}
+Status: *${r.status}*
+━━━━━━━━━━━━━━━━━━
+Thank you for choosing Mobile Lab Mityana 💙`;
+
+  // Send to patient phone if available
+  const patientPhone=r.phone?r.phone.replace(/^0/,"256").replace(/^\+/,""):"";
+  const waNum=patientPhone||ADMIN_WA;
+  window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`,"_blank");
+}
+
+// ── SAVE TO FIRESTORE ──
+async function saveToFirestore(){
+  if(!currentReceiptData){showToast("Generate receipt first");return;}
+  try{
+    await db.collection("receipts").doc(currentReceiptData.receiptNo).set(currentReceiptData);
+    // Also update the order with receipt reference
+    if(currentReceiptData.orderId){
+      await db.collection("orders").doc(currentReceiptData.orderId).update({
+        receiptNo:currentReceiptData.receiptNo,
+        amountPaid:currentReceiptData.paid,
+        paymentConfirmed:true,
+        status:"completed"
+      }).catch(()=>{});
+    }
+    showToast("Receipt saved to Firestore ✓");
+  }catch(e){showToast("Save failed: "+e.message);}
+}
+
+// ── TOAST ──
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.innerText=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+</script>
+</body>
+</html>
