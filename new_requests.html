@@ -11,137 +11,53 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;color:#0f172a;}
-
-/* ── TOPBAR ── */
-.topbar{
-  background:linear-gradient(135deg,#0ea5e9,#14b8a6);
-  padding:14px 20px;display:flex;align-items:center;gap:14px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100;
-}
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:14px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100;}
 .topbar-logo{font-size:26px;}
 .topbar-info h2{color:#fff;font-size:17px;font-weight:900;margin:0;}
 .topbar-info p{color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;margin:2px 0 0;}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
-.topbar-btn{
-  background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);
-  border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;
-  font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;
-  align-items:center;gap:6px;transition:all 0.2s;
-}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
 .topbar-btn:hover{background:rgba(255,255,255,0.3);}
-#chatNotifBadge{
-  background:#ef4444;color:#fff;border-radius:999px;
-  font-size:11px;font-weight:900;padding:2px 7px;
-  display:none;animation:badgePulse 2s infinite;
-}
+#chatNotifBadge{background:#ef4444;color:#fff;border-radius:999px;font-size:11px;font-weight:900;padding:2px 7px;display:none;animation:badgePulse 2s infinite;}
 @keyframes badgePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
-
-/* ── STATS ROW ── */
-.stats-row{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
-  padding:18px 20px 0;
-}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 20px 0;}
 @media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr);}}
-.stat-card{
-  background:#fff;border-radius:18px;padding:16px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.06);
-  display:flex;align-items:center;gap:12px;
-  border:1px solid rgba(0,0,0,0.05);
-}
-.stat-icon{
-  width:46px;height:46px;border-radius:14px;
-  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
-}
+.stat-card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,0.06);display:flex;align-items:center;gap:12px;border:1px solid rgba(0,0,0,0.05);}
+.stat-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
 .stat-val{font-size:24px;font-weight:900;line-height:1;}
 .stat-lbl{font-size:12px;font-weight:700;color:#64748b;margin-top:2px;}
-
-/* ── NAV TABS ── */
-.nav-tabs{
-  display:flex;gap:8px;padding:16px 20px 0;
-  overflow-x:auto;scrollbar-width:none;
-}
+.nav-tabs{display:flex;gap:8px;padding:16px 20px 0;overflow-x:auto;scrollbar-width:none;}
 .nav-tabs::-webkit-scrollbar{display:none;}
-.tab-btn{
-  padding:10px 18px;border:none;border-radius:999px;cursor:pointer;
-  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;
-  background:#fff;color:#64748b;white-space:nowrap;
-  box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:all 0.2s;
-  display:flex;align-items:center;gap:6px;
-}
+.tab-btn{padding:10px 18px;border:none;border-radius:999px;cursor:pointer;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;background:#fff;color:#64748b;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:all 0.2s;display:flex;align-items:center;gap:6px;}
 .tab-btn.active{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);}
-.tab-count{
-  background:rgba(255,255,255,0.3);border-radius:999px;
-  padding:2px 7px;font-size:11px;font-weight:900;
-}
+.tab-count{background:rgba(255,255,255,0.3);border-radius:999px;padding:2px 7px;font-size:11px;font-weight:900;}
 .tab-btn:not(.active) .tab-count{background:rgba(14,165,233,0.1);color:#0ea5e9;}
-
-/* ── CONTENT AREA ── */
 .content{padding:16px 20px;}
-
-/* ── TOOLBAR ── */
-.toolbar{
-  display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;
-}
-.search-input{
-  flex:1;min-width:180px;padding:10px 16px;border-radius:999px;
-  border:1.5px solid #e2e8f0;background:#fff;
-  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:600;
-  outline:none;color:#0f172a;
-}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.search-input{flex:1;min-width:180px;padding:10px 16px;border-radius:999px;border:1.5px solid #e2e8f0;background:#fff;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:600;outline:none;color:#0f172a;}
 .search-input:focus{border-color:#0ea5e9;}
-.filter-select{
-  padding:10px 14px;border-radius:999px;border:1.5px solid #e2e8f0;
-  background:#fff;font-family:'Nunito',Arial,sans-serif;
-  font-size:13px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;
-}
-.filter-select:focus{border-color:#0ea5e9;}
+.filter-select{padding:10px 14px;border-radius:999px;border:1.5px solid #e2e8f0;background:#fff;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;}
 </style>
 <style>
-/* ── ORDER CARDS ── */
 .orders-grid{display:flex;flex-direction:column;gap:12px;}
-.order-card{
-  background:#fff;border-radius:18px;padding:16px 18px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.06);
-  border:1px solid rgba(0,0,0,0.05);
-  transition:all 0.2s;
-}
+.order-card{background:#fff;border-radius:18px;padding:16px 18px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.05);transition:all 0.2s;}
 .order-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.1);transform:translateY(-1px);}
 .order-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
 .order-id{font-size:12px;font-weight:800;color:#64748b;}
 .order-time{font-size:12px;font-weight:700;color:#94a3b8;}
 .order-name{font-size:16px;font-weight:900;color:#0f172a;margin-bottom:2px;}
 .order-contact{font-size:13px;font-weight:600;color:#64748b;}
-.status-badge{
-  padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;
-  white-space:nowrap;flex-shrink:0;
-}
+.status-badge{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap;flex-shrink:0;}
 .status-pending{background:rgba(245,158,11,0.12);color:#b45309;}
 .status-ongoing{background:rgba(14,165,233,0.12);color:#0369a1;}
 .status-completed{background:rgba(34,197,94,0.12);color:#15803d;}
 .status-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
-.order-tests{
-  background:#f8fafc;border-radius:12px;padding:10px 12px;
-  margin:10px 0;font-size:13px;font-weight:600;color:#0f172a;
-  line-height:1.7;max-height:100px;overflow:auto;
-}
-.order-tests::-webkit-scrollbar{width:3px;}
+.order-tests{background:#f8fafc;border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13px;font-weight:600;color:#0f172a;line-height:1.7;max-height:100px;overflow:auto;}
 .order-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-.meta-chip{
-  display:flex;align-items:center;gap:5px;
-  background:#f1f5f9;border-radius:999px;
-  padding:5px 10px;font-size:12px;font-weight:700;color:#475569;
-}
-.order-total{
-  font-size:18px;font-weight:900;
-  background:linear-gradient(135deg,#0369a1,#0f766e);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
+.meta-chip{display:flex;align-items:center;gap:5px;background:#f1f5f9;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;color:#475569;}
+.order-total{font-size:18px;font-weight:900;background:linear-gradient(135deg,#0369a1,#0f766e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .order-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
-.action-btn{
-  padding:9px 16px;border:none;border-radius:12px;cursor:pointer;
-  font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;
-  transition:all 0.2s;display:flex;align-items:center;gap:6px;
-}
+.action-btn{padding:9px 16px;border:none;border-radius:12px;cursor:pointer;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
 .action-btn:hover{transform:translateY(-1px);}
 .btn-start{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 4px 12px rgba(34,197,94,0.3);}
 .btn-complete{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;box-shadow:0 4px 12px rgba(14,165,233,0.3);}
@@ -149,111 +65,66 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
 .btn-whatsapp{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;box-shadow:0 4px 12px rgba(37,211,102,0.3);}
 .btn-result{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 4px 12px rgba(139,92,246,0.3);}
 .btn-view{background:#f1f5f9;color:#0f172a;}
-
-/* ── RESULT MODAL ── */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;
-  display:flex;align-items:flex-end;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity 0.3s;
-}
+/* ── RECEIPT BUTTON ── */
+.btn-receipt{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 4px 12px rgba(245,158,11,0.3);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal{
-  background:#fff;border-radius:28px 28px 0 0;padding:24px 20px 36px;
-  width:100%;max-width:560px;
-  transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  max-height:90vh;overflow-y:auto;
-}
+.modal{background:#fff;border-radius:28px 28px 0 0;padding:24px 20px 36px;width:100%;max-width:560px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);max-height:90vh;overflow-y:auto;}
 .modal-overlay.open .modal{transform:translateY(0);}
 .modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:999px;margin:0 auto 20px;}
 .modal h3{font-size:18px;font-weight:900;color:#0f172a;margin-bottom:16px;}
 .modal label{font-size:13px;font-weight:800;color:#0f172a;display:block;margin-bottom:6px;}
-.modal input,.modal select,.modal textarea{
-  width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid #e2e8f0;
-  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
-  color:#0f172a;background:#fff;outline:none;margin-bottom:14px;
-}
+.modal input,.modal select,.modal textarea{width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid #e2e8f0;font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:#0f172a;background:#fff;outline:none;margin-bottom:14px;}
 .modal input:focus,.modal select:focus,.modal textarea:focus{border-color:#0ea5e9;}
 .modal textarea{min-height:80px;resize:none;}
 .test-result-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;align-items:center;}
 .test-result-row .test-lbl{font-size:13px;font-weight:800;color:#0f172a;padding:10px 12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;}
 .test-result-row input{margin:0;padding:10px 12px;font-size:13px;}
 @media(max-width:480px){.test-result-row{grid-template-columns:1fr;}}
-.modal-btn{
-  width:100%;padding:14px;border:none;border-radius:14px;
-  background:linear-gradient(135deg,#0ea5e9,#14b8a6);
-  color:#fff;font-size:15px;font-weight:900;cursor:pointer;
-  font-family:'Nunito',Arial,sans-serif;
-  box-shadow:0 6px 18px rgba(14,165,233,0.3);margin-top:4px;
-}
-
-/* ── EMPTY STATE ── */
-.empty-state{
-  text-align:center;padding:50px 20px;color:#94a3b8;
-}
+.modal-btn{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;font-size:15px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;box-shadow:0 6px 18px rgba(14,165,233,0.3);margin-top:4px;}
+.modal-btn.orange{background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 6px 18px rgba(245,158,11,0.3);}
+.empty-state{text-align:center;padding:50px 20px;color:#94a3b8;}
 .empty-state .icon{font-size:52px;opacity:0.4;margin-bottom:12px;}
 .empty-state p{font-size:15px;font-weight:700;}
-
-/* ── TOAST ── */
-.toast{
-  position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
-  background:#0f172a;color:#fff;padding:12px 24px;border-radius:999px;
-  font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;
-}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:#0f172a;color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ── DETAIL EXPAND ── */
 .order-detail{display:none;border-top:1px solid #f1f5f9;margin-top:12px;padding-top:12px;}
 .order-detail.open{display:block;}
 .detail-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;font-weight:600;border-bottom:1px solid #f8fafc;}
 .detail-row span:first-child{color:#64748b;}
 .detail-row span:last-child{color:#0f172a;font-weight:800;text-align:right;max-width:60%;}
+/* Receipt confirm modal */
+.receipt-confirm-field{margin-bottom:14px;}
+.receipt-confirm-field label{font-size:13px;font-weight:800;color:#0f172a;display:block;margin-bottom:6px;}
+.receipt-confirm-field input,.receipt-confirm-field select{width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid #e2e8f0;font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:#0f172a;background:#fff;outline:none;}
+.receipt-confirm-field input:focus,.receipt-confirm-field select:focus{border-color:#f59e0b;}
 </style>
 </head>
 <body>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <!-- TOPBAR -->
 <div class="topbar">
   <span class="topbar-logo">🧪</span>
-  <div class="topbar-info">
-    <h2>Admin Dashboard</h2>
-    <p>Mobile Lab – Mityana</p>
-  </div>
+  <div class="topbar-info"><h2>Admin Dashboard</h2><p>Mobile Lab – Mityana</p></div>
   <div class="topbar-right">
-    <a class="topbar-btn" href="doctor_chat.html">
-      💬 Chats <span id="chatNotifBadge">0</span>
-    </a>
+    <a class="topbar-btn" href="receipt.html">🧾 Receipts</a>
+    <a class="topbar-btn" href="reports.html">📊 Reports</a>
+    <a class="topbar-btn" href="doctor_chat.html">💬 Chats <span id="chatNotifBadge">0</span></a>
     <button class="topbar-btn" id="logoutBtn">🚪 Logout</button>
   </div>
 </div>
 
-<!-- STATS ROW -->
+<!-- STATS -->
 <div class="stats-row">
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(245,158,11,0.12);">⏳</div>
-    <div><div class="stat-val" id="statPending" style="color:#b45309;">0</div><div class="stat-lbl">Pending</div></div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(14,165,233,0.12);">🔬</div>
-    <div><div class="stat-val" id="statOngoing" style="color:#0369a1;">0</div><div class="stat-lbl">Ongoing</div></div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(34,197,94,0.12);">✅</div>
-    <div><div class="stat-val" id="statCompleted" style="color:#15803d;">0</div><div class="stat-lbl">Completed</div></div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(239,68,68,0.1);">❌</div>
-    <div><div class="stat-val" id="statCancelled" style="color:#b91c1c;">0</div><div class="stat-lbl">Cancelled</div></div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(139,92,246,0.12);">📅</div>
-    <div><div class="stat-val" id="statAppointments" style="color:#7c3aed;">0</div><div class="stat-lbl">Appointments</div></div>
-  </div>
+  <div class="stat-card"><div class="stat-icon" style="background:rgba(245,158,11,0.12);">⏳</div><div><div class="stat-val" id="statPending" style="color:#b45309;">0</div><div class="stat-lbl">Pending</div></div></div>
+  <div class="stat-card"><div class="stat-icon" style="background:rgba(14,165,233,0.12);">🔬</div><div><div class="stat-val" id="statOngoing" style="color:#0369a1;">0</div><div class="stat-lbl">Ongoing</div></div></div>
+  <div class="stat-card"><div class="stat-icon" style="background:rgba(34,197,94,0.12);">✅</div><div><div class="stat-val" id="statCompleted" style="color:#15803d;">0</div><div class="stat-lbl">Completed</div></div></div>
+  <div class="stat-card"><div class="stat-icon" style="background:rgba(245,158,11,0.12);">🧾</div><div><div class="stat-val" id="statReceipts" style="color:#b45309;">0</div><div class="stat-lbl">Receipts Issued</div></div></div>
+  <div class="stat-card"><div class="stat-icon" style="background:rgba(239,68,68,0.1);">❌</div><div><div class="stat-val" id="statCancelled" style="color:#b91c1c;">0</div><div class="stat-lbl">Cancelled</div></div></div>
 </div>
 
-<!-- NAV TABS -->
+<!-- TABS -->
 <div class="nav-tabs">
   <button class="tab-btn active" id="tab-pending" onclick="switchTab('pending')">⏳ Pending <span class="tab-count" id="cnt-pending">0</span></button>
   <button class="tab-btn" id="tab-ongoing" onclick="switchTab('ongoing')">🔬 Ongoing <span class="tab-count" id="cnt-ongoing">0</span></button>
@@ -266,6 +137,7 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
 
 <!-- CONTENT -->
 <div class="content">
+  <!-- ORDERS -->
   <div id="orders-section">
     <div class="toolbar">
       <input class="search-input" id="searchInput" placeholder="🔍 Search by name, phone, order ID..." oninput="filterOrders()">
@@ -280,37 +152,64 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
     </div>
   </div>
 
-  <!-- APPOINTMENTS SECTION -->
+  <!-- APPOINTMENTS -->
   <div id="appointments-section" style="display:none;">
     <div class="toolbar">
       <input class="search-input" id="apptSearch" placeholder="🔍 Search appointments..." oninput="filterAppointments()">
       <select class="filter-select" id="apptFilter" onchange="filterAppointments()">
-        <option value="all">All</option>
-        <option value="pending">Pending</option>
-        <option value="confirmed">Confirmed</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
+        <option value="all">All</option><option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option>
       </select>
     </div>
-    <div class="orders-grid" id="apptGrid">
-      <div class="empty-state"><div class="icon">📅</div><p>Loading appointments...</p></div>
-    </div>
+    <div class="orders-grid" id="apptGrid"><div class="empty-state"><div class="icon">📅</div><p>Loading appointments...</p></div></div>
   </div>
 
-  <!-- WALLETS SECTION -->
+  <!-- WALLETS -->
   <div id="wallets-section" style="display:none;">
-    <div class="toolbar">
-      <input class="search-input" id="walletSearch" placeholder="🔍 Search patients..." oninput="filterWallets()">
-    </div>
-    <!-- TOP-UP REQUESTS -->
+    <div class="toolbar"><input class="search-input" id="walletSearch" placeholder="🔍 Search patients..." oninput="filterWallets()"></div>
     <div style="font-size:14px;font-weight:900;color:#0f172a;margin-bottom:10px;">⏳ Pending Top-Up Requests</div>
-    <div class="orders-grid" id="topupRequestsGrid">
-      <div class="empty-state"><div class="icon">💳</div><p>No pending requests</p></div>
-    </div>
+    <div class="orders-grid" id="topupRequestsGrid"><div class="empty-state"><div class="icon">💳</div><p>No pending requests</p></div></div>
     <div style="font-size:14px;font-weight:900;color:#0f172a;margin:16px 0 10px;">👥 All Patient Wallets</div>
-    <div class="orders-grid" id="walletsGrid">
-      <div class="empty-state"><div class="icon">💳</div><p>Loading wallets...</p></div>
+    <div class="orders-grid" id="walletsGrid"><div class="empty-state"><div class="icon">💳</div><p>Loading wallets...</p></div></div>
+  </div>
+</div>
+
+<!-- RECEIPT CONFIRM MODAL -->
+<div class="modal-overlay" id="receiptConfirmModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>🧾 Confirm Payment & Generate Receipt</h3>
+    <div class="receipt-confirm-field"><label>Patient Name</label><input type="text" id="rcName" readonly></div>
+    <div class="receipt-confirm-field"><label>Phone</label><input type="text" id="rcPhone" readonly></div>
+    <div class="receipt-confirm-field"><label>Order ID</label><input type="text" id="rcOrderId" readonly></div>
+    <div class="receipt-confirm-field"><label>Services (from order)</label><input type="text" id="rcServices" readonly style="font-size:12px;"></div>
+    <div class="receipt-confirm-field">
+      <label>✅ Amount Paid (UGX) — confirm exact amount received</label>
+      <input type="number" id="rcAmountPaid" placeholder="e.g. 35000">
     </div>
+    <div class="receipt-confirm-field">
+      <label>Payment Method</label>
+      <select id="rcPayment">
+        <option value="Cash">Cash</option>
+        <option value="MTN Mobile Money">MTN Mobile Money</option>
+        <option value="Airtel Money">Airtel Money</option>
+        <option value="Wallet">Patient Wallet</option>
+      </select>
+    </div>
+    <div class="receipt-confirm-field">
+      <label>Payment Status</label>
+      <select id="rcStatus">
+        <option value="PAID">✅ PAID IN FULL</option>
+        <option value="PARTIAL">⚠️ PARTIAL PAYMENT</option>
+        <option value="PENDING">⏳ PAYMENT PENDING</option>
+      </select>
+    </div>
+    <div class="receipt-confirm-field">
+      <label>Notes (optional)</label>
+      <input type="text" id="rcNotes" placeholder="e.g. balance to be paid next visit">
+    </div>
+    <button class="modal-btn orange" onclick="goToReceiptPage()">🧾 Open Receipt Generator</button>
+    <button class="modal-btn" style="margin-top:10px;background:linear-gradient(135deg,#22c55e,#16a34a);" onclick="quickSaveReceipt()">⚡ Quick Save Receipt to Firestore</button>
   </div>
 </div>
 
@@ -319,17 +218,11 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   <div class="modal">
     <div class="modal-handle"></div>
     <h3 id="creditModalTitle">💳 Update Wallet</h3>
-    <label>Patient</label>
-    <input type="text" id="creditPatientName" readonly>
+    <label>Patient</label><input type="text" id="creditPatientName" readonly>
     <label>Action</label>
-    <select id="creditType">
-      <option value="credit">➕ Credit (Add Money)</option>
-      <option value="debit">➖ Debit (Deduct Money)</option>
-    </select>
-    <label>Amount (UGX)</label>
-    <input type="number" id="creditAmount" placeholder="e.g. 50000">
-    <label>Note</label>
-    <input type="text" id="creditNote" placeholder="e.g. MTN deposit confirmed">
+    <select id="creditType"><option value="credit">➕ Credit (Add Money)</option><option value="debit">➖ Debit (Deduct Money)</option></select>
+    <label>Amount (UGX)</label><input type="number" id="creditAmount" placeholder="e.g. 50000">
+    <label>Note</label><input type="text" id="creditNote" placeholder="e.g. MTN deposit confirmed">
     <button class="modal-btn" onclick="submitCredit()">✅ Update Balance</button>
   </div>
 </div>
@@ -339,10 +232,8 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>📋 Upload Test Results</h3>
-    <label>Order ID</label>
-    <input type="text" id="resultOrderId" readonly>
-    <label>Patient Name</label>
-    <input type="text" id="resultPatientName" readonly>
+    <label>Order ID</label><input type="text" id="resultOrderId" readonly>
+    <label>Patient Name</label><input type="text" id="resultPatientName" readonly>
     <label>Tests Ordered</label>
     <div id="resultTestsFields" style="margin-bottom:14px;"></div>
     <label>Overall Summary / Extra Notes</label>
@@ -352,168 +243,150 @@ body{font-family:'Nunito',Arial,sans-serif;background:#f1f5f9;min-height:100vh;c
     <button class="modal-btn" onclick="submitResult()">✅ Save & Notify Patient</button>
   </div>
 </div>
+
 <script>
-const firebaseConfig = {
-  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId:"mobile-lab-mityana-aeae2"
-};
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2"};
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const auth=firebase.auth();
+const db=firebase.firestore();
+let allOrders=[];
+let currentTab="pending";
+let resultTargetId="";
+let receiptTargetOrder=null;
+const ADMIN_WHATSAPP="256750992939";
 
-let allOrders = [];
-let currentTab = "pending";
-let resultTargetId = "";
-const ADMIN_WHATSAPP = "256750992939";
-
-// ── AUTH ──
-auth.onAuthStateChanged(async user => {
-  if(!user){ window.location.href="login.html"; return; }
-  const snap = await db.collection("users").doc(user.uid).get();
-  if(!snap.exists || snap.data().role !== "admin"){
-    alert("Access denied");
-    await auth.signOut();
-    window.location.href="login.html";
-    return;
+// ── AUTH (admin only) ──
+auth.onAuthStateChanged(async user=>{
+  if(!user){window.location.href="login.html";return;}
+  const snap=await db.collection("users").doc(user.uid).get();
+  if(!snap.exists||snap.data().role!=="admin"){
+    if(user.email!=="edrinehero@gmail.com"){
+      alert("Access denied");await auth.signOut();window.location.href="login.html";return;
+    }
   }
   loadOrders();
   watchChatUnread();
   loadAppointments();
+  loadReceiptCount();
 });
 
-document.getElementById("logoutBtn").onclick = async () => {
-  await auth.signOut();
-  window.location.href="login.html";
-};
+document.getElementById("logoutBtn").onclick=async()=>{await auth.signOut();window.location.href="login.html";};
 
-// ── WATCH CHAT UNREAD ──
-function watchChatUnread(){
-  db.collection("chats").onSnapshot(snapshot => {
-    let total = 0;
-    snapshot.forEach(doc => { total += doc.data().unreadDoctor || 0; });
-    const badge = document.getElementById("chatNotifBadge");
-    if(total > 0){
-      badge.style.display = "inline";
-      badge.innerText = total;
-    } else {
-      badge.style.display = "none";
-    }
+// ── RECEIPT COUNT ──
+function loadReceiptCount(){
+  db.collection("receipts").onSnapshot(snap=>{
+    document.getElementById("statReceipts").innerText=snap.size;
   });
 }
 
-// ── LOAD ALL ORDERS REAL-TIME ──
+// ── CHAT BADGE ──
+function watchChatUnread(){
+  db.collection("chats").onSnapshot(snapshot=>{
+    let total=0;
+    snapshot.forEach(doc=>{total+=doc.data().unreadDoctor||0;});
+    const badge=document.getElementById("chatNotifBadge");
+    if(total>0){badge.style.display="inline";badge.innerText=total;}
+    else{badge.style.display="none";}
+  });
+}
+
+// ── LOAD ORDERS ──
 function loadOrders(){
-  db.collection("orders").orderBy("createdAt","desc").onSnapshot(snapshot => {
-    allOrders = [];
-    snapshot.forEach(doc => allOrders.push({ id: doc.id, ...doc.data() }));
+  db.collection("orders").orderBy("createdAt","desc").onSnapshot(snapshot=>{
+    allOrders=[];
+    snapshot.forEach(doc=>allOrders.push({id:doc.id,...doc.data()}));
     updateStats();
     filterOrders();
-  }, err => {
-    document.getElementById("ordersGrid").innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>Error: ${err.message}</p></div>`;
+  },err=>{
+    document.getElementById("ordersGrid").innerHTML=`<div class="empty-state"><div class="icon">❌</div><p>Error: ${err.message}</p></div>`;
   });
 }
 
-// ── STATS ──
 function updateStats(){
-  const counts = { pending:0, ongoing:0, completed:0, cancelled:0 };
-  allOrders.forEach(o => { if(counts[o.status] !== undefined) counts[o.status]++; });
-  document.getElementById("statPending").innerText = counts.pending;
-  document.getElementById("statOngoing").innerText = counts.ongoing;
-  document.getElementById("statCompleted").innerText = counts.completed;
-  document.getElementById("statCancelled").innerText = counts.cancelled;
-  document.getElementById("cnt-pending").innerText = counts.pending;
-  document.getElementById("cnt-ongoing").innerText = counts.ongoing;
-  document.getElementById("cnt-completed").innerText = counts.completed;
-  document.getElementById("cnt-cancelled").innerText = counts.cancelled;
-  document.getElementById("cnt-all").innerText = allOrders.length;
+  const counts={pending:0,ongoing:0,completed:0,cancelled:0};
+  allOrders.forEach(o=>{if(counts[o.status]!==undefined)counts[o.status]++;});
+  document.getElementById("statPending").innerText=counts.pending;
+  document.getElementById("statOngoing").innerText=counts.ongoing;
+  document.getElementById("statCompleted").innerText=counts.completed;
+  document.getElementById("statCancelled").innerText=counts.cancelled;
+  document.getElementById("cnt-pending").innerText=counts.pending;
+  document.getElementById("cnt-ongoing").innerText=counts.ongoing;
+  document.getElementById("cnt-completed").innerText=counts.completed;
+  document.getElementById("cnt-cancelled").innerText=counts.cancelled;
+  document.getElementById("cnt-all").innerText=allOrders.length;
 }
 
-// ── TAB SWITCH ──
 function switchTab(tab){
-  currentTab = tab;
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  currentTab=tab;
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("tab-"+tab).classList.add("active");
-  document.getElementById("orders-section").style.display = (tab === "appointments" || tab === "wallets") ? "none" : "block";
-  document.getElementById("appointments-section").style.display = tab === "appointments" ? "block" : "none";
-  document.getElementById("wallets-section").style.display = tab === "wallets" ? "block" : "none";
-  if(tab === "appointments") filterAppointments();
-  else if(tab === "wallets") loadWallets();
+  document.getElementById("orders-section").style.display=(tab==="appointments"||tab==="wallets")?"none":"block";
+  document.getElementById("appointments-section").style.display=tab==="appointments"?"block":"none";
+  document.getElementById("wallets-section").style.display=tab==="wallets"?"block":"none";
+  if(tab==="appointments")filterAppointments();
+  else if(tab==="wallets")loadWallets();
   else filterOrders();
 }
 
-// ── FILTER + SORT ──
 function filterOrders(){
-  const search = document.getElementById("searchInput").value.toLowerCase();
-  const sort = document.getElementById("sortSelect").value;
-
-  let filtered = allOrders.filter(o => {
-    const matchTab = currentTab === "all" || o.status === currentTab;
-    const matchSearch = !search ||
-      (o.name||"").toLowerCase().includes(search) ||
-      (o.phone||"").toLowerCase().includes(search) ||
-      (o.id||"").toLowerCase().includes(search) ||
-      (o.location||"").toLowerCase().includes(search);
-    return matchTab && matchSearch;
+  const search=document.getElementById("searchInput").value.toLowerCase();
+  const sort=document.getElementById("sortSelect").value;
+  let filtered=allOrders.filter(o=>{
+    const matchTab=currentTab==="all"||o.status===currentTab;
+    const matchSearch=!search||(o.name||"").toLowerCase().includes(search)||(o.phone||"").toLowerCase().includes(search)||(o.id||"").toLowerCase().includes(search)||(o.location||"").toLowerCase().includes(search);
+    return matchTab&&matchSearch;
   });
-
-  if(sort === "oldest") filtered.reverse();
-  else if(sort === "highest"){
-    filtered.sort((a,b) => {
-      const aTotal = parseInt((a.total||"0").replace(/\D/g,"")) || 0;
-      const bTotal = parseInt((b.total||"0").replace(/\D/g,"")) || 0;
-      return bTotal - aTotal;
-    });
-  }
-
+  if(sort==="oldest")filtered.reverse();
+  else if(sort==="highest")filtered.sort((a,b)=>(parseInt((b.total||"0").replace(/\D/g,""))||0)-(parseInt((a.total||"0").replace(/\D/g,""))||0));
   renderOrders(filtered);
 }
 
-// ── RENDER ORDERS ──
 function renderOrders(orders){
-  const grid = document.getElementById("ordersGrid");
-  if(orders.length === 0){
-    grid.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No orders found</p></div>`;
-    return;
-  }
-  grid.innerHTML = "";
-  orders.forEach((o, idx) => {
-    const card = document.createElement("div");
-    card.className = "order-card";
-    const time = o.createdAt ? o.createdAt.toDate().toLocaleString("en-UG") : "—";
-    const testsArr = (o.tests||"").split("\n").filter(t=>t.trim());
-    const testsHtml = testsArr.map(t=>`• ${t}`).join("<br>") || "—";
-    const statusClass = `status-${o.status||"pending"}`;
-    const statusLabel = {pending:"⏳ Pending",ongoing:"🔬 Ongoing",completed:"✅ Completed",cancelled:"❌ Cancelled"}[o.status] || o.status;
+  const grid=document.getElementById("ordersGrid");
+  if(orders.length===0){grid.innerHTML=`<div class="empty-state"><div class="icon">📭</div><p>No orders found</p></div>`;return;}
+  grid.innerHTML="";
+  orders.forEach((o,idx)=>{
+    const card=document.createElement("div");
+    card.className="order-card";
+    const time=o.createdAt?o.createdAt.toDate().toLocaleString("en-UG"):"—";
+    const testsArr=(o.tests||"").split("\n").filter(t=>t.trim());
+    const testsHtml=testsArr.map(t=>`• ${t}`).join("<br>")||"—";
+    const statusClass=`status-${o.status||"pending"}`;
+    const statusLabel={pending:"⏳ Pending",ongoing:"🔬 Ongoing",completed:"✅ Completed",cancelled:"❌ Cancelled"}[o.status]||o.status;
+    const hasReceipt=o.receiptNo?"✅ Receipt: "+o.receiptNo:"";
 
-    // Action buttons based on status
-    let actionBtns = "";
-    if(o.status === "pending"){
-      actionBtns = `
+    // Action buttons — receipt button appears on ongoing AND completed
+    let actionBtns="";
+    if(o.status==="pending"){
+      actionBtns=`
         <button class="action-btn btn-start" onclick="startOrder('${o.id}',this)">▶ Start Test</button>
         <button class="action-btn btn-whatsapp" onclick="waContact('${o.phone}','${o.name}','${o.id}')">💬 WhatsApp</button>
+        <button class="action-btn btn-receipt" onclick="openReceiptModal('${o.id}')">🧾 Receipt</button>
         <button class="action-btn btn-cancel" onclick="cancelOrder('${o.id}',this)">✕ Cancel</button>`;
-    } else if(o.status === "ongoing"){
-      actionBtns = `
+    } else if(o.status==="ongoing"){
+      actionBtns=`
         <button class="action-btn btn-result" onclick="openResultModal('${o.id}','${o.name}')">📋 Upload Results</button>
+        <button class="action-btn btn-complete" onclick="completeOrder('${o.id}',this)">✅ Mark Complete</button>
+        <button class="action-btn btn-receipt" onclick="openReceiptModal('${o.id}')">🧾 Receipt</button>
+        <button class="action-btn btn-whatsapp" onclick="waContact('${o.phone}','${o.name}','${o.id}')">💬 WhatsApp</button>`;
+    } else if(o.status==="completed"){
+      actionBtns=`
+        <button class="action-btn btn-receipt" onclick="openReceiptModal('${o.id}')">🧾 ${o.receiptNo?"View Receipt":"Generate Receipt"}</button>
         <button class="action-btn btn-whatsapp" onclick="waContact('${o.phone}','${o.name}','${o.id}')">💬 WhatsApp</button>
-        <button class="action-btn btn-complete" onclick="completeOrder('${o.id}',this)">✅ Mark Complete</button>`;
-    } else if(o.status === "completed"){
-      actionBtns = `
-        <button class="action-btn btn-whatsapp" onclick="waContact('${o.phone}','${o.name}','${o.id}')">💬 WhatsApp</button>
-        <button class="action-btn btn-view" onclick="toggleDetail('detail-${o.id}')">👁 View Details</button>`;
-    } else if(o.status === "cancelled"){
-      actionBtns = `
+        <button class="action-btn btn-view" onclick="toggleDetail('detail-${o.id}')">👁 Details</button>`;
+    } else if(o.status==="cancelled"){
+      actionBtns=`
         <button class="action-btn btn-start" onclick="restoreOrder('${o.id}',this)">↩ Restore</button>
-        <button class="action-btn btn-view" onclick="toggleDetail('detail-${o.id}')">👁 View Details</button>`;
+        <button class="action-btn btn-view" onclick="toggleDetail('detail-${o.id}')">👁 Details</button>`;
     }
 
-    card.innerHTML = `
+    card.innerHTML=`
       <div class="order-top">
         <div>
           <div class="order-id">#${idx+1} &nbsp;•&nbsp; ${o.id}</div>
-          <div class="order-name">${o.name || "—"}</div>
+          <div class="order-name">${o.name||"—"}</div>
           <div class="order-contact">📞 ${o.phone||"—"} &nbsp;|&nbsp; ✉️ ${o.email||"—"}</div>
+          ${hasReceipt?`<div style="font-size:11px;font-weight:800;color:#15803d;margin-top:3px;">${hasReceipt}</div>`:""}
         </div>
         <div>
           <span class="status-badge ${statusClass}">${statusLabel}</span>
@@ -529,7 +402,7 @@ function renderOrders(orders){
       <div class="order-tests">${testsHtml}</div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div class="order-total">${o.total||"UGX 0"}</div>
-        ${o.notes && o.notes !== "None" ? `<div class="meta-chip">📝 ${o.notes}</div>` : ""}
+        ${o.notes&&o.notes!=="None"?`<div class="meta-chip">📝 ${o.notes}</div>`:""}
       </div>
       <div class="order-actions">${actionBtns}</div>
       <div class="order-detail" id="detail-${o.id}">
@@ -538,481 +411,338 @@ function renderOrders(orders){
         <div class="detail-row"><span>Payment</span><span>${o.payment||"—"}</span></div>
         <div class="detail-row"><span>Location</span><span>${o.location||"—"}</span></div>
         <div class="detail-row"><span>Notes</span><span>${o.notes||"None"}</span></div>
-        ${o.cancelReason ? `<div class="detail-row"><span>Cancel Reason</span><span>${o.cancelReason}</span></div>` : ""}
-        ${o.resultText ? `<div class="detail-row"><span>Results</span><span>${o.resultText}</span></div>` : ""}
-        ${o.resultNotes ? `<div class="detail-row"><span>Doctor Notes</span><span>${o.resultNotes}</span></div>` : ""}
-      </div>
-    `;
+        ${o.receiptNo?`<div class="detail-row"><span>Receipt No</span><span>${o.receiptNo}</span></div>`:""}
+        ${o.amountPaid?`<div class="detail-row"><span>Amount Paid</span><span>UGX ${Number(o.amountPaid).toLocaleString()}</span></div>`:""}
+        ${o.cancelReason?`<div class="detail-row"><span>Cancel Reason</span><span>${o.cancelReason}</span></div>`:""}
+        ${o.resultText?`<div class="detail-row"><span>Results</span><span>${o.resultText}</span></div>`:""}
+        ${o.resultNotes?`<div class="detail-row"><span>Doctor Notes</span><span>${o.resultNotes}</span></div>`:""}
+      </div>`;
     grid.appendChild(card);
   });
 }
+</script>
 
+<script>
 // ── ORDER ACTIONS ──
-async function startOrder(orderId, btn){
-  btn.disabled = true; btn.innerText = "Starting...";
-  try{
-    await db.collection("orders").doc(orderId).update({
-      status:"ongoing",
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    showToast("🔬 Test started!");
-  } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="▶ Start Test"; }
+async function startOrder(orderId,btn){
+  btn.disabled=true;btn.innerText="Starting...";
+  try{await db.collection("orders").doc(orderId).update({status:"ongoing",updatedAt:firebase.firestore.FieldValue.serverTimestamp()});showToast("🔬 Test started!");}
+  catch(err){alert("Failed: "+err.message);btn.disabled=false;btn.innerText="▶ Start Test";}
 }
-
-async function completeOrder(orderId, btn){
-  if(!confirm("Mark this order as completed?")) return;
-  btn.disabled = true; btn.innerText = "Saving...";
-  try{
-    await db.collection("orders").doc(orderId).update({
-      status:"completed",
-      completedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    showToast("✅ Order marked complete!");
-  } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="✅ Mark Complete"; }
+async function completeOrder(orderId,btn){
+  if(!confirm("Mark this order as completed?"))return;
+  btn.disabled=true;btn.innerText="Saving...";
+  try{await db.collection("orders").doc(orderId).update({status:"completed",completedAt:firebase.firestore.FieldValue.serverTimestamp()});showToast("✅ Order marked complete!");}
+  catch(err){alert("Failed: "+err.message);btn.disabled=false;btn.innerText="✅ Mark Complete";}
 }
-
-async function cancelOrder(orderId, btn){
-  const reason = prompt("Reason for cancellation?");
-  if(!reason) return;
-  btn.disabled = true; btn.innerText = "Cancelling...";
-  try{
-    await db.collection("orders").doc(orderId).update({
-      status:"cancelled",
-      cancelReason: reason,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    showToast("❌ Order cancelled");
-  } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="✕ Cancel"; }
+async function cancelOrder(orderId,btn){
+  const reason=prompt("Reason for cancellation?");if(!reason)return;
+  btn.disabled=true;btn.innerText="Cancelling...";
+  try{await db.collection("orders").doc(orderId).update({status:"cancelled",cancelReason:reason,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});showToast("❌ Order cancelled");}
+  catch(err){alert("Failed: "+err.message);btn.disabled=false;btn.innerText="✕ Cancel";}
 }
-
-async function restoreOrder(orderId, btn){
-  btn.disabled = true; btn.innerText = "Restoring...";
-  try{
-    await db.collection("orders").doc(orderId).update({
-      status:"pending",
-      cancelReason: firebase.firestore.FieldValue.delete(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    showToast("↩ Order restored to pending");
-  } catch(err){ alert("Failed: "+err.message); btn.disabled=false; btn.innerText="↩ Restore"; }
+async function restoreOrder(orderId,btn){
+  btn.disabled=true;btn.innerText="Restoring...";
+  try{await db.collection("orders").doc(orderId).update({status:"pending",cancelReason:firebase.firestore.FieldValue.delete(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});showToast("↩ Order restored");}
+  catch(err){alert("Failed: "+err.message);btn.disabled=false;btn.innerText="↩ Restore";}
 }
-
-// ── WHATSAPP CONTACT ──
-function waContact(phone, name, orderId){
-  if(!phone){ showToast("No phone number"); return; }
-  const msg = `Hello ${name}, this is Mobile Lab Mityana regarding your order ${orderId}. `;
+function waContact(phone,name,orderId){
+  if(!phone){showToast("No phone number");return;}
+  const msg=`Hello ${name}, this is Mobile Lab Mityana regarding your order ${orderId}. `;
   window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
 }
+function toggleDetail(id){const el=document.getElementById(id);if(el)el.classList.toggle("open");}
 
-// ── RESULT MODAL ──
-function openResultModal(orderId, patientName){
-  resultTargetId = orderId;
-  document.getElementById("resultOrderId").value = orderId;
-  document.getElementById("resultPatientName").value = patientName;
-  document.getElementById("resultText").value = "";
-  document.getElementById("resultNotes").value = "";
+// ── RECEIPT MODAL ──
+function openReceiptModal(orderId){
+  const o=allOrders.find(x=>x.id===orderId);
+  if(!o){showToast("Order not found");return;}
+  receiptTargetOrder=o;
+  document.getElementById("rcName").value=o.name||"";
+  document.getElementById("rcPhone").value=o.phone||"";
+  document.getElementById("rcOrderId").value=o.order_id||orderId;
+  // Summarise services
+  const testsArr=(o.tests||"").split("\n").filter(t=>t.trim());
+  document.getElementById("rcServices").value=testsArr.map(t=>t.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim()).join(", ");
+  // Pre-fill paid from order total
+  const totalNum=parseInt((o.total||"0").replace(/\D/g,""))||0;
+  document.getElementById("rcAmountPaid").value=totalNum;
+  document.getElementById("rcPayment").value=o.payment||"Cash";
+  document.getElementById("rcStatus").value=o.paymentConfirmed?"PAID":"PAID";
+  document.getElementById("rcNotes").value="";
+  document.getElementById("receiptConfirmModal").classList.add("open");
+}
+document.getElementById("receiptConfirmModal").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove("open");});
 
-  // Build per-test input fields from the order
-  const order = allOrders.find(o => o.id === orderId);
-  const testsField = document.getElementById("resultTestsFields");
-  testsField.innerHTML = "";
+// Open full receipt generator page with data pre-filled via sessionStorage
+function goToReceiptPage(){
+  if(!receiptTargetOrder){return;}
+  const paid=document.getElementById("rcAmountPaid").value;
+  const payment=document.getElementById("rcPayment").value;
+  const status=document.getElementById("rcStatus").value;
+  const notes=document.getElementById("rcNotes").value;
+  // Store in sessionStorage so receipt.html can pick it up
+  sessionStorage.setItem("prefillOrder",JSON.stringify({
+    orderId:receiptTargetOrder.order_id||receiptTargetOrder.id,
+    name:receiptTargetOrder.name||"",
+    phone:receiptTargetOrder.phone||"",
+    location:receiptTargetOrder.location||"",
+    tests:receiptTargetOrder.tests||"",
+    amountPaid:paid,
+    payment,status,notes
+  }));
+  window.open("receipt.html","_blank");
+  document.getElementById("receiptConfirmModal").classList.remove("open");
+}
 
-  if(order && order.tests){
-    const tests = order.tests.split("\n").filter(t => t.trim());
-    if(tests.length > 0){
-      tests.forEach((testLine, i) => {
-        // Strip price part e.g. "HIV (UGX 7,000)" → "HIV"
-        const testName = testLine.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim();
-        if(!testName) return;
-        const row = document.createElement("div");
-        row.className = "test-result-row";
-        row.innerHTML = `
-          <div class="test-lbl">🧪 ${testName}</div>
-          <input type="text" placeholder="Enter result..." id="testResult_${i}" data-test="${testName}">
-        `;
-        testsField.appendChild(row);
-      });
-    } else {
-      testsField.innerHTML = `<p style="font-size:13px;color:#64748b;font-weight:600;">No tests found — type results in the summary below.</p>`;
+// Quick save receipt to Firestore without opening full page
+async function quickSaveReceipt(){
+  if(!receiptTargetOrder){return;}
+  const paid=parseFloat(document.getElementById("rcAmountPaid").value)||0;
+  const payment=document.getElementById("rcPayment").value;
+  const status=document.getElementById("rcStatus").value;
+  const notes=document.getElementById("rcNotes").value;
+  const o=receiptTargetOrder;
+  const testsArr=(o.tests||"").split("\n").filter(t=>t.trim());
+  const services=testsArr.map(line=>{
+    const match=line.match(/(.+)\s*\(UGX\s*([\d,]+)\)/i);
+    if(match)return{name:match[1].trim(),price:parseInt(match[2].replace(/,/g,""))||0};
+    return{name:line.replace(/^[•\-]\s*/,"").trim(),price:0};
+  }).filter(s=>s.name);
+  const subtotal=services.reduce((s,x)=>s+x.price,0);
+  const totalNum=parseInt((o.total||"0").replace(/\D/g,""))||subtotal;
+  const balance=Math.max(0,totalNum-paid);
+  const receiptNo="RCP-"+Date.now().toString().slice(-8);
+  const now=new Date();
+  const receiptData={
+    receiptNo,
+    orderId:o.order_id||o.id,
+    userId:o.userId||"",
+    name:o.name||"",
+    phone:o.phone||"",
+    location:o.location||"",
+    services,subtotal,discount:0,
+    total:totalNum,paid,balance,
+    payment,status,notes,
+    date:now.toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"}),
+    time:now.toLocaleTimeString("en-UG",{hour:"2-digit",minute:"2-digit"}),
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try{
+    await db.collection("receipts").doc(receiptNo).set(receiptData);
+    await db.collection("orders").doc(o.id).update({
+      receiptNo,amountPaid:paid,paymentConfirmed:true,
+      status:status==="PAID"?"completed":o.status
+    });
+    document.getElementById("receiptConfirmModal").classList.remove("open");
+    showToast("✅ Receipt saved — "+receiptNo);
+    // Send WhatsApp notification to patient
+    if(o.phone){
+      const svcList=services.map(s=>`• ${s.name} — UGX ${s.price.toLocaleString()}`).join("\n");
+      const msg=`🧾 *Receipt from Mobile Lab Mityana*\nReceipt No: *${receiptNo}*\nDate: ${receiptData.date}\n\n*Services:*\n${svcList}\n\n*Total: UGX ${totalNum.toLocaleString()}*\nPaid: UGX ${paid.toLocaleString()}${balance>0?`\nBalance: UGX ${balance.toLocaleString()}`:""}\nPayment: ${payment}\nStatus: *${status}*\n\nThank you for choosing Mobile Lab Mityana 💙`;
+      window.open(`https://wa.me/${o.phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`,"_blank");
     }
-  } else {
-    testsField.innerHTML = `<p style="font-size:13px;color:#64748b;font-weight:600;">No tests found — type results in the summary below.</p>`;
-  }
+  }catch(err){showToast("Failed: "+err.message);}
+}
 
+// ── RESULTS MODAL ──
+function openResultModal(orderId,patientName){
+  resultTargetId=orderId;
+  document.getElementById("resultOrderId").value=orderId;
+  document.getElementById("resultPatientName").value=patientName;
+  document.getElementById("resultText").value="";
+  document.getElementById("resultNotes").value="";
+  const order=allOrders.find(o=>o.id===orderId);
+  const testsField=document.getElementById("resultTestsFields");
+  testsField.innerHTML="";
+  if(order&&order.tests){
+    const tests=order.tests.split("\n").filter(t=>t.trim());
+    tests.forEach((testLine,i)=>{
+      const testName=testLine.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim();
+      if(!testName)return;
+      const row=document.createElement("div");
+      row.className="test-result-row";
+      row.innerHTML=`<div class="test-lbl">🧪 ${testName}</div><input type="text" placeholder="Enter result..." id="testResult_${i}" data-test="${testName}">`;
+      testsField.appendChild(row);
+    });
+  }
   document.getElementById("resultModal").classList.add("open");
 }
-
-document.getElementById("resultModal").addEventListener("click", e => {
-  if(e.target === e.currentTarget) e.currentTarget.classList.remove("open");
-});
+document.getElementById("resultModal").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove("open");});
 
 async function submitResult(){
-  // Build resultText from per-test fields
-  const testRows = document.querySelectorAll("#resultTestsFields .test-result-row input");
-  let builtText = "";
-  testRows.forEach(input => {
-    const testName = input.dataset.test;
-    const value = input.value.trim();
-    if(testName) builtText += `${testName}: ${value || "Pending"}\n`;
-  });
-
-  // Append manual summary if filled
-  const manualSummary = document.getElementById("resultText").value.trim();
-  if(manualSummary) builtText += `\n${manualSummary}`;
-
-  const resultText = builtText.trim();
-  const resultNotes = document.getElementById("resultNotes").value.trim();
-
-  if(!resultText){ showToast("Please enter at least one test result"); return; }
-
-  const order = allOrders.find(o => o.id === resultTargetId);
+  const testRows=document.querySelectorAll("#resultTestsFields .test-result-row input");
+  let builtText="";
+  testRows.forEach(input=>{if(input.dataset.test)builtText+=`${input.dataset.test}: ${input.value.trim()||"Pending"}\n`;});
+  const manualSummary=document.getElementById("resultText").value.trim();
+  if(manualSummary)builtText+=`\n${manualSummary}`;
+  const resultText=builtText.trim();
+  const resultNotes=document.getElementById("resultNotes").value.trim();
+  if(!resultText){showToast("Please enter at least one test result");return;}
+  const order=allOrders.find(o=>o.id===resultTargetId);
   try{
-    // Save results to order
-    await db.collection("orders").doc(resultTargetId).update({
-      status: "completed",
-      resultText,
-      resultNotes,
-      completedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // Save to results collection so patient can see it
-    await db.collection("results").doc(resultTargetId).set({
-      orderId: resultTargetId,
-      userId: order?.userId || "",
-      patientName: order?.name || "",
-      resultText,
-      resultNotes,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // Notify patient via WhatsApp
+    await db.collection("orders").doc(resultTargetId).update({status:"completed",resultText,resultNotes,completedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection("results").doc(resultTargetId).set({orderId:resultTargetId,userId:order?.userId||"",patientName:order?.name||"",resultText,resultNotes,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     if(order?.phone){
-      const waMsg = `Hello ${order.name}, your lab results for order ${resultTargetId} are ready!\n\n📋 Results:\n${resultText}\n\n👨‍⚕️ Doctor's Notes:\n${resultNotes||"None"}\n\nMobile Lab – Mityana`;
+      const waMsg=`Hello ${order.name}, your lab results for order ${resultTargetId} are ready!\n\n📋 Results:\n${resultText}\n\n👨‍⚕️ Doctor's Notes:\n${resultNotes||"None"}\n\nMobile Lab – Mityana`;
       window.open(`https://wa.me/${order.phone.replace(/^0/,"256")}?text=${encodeURIComponent(waMsg)}`);
     }
-
     document.getElementById("resultModal").classList.remove("open");
     showToast("✅ Results saved & patient notified!");
-  } catch(err){ alert("Failed: "+err.message); }
-}
-
-// ── TOGGLE DETAIL ──
-function toggleDetail(id){
-  const el = document.getElementById(id);
-  if(el) el.classList.toggle("open");
+  }catch(err){alert("Failed: "+err.message);}
 }
 
 // ── TOAST ──
-function showToast(msg){
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2500);
-}
+function showToast(msg){const t=document.getElementById("toast");t.innerText=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500);}
+</script>
 
+<script>
 // ── APPOINTMENTS ──
-let allAppointments = [];
-
+let allAppointments=[];
 function loadAppointments(){
-  db.collection("appointments").orderBy("createdAt","desc").onSnapshot(snapshot => {
-    allAppointments = [];
-    snapshot.forEach(doc => allAppointments.push({ id: doc.id, ...doc.data() }));
-    // Update count badge
-    const pending = allAppointments.filter(a => a.status === "pending").length;
-    document.getElementById("cnt-appointments").innerText = allAppointments.length;
-    document.getElementById("statAppointments").innerText = pending;
+  db.collection("appointments").orderBy("createdAt","desc").onSnapshot(snapshot=>{
+    allAppointments=[];
+    snapshot.forEach(doc=>allAppointments.push({id:doc.id,...doc.data()}));
+    document.getElementById("cnt-appointments").innerText=allAppointments.length;
     filterAppointments();
   });
 }
-
 function filterAppointments(){
-  const search = (document.getElementById("apptSearch")?.value || "").toLowerCase();
-  const filter = document.getElementById("apptFilter")?.value || "all";
-  let list = allAppointments.filter(a => {
-    const matchFilter = filter === "all" || a.status === filter;
-    const matchSearch = !search ||
-      (a.name||"").toLowerCase().includes(search) ||
-      (a.phone||"").toLowerCase().includes(search) ||
-      (a.service||"").toLowerCase().includes(search) ||
-      (a.date||"").includes(search);
-    return matchFilter && matchSearch;
+  const search=(document.getElementById("apptSearch")?.value||"").toLowerCase();
+  const filter=document.getElementById("apptFilter")?.value||"all";
+  const list=allAppointments.filter(a=>{
+    const mF=filter==="all"||a.status===filter;
+    const mS=!search||(a.name||"").toLowerCase().includes(search)||(a.phone||"").includes(search)||(a.service||"").toLowerCase().includes(search);
+    return mF&&mS;
   });
   renderAppointments(list);
 }
-
 function renderAppointments(list){
-  const grid = document.getElementById("apptGrid");
-  if(list.length === 0){
-    grid.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No appointments found</p></div>`;
-    return;
-  }
-  grid.innerHTML = "";
-  list.forEach((a, idx) => {
-    const card = document.createElement("div");
-    card.className = "order-card";
-    const statusClass = `status-${a.status||"pending"}`;
-    const statusLabel = {pending:"⏳ Pending",confirmed:"✅ Confirmed",completed:"✔ Done",cancelled:"❌ Cancelled"}[a.status] || a.status;
-    const createdAt = a.createdAt ? a.createdAt.toDate().toLocaleString("en-UG") : "—";
-
-    // Action buttons
-    let actions = "";
-    if(a.status === "pending"){
-      actions = `
-        <button class="action-btn btn-start" onclick="confirmAppt('${a.id}','${a.name}','${a.phone}',this)">✅ Confirm</button>
-        <button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button>
-        <button class="action-btn btn-cancel" onclick="cancelAppt('${a.id}',this)">✕ Cancel</button>`;
-    } else if(a.status === "confirmed"){
-      actions = `
-        <button class="action-btn btn-complete" onclick="doneAppt('${a.id}',this)">✔ Mark Done</button>
-        <button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button>
-        <button class="action-btn btn-cancel" onclick="cancelAppt('${a.id}',this)">✕ Cancel</button>`;
-    } else {
-      actions = `<button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button>`;
+  const grid=document.getElementById("apptGrid");
+  if(list.length===0){grid.innerHTML=`<div class="empty-state"><div class="icon">📭</div><p>No appointments found</p></div>`;return;}
+  grid.innerHTML="";
+  list.forEach((a,idx)=>{
+    const card=document.createElement("div");
+    card.className="order-card";
+    const statusClass=`status-${a.status||"pending"}`;
+    const statusLabel={pending:"⏳ Pending",confirmed:"✅ Confirmed",completed:"✔ Done",cancelled:"❌ Cancelled"}[a.status]||a.status;
+    const createdAt=a.createdAt?a.createdAt.toDate().toLocaleString("en-UG"):"—";
+    let actions="";
+    if(a.status==="pending"){
+      actions=`<button class="action-btn btn-start" onclick="confirmAppt('${a.id}','${a.name}','${a.phone}',this)">✅ Confirm</button><button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button><button class="action-btn btn-cancel" onclick="cancelAppt('${a.id}',this)">✕ Cancel</button>`;
+    }else if(a.status==="confirmed"){
+      actions=`<button class="action-btn btn-complete" onclick="doneAppt('${a.id}',this)">✔ Mark Done</button><button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button><button class="action-btn btn-cancel" onclick="cancelAppt('${a.id}',this)">✕ Cancel</button>`;
+    }else{
+      actions=`<button class="action-btn btn-whatsapp" onclick="waAppt('${a.phone}','${a.name}','${a.date}','${a.time}')">💬 WhatsApp</button>`;
     }
-
-    card.innerHTML = `
-      <div class="order-top">
-        <div>
-          <div class="order-id">#${idx+1} &nbsp;•&nbsp; ${a.apptId||a.id}</div>
-          <div class="order-name">${a.name||"—"}</div>
-          <div class="order-contact">📞 ${a.phone||"—"}</div>
-        </div>
-        <div>
-          <span class="status-badge ${statusClass}">${statusLabel}</span>
-          <div class="order-time" style="margin-top:6px;text-align:right;">${createdAt}</div>
-        </div>
-      </div>
-      <div class="order-meta">
-        <div class="meta-chip">🏥 ${a.service||"—"}</div>
-        <div class="meta-chip">📆 ${a.date||"—"}</div>
-        <div class="meta-chip">🕐 ${a.time||"—"}</div>
-        <div class="meta-chip">📍 ${a.location||"—"}</div>
-      </div>
-      ${a.notes && a.notes !== "None" ? `<div class="order-tests">📝 ${a.notes}</div>` : ""}
-      <div class="order-actions">${actions}</div>
-    `;
+    card.innerHTML=`<div class="order-top"><div><div class="order-id">#${idx+1} &nbsp;•&nbsp; ${a.apptId||a.id}</div><div class="order-name">${a.name||"—"}</div><div class="order-contact">📞 ${a.phone||"—"}</div></div><div><span class="status-badge ${statusClass}">${statusLabel}</span><div class="order-time" style="margin-top:6px;">${createdAt}</div></div></div><div class="order-meta"><div class="meta-chip">🏥 ${a.service||"—"}</div><div class="meta-chip">📆 ${a.date||"—"}</div><div class="meta-chip">🕐 ${a.time||"—"}</div><div class="meta-chip">📍 ${a.location||"—"}</div></div>${a.notes&&a.notes!=="None"?`<div class="order-tests">📝 ${a.notes}</div>`:""}<div class="order-actions">${actions}</div>`;
     grid.appendChild(card);
   });
 }
-
-async function confirmAppt(id, name, phone, btn){
-  btn.disabled = true; btn.innerText = "Confirming...";
+async function confirmAppt(id,name,phone,btn){
+  btn.disabled=true;btn.innerText="Confirming...";
+  const appt=allAppointments.find(a=>a.id===id);
   try{
-    await db.collection("appointments").doc(id).update({
-      status: "confirmed",
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Notify patient on WhatsApp
-    const appt = allAppointments.find(a => a.id === id);
-    if(phone){
-      const msg = `✅ Hello ${name}, your appointment has been CONFIRMED!\n📆 Date: ${appt?.date||""}\n🕐 Time: ${appt?.time||""}\n🏥 Service: ${appt?.service||""}\n\nMobile Lab – Mityana`;
-      window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
-    }
-    showToast("✅ Appointment confirmed & patient notified!");
-  } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✅ Confirm"; }
+    await db.collection("appointments").doc(id).update({status:"confirmed",updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    if(phone){const msg=`✅ Hello ${name}, your appointment has been CONFIRMED!\n📆 Date: ${appt?.date||""}\n🕐 Time: ${appt?.time||""}\n🏥 Service: ${appt?.service||""}\n\nMobile Lab – Mityana`;window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);}
+    showToast("✅ Appointment confirmed!");
+  }catch(err){showToast("Failed: "+err.message);btn.disabled=false;btn.innerText="✅ Confirm";}
 }
-
-async function doneAppt(id, btn){
-  btn.disabled = true; btn.innerText = "Saving...";
+async function doneAppt(id,btn){
+  btn.disabled=true;btn.innerText="Saving...";
+  try{await db.collection("appointments").doc(id).update({status:"completed",completedAt:firebase.firestore.FieldValue.serverTimestamp()});showToast("✔ Done!");}
+  catch(err){showToast("Failed: "+err.message);btn.disabled=false;btn.innerText="✔ Mark Done";}
+}
+async function cancelAppt(id,btn){
+  const reason=prompt("Reason for cancellation?");if(!reason)return;
+  btn.disabled=true;btn.innerText="Cancelling...";
+  const appt=allAppointments.find(a=>a.id===id);
   try{
-    await db.collection("appointments").doc(id).update({
-      status: "completed",
-      completedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    showToast("✔ Appointment marked as done!");
-  } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✔ Mark Done"; }
+    await db.collection("appointments").doc(id).update({status:"cancelled",cancelReason:reason,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    if(appt?.phone){const msg=`❌ Hello ${appt.name}, your appointment on ${appt.date} has been cancelled.\nReason: ${reason}\n\nMobile Lab – Mityana`;window.open(`https://wa.me/${appt.phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);}
+    showToast("Cancelled");
+  }catch(err){showToast("Failed: "+err.message);btn.disabled=false;btn.innerText="✕ Cancel";}
 }
-
-async function cancelAppt(id, btn){
-  const reason = prompt("Reason for cancellation?");
-  if(!reason) return;
-  btn.disabled = true; btn.innerText = "Cancelling...";
-  try{
-    const appt = allAppointments.find(a => a.id === id);
-    await db.collection("appointments").doc(id).update({
-      status: "cancelled",
-      cancelReason: reason,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Notify patient
-    if(appt?.phone){
-      const msg = `❌ Hello ${appt.name}, your appointment on ${appt.date} at ${appt.time} has been cancelled.\nReason: ${reason}\n\nPlease contact us to reschedule.\nMobile Lab – Mityana`;
-      window.open(`https://wa.me/${appt.phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
-    }
-    showToast("Appointment cancelled");
-  } catch(err){ showToast("Failed: "+err.message); btn.disabled=false; btn.innerText="✕ Cancel"; }
-}
-
-function waAppt(phone, name, date, time){
-  if(!phone){ showToast("No phone number"); return; }
-  const msg = `Hello ${name}, this is Mobile Lab Mityana regarding your appointment on ${date} at ${time}. `;
-  window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
+function waAppt(phone,name,date,time){
+  if(!phone){showToast("No phone number");return;}
+  window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(`Hello ${name}, this is Mobile Lab Mityana regarding your appointment on ${date} at ${time}. `)}`);
 }
 
 // ── WALLETS ──
-let allWallets = [];
-let allTopupRequests = [];
-let creditTargetUserId = "";
-
+let allWallets=[];
+let allTopupRequests=[];
+let creditTargetUserId="";
 function loadWallets(){
-  // Load top-up requests
-  db.collection("topup_requests").where("status","==","pending")
-    .onSnapshot(snap => {
-      allTopupRequests = [];
-      snap.forEach(doc => allTopupRequests.push({ id: doc.id, ...doc.data() }));
-      document.getElementById("cnt-wallets").innerText = allTopupRequests.length;
-      renderTopupRequests();
-    });
-
-  // Load all wallets
-  db.collection("wallets").onSnapshot(async snap => {
-    allWallets = [];
+  db.collection("topup_requests").where("status","==","pending").onSnapshot(snap=>{
+    allTopupRequests=[];
+    snap.forEach(doc=>allTopupRequests.push({id:doc.id,...doc.data()}));
+    document.getElementById("cnt-wallets").innerText=allTopupRequests.length;
+    renderTopupRequests();
+  });
+  db.collection("wallets").onSnapshot(async snap=>{
+    allWallets=[];
     for(const doc of snap.docs){
-      const uid = doc.id;
-      const walletData = doc.data();
-      // Get patient name
-      const userDoc = await db.collection("users").doc(uid).get();
-      const name = userDoc.exists ? (userDoc.data().fullName || userDoc.data().email || uid) : uid;
-      const phone = userDoc.exists ? (userDoc.data().phone || "—") : "—";
-      allWallets.push({ uid, name, phone, ...walletData });
+      const uid=doc.id;
+      const walletData=doc.data();
+      const userDoc=await db.collection("users").doc(uid).get();
+      const name=userDoc.exists?(userDoc.data().fullName||userDoc.data().email||uid):uid;
+      const phone=userDoc.exists?(userDoc.data().phone||"—"):"—";
+      allWallets.push({uid,name,phone,...walletData});
     }
     renderWallets();
   });
 }
-
 function renderTopupRequests(){
-  const grid = document.getElementById("topupRequestsGrid");
-  if(allTopupRequests.length === 0){
-    grid.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>No pending top-up requests</p></div>`;
-    return;
-  }
-  grid.innerHTML = "";
-  allTopupRequests.forEach(r => {
-    const card = document.createElement("div");
-    card.className = "order-card";
-    const time = r.createdAt ? r.createdAt.toDate().toLocaleString("en-UG") : "—";
-    card.innerHTML = `
-      <div class="order-top">
-        <div>
-          <div class="order-id">Top-Up Request</div>
-          <div class="order-name">${r.userName || "—"}</div>
-          <div class="order-contact">💳 ${r.method||"—"} &nbsp;|&nbsp; Ref: ${r.ref||"N/A"}</div>
-        </div>
-        <div>
-          <div class="order-total">UGX ${(r.amount||0).toLocaleString()}</div>
-          <div class="order-time">${time}</div>
-        </div>
-      </div>
-      <div class="order-actions">
-        <button class="action-btn btn-start" onclick="approveTopup('${r.id}','${r.userId}','${r.userName}',${r.amount})">✅ Approve & Credit</button>
-        <button class="action-btn btn-cancel" onclick="rejectTopup('${r.id}')">✕ Reject</button>
-      </div>
-    `;
+  const grid=document.getElementById("topupRequestsGrid");
+  if(allTopupRequests.length===0){grid.innerHTML=`<div class="empty-state"><div class="icon">✅</div><p>No pending top-up requests</p></div>`;return;}
+  grid.innerHTML="";
+  allTopupRequests.forEach(r=>{
+    const card=document.createElement("div");card.className="order-card";
+    const time=r.createdAt?r.createdAt.toDate().toLocaleString("en-UG"):"—";
+    card.innerHTML=`<div class="order-top"><div><div class="order-id">Top-Up Request</div><div class="order-name">${r.userName||"—"}</div><div class="order-contact">💳 ${r.method||"—"} &nbsp;|&nbsp; Ref: ${r.ref||"N/A"}</div></div><div><div class="order-total">UGX ${(r.amount||0).toLocaleString()}</div><div class="order-time">${time}</div></div></div><div class="order-actions"><button class="action-btn btn-start" onclick="approveTopup('${r.id}','${r.userId}','${r.userName}',${r.amount})">✅ Approve & Credit</button><button class="action-btn btn-cancel" onclick="rejectTopup('${r.id}')">✕ Reject</button></div>`;
     grid.appendChild(card);
   });
 }
-
 function filterWallets(){
-  const search = (document.getElementById("walletSearch")?.value||"").toLowerCase();
-  const filtered = allWallets.filter(w => w.name.toLowerCase().includes(search) || w.phone.includes(search));
-  renderWallets(filtered);
+  const search=(document.getElementById("walletSearch")?.value||"").toLowerCase();
+  renderWallets(allWallets.filter(w=>w.name.toLowerCase().includes(search)||w.phone.includes(search)));
 }
-
 function renderWallets(list){
-  const grid = document.getElementById("walletsGrid");
-  const data = list || allWallets;
-  if(data.length === 0){
-    grid.innerHTML = `<div class="empty-state"><div class="icon">💳</div><p>No wallet accounts yet</p></div>`;
-    return;
-  }
-  grid.innerHTML = "";
-  data.forEach(w => {
-    const card = document.createElement("div");
-    card.className = "order-card";
-    const updated = w.updatedAt ? w.updatedAt.toDate().toLocaleString("en-UG") : "—";
-    card.innerHTML = `
-      <div class="order-top">
-        <div>
-          <div class="order-name">${w.name}</div>
-          <div class="order-contact">📞 ${w.phone}</div>
-          <div class="order-time" style="margin-top:4px;">Updated: ${updated}</div>
-        </div>
-        <div class="order-total">UGX ${(w.balance||0).toLocaleString()}</div>
-      </div>
-      <div class="order-actions">
-        <button class="action-btn btn-start" onclick="openCreditModal('${w.uid}','${w.name}')">➕ Credit</button>
-        <button class="action-btn btn-cancel" onclick="openDebitModal('${w.uid}','${w.name}')">➖ Debit</button>
-      </div>
-    `;
+  const grid=document.getElementById("walletsGrid");
+  const data=list||allWallets;
+  if(data.length===0){grid.innerHTML=`<div class="empty-state"><div class="icon">💳</div><p>No wallet accounts yet</p></div>`;return;}
+  grid.innerHTML="";
+  data.forEach(w=>{
+    const card=document.createElement("div");card.className="order-card";
+    const updated=w.updatedAt?w.updatedAt.toDate().toLocaleString("en-UG"):"—";
+    card.innerHTML=`<div class="order-top"><div><div class="order-name">${w.name}</div><div class="order-contact">📞 ${w.phone}</div><div class="order-time" style="margin-top:4px;">Updated: ${updated}</div></div><div class="order-total">UGX ${(w.balance||0).toLocaleString()}</div></div><div class="order-actions"><button class="action-btn btn-start" onclick="openCreditModal('${w.uid}','${w.name}')">➕ Credit</button><button class="action-btn btn-cancel" onclick="openDebitModal('${w.uid}','${w.name}')">➖ Debit</button></div>`;
     grid.appendChild(card);
   });
 }
-
-async function approveTopup(reqId, userId, userName, amount){
-  if(!confirm(`Credit UGX ${Number(amount).toLocaleString()} to ${userName}?`)) return;
+async function approveTopup(reqId,userId,userName,amount){
+  if(!confirm(`Credit UGX ${Number(amount).toLocaleString()} to ${userName}?`))return;
   try{
-    // Credit wallet
-    await db.collection("wallets").doc(userId).set({
-      balance: firebase.firestore.FieldValue.increment(amount),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-    // Log transaction
-    await db.collection("wallet_transactions").add({
-      userId, type:"credit", amount,
-      note: "Top-up approved by admin",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Mark request done
-    await db.collection("topup_requests").doc(reqId).update({ status:"approved" });
+    await db.collection("wallets").doc(userId).set({balance:firebase.firestore.FieldValue.increment(amount),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    await db.collection("wallet_transactions").add({userId,type:"credit",amount,note:"Top-up approved by admin",createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection("topup_requests").doc(reqId).update({status:"approved"});
     showToast("✅ Wallet credited!");
-  } catch(err){ showToast("Failed: "+err.message); }
+  }catch(err){showToast("Failed: "+err.message);}
 }
-
-async function rejectTopup(reqId){
-  await db.collection("topup_requests").doc(reqId).update({ status:"rejected" });
-  showToast("Top-up request rejected");
-}
-
-function openCreditModal(uid, name){
-  creditTargetUserId = uid;
-  document.getElementById("creditPatientName").value = name;
-  document.getElementById("creditType").value = "credit";
-  document.getElementById("creditAmount").value = "";
-  document.getElementById("creditNote").value = "";
-  document.getElementById("creditModal").classList.add("open");
-}
-function openDebitModal(uid, name){
-  creditTargetUserId = uid;
-  document.getElementById("creditPatientName").value = name;
-  document.getElementById("creditType").value = "debit";
-  document.getElementById("creditAmount").value = "";
-  document.getElementById("creditNote").value = "";
-  document.getElementById("creditModal").classList.add("open");
-}
-document.getElementById("creditModal").addEventListener("click", e => {
-  if(e.target === e.currentTarget) e.currentTarget.classList.remove("open");
-});
-
+async function rejectTopup(reqId){await db.collection("topup_requests").doc(reqId).update({status:"rejected"});showToast("Top-up request rejected");}
+function openCreditModal(uid,name){creditTargetUserId=uid;document.getElementById("creditPatientName").value=name;document.getElementById("creditType").value="credit";document.getElementById("creditAmount").value="";document.getElementById("creditNote").value="";document.getElementById("creditModal").classList.add("open");}
+function openDebitModal(uid,name){creditTargetUserId=uid;document.getElementById("creditPatientName").value=name;document.getElementById("creditType").value="debit";document.getElementById("creditAmount").value="";document.getElementById("creditNote").value="";document.getElementById("creditModal").classList.add("open");}
+document.getElementById("creditModal").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove("open");});
 async function submitCredit(){
-  const type = document.getElementById("creditType").value;
-  const amount = parseInt(document.getElementById("creditAmount").value);
-  const note = document.getElementById("creditNote").value.trim() || (type==="credit"?"Admin credit":"Admin debit");
-  if(!amount || amount < 1){ showToast("Enter a valid amount"); return; }
-
+  const type=document.getElementById("creditType").value;
+  const amount=parseInt(document.getElementById("creditAmount").value);
+  const note=document.getElementById("creditNote").value.trim()||(type==="credit"?"Admin credit":"Admin debit");
+  if(!amount||amount<1){showToast("Enter a valid amount");return;}
   try{
-    const change = type === "credit" ? amount : -amount;
-    await db.collection("wallets").doc(creditTargetUserId).set({
-      balance: firebase.firestore.FieldValue.increment(change),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-    await db.collection("wallet_transactions").add({
-      userId: creditTargetUserId, type, amount, note,
-      by: "admin",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    await db.collection("wallets").doc(creditTargetUserId).set({balance:firebase.firestore.FieldValue.increment(type==="credit"?amount:-amount),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    await db.collection("wallet_transactions").add({userId:creditTargetUserId,type,amount,note,by:"admin",createdAt:firebase.firestore.FieldValue.serverTimestamp()});
     document.getElementById("creditModal").classList.remove("open");
-    showToast(`✅ Wallet ${type === "credit" ? "credited" : "debited"} — UGX ${amount.toLocaleString()}`);
-  } catch(err){ showToast("Failed: "+err.message); }
+    showToast(`✅ Wallet ${type==="credit"?"credited":"debited"} — UGX ${amount.toLocaleString()}`);
+  }catch(err){showToast("Failed: "+err.message);}
 }
 </script>
 </body>
