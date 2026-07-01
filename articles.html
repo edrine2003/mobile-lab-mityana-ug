@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Articles – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.topbar h2{color:#fff;font-size:18px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0ea5e9,#14b8a6,#10b981);padding:28px 20px 32px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;right:-60px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,0.08);pointer-events:none;}
+.hero h1{color:#fff;font-size:26px;font-weight:900;margin-bottom:6px;}
+.hero p{color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;}
+
+/* SEARCH */
+.search-wrap{max-width:700px;margin:18px auto 0;padding:0 16px;}
+.search-box{width:100%;padding:13px 18px;border-radius:16px;border:2px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;outline:none;box-shadow:0 4px 16px rgba(0,0,0,0.07);}
+.search-box:focus{border-color:var(--primary);}
+
+/* CATEGORY TABS */
+.tabs-wrap{max-width:900px;margin:16px auto 0;padding:0 16px;}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.tab{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;border:2px solid var(--border);background:#fff;color:var(--muted);font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.tab.active,.tab:hover{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(14,165,233,0.3);}
+
+/* RESULTS INFO */
+.results-info{max-width:900px;margin:12px auto 0;padding:0 16px;font-size:13px;font-weight:700;color:var(--muted);}
+
+/* GRID */
+.grid{max-width:900px;margin:16px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:600px){.grid{grid-template-columns:1fr;}}
+
+/* ARTICLE CARD */
+.article-card{background:var(--card);border-radius:22px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.07);border:1px solid var(--border);transition:all 0.2s;animation:fadeUp 0.4s ease both;cursor:pointer;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+.article-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,0.11);}
+.article-card.hidden{display:none;}
+.card-banner{height:110px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;}
+.card-cat{position:absolute;top:10px;left:10px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;background:rgba(255,255,255,0.85);backdrop-filter:blur(4px);}
+.card-read{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(0,0,0,0.25);color:#fff;}
+.card-body{padding:16px;}
+.card-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:6px;line-height:1.4;}
+.card-desc{font-size:13px;font-weight:600;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;}
+.read-btn{padding:9px 18px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.read-btn:hover{transform:translateY(-1px);}
+.card-date{font-size:11px;font-weight:700;color:var(--muted);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+.modal-overlay.open .modal-box{transform:translateY(0);}
+.modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:999px;margin:14px auto 0;}
+.modal-banner{height:160px;display:flex;align-items:center;justify-content:center;font-size:72px;margin:10px 20px 0;border-radius:20px;}
+.modal-content{padding:20px 22px 40px;}
+.modal-cat{display:inline-block;padding:4px 14px;border-radius:999px;font-size:12px;font-weight:800;margin-bottom:10px;}
+.modal-title{font-size:22px;font-weight:900;color:var(--dark);margin-bottom:8px;line-height:1.3;}
+.modal-meta{display:flex;gap:16px;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:16px;}
+.modal-body{font-size:14px;font-weight:600;color:#334155;line-height:1.8;}
+.modal-body p{margin-bottom:14px;}
+.modal-body h3{font-size:15px;font-weight:900;color:var(--dark);margin:18px 0 8px;}
+.modal-body ul{padding-left:20px;margin-bottom:14px;}
+.modal-body li{margin-bottom:6px;}
+.book-btn{display:block;width:100%;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:15px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;box-shadow:0 6px 18px rgba(14,165,233,0.3);margin-top:20px;text-align:center;text-decoration:none;}
+.close-btn{display:block;width:100%;padding:12px;border:2px solid var(--border);border-radius:14px;background:#fff;color:var(--muted);font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span style="font-size:22px;">📰</span>
+  <h2>Health Articles</h2>
+  <a class="topbar-btn" href="dashboard.html">🏠 Home</a>
+</div>
+
+<div class="hero">
+  <h1>📰 Health Articles</h1>
+  <p>Stay informed. Stay healthy. Knowledge from Mobile Lab Mityana.</p>
+</div>
+
+<div class="search-wrap">
+  <input class="search-box" id="searchBox" placeholder="🔍 Search articles e.g. malaria, HIV, diabetes..." oninput="filterArticles()">
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="filterByTab(this,'all')">All</button>
+    <button class="tab" onclick="filterByTab(this,'blood')">🩸 Blood Health</button>
+    <button class="tab" onclick="filterByTab(this,'womens')">🌸 Women's Health</button>
+    <button class="tab" onclick="filterByTab(this,'infections')">🦠 Infections</button>
+    <button class="tab" onclick="filterByTab(this,'nutrition')">🥗 Nutrition</button>
+    <button class="tab" onclick="filterByTab(this,'mental')">🧠 Mental Health</button>
+  </div>
+</div>
+
+<div class="results-info" id="resultsInfo">Showing all 12 articles</div>
+<div class="grid" id="articlesGrid"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="articleModal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-banner" id="modalBanner">📰</div>
+    <div class="modal-content">
+      <div class="modal-cat" id="modalCat"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-body" id="modalBody"></div>
+      <a class="book-btn" href="index.html">🧪 Book Related Test</a>
+      <button class="close-btn" onclick="closeModal()">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ARTICLES = [
+{
+  id:1, cat:"blood", catLabel:"🩸 Blood Health", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+  icon:"🩸", bg:"linear-gradient(135deg,#fecaca,#fee2e2)", readTime:"4 min read", date:"June 2025",
+  title:"Understanding Your Blood Test Results",
+  desc:"Your blood test report can look confusing. Here's a plain-English guide to what CBC, glucose, and other values really mean.",
+  body:`<p>When you receive your blood test results, you may see numbers, abbreviations and reference ranges that seem overwhelming. This guide explains the most common blood tests in simple terms.</p>
+<h3>Complete Blood Count (CBC)</h3>
+<p>A CBC measures three main types of cells: Red blood cells carry oxygen around your body. White blood cells fight infections. Platelets help your blood clot. If red cells are low, you may have anaemia — causing tiredness and weakness. If white cells are high, your body is fighting an infection.</p>
+<h3>Blood Glucose</h3>
+<p>This measures sugar in your blood. Fasting glucose above 7.0 mmol/L on two separate tests confirms diabetes. Between 6.1–6.9 mmol/L is pre-diabetes — a warning sign to change your diet and lifestyle before diabetes develops.</p>
+<h3>What to do with your results</h3>
+<p>Never diagnose yourself from numbers alone. Always discuss results with a doctor or use our Chat with Doctor feature. Reference ranges vary by lab and age. A result outside the normal range does not always mean disease — context matters.</p>
+<p>Book a CBC or Blood Glucose test today from your Mobile Lab dashboard to know your numbers.</p>`
+},
+{
+  id:2, cat:"infections", catLabel:"🦠 Infections", catColor:"rgba(139,92,246,0.12)", catText:"#7c3aed",
+  icon:"🎗️", bg:"linear-gradient(135deg,#ede9fe,#ddd6fe)", readTime:"5 min read", date:"June 2025",
+  title:"HIV: Facts, Testing & Treatment in Uganda",
+  desc:"HIV is manageable with modern treatment. Learn the facts, when to test, and what to do if you test positive.",
+  body:`<p>HIV (Human Immunodeficiency Virus) attacks the immune system. Without treatment, it can progress to AIDS. But with proper treatment, people with HIV live long, healthy lives — often with a normal life expectancy.</p>
+<h3>How HIV spreads</h3>
+<p>HIV spreads through unprotected sex with an infected person, sharing needles or syringes, blood transfusions with infected blood, and from mother to child during pregnancy, birth or breastfeeding. HIV does NOT spread through hugging, sharing food, mosquito bites, or casual contact.</p>
+<h3>When to test</h3>
+<p>Test if you have had unprotected sex with a new or unknown partner, shared needles, or received a blood transfusion. All pregnant women should test as part of routine antenatal care. Everyone should test at least once a year if sexually active.</p>
+<h3>Treatment in Uganda</h3>
+<p>Antiretroviral Therapy (ART) is available FREE at all government health centres in Uganda. Starting ART early keeps your viral load undetectable — meaning you cannot pass HIV to others. The key is to test and start treatment early.</p>
+<p>Our HIV test is confidential, quick, and costs only UGX 7,000. Results in 15 minutes.</p>`
+},
+{
+  id:3, cat:"infections", catLabel:"🦠 Infections", catColor:"rgba(139,92,246,0.12)", catText:"#7c3aed",
+  icon:"🦟", bg:"linear-gradient(135deg,#d1fae5,#a7f3d0)", readTime:"3 min read", date:"May 2025",
+  title:"Malaria Prevention & Treatment Guide",
+  desc:"Malaria kills thousands in Uganda every year. Know the symptoms, when to test, and how to protect your family.",
+  body:`<p>Malaria is one of the leading causes of illness and death in Uganda. It is caused by Plasmodium parasites spread by female Anopheles mosquitoes. The good news: it is both preventable and treatable.</p>
+<h3>Symptoms to watch for</h3>
+<p>Malaria typically causes high fever (often spiking at night), chills and sweating, severe headache, body aches, nausea and vomiting, and fatigue. In severe cases — especially in children — it can cause convulsions, anaemia, and coma. Any fever lasting more than 24 hours should be tested immediately.</p>
+<h3>Prevention</h3>
+<ul>
+<li>Sleep under an insecticide-treated mosquito net every night</li>
+<li>Use mosquito repellent on exposed skin</li>
+<li>Wear long-sleeved clothing in the evenings</li>
+<li>Clear stagnant water around your home where mosquitoes breed</li>
+<li>Consider indoor residual spraying</li>
+</ul>
+<h3>Treatment</h3>
+<p>The standard treatment in Uganda is Coartem (artemether-lumefantrine). It must be taken with food and the full 6-dose course must be completed even if you feel better. Stopping early allows the parasite to survive and can cause a relapse.</p>
+<p>Our malaria blood smear test costs UGX 5,000 with results in under an hour.</p>`
+},
+{
+  id:4, cat:"womens", catLabel:"🌸 Women's Health", catColor:"rgba(236,72,153,0.12)", catText:"#be185d",
+  icon:"🌸", bg:"linear-gradient(135deg,#fce7f3,#fbcfe8)", readTime:"4 min read", date:"June 2025",
+  title:"Women's Health: Understanding Your Cycle",
+  desc:"Your menstrual cycle tells you a lot about your health. Learn what's normal, what isn't, and when to seek help.",
+  body:`<p>The menstrual cycle is a monthly process your body goes through to prepare for possible pregnancy. A normal cycle lasts 21–35 days. The average is 28 days, but everyone is different.</p>
+<h3>Phases of the cycle</h3>
+<p><strong>Menstrual phase (Days 1–5):</strong> Uterine lining sheds. Normal bleeding lasts 3–7 days. Cramping, backache and mood changes are common.</p>
+<p><strong>Follicular phase (Days 1–13):</strong> Oestrogen rises, energy increases. Best time for exercise and new activities.</p>
+<p><strong>Ovulation (Day 14):</strong> Egg is released. This is your most fertile day. You may notice clear stretchy discharge.</p>
+<p><strong>Luteal phase (Days 15–28):</strong> Progesterone rises. PMS symptoms may appear: bloating, breast tenderness, mood swings, cravings.</p>
+<h3>When to see a doctor</h3>
+<ul>
+<li>Periods lasting more than 7 days</li>
+<li>Bleeding between periods</li>
+<li>Severe pain that stops you from daily activities</li>
+<li>No period for 3+ months (not pregnant)</li>
+<li>Unusual vaginal discharge with odour</li>
+</ul>
+<p>Use the Cycle Tracker in our app to monitor your cycle and get personalised fertility insights.</p>`
+},
+{
+  id:5, cat:"infections", catLabel:"🦠 Infections", catColor:"rgba(139,92,246,0.12)", catText:"#7c3aed",
+  icon:"🟡", bg:"linear-gradient(135deg,#fef9c3,#fef08a)", readTime:"4 min read", date:"May 2025",
+  title:"Hepatitis B: What You Need to Know",
+  desc:"Hepatitis B silently damages the liver for years. Testing and vaccination can save your life.",
+  body:`<p>Hepatitis B is a viral infection that attacks the liver. It can cause both acute (short-term) and chronic (long-term) disease. Uganda has one of the highest Hepatitis B rates in Africa, yet most people don't know they are infected.</p>
+<h3>How it spreads</h3>
+<p>Hepatitis B spreads through contact with infected blood (sharing needles, unsterilised medical equipment), unprotected sex, and from an infected mother to her baby at birth. It is 50–100 times more infectious than HIV.</p>
+<h3>Symptoms</h3>
+<p>Most people have NO symptoms for years. When symptoms do appear they include: jaundice (yellowing of skin and eyes), dark urine, extreme fatigue, abdominal pain (right side), nausea and loss of appetite. By the time symptoms appear, serious liver damage may already have occurred.</p>
+<h3>Testing and vaccination</h3>
+<p>A simple blood test can detect Hepatitis B. If negative, you can get vaccinated — 3 doses provide lifetime protection. All pregnant women should be tested. All newborns in Uganda should receive the Hepatitis B vaccine at birth.</p>
+<p>Our Hepatitis B test costs UGX 10,000. Book today for home collection.</p>`
+},
+{
+  id:6, cat:"blood", catLabel:"🩸 Blood Health", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+  icon:"🍬", bg:"linear-gradient(135deg,#e0f2fe,#bae6fd)", readTime:"5 min read", date:"June 2025",
+  title:"Managing Diabetes with Regular Testing",
+  desc:"Diabetes is Uganda's fastest growing disease. Know your blood sugar, manage it well, and live fully.",
+  body:`<p>Diabetes occurs when blood sugar (glucose) stays too high for too long. In Uganda, Type 2 diabetes is becoming increasingly common due to changing diets and less physical activity. The dangerous thing about diabetes is that it often has no symptoms until serious complications have developed.</p>
+<h3>Types of diabetes</h3>
+<p><strong>Type 1:</strong> The body produces no insulin. Usually diagnosed in children and young adults. Requires daily insulin injections for life.</p>
+<p><strong>Type 2:</strong> The body doesn't use insulin properly. Most common type. Can often be controlled with diet, exercise, and oral medication.</p>
+<p><strong>Gestational diabetes:</strong> Occurs during pregnancy. Increases risk of Type 2 diabetes later in life.</p>
+<h3>Warning signs</h3>
+<ul>
+<li>Frequent urination, especially at night</li>
+<li>Extreme thirst and hunger</li>
+<li>Unexplained weight loss</li>
+<li>Blurred vision</li>
+<li>Slow healing wounds</li>
+<li>Tingling or numbness in hands and feet</li>
+</ul>
+<h3>Managing diabetes</h3>
+<p>Regular blood glucose monitoring is the foundation of diabetes management. Test your fasting glucose every 3 months. Eat a low-sugar, high-fibre diet. Walk or exercise for 30 minutes daily. Take medication as prescribed. Never skip doses.</p>
+<p>Our fasting blood glucose test costs UGX 7,000. Book a home collection to check your levels today.</p>`
+},
+{
+  id:7, cat:"infections", catLabel:"🦠 Infections", catColor:"rgba(139,92,246,0.12)", catText:"#7c3aed",
+  icon:"🌡️", bg:"linear-gradient(135deg,#ffedd5,#fed7aa)", readTime:"3 min read", date:"May 2025",
+  title:"Typhoid Fever: Causes, Symptoms & Prevention",
+  desc:"Typhoid is common in Uganda. Learn how to recognise it, treat it correctly, and prevent it from spreading.",
+  body:`<p>Typhoid fever is a bacterial infection caused by Salmonella Typhi. It spreads through contaminated food and water, and is most common in areas with poor sanitation. Uganda sees thousands of cases every year, particularly in rural and peri-urban areas.</p>
+<h3>Symptoms</h3>
+<p>Typhoid develops gradually over 1–2 weeks. Early symptoms include sustained high fever (38–40°C), severe headache, weakness, loss of appetite, and abdominal pain. Later symptoms may include constipation followed by diarrhoea, rose-coloured spots on the abdomen, and an enlarged spleen. Without treatment, typhoid can cause intestinal perforation — a life-threatening emergency.</p>
+<h3>Diagnosis</h3>
+<p>The Widal serum test is the most common test used in Uganda. It is most accurate after 7–10 days of illness when antibodies reach detectable levels. A blood culture is the gold standard but takes longer.</p>
+<h3>Treatment</h3>
+<p>Typhoid is treated with antibiotics — Ciprofloxacin, Azithromycin or Ceftriaxone. Full course must be completed. Rest, hydration and soft foods are important during recovery.</p>
+<h3>Prevention</h3>
+<ul>
+<li>Always boil or treat drinking water</li>
+<li>Wash hands thoroughly before eating and after using the toilet</li>
+<li>Avoid raw foods washed in untreated water</li>
+<li>Typhoid vaccine is available and recommended for travel to high-risk areas</li>
+</ul>`
+},
+{
+  id:8, cat:"blood", catLabel:"🩸 Blood Health", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+  icon:"🫘", bg:"linear-gradient(135deg,#dcfce7,#bbf7d0)", readTime:"4 min read", date:"June 2025",
+  title:"Understanding Kidney Function Tests",
+  desc:"Your kidneys filter 200 litres of blood daily. Learn what creatinine, urea, and other markers reveal about kidney health.",
+  body:`<p>Your kidneys are two bean-shaped organs that filter waste and excess fluids from your blood, regulate blood pressure, and produce hormones. Kidney disease often shows no symptoms until 60–70% of kidney function is already lost — making regular testing critical.</p>
+<h3>What the test measures</h3>
+<p><strong>Creatinine:</strong> A waste product from muscle activity. High levels mean kidneys aren't filtering properly. Normal range: 60–110 μmol/L for men, 45–90 μmol/L for women.</p>
+<p><strong>Urea:</strong> A waste product from protein breakdown. Elevated urea alongside high creatinine suggests kidney failure.</p>
+<p><strong>eGFR (Estimated Glomerular Filtration Rate):</strong> Calculated from creatinine. Below 60 for 3+ months = Chronic Kidney Disease.</p>
+<h3>Who should test?</h3>
+<ul>
+<li>People with diabetes or high blood pressure</li>
+<li>Anyone with swollen legs, face or feet</li>
+<li>Reduced or no urine output</li>
+<li>History of kidney stones or urinary infections</li>
+<li>Routine check for people over 40</li>
+</ul>
+<h3>Protecting your kidneys</h3>
+<p>Stay well hydrated. Avoid excessive use of painkillers (NSAIDs like ibuprofen damage kidneys over time). Control blood pressure and blood sugar. Avoid herbal medicines that may contain toxic compounds. Our Kidney Function Test costs UGX 50,000.</p>`
+},
+{
+  id:9, cat:"infections", catLabel:"🦠 Infections", catColor:"rgba(139,92,246,0.12)", catText:"#7c3aed",
+  icon:"🔴", bg:"linear-gradient(135deg,#ffe4e6,#fecdd3)", readTime:"4 min read", date:"May 2025",
+  title:"STI Prevention for Young Adults",
+  desc:"Sexually transmitted infections are on the rise in Uganda. Know the facts, protect yourself, and test regularly.",
+  body:`<p>Sexually transmitted infections (STIs) affect millions of people worldwide including many young adults in Uganda. Many STIs have no symptoms — which is why regular testing is the only way to know your status.</p>
+<h3>Common STIs in Uganda</h3>
+<p><strong>Chlamydia:</strong> Most common bacterial STI. Often no symptoms. Causes infertility if untreated. Treated with antibiotics.</p>
+<p><strong>Gonorrhea:</strong> Causes discharge and painful urination. Increasingly antibiotic-resistant. Treatable with dual antibiotic therapy.</p>
+<p><strong>Syphilis (RPR):</strong> Causes painless sores. Can spread to brain and heart if untreated. Treated with penicillin injection.</p>
+<p><strong>HIV:</strong> See our HIV article for full details.</p>
+<h3>Prevention</h3>
+<ul>
+<li>Use condoms consistently and correctly</li>
+<li>Reduce number of sexual partners</li>
+<li>Test together with your partner before sex without a condom</li>
+<li>Get vaccinated for Hepatitis B and HPV</li>
+<li>Never share needles or personal items that could have blood</li>
+</ul>
+<h3>Testing</h3>
+<p>If you are sexually active, test for HIV, Syphilis, Chlamydia and Gonorrhea at least once a year. Testing is confidential. Early detection means early treatment and less damage to your health.</p>`
+},
+{
+  id:10, cat:"nutrition", catLabel:"🥗 Nutrition", catColor:"rgba(34,197,94,0.12)", catText:"#15803d",
+  icon:"🥗", bg:"linear-gradient(135deg,#d1fae5,#a7f3d0)", readTime:"3 min read", date:"June 2025",
+  title:"Healthy Eating for Better Lab Results",
+  desc:"What you eat directly affects your blood tests. Learn which foods help — and which ones skew your results.",
+  body:`<p>Your diet has a direct impact on your laboratory test results. Some foods can cause falsely high or low readings, while a consistently good diet leads to healthier values across the board.</p>
+<h3>Before fasting tests</h3>
+<p>For blood glucose, lipid profile, liver function, and kidney function tests — fast for 8–12 hours. Drink water only. Avoid heavy exercise the evening before. Avoid alcohol for at least 24 hours.</p>
+<h3>Foods that improve lab results</h3>
+<ul>
+<li><strong>Leafy greens (sukuma wiki, spinach):</strong> Lower cholesterol, improve iron levels</li>
+<li><strong>Beans and lentils:</strong> Stabilise blood sugar, improve kidney function</li>
+<li><strong>Fish:</strong> Omega-3 fatty acids reduce triglycerides</li>
+<li><strong>Water:</strong> Proper hydration improves kidney function tests</li>
+<li><strong>Fruits:</strong> Antioxidants support liver health</li>
+</ul>
+<h3>Foods that worsen lab results</h3>
+<ul>
+<li>Excess sugar and white carbohydrates raise blood glucose</li>
+<li>Excess salt raises blood pressure and strains kidneys</li>
+<li>Red meat raises urea and creatinine levels</li>
+<li>Alcohol raises liver enzymes (ALT, AST)</li>
+<li>Processed foods raise cholesterol and triglycerides</li>
+</ul>
+<p>Eating well for 2–3 weeks before your tests gives a truer picture of your health. Book your comprehensive tests today.</p>`
+},
+{
+  id:11, cat:"womens", catLabel:"🌸 Women's Health", catColor:"rgba(236,72,153,0.12)", catText:"#be185d",
+  icon:"🤰", bg:"linear-gradient(135deg,#fdf2f8,#fce7f3)", readTime:"3 min read", date:"June 2025",
+  title:"When to Test for Pregnancy",
+  desc:"Pregnancy tests are most accurate at the right time. Find out when to test and what to do with your results.",
+  body:`<p>A pregnancy test detects the hormone hCG (Human Chorionic Gonadotropin), which is produced after a fertilised egg implants in the uterus. Knowing when and how to test correctly gives the most accurate result.</p>
+<h3>When is the best time to test?</h3>
+<p>The most accurate time is after a missed period. hCG levels double every 48–72 hours in early pregnancy, so the longer you wait after a missed period, the more reliable the result. Testing too early can give a false negative.</p>
+<p>For the most sensitive reading, use your first morning urine — it is most concentrated. Do not drink large amounts of water before testing as this dilutes hCG.</p>
+<h3>Urine vs Blood test</h3>
+<p>A urine hCG test (UGX 5,000) detects pregnancy from the day of a missed period. A blood hCG test (UGX 15,000) can detect pregnancy 6–8 days after ovulation — about a week before a missed period. The blood test is more sensitive and can confirm early pregnancy or monitor for miscarriage.</p>
+<h3>What to do if positive</h3>
+<p>Book antenatal care (ANC) as early as possible — ideally before 12 weeks. Start taking folic acid 400mcg daily to prevent birth defects. Avoid alcohol, smoking and unprescribed medicines. Eat a balanced diet and stay hydrated.</p>
+<h3>What to do if negative but still no period</h3>
+<p>Repeat the test in 3–5 days. If still negative and no period, see a doctor to rule out other causes such as stress, weight changes, thyroid problems or polycystic ovary syndrome (PCOS).</p>`
+},
+{
+  id:12, cat:"blood", catLabel:"🩸 Blood Health", catColor:"rgba(239,68,68,0.12)", catText:"#b91c1c",
+  icon:"🧬", bg:"linear-gradient(135deg,#ede9fe,#ddd6fe)", readTime:"4 min read", date:"May 2025",
+  title:"Sickle Cell: Living Well in Uganda",
+  desc:"Sickle cell disease affects millions of Ugandans. Understanding it helps you manage it and protect your children.",
+  body:`<p>Sickle cell disease (SCD) is an inherited blood disorder where red blood cells become crescent (sickle) shaped instead of round. These abnormal cells block blood flow, causing pain crises, anaemia, organ damage, and frequent infections. Uganda has one of the highest sickle cell rates in the world.</p>
+<h3>Understanding the genetics</h3>
+<p><strong>AA:</strong> Normal — no sickle cell genes. <strong>AS:</strong> Sickle cell trait (carrier) — generally healthy but can pass the gene to children. <strong>SS:</strong> Sickle cell disease — has symptoms and requires lifelong management. Two AS parents have a 25% chance of having an SS child.</p>
+<h3>Symptoms of SS disease</h3>
+<ul>
+<li>Painful crises (chest, joints, abdomen) lasting hours to days</li>
+<li>Chronic anaemia — fatigue, pale skin, shortness of breath</li>
+<li>Swelling of hands and feet in infants</li>
+<li>Frequent infections</li>
+<li>Delayed growth in children</li>
+<li>Stroke risk</li>
+</ul>
+<h3>Living well with sickle cell</h3>
+<p>Stay well hydrated — dehydration triggers painful crises. Avoid extreme temperatures and high altitudes. Take folic acid daily. Get vaccinated against pneumococcal, influenza and other infections. Take hydroxyurea if prescribed by your doctor. Join a sickle cell support group.</p>
+<h3>Before marriage: test together</h3>
+<p>Both partners should know their sickle cell status before having children. Our sickling test costs UGX 40,000. Knowing your status helps you make informed family planning decisions.</p>`
+}
+];
+
+let activeTab = "all";
+let searchTerm = "";
+let activeArticle = null;
+
+function renderArticles(){
+  const grid = document.getElementById("articlesGrid");
+  grid.innerHTML = "";
+  let shown = 0;
+  ARTICLES.forEach((a, i) => {
+    const matchTab = activeTab === "all" || a.cat === activeTab;
+    const matchSearch = !searchTerm || a.title.toLowerCase().includes(searchTerm) || a.desc.toLowerCase().includes(searchTerm) || a.body.toLowerCase().includes(searchTerm);
+    if(!matchTab || !matchSearch) return;
+    shown++;
+    const card = document.createElement("div");
+    card.className = "article-card";
+    card.style.animationDelay = (shown * 0.05) + "s";
+    card.innerHTML = `
+      <div class="card-banner" style="background:${a.bg};">
+        ${a.icon}
+        <span class="card-cat" style="color:${a.catText};">${a.catLabel}</span>
+        <span class="card-read">⏱ ${a.readTime}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${a.title}</div>
+        <div class="card-desc">${a.desc}</div>
+        <div class="card-footer">
+          <button class="read-btn" onclick="openArticle(${a.id})">📖 Read More</button>
+          <span class="card-date">${a.date}</span>
+        </div>
+      </div>`;
+    card.onclick = (e) => { if(!e.target.classList.contains("read-btn")) openArticle(a.id); };
+    grid.appendChild(card);
+  });
+  if(shown === 0) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted);font-weight:700;">😕 No articles found for "<b>${searchTerm||activeTab}</b>"</div>`;
+  document.getElementById("resultsInfo").innerText = `Showing ${shown} of ${ARTICLES.length} articles`;
+}
+
+function openArticle(id){
+  const a = ARTICLES.find(x => x.id === id);
+  if(!a) return;
+  activeArticle = a;
+  document.getElementById("modalBanner").style.background = a.bg;
+  document.getElementById("modalBanner").innerText = a.icon;
+  document.getElementById("modalCat").innerText = a.catLabel;
+  document.getElementById("modalCat").style.background = a.catColor;
+  document.getElementById("modalCat").style.color = a.catText;
+  document.getElementById("modalTitle").innerText = a.title;
+  document.getElementById("modalMeta").innerHTML = `<span>⏱ ${a.readTime}</span><span>📅 ${a.date}</span>`;
+  document.getElementById("modalBody").innerHTML = a.body;
+  document.getElementById("articleModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(){
+  document.getElementById("articleModal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("articleModal").addEventListener("click", e => {
+  if(e.target === e.currentTarget) closeModal();
+});
+
+function filterByTab(btn, tab){
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+  activeTab = tab;
+  renderArticles();
+}
+
+function filterArticles(){
+  searchTerm = document.getElementById("searchBox").value.toLowerCase().trim();
+  renderArticles();
+}
+
+renderArticles();
+</script>
+</body>
+</html>
