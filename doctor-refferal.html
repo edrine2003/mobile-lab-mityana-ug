@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctor Referral Portal – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.topbar h2{color:#fff;font-size:18px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+.page-wrap{max-width:680px;margin:0 auto;padding:20px 16px;}
+.hero-card{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);border-radius:24px;padding:28px 20px;color:#fff;margin-bottom:20px;box-shadow:0 8px 28px rgba(14,165,233,0.3);position:relative;overflow:hidden;text-align:center;}
+.hero-card::before{content:'👨‍⚕️';position:absolute;font-size:120px;opacity:0.08;bottom:-20px;right:-10px;}
+.hero-card h2{font-size:22px;font-weight:900;margin-bottom:8px;}
+.hero-card p{font-size:14px;font-weight:600;opacity:0.9;line-height:1.6;}
+.earn-badge{display:inline-block;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:999px;padding:8px 20px;font-size:14px;font-weight:900;margin-top:12px;}
+.panel{background:var(--card);border-radius:22px;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,0.07);border:1px solid var(--border);margin-bottom:20px;}
+.panel-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:13px;font-weight:800;color:var(--dark);margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:var(--dark);background:#fff;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:500px){.grid2{grid-template-columns:1fr;}}
+.submit-btn{width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;font-size:15px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;box-shadow:0 6px 18px rgba(14,165,233,0.3);transition:all 0.2s;}
+.submit-btn:hover{transform:translateY(-1px);}
+.code-box{background:linear-gradient(135deg,rgba(14,165,233,0.08),rgba(20,184,166,0.08));border:2px dashed rgba(14,165,233,0.4);border-radius:16px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;}
+.code-text{font-size:24px;font-weight:900;color:var(--primary);letter-spacing:3px;}
+.copy-btn{background:var(--primary);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;}
+.share-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.share-btn{flex:1;min-width:120px;padding:11px 14px;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn-wa{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;}
+.btn-copy{background:rgba(14,165,233,0.1);color:var(--primary);}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--card);border-radius:18px;padding:16px 10px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.07);border:1px solid var(--border);}
+.stat-val{font-size:24px;font-weight:900;color:var(--primary);}
+.stat-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-top:4px;}
+.ref-card{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ref-name{font-size:14px;font-weight:800;color:var(--dark);}
+.ref-date{font-size:12px;font-weight:600;color:var(--muted);margin-top:2px;}
+.ref-status{padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;}
+.status-completed{background:rgba(34,197,94,0.12);color:#15803d;}
+.status-pending{background:rgba(245,158,11,0.12);color:#b45309;}
+.empty-state{text-align:center;padding:30px;color:var(--muted);font-weight:700;}
+.steps-card{background:var(--card);border-radius:20px;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,0.07);border:1px solid var(--border);margin-bottom:20px;}
+.step-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+.step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;}
+.step-text h4{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:2px;}
+.step-text p{font-size:13px;font-weight:600;color:var(--muted);}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="topbar">
+  <span style="font-size:22px;">👨‍⚕️</span>
+  <h2>Doctor Referral Portal</h2>
+  <a class="topbar-btn" href="dashboard.html">🏠 Home</a>
+</div>
+
+<div class="page-wrap">
+  <div class="hero-card">
+    <h2>👨‍⚕️ Refer Patients, Earn Rewards</h2>
+    <p>Register as a referring doctor or clinic. Share your referral link with patients. Earn UGX 2,000 for every completed test.</p>
+    <div class="earn-badge">💰 UGX 2,000 per completed test</div>
+  </div>
+
+  <!-- REGISTRATION / DASHBOARD — toggled by JS -->
+  <div id="registerSection">
+    <div class="panel">
+      <div class="panel-title">📝 Register Your Practice</div>
+      <div class="grid2">
+        <div class="field"><label>Doctor / Clinic Name</label><input type="text" id="drName" placeholder="e.g. Dr. Ssali John or Mityana Clinic"></div>
+        <div class="field"><label>Speciality</label>
+          <select id="drSpeciality">
+            <option value="">-- Select --</option>
+            <option>General Practitioner</option><option>Gynaecologist</option>
+            <option>Paediatrician</option><option>Internal Medicine</option>
+            <option>Surgeon</option><option>Dermatologist</option>
+            <option>Clinic / Health Centre</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Phone</label><input type="text" id="drPhone" placeholder="07XXXXXXXX"></div>
+        <div class="field"><label>Email</label><input type="email" id="drEmail" placeholder="doctor@example.com"></div>
+        <div class="field" style="grid-column:1/-1"><label>Location / Clinic Address</label><input type="text" id="drLocation" placeholder="e.g. Mityana Town, near Total Petrol Station"></div>
+      </div>
+      <button class="submit-btn" onclick="registerDoctor()">✅ Register & Get My Referral Code</button>
+    </div>
+
+    <div class="steps-card">
+      <div class="panel-title">📖 How it works</div>
+      <div class="step-row"><div class="step-num">1</div><div class="step-text"><h4>Register above</h4><p>Fill in your details and get your unique doctor referral code.</p></div></div>
+      <div class="step-row"><div class="step-num">2</div><div class="step-text"><h4>Share with patients</h4><p>Give patients your referral link or code when recommending lab tests.</p></div></div>
+      <div class="step-row"><div class="step-num">3</div><div class="step-text"><h4>Patient books & pays</h4><p>Patient books their test on Mobile Lab Mityana using your code.</p></div></div>
+      <div class="step-row"><div class="step-num">4</div><div class="step-text"><h4>You earn UGX 2,000</h4><p>Once their test is completed and paid, your wallet is credited automatically.</p></div></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD (shown after registration) -->
+  <div id="dashboardSection" style="display:none;">
+    <div class="panel">
+      <div class="panel-title">🔑 Your Referral Code</div>
+      <div class="code-box">
+        <span class="code-text" id="drCode">DR-XXXXXX</span>
+        <button class="copy-btn" onclick="copyCode()">📋 Copy</button>
+      </div>
+      <div class="share-btns">
+        <a class="share-btn btn-wa" id="waShareBtn" href="#" target="_blank">💚 Share on WhatsApp</a>
+        <button class="share-btn btn-copy" onclick="copyLink()">🔗 Copy Link</button>
+      </div>
+      <p style="font-size:12px;font-weight:600;color:var(--muted);">Your referral link: <span id="refLink" style="color:var(--primary);font-weight:800;word-break:break-all;"></span></p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="drTotalRefs">0</div><div class="stat-lbl">Patients Referred</div></div>
+      <div class="stat-card"><div class="stat-val" id="drCompleted">0</div><div class="stat-lbl">Tests Completed</div></div>
+      <div class="stat-card"><div class="stat-val" id="drEarned">0</div><div class="stat-lbl">Earned (UGX)</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">👥 Referred Patients</div>
+      <div id="drRefList"><div class="empty-state">No referrals yet. Start sharing your code!</div></div>
+    </div>
+
+    <button class="submit-btn" style="background:rgba(239,68,68,0.1);color:#b91c1c;box-shadow:none;border:1.5px solid rgba(239,68,68,0.3);" onclick="editProfile()">✏️ Edit Profile</button>
+  </div>
+</div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+let currentUser=null;
+let myDrCode="";
+const APP_URL="https://mobile-lab-mityana-aeae2.web.app";
+
+auth.onAuthStateChanged(async user=>{
+  if(!user){window.location.href="login.html";return;}
+  currentUser=user;
+  // Check if already registered
+  const doc=await db.collection("doctor_referrals").doc(user.uid).get();
+  if(doc.exists){
+    loadDashboard(doc.data());
+  }
+});
+
+async function registerDoctor(){
+  const name=document.getElementById("drName").value.trim();
+  const spec=document.getElementById("drSpeciality").value;
+  const phone=document.getElementById("drPhone").value.trim();
+  const email=document.getElementById("drEmail").value.trim();
+  const location=document.getElementById("drLocation").value.trim();
+  if(!name||!phone||!location){showToast("Please fill in name, phone and location");return;}
+  const code="DR-"+currentUser.uid.slice(0,6).toUpperCase();
+  try{
+    await db.collection("doctor_referrals").doc(currentUser.uid).set({
+      name,speciality:spec,phone,email,location,
+      referralCode:code,userId:currentUser.uid,
+      totalRefs:0,completedRefs:0,totalEarned:0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("✅ Registered successfully!");
+    loadDashboard({name,speciality:spec,phone,email,location,referralCode:code});
+  }catch(e){showToast("Failed: "+e.message);}
+}
+
+function loadDashboard(data){
+  myDrCode=data.referralCode||"DR-XXXXXX";
+  document.getElementById("drCode").innerText=myDrCode;
+  const link=`${APP_URL}/index.html?ref=${myDrCode}`;
+  document.getElementById("refLink").innerText=link;
+  const msg=`👨‍⚕️ *Dr. ${data.name}* recommends Mobile Lab Mityana for your lab tests.\n\n🧪 Fast, affordable, home collection available!\n\nUse my referral code *${myDrCode}* when booking.\n\n👉 Book here: ${link}`;
+  document.getElementById("waShareBtn").href=`https://wa.me/?text=${encodeURIComponent(msg)}`;
+  document.getElementById("registerSection").style.display="none";
+  document.getElementById("dashboardSection").style.display="block";
+  loadReferrals();
+}
+
+function loadReferrals(){
+  db.collection("referrals").where("doctorCode","==",myDrCode)
+    .orderBy("createdAt","desc").onSnapshot(snap=>{
+    let total=snap.size,completed=0,earned=0;
+    const list=document.getElementById("drRefList");
+    if(snap.empty){list.innerHTML=`<div class="empty-state">No referrals yet. Start sharing your code!</div>`;}
+    else{
+      list.innerHTML="";
+      snap.forEach(d=>{
+        const r=d.data();
+        if(r.status==="completed"){completed++;earned+=2000;}
+        const maskName=n=>{if(!n)return "Patient";return n.split(" ").map(w=>w.length<=2?w:w[0]+"*".repeat(w.length-2)+w[w.length-1]).join(" ");};
+        const date=r.createdAt?r.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric"}):"—";
+        const card=document.createElement("div");card.className="ref-card";
+        card.innerHTML=`<div><div class="ref-name">${maskName(r.refereeName||"Patient")}</div><div class="ref-date">${date}</div></div><span class="ref-status status-${r.status||"pending"}">${r.status==="completed"?"✅ Completed":"⏳ Pending"}</span>`;
+        list.appendChild(card);
+      });
+    }
+    document.getElementById("drTotalRefs").innerText=total;
+    document.getElementById("drCompleted").innerText=completed;
+    document.getElementById("drEarned").innerText=earned.toLocaleString();
+  },()=>{});
+}
+
+function copyCode(){
+  navigator.clipboard.writeText(myDrCode).then(()=>showToast("✅ Code copied!")).catch(()=>showToast("Copy: "+myDrCode));
+}
+function copyLink(){
+  const link=`${APP_URL}/index.html?ref=${myDrCode}`;
+  navigator.clipboard.writeText(link).then(()=>showToast("✅ Link copied!")).catch(()=>showToast("Copy the link manually"));
+}
+function editProfile(){
+  document.getElementById("registerSection").style.display="block";
+  document.getElementById("dashboardSection").style.display="none";
+}
+function showToast(msg){const t=document.getElementById("toast");t.innerText=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500);}
+</script>
+</body>
+</html>
