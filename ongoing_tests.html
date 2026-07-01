@@ -2,308 +2,600 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>🧪 Ongoing Tests – Mobile Lab</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Ongoing Tests – Mobile Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
-body{font-family:Arial;margin:0;background:#f1f5f9;padding:16px;}
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.09);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.topbar h2{color:#fff;font-size:17px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;transition:all 0.2s;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+.content{max-width:860px;margin:0 auto;padding:20px 16px;}
+.search-bar{width:100%;padding:12px 16px;border-radius:14px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;outline:none;margin-bottom:16px;background:#fff;}
+.search-bar:focus{border-color:var(--primary);}
+.counter{font-size:14px;font-weight:800;color:var(--muted);margin-bottom:16px;}
 
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
+/* ORDER CARD */
+.order-card{background:var(--card);border-radius:20px;padding:0;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.07);border:1px solid var(--border);overflow:hidden;}
+.card-head{background:linear-gradient(135deg,rgba(14,165,233,0.06),rgba(20,184,166,0.06));padding:16px 18px;border-bottom:1px solid var(--border);}
+.patient-name{font-size:17px;font-weight:900;color:var(--dark);margin-bottom:4px;}
+.patient-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;font-weight:700;color:var(--muted);}
+.meta-chip{background:#fff;border:1px solid var(--border);border-radius:999px;padding:3px 10px;}
+
+/* RESULT SECTIONS */
+.result-section{padding:16px 18px;border-bottom:1px solid var(--border);}
+.section-label{font-size:13px;font-weight:900;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+/* CBC TABLE */
+.cbc-table{width:100%;border-collapse:collapse;font-size:13px;}
+.cbc-table thead th{background:#f8fafc;padding:8px 10px;text-align:left;font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--border);}
+.cbc-table tbody td{padding:7px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+.cbc-table tbody tr:last-child td{border-bottom:none;}
+.cbc-table tbody tr:hover td{background:#f8fafc;}
+.param-name{font-weight:800;color:var(--dark);font-size:13px;}
+.param-units{font-size:11px;font-weight:700;color:var(--muted);}
+.param-range{font-size:11px;font-weight:700;color:#64748b;}
+.val-input{width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:700;color:var(--dark);outline:none;min-width:80px;}
+.val-input:focus{border-color:var(--primary);}
+.flag-select{padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:12px;font-weight:800;outline:none;cursor:pointer;min-width:80px;}
+.flag-select:focus{border-color:var(--primary);}
+.flag-N{color:#15803d;background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.3);}
+.flag-H{color:#b91c1c;background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.3);}
+.flag-L{color:#1d4ed8;background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.3);}
+
+/* URINALYSIS */
+.ua-row{display:grid;grid-template-columns:1.5fr 1fr 1.2fr;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;}
+.ua-row:last-child{border-bottom:none;}
+.ua-param{font-size:13px;font-weight:800;color:var(--dark);}
+.ua-select{width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:12px;font-weight:700;color:var(--dark);outline:none;background:#fff;}
+.ua-select:focus{border-color:var(--primary);}
+.ua-notes{width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:12px;font-weight:600;outline:none;}
+
+/* GENERIC TESTS */
+.gen-row{display:grid;grid-template-columns:2fr 1.2fr 1fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;}
+.gen-row:last-child{border-bottom:none;}
+.gen-name{font-size:13px;font-weight:800;color:var(--dark);}
+.result-select{width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:12px;font-weight:800;outline:none;cursor:pointer;}
+.result-select:focus{border-color:var(--primary);}
+.result-select option[value="Positive"]{color:#b91c1c;}
+.result-select option[value="Negative"]{color:#15803d;}
+.result-select option[value="Inconclusive"]{color:#b45309;}
+
+/* NOTES */
+.notes-area{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:600;color:var(--dark);outline:none;resize:vertical;min-height:80px;}
+.notes-area:focus{border-color:var(--primary);}
+
+/* ACTION BUTTONS */
+.card-actions{padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;background:#fafafa;}
+.action-btn{padding:10px 18px;border:none;border-radius:12px;cursor:pointer;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
+.action-btn:hover{transform:translateY(-1px);}
+.btn-complete{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 4px 12px rgba(34,197,94,0.3);}
+.btn-pdf{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 4px 12px rgba(139,92,246,0.3);}
+.btn-wa{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;}
+.btn-delete{background:#fff;color:#ef4444;border:1.5px solid rgba(239,68,68,0.3);}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty .icon{font-size:52px;opacity:0.4;margin-bottom:12px;}
+.empty p{font-size:15px;font-weight:700;}
+
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){
+  .cbc-table thead th:nth-child(3),.cbc-table tbody td:nth-child(3){display:none;}
+  .ua-row,.gen-row{grid-template-columns:1fr 1fr;}
 }
-
-button{
-cursor:pointer;
-border:none;
-border-radius:8px;
-padding:10px 14px;
-font-weight:bold;
-}
-
-#logoutBtn{background:#ef4444;color:white;}
-#chatBtn{background:#0ea5e9;color:white;}
-
-#search{
-padding:10px;
-width:100%;
-max-width:400px;
-border-radius:8px;
-border:1px solid #ccc;
-margin-bottom:20px;
-}
-
-.order-card{
-background:white;
-border-radius:12px;
-padding:16px;
-margin-bottom:16px;
-box-shadow:0 3px 10px rgba(0,0,0,0.05);
-}
-
-.order-card h3{
-margin-top:0;
-color:#0284c7;
-}
-
-.result-input{
-width:100%;
-padding:6px;
-border-radius:6px;
-border:1px solid #cbd5e1;
-margin-top:5px;
-}
-
-.complete{background:#22c55e;color:white;margin-top:12px;}
-.delete{background:#ef4444;color:white;margin-left:10px;}
-.whatsapp{background:#25D366;color:white;margin-left:10px;}
 </style>
 </head>
-
 <body>
+<div class="toast" id="toast"></div>
 
-<header>
-<h2>🧪 Ongoing Tests</h2>
-
-<div>
-<button id="chatBtn">💬 Chat</button>
-<button id="logoutBtn">Logout</button>
+<div class="topbar">
+  <span style="font-size:22px;">🔬</span>
+  <h2>Ongoing Tests</h2>
+  <a class="topbar-btn" href="patient_chat.html">💬 Chat</a>
+  <a class="topbar-btn" href="new_requests.html">📋 Orders</a>
+  <button class="topbar-btn" id="logoutBtn">🚪 Logout</button>
 </div>
-</header>
 
-<input id="search" placeholder="Search patient name or phone">
-
-<div id="ordersCounter"></div>
-<div id="ordersContainer"></div>
+<div class="content">
+  <input class="search-bar" id="search" placeholder="🔍 Search patient name or phone...">
+  <div class="counter" id="counter">Loading...</div>
+  <div id="ordersContainer"></div>
+</div>
 
 <script>
-
-const firebaseConfig={
-apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
-projectId:"mobile-lab-mityana-aeae2"
-};
-
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2"};
 firebase.initializeApp(firebaseConfig);
-
-const auth=firebase.auth();
-const db=firebase.firestore();
-
-const container=document.getElementById("ordersContainer");
-const counter=document.getElementById("ordersCounter");
-const search=document.getElementById("search");
-
+const auth=firebase.auth();const db=firebase.firestore();
 let allOrders=[];
 
-/* AUTH */
 auth.onAuthStateChanged(async user=>{
-if(!user){location.href="login.html";return;}
-
-const u=await db.collection("users").doc(user.uid).get();
-
-if(!u.exists || u.data().role!=="admin"){
-alert("Access denied");
-auth.signOut();
-location.href="login.html";
-return;
-}
-
-loadOrders();
+  if(!user){location.href="login.html";return;}
+  const u=await db.collection("users").doc(user.uid).get();
+  if(!u.exists||u.data().role!=="admin"){
+    if(user.email!=="edrinehero@gmail.com"){alert("Access denied");auth.signOut();location.href="login.html";return;}
+  }
+  loadOrders();
 });
 
-/* LOGOUT */
-logoutBtn.onclick=async()=>{
-await auth.signOut();
-location.href="login.html";
-};
+document.getElementById("logoutBtn").onclick=async()=>{await auth.signOut();location.href="login.html";};
 
-/* CHAT */
-chatBtn.onclick=()=>{
-location.href="patient_chat.html";
-};
-
-/* LOAD ORDERS */
 async function loadOrders(){
-
-const snap=await db.collection("orders")
-.where("status","==","ongoing")
-.orderBy("createdAt","asc")
-.get();
-
-allOrders=[];
-
-snap.forEach(d=>{
-allOrders.push({id:d.id,...d.data()});
-});
-
-counter.innerText=`Ongoing Tests: ${allOrders.length}`;
-
-renderOrders(allOrders);
+  const snap=await db.collection("orders").where("status","==","ongoing").orderBy("createdAt","asc").get();
+  allOrders=[];
+  snap.forEach(d=>allOrders.push({id:d.id,...d.data()}));
+  document.getElementById("counter").innerText=`🔬 ${allOrders.length} ongoing test${allOrders.length!==1?"s":""}`;
+  renderOrders(allOrders);
 }
 
-/* SEARCH */
-search.oninput=()=>{
-const q=search.value.toLowerCase();
-
-const filtered=allOrders.filter(o=>
-(o.name||"").toLowerCase().includes(q) ||
-(o.phone||"").includes(q)
-);
-
-renderOrders(filtered);
+document.getElementById("search").oninput=function(){
+  const q=this.value.toLowerCase();
+  renderOrders(allOrders.filter(o=>(o.name||"").toLowerCase().includes(q)||(o.phone||"").includes(q)));
 };
 
-/* RENDER */
-function renderOrders(list){
+// ── TEST DEFINITIONS ──
+const CBC_PARAMS=[
+  {name:"WBC",units:"x10*9/L",range:"4.0–10.0"},{name:"LYMPH#",units:"x10*9/L",range:"1.0–3.0"},
+  {name:"MO#",units:"x10*9/L",range:"0.2–1.0"},{name:"GRAN#",units:"x10*9/L",range:"2.0–7.0"},
+  {name:"LYMPH%",units:"%",range:"20–40"},{name:"MO%",units:"%",range:"2–10"},
+  {name:"GRAN%",units:"%",range:"50–70"},{name:"RBC",units:"x10*12/L",range:"4.0–5.5"},
+  {name:"HGB",units:"g/dL",range:"12.0–17.0"},{name:"HCT",units:"%",range:"36–50"},
+  {name:"MCV",units:"fL",range:"80–100"},{name:"MCH",units:"pg",range:"27–33"},
+  {name:"MCHC",units:"g/dL",range:"32–36"},{name:"RDW-CV",units:"%",range:"11.5–14.5"},
+  {name:"PLT",units:"x10*9/L",range:"150–400"},{name:"MPV",units:"fL",range:"7.5–12.5"},
+  {name:"PDW",units:"%",range:"10–17"},{name:"PCT",units:"%",range:"0.1–0.5"},
+  {name:"RDW-SD",units:"fL",range:"35–56"}
+];
 
-container.innerHTML="";
+const UA_MACRO=[
+  {name:"Colour",type:"text",placeholder:"e.g. Pale yellow, dark yellow"},
+  {name:"Appearance",type:"text",placeholder:"e.g. Clear, turbid, cloudy"}
+];
+const UA_DIPSTICK=[
+  {name:"UROBILINOGEN",opts:["Negative","Normal","1+","2+","3+"]},
+  {name:"BILIRUBIN",opts:["Negative","Trace","1+","2+","3+"]},
+  {name:"SPECIFIC GRAVITY",type:"text",placeholder:"e.g. 1.005"},
+  {name:"pH",type:"text",placeholder:"e.g. 6.5"},
+  {name:"NITRITES",opts:["Negative","Positive","Trace"]},
+  {name:"GLUCOSE",opts:["Negative","Trace","1+","2+","3+","4+"]},
+  {name:"PROTEINS",opts:["Negative","Trace","1+","2+","3+","4+"]},
+  {name:"KETONES",opts:["Negative","Trace","1+","2+","3+"]},
+  {name:"LEUCOCYTES",opts:["Negative","Trace","1+","2+","3+"]},
+  {name:"RBCs",opts:["Negative","Trace","1+","2+","3+"]},
+  {name:"BLOOD",opts:["Negative","Trace","1+","2+","3+"]}
+];
+const UA_MICRO_ITEMS=[
+  {name:"Epithelial cells",opts:["Not seen","+ seen","++ seen","+++ seen"]},
+  {name:"Pus cells",opts:["Not seen","+ seen","++ seen","+++ seen"]},
+  {name:"RBCs",opts:["Not seen","+ seen","++ seen","+++ seen"]},
+  {name:"Clue cells",opts:["Not seen","+ seen","++ seen","+++ seen"]},
+  {name:"Bacteria",opts:["Not seen","Few seen","Moderate","Many seen"]},
+  {name:"Casts",opts:["Not seen","+ seen"]},
+  {name:"Crystals",opts:["Not seen","+ seen"]}
+];
 
-list.forEach(o=>{
-
-const card=document.createElement("div");
-card.className="order-card";
-
-/* SPLIT TESTS CLEANLY */
-let testsArray = [];
-
-if(o.tests){
-testsArray = o.tests.split("\n").map(t=>t.trim()).filter(t=>t);
-}
-
-/* BUILD INPUTS FOR EACH TEST */
-let inputsHTML = "";
-
-testsArray.forEach(test=>{
-inputsHTML += `
-<label>${test}</label>
-<input class="result-input" data-test="${test}" placeholder="Enter result for ${test}">
-`;
-});
-
-card.innerHTML=`
-<h3>${o.name || ""}</h3>
-
-<p><b>Age:</b> ${o.age || ""}</p>
-<p><b>Phone:</b> ${o.phone || ""}</p>
-<p><b>Email:</b> ${o.email || ""}</p>
-
-<p><b>Tests:</b><br>${testsArray.join("<br>")}</p>
-
-${inputsHTML}
-
-<br>
-<button class="complete">Complete</button>
-<button class="delete">Delete</button>
-<button class="whatsapp">WhatsApp</button>
-`;
-
-container.appendChild(card);
-
-/* DELETE */
-card.querySelector(".delete").onclick=async()=>{
-if(!confirm("Delete this test?")) return;
-
-await db.collection("orders").doc(o.id).delete();
-alert("Deleted");
-loadOrders();
+// Generic tests with qualifier options
+const GENERIC_TESTS={
+  // Infection / STI — Positive/Negative
+  "HIV":["Negative","Positive","Inconclusive","Reactive","Non-Reactive"],
+  "Hepatitis B":["Negative","Positive","Reactive","Non-Reactive"],
+  "Hepatitis C":["Negative","Positive","Reactive","Non-Reactive"],
+  "RPR / Syphilis":["Non-Reactive","Reactive","Weakly Reactive"],
+  "Gonorrhea Test":["Negative","Positive","Inconclusive"],
+  "Chlamydia Test":["Negative","Positive","Inconclusive"],
+  "Brucella Test":["Negative","Positive","1:80","1:160","1:320"],
+  "H. Pylori Stool":["Negative","Positive"],
+  "H. Pylori Serum":["Negative","Positive","Weakly Positive"],
+  "Malaria (B/S)":["Negative — No parasites seen","Positive — P. falciparum","Positive — P. vivax","Positive — Mixed"],
+  "Pregnancy Test (hCG)":["Negative","Positive"],
+  "HCG Blood":["Negative","Positive"],
+  "Widal Serum":["Negative (<1:80)","Positive 1:80","Positive 1:160","Positive 1:320","Positive 1:640"],
+  "Widal Stool":["Negative","Positive"],
+  "Rheumatoid Factor":["Negative","Positive (weakly)","Positive (strongly)"],
+  "RPR":["Non-Reactive","Reactive"],
+  "Sickling Test":["AA — Normal","AS — Sickle Cell Trait","SS — Sickle Cell Disease"],
+  "Gram Staining":["No organisms seen","Gram-positive cocci seen","Gram-negative diplococci seen","Gram-negative rods seen","Mixed organisms seen"],
+  "High Vaginal Swab":["Normal flora","Bacterial Vaginosis","Candida species","Trichomonas vaginalis","Mixed infection"],
+  "High Vaginal Swab C&S":["No significant growth","Mixed growth","Pending culture — 3 days"],
+  // Numeric
+  "Blood Glucose":["numeric"],
+  "PSA":["numeric"],
+  "Blood Grouping":["A+","A-","B+","B-","AB+","AB-","O+","O-"],
+  "Bleeding & Clotting Test":["Normal","Prolonged BT","Prolonged CT","Both prolonged"],
+  "Stool Analysis":["Normal","Ova/parasites seen","Bacteria present","Blood present","Pus cells seen"],
+  "H. Pylori":["Negative","Positive"],
+  "DNA":["Match confirmed (99.9%)","No match","Inconclusive — retest required"]
 };
 
-/* COMPLETE */
-card.querySelector(".complete").onclick=async()=>{
+function getTestType(testName){
+  const clean=testName.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim();
+  if(/CBC|Complete Blood Count/i.test(clean)) return "cbc";
+  if(/Urinalysis|Urine/i.test(clean)) return "ua";
+  for(const key of Object.keys(GENERIC_TESTS)){
+    if(clean.toLowerCase().includes(key.toLowerCase())||key.toLowerCase().includes(clean.toLowerCase())) return {type:"generic",key,opts:GENERIC_TESTS[key]};
+  }
+  // Check for LFT, RFT, Lipid, Electrolytes — numeric tables
+  if(/LFT|Liver Function/i.test(clean)) return "lft";
+  if(/RFT|Kidney Function/i.test(clean)) return "rft";
+  if(/Lipid/i.test(clean)) return "lipid";
+  if(/Electrolyte/i.test(clean)) return "electrolytes";
+  return {type:"generic",key:clean,opts:["Negative","Positive","Inconclusive","Normal","Abnormal"]};
+}
 
-const inputs = card.querySelectorAll(".result-input");
-
-let results = {};
-
-inputs.forEach(input=>{
-const test = input.dataset.test;
-const value = input.value.trim();
-
-if(value){
-results[test] = {
-value: value,
-units: ""
+// LFT, RFT, Lipid, Electrolytes parameters
+const PANEL_PARAMS={
+  lft:[{name:"ALT (SGPT)",units:"U/L",range:"7–56"},{name:"AST (SGOT)",units:"U/L",range:"10–40"},{name:"ALP",units:"U/L",range:"44–147"},{name:"Total Bilirubin",units:"mg/dL",range:"0.1–1.2"},{name:"Direct Bilirubin",units:"mg/dL",range:"0–0.3"},{name:"Total Protein",units:"g/dL",range:"6.0–8.3"},{name:"Albumin",units:"g/dL",range:"3.5–5.0"},{name:"GGT",units:"U/L",range:"9–48"}],
+  rft:[{name:"Creatinine",units:"μmol/L",range:"60–110"},{name:"Urea",units:"mmol/L",range:"2.5–7.8"},{name:"Uric Acid",units:"mg/dL",range:"3.5–7.2"},{name:"eGFR",units:"mL/min/1.73m²",range:">60"}],
+  lipid:[{name:"Total Cholesterol",units:"mmol/L",range:"<5.2"},{name:"LDL Cholesterol",units:"mmol/L",range:"<3.4"},{name:"HDL Cholesterol",units:"mmol/L",range:">1.0"},{name:"Triglycerides",units:"mmol/L",range:"<1.7"},{name:"VLDL",units:"mmol/L",range:"0.1–1.0"}],
+  electrolytes:[{name:"Sodium (Na+)",units:"mmol/L",range:"136–145"},{name:"Potassium (K+)",units:"mmol/L",range:"3.5–5.0"},{name:"Chloride (Cl-)",units:"mmol/L",range:"98–106"},{name:"Bicarbonate (HCO3-)",units:"mmol/L",range:"22–29"},{name:"Calcium (Ca2+)",units:"mmol/L",range:"2.1–2.6"},{name:"Phosphate",units:"mmol/L",range:"0.8–1.5"}]
 };
-}
-});
-
-if(Object.keys(results).length === 0){
-alert("Enter at least one result");
-return;
-}
-
-/* SAVE RESULTS CORRECTLY */
-await db.collection("results").doc(o.id).set({
-
-order_id:o.id,
-userId:o.userId,
-
-patientName:o.name || "",
-patientEmail:o.email || "",
-
-results:results,
-
-uploaded_at:firebase.firestore.FieldValue.serverTimestamp()
-
-});
-
-/* UPDATE STATUS */
-await db.collection("orders").doc(o.id).update({
-status:"completed"
-});
-
-generatePDF(o, results);
-};
-
-/* WHATSAPP */
-card.querySelector(".whatsapp").onclick=()=>{
-const msg=`Hello ${o.name}, your lab results are ready. Please check your app.`;
-const phone=o.phone.replace("+","");
-window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
-};
-
-});
-}
-
-/* PDF */
-function generatePDF(o,results){
-
-const {jsPDF}=window.jspdf;
-const pdf=new jsPDF();
-
-let y=20;
-
-pdf.setFontSize(18);
-pdf.text("Mobile Lab Services",105,y,{align:"center"});
-
-y+=15;
-
-pdf.setFontSize(12);
-
-pdf.text(`Patient: ${o.name}`,20,y); y+=8;
-pdf.text(`Age: ${o.age}`,20,y); y+=8;
-pdf.text(`Phone: ${o.phone}`,20,y); y+=12;
-
-/* LOOP RESULTS CLEANLY */
-Object.entries(results).forEach(([test,val])=>{
-pdf.text(`${test}: ${val.value}`,20,y);
-y+=8;
-});
-
-pdf.save(`Lab_Result_${o.name}.pdf`);
-
-loadOrders();
-}
-
 </script>
 
+<script>
+// ── RENDER ORDERS ──
+function renderOrders(list){
+  const container=document.getElementById("ordersContainer");
+  if(list.length===0){container.innerHTML=`<div class="empty"><div class="icon">✅</div><p>No ongoing tests right now</p></div>`;return;}
+  container.innerHTML="";
+  list.forEach(o=>{
+    const card=document.createElement("div");
+    card.className="order-card";
+    const date=o.createdAt?o.createdAt.toDate().toLocaleString("en-UG"):"—";
+    const testsArr=(o.tests||"").split("\n").map(t=>t.trim()).filter(t=>t);
+
+    // Build result fields HTML for each test
+    let resultFieldsHTML="";
+    testsArr.forEach((testLine,i)=>{
+      const cleanName=testLine.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim();
+      const type=getTestType(cleanName);
+      if(type==="cbc") resultFieldsHTML+=buildCBC(i);
+      else if(type==="ua") resultFieldsHTML+=buildUA(i);
+      else if(type==="lft") resultFieldsHTML+=buildPanel("lft","🫁 Liver Function Test (LFT)",i);
+      else if(type==="rft") resultFieldsHTML+=buildPanel("rft","🫘 Kidney Function Test (RFT)",i);
+      else if(type==="lipid") resultFieldsHTML+=buildPanel("lipid","🫀 Lipid Profile",i);
+      else if(type==="electrolytes") resultFieldsHTML+=buildPanel("electrolytes","⚡ Electrolytes",i);
+      else resultFieldsHTML+=buildGeneric(cleanName,type.opts||["Negative","Positive","Inconclusive","Normal","Abnormal"],i);
+    });
+
+    card.innerHTML=`
+      <div class="card-head">
+        <div class="patient-name">${o.name||"—"}</div>
+        <div class="patient-meta">
+          <span class="meta-chip">📅 ${date}</span>
+          <span class="meta-chip">📞 ${o.phone||"—"}</span>
+          <span class="meta-chip">👤 ${o.sex||"—"}, ${o.age||"—"} yrs</span>
+          <span class="meta-chip">💳 ${o.payment||"—"}</span>
+          <span class="meta-chip">🆔 ${o.order_id||o.id}</span>
+        </div>
+      </div>
+      ${resultFieldsHTML}
+      <div class="result-section">
+        <div class="section-label">👨‍⚕️ Doctor's Summary & Advice</div>
+        <textarea class="notes-area" id="summary-${o.id}" placeholder="Overall interpretation, advice, follow-up instructions..."></textarea>
+      </div>
+      <div class="card-actions">
+        <button class="action-btn btn-complete" onclick="completeOrder('${o.id}')">✅ Save & Complete</button>
+        <button class="action-btn btn-pdf" onclick="previewPDF('${o.id}')">📄 Generate PDF</button>
+        <button class="action-btn btn-wa" onclick="waNotify('${o.phone||""}','${o.name||""}','${o.id}')">💬 WhatsApp</button>
+        <button class="action-btn btn-delete" onclick="deleteOrder('${o.id}')">🗑️ Delete</button>
+      </div>`;
+    // Store order data on element for easy access
+    card.dataset.orderId=o.id;
+    card._orderData=o;
+    container.appendChild(card);
+  });
+}
+
+// ── CBC TABLE ──
+function buildCBC(idx){
+  const rows=CBC_PARAMS.map(p=>`
+    <tr>
+      <td><span class="param-name">${p.name}</span></td>
+      <td><span class="param-units">${p.units}</span></td>
+      <td><span class="param-range">${p.range}</span></td>
+      <td><input class="val-input result-field" data-param="${p.name}" data-units="${p.units}" placeholder="Value"></td>
+      <td>
+        <select class="flag-select result-flag flag-N" data-param="${p.name}" onchange="updateFlagStyle(this)">
+          <option value="N">Normal</option>
+          <option value="H">High ↑</option>
+          <option value="L">Low ↓</option>
+        </select>
+      </td>
+    </tr>`).join("");
+  return `
+    <div class="result-section" data-test="CBC" data-idx="${idx}">
+      <div class="section-label">🩸 CBC – Complete Blood Count</div>
+      <div style="overflow-x:auto;">
+        <table class="cbc-table">
+          <thead><tr><th>Parameter</th><th>Units</th><th>Normal Range</th><th>Value</th><th>Flag</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── URINALYSIS ──
+function buildUA(idx){
+  const macroRows=UA_MACRO.map(p=>`
+    <div class="ua-row">
+      <span class="ua-param">${p.name}</span>
+      <input class="ua-notes result-field" style="grid-column:2/-1;" data-param="${p.name}" placeholder="${p.placeholder}">
+    </div>`).join("");
+  const dipstickRows=UA_DIPSTICK.map(p=>{
+    if(p.type==="text") return `
+      <div class="ua-row">
+        <span class="ua-param">${p.name}</span>
+        <input class="ua-notes result-field" data-param="${p.name}" placeholder="${p.placeholder}">
+        <span></span>
+      </div>`;
+    return `
+      <div class="ua-row">
+        <span class="ua-param">${p.name}</span>
+        <select class="ua-select result-field" data-param="${p.name}">
+          ${p.opts.map(o=>`<option value="${o}">${o}</option>`).join("")}
+        </select>
+        <span></span>
+      </div>`;
+  }).join("");
+  const microRows=UA_MICRO_ITEMS.map(p=>`
+    <div class="ua-row">
+      <span class="ua-param">${p.name}</span>
+      <select class="ua-select result-field" data-param="micro_${p.name}">
+        ${p.opts.map(o=>`<option value="${o}">${o}</option>`).join("")}
+      </select>
+      <span></span>
+    </div>`).join("");
+  return `
+    <div class="result-section" data-test="Urinalysis" data-idx="${idx}">
+      <div class="section-label">💧 Urinalysis – Macroscopy</div>
+      ${macroRows}
+      <div class="section-label" style="margin-top:12px;">🔬 Dipstick Results</div>
+      ${dipstickRows}
+      <div class="section-label" style="margin-top:12px;">🧫 Microscopy</div>
+      ${microRows}
+      <div style="margin-top:10px;">
+        <label style="font-size:12px;font-weight:800;color:var(--muted);display:block;margin-bottom:4px;">Microscopy Notes</label>
+        <input class="val-input result-field" style="width:100%;" data-param="micro_notes" placeholder="e.g. Epithelial cells +++ seen, pus cells + seen, clue cells + seen">
+      </div>
+    </div>`;
+}
+
+// ── PANEL (LFT / RFT / Lipid / Electrolytes) ──
+function buildPanel(panelKey,label,idx){
+  const params=PANEL_PARAMS[panelKey]||[];
+  const rows=params.map(p=>`
+    <tr>
+      <td><span class="param-name">${p.name}</span></td>
+      <td><span class="param-units">${p.units}</span></td>
+      <td><span class="param-range">${p.range}</span></td>
+      <td><input class="val-input result-field" data-param="${p.name}" data-units="${p.units}" placeholder="Value"></td>
+      <td>
+        <select class="flag-select result-flag flag-N" data-param="${p.name}" onchange="updateFlagStyle(this)">
+          <option value="N">Normal</option><option value="H">High ↑</option><option value="L">Low ↓</option>
+        </select>
+      </td>
+    </tr>`).join("");
+  return `
+    <div class="result-section" data-test="${panelKey}" data-idx="${idx}">
+      <div class="section-label">${label}</div>
+      <div style="overflow-x:auto;">
+        <table class="cbc-table">
+          <thead><tr><th>Parameter</th><th>Units</th><th>Normal Range</th><th>Value</th><th>Flag</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── GENERIC TEST ──
+function buildGeneric(name,opts,idx){
+  const isNumeric=opts[0]==="numeric";
+  const fieldHTML=isNumeric
+    ?`<div style="display:flex;gap:10px;align-items:center;">
+        <input class="val-input result-field" style="flex:1;" data-param="${name}" placeholder="Enter numeric value">
+        <input class="val-input result-field" style="width:100px;" data-param="${name}_units" placeholder="Units">
+        <select class="flag-select result-flag flag-N" data-param="${name}_flag" onchange="updateFlagStyle(this)">
+          <option value="N">Normal</option><option value="H">High ↑</option><option value="L">Low ↓</option>
+        </select>
+      </div>`
+    :`<select class="result-select result-field" data-param="${name}" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;outline:none;cursor:pointer;margin-bottom:8px;">
+        ${opts.map(o=>`<option value="${o}" style="${o==="Positive"||o==="Reactive"?"color:#b91c1c":o==="Negative"||o==="Non-Reactive"?"color:#15803d":o==="Inconclusive"?"color:#b45309":""}">${o}</option>`).join("")}
+      </select>
+      <input class="val-input result-field" data-param="${name}_note" style="width:100%;" placeholder="Additional notes (optional)">`;
+  return `
+    <div class="result-section" data-test="${name}" data-idx="${idx}">
+      <div class="section-label">🧪 ${name}</div>
+      ${fieldHTML}
+    </div>`;
+}
+
+function updateFlagStyle(sel){
+  sel.className="flag-select result-flag flag-"+sel.value;
+}
+
+// ── COLLECT ALL RESULTS FROM A CARD ──
+function collectResults(card){
+  const results={};
+  card.querySelectorAll(".result-field").forEach(el=>{
+    const param=el.dataset.param;
+    if(!param) return;
+    const val=el.value||el.innerText||"";
+    if(val&&val.trim()) results[param]=val.trim();
+  });
+  card.querySelectorAll(".result-flag").forEach(el=>{
+    const param=el.dataset.param;
+    if(!param) return;
+    results[param+"_flag"]=el.value;
+  });
+  return results;
+}
+
+// ── FORMAT RESULTS AS READABLE TEXT ──
+function formatResultsText(results,testsArr){
+  let lines=[];
+  testsArr.forEach(testLine=>{
+    const name=testLine.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim();
+    lines.push(`\n── ${name} ──`);
+    for(const [key,val] of Object.entries(results)){
+      if(key.toLowerCase().includes(name.toLowerCase().split(" ")[0])||
+         key.startsWith("WBC")||key.startsWith("HGB")||key.startsWith("RBC")||
+         key.startsWith("PLT")||key.startsWith("MCV")||key.startsWith("HCT")){
+        if(!key.endsWith("_flag")&&!key.endsWith("_note")) lines.push(`${key}: ${val}`);
+      }
+    }
+  });
+  // Add all remaining entries not already listed
+  const allKeys=Object.keys(results).filter(k=>!k.endsWith("_flag"));
+  allKeys.forEach(k=>{if(!lines.join("\n").includes(k)) lines.push(`${k}: ${results[k]}`);});
+  return lines.join("\n");
+}
+
+// ── COMPLETE ORDER ──
+async function completeOrder(orderId){
+  const card=document.querySelector(`[data-order-id="${orderId}"]`)||
+    [...document.querySelectorAll(".order-card")].find(c=>c.dataset.orderId===orderId);
+  if(!card){showToast("Card not found");return;}
+  const o=card._orderData;
+  const results=collectResults(card);
+  const summary=document.getElementById("summary-"+orderId)?.value.trim()||"";
+  const testsArr=(o.tests||"").split("\n").map(t=>t.trim()).filter(t=>t);
+  const resultText=formatResultsText(results,testsArr);
+  if(!resultText.trim()&&!summary){showToast("Enter at least one result");return;}
+  try{
+    await db.collection("results").doc(orderId).set({
+      order_id:orderId,userId:o.userId||"",
+      patientName:o.name||"",patientEmail:o.email||"",
+      results,resultText,resultNotes:summary,
+      uploaded_at:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection("orders").doc(orderId).update({
+      status:"completed",resultText,resultNotes:summary,
+      completedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("✅ Results saved!");
+    // Notify patient via WhatsApp
+    if(o.phone){
+      const msg=`Hello ${o.name}, your lab results for order ${orderId} are ready!\n\n📋 Results:\n${resultText}\n\n👨‍⚕️ Doctor's Notes:\n${summary||"None"}\n\nMobile Lab – Mityana`;
+      window.open(`https://wa.me/${o.phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`,"_blank");
+    }
+    setTimeout(loadOrders,1500);
+  }catch(e){showToast("Failed: "+e.message);}
+}
+
+// ── GENERATE PDF ──
+async function previewPDF(orderId){
+  const card=[...document.querySelectorAll(".order-card")].find(c=>c.dataset.orderId===orderId);
+  if(!card){showToast("Card not found");return;}
+  const o=card._orderData;
+  const results=collectResults(card);
+  const summary=document.getElementById("summary-"+orderId)?.value.trim()||"";
+  const testsArr=(o.tests||"").split("\n").map(t=>t.trim()).filter(t=>t);
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF({unit:"mm",format:"a4"});
+  const pageW=210;let y=15;
+  // Header
+  pdf.setFillColor(14,165,233);pdf.rect(0,0,pageW,28,F);
+  pdf.setTextColor(255,255,255);pdf.setFontSize(16);pdf.setFont("helvetica","bold");
+  pdf.text("Mobile Lab Mityana – Lab Result Report",pageW/2,12,{align:"center"});
+  pdf.setFontSize(9);pdf.text("For the love of your health | MTN: +256 778 379 791 | Airtel: 0750 992 939",pageW/2,20,{align:"center"});
+  y=36;
+  // Patient info box
+  pdf.setDrawColor(14,165,233);pdf.setLineWidth(0.3);
+  pdf.roundedRect(10,y,pageW-20,22,3,3);
+  pdf.setTextColor(15,23,42);pdf.setFontSize(10);pdf.setFont("helvetica","bold");
+  pdf.text(`Patient: ${o.name||"—"}`,14,y+7);
+  pdf.text(`Age/Sex: ${o.age||"—"} yrs / ${o.sex||"—"}`,14,y+14);
+  pdf.text(`Phone: ${o.phone||"—"}`,90,y+7);
+  pdf.text(`Order ID: ${o.order_id||orderId}`,90,y+14);
+  pdf.text(`Date: ${new Date().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"})}`,155,y+7);
+  y+=28;
+  // Tests results
+  testsArr.forEach(testLine=>{
+    const name=testLine.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim();
+    // Section header
+    if(y>260){pdf.addPage();y=15;}
+    pdf.setFillColor(241,245,249);pdf.rect(10,y,pageW-20,7,F);
+    pdf.setTextColor(14,165,233);pdf.setFontSize(10);pdf.setFont("helvetica","bold");
+    pdf.text(`🧪 ${name}`,14,y+5);y+=10;
+    // Collect relevant params
+    const relevant=Object.entries(results).filter(([k])=>
+      !k.endsWith("_flag")&&!k.endsWith("_note")&&!k.endsWith("_units")
+    );
+    // If CBC/panel — show as table
+    const isCBC=CBC_PARAMS.some(p=>results[p.name]!==undefined);
+    if((/CBC/i.test(name)||/Urinalysis/i.test(name)||/LFT|RFT|Lipid|Electrolyte/i.test(name))&&relevant.length>0){
+      pdf.setFontSize(9);pdf.setTextColor(100,116,139);pdf.setFont("helvetica","bold");
+      pdf.text("PARAMETER",14,y);pdf.text("VALUE",100,y);pdf.text("FLAG",150,y);
+      pdf.setDrawColor(200,200,200);pdf.setLineWidth(0.2);pdf.line(10,y+1,pageW-10,y+1);
+      y+=5;
+      relevant.slice(0,30).forEach(([k,v])=>{
+        if(y>270){pdf.addPage();y=15;}
+        const flag=results[k+"_flag"]||"N";
+        const flagTxt=flag==="H"?"High ↑":flag==="L"?"Low ↓":"Normal";
+        const flagColor=flag==="H"?[185,28,28]:flag==="L"?[29,78,216]:[21,128,61];
+        pdf.setTextColor(15,23,42);pdf.setFont("helvetica","normal");pdf.setFontSize(9);
+        pdf.text(k,14,y);pdf.text(String(v),100,y);
+        pdf.setTextColor(...flagColor);pdf.text(flagTxt,150,y);
+        y+=5;
+      });
+    } else {
+      // Single result
+      const mainVal=results[name]||results[name+"_value"]||"—";
+      const note=results[name+"_note"]||"";
+      pdf.setTextColor(15,23,42);pdf.setFont("helvetica","normal");pdf.setFontSize(10);
+      pdf.text(`Result: `,14,y);
+      const isPos=String(mainVal).toLowerCase().includes("positive")||String(mainVal).toLowerCase().includes("reactive");
+      const isNeg=String(mainVal).toLowerCase().includes("negative")||String(mainVal).toLowerCase().includes("non-reactive");
+      pdf.setTextColor(isPos?185:isNeg?21:15,isPos?28:isNeg?128:23,isPos?28:isNeg?61:42);
+      pdf.setFont("helvetica","bold");pdf.text(String(mainVal),35,y);
+      if(note){pdf.setTextColor(100,116,139);pdf.setFont("helvetica","normal");pdf.setFontSize(9);y+=5;pdf.text(`Note: ${note}`,14,y);}
+    }
+    y+=8;
+  });
+  // Doctor notes
+  if(summary){
+    if(y>250){pdf.addPage();y=15;}
+    pdf.setFillColor(240,249,255);pdf.roundedRect(10,y,pageW-20,summary.length/60*5+15,3,3,F);
+    pdf.setTextColor(3,105,161);pdf.setFontSize(10);pdf.setFont("helvetica","bold");
+    pdf.text("👨‍⚕️ Doctor's Advice:",14,y+7);
+    pdf.setFont("helvetica","normal");pdf.setFontSize(9);
+    const lines=pdf.splitTextToSize(summary,pageW-30);
+    lines.forEach((line,i)=>{pdf.text(line,14,y+13+i*5);});
+    y+=15+lines.length*5+5;
+  }
+  // Footer
+  pdf.setFillColor(14,165,233);pdf.rect(0,285,pageW,12,F);
+  pdf.setTextColor(255,255,255);pdf.setFontSize(8);pdf.setFont("helvetica","normal");
+  pdf.text("This is an official lab result from Mobile Lab Mityana. Please consult your doctor for medical interpretation.",pageW/2,291,{align:"center"});
+  pdf.save(`LabResult_${o.name||"patient"}_${orderId}.pdf`);
+  showToast("✅ PDF downloaded!");
+}
+
+// ── WHATSAPP ──
+function waNotify(phone,name,orderId){
+  if(!phone){showToast("No phone number");return;}
+  const msg=`Hello ${name}, your lab results for order ${orderId} are ready on Mobile Lab Mityana. Log in to view them. — Mobile Lab Mityana`;
+  window.open(`https://wa.me/${phone.replace(/^0/,"256")}?text=${encodeURIComponent(msg)}`);
+}
+
+// ── DELETE ──
+async function deleteOrder(orderId){
+  if(!confirm("Delete this order permanently?")) return;
+  await db.collection("orders").doc(orderId).delete();
+  showToast("Deleted");loadOrders();
+}
+
+function showToast(msg){const t=document.getElementById("toast");t.innerText=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500);}
+</script>
 </body>
 </html>
