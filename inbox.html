@@ -3,448 +3,266 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Results – Mobile Lab</title>
+<title>My Results – Mobile Lab Mityana</title>
 <meta name="theme-color" content="#0ea5e9">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;}
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:40px;}
-
-/* TOPBAR */
-.topbar{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);background-size:300% 300%;animation:gradShift 8s ease infinite;padding:16px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
-@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
-.back-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;}
-.topbar-title{color:#fff;font-size:18px;font-weight:900;flex:1;text-align:center;}
-.chat-link{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;text-decoration:none;}
-
-/* HERO */
-.hero{background:linear-gradient(135deg,#0369a1,#0ea5e9);padding:24px 20px 50px;color:#fff;text-align:center;position:relative;overflow:hidden;}
-.hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:30px;background:var(--bg);border-radius:30px 30px 0 0;}
-.hero h2{font-size:22px;font-weight:900;margin-bottom:6px;}
-.hero p{font-size:13px;opacity:0.9;font-weight:600;}
-
-/* LOADER */
-.loader{text-align:center;padding:50px 20px;color:var(--muted);}
-.loader-ring{width:44px;height:44px;border-radius:50%;border:4px solid #e2e8f0;border-top-color:var(--primary);animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.topbar h2{color:#fff;font-size:18px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+#loader{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+.loader-ring{width:52px;height:52px;border-radius:50%;border:5px solid #e2e8f0;border-top-color:#0ea5e9;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* EMPTY STATE */
-.empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
-.empty-state .icon{font-size:56px;opacity:0.3;margin-bottom:14px;}
-.empty-state h3{font-size:17px;font-weight:800;margin-bottom:6px;}
-.empty-state p{font-size:13px;font-weight:600;}
-
-/* RESULT CARD */
-.results-list{padding:16px;}
-.result-card{background:#fff;border-radius:22px;margin-bottom:16px;box-shadow:0 6px 24px rgba(0,0,0,0.08);border:1px solid var(--border);overflow:hidden;animation:cardIn 0.4s ease both;}
-@keyframes cardIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
-.result-card-header{background:linear-gradient(135deg,var(--primary),var(--primary2));padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.result-card-header h3{color:#fff;font-size:16px;font-weight:900;margin:0;}
-.result-card-header p{color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;margin:3px 0 0;}
-.result-status{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;background:rgba(255,255,255,0.25);color:#fff;white-space:nowrap;}
-.result-body{padding:16px 18px;}
-.result-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
-.meta-chip{background:#f1f5f9;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;color:#475569;}
-.result-text{background:#f8fafc;border-radius:14px;padding:14px;font-size:14px;font-weight:600;color:var(--dark);line-height:1.8;margin-bottom:12px;white-space:pre-wrap;}
-.doctor-notes{background:linear-gradient(135deg,rgba(14,165,233,0.06),rgba(20,184,166,0.06));border-radius:14px;padding:14px;border-left:4px solid var(--primary);font-size:13px;font-weight:600;color:var(--dark);line-height:1.7;margin-bottom:14px;}
-.doctor-notes strong{color:var(--primary);font-weight:800;}
-.result-actions{display:flex;gap:10px;flex-wrap:wrap;}
-.action-btn{padding:10px 18px;border:none;border-radius:12px;cursor:pointer;font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:800;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
-.btn-download{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);}
-.btn-download:hover{transform:translateY(-2px);}
-.btn-print{background:#f1f5f9;color:var(--dark);}
-.btn-share{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;}
-
-/* ORDERS SECTION */
-.section-title{font-size:15px;font-weight:900;color:var(--dark);padding:16px 16px 8px;display:flex;align-items:center;gap:8px;}
-.order-card{background:#fff;border-radius:18px;padding:14px 16px;margin:0 16px 10px;box-shadow:0 3px 12px rgba(0,0,0,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.order-info h4{font-size:14px;font-weight:800;color:var(--dark);margin:0 0 3px;}
-.order-info p{font-size:12px;font-weight:600;color:var(--muted);}
-.status-pill{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap;}
-.s-pending{background:rgba(245,158,11,0.12);color:#b45309;}
-.s-ongoing{background:rgba(14,165,233,0.12);color:#0369a1;}
-.s-completed{background:rgba(34,197,94,0.12);color:#15803d;}
-.s-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
-
+#loader p{font-size:15px;font-weight:700;color:#0ea5e9;}
+.page-wrap{max-width:700px;margin:0 auto;padding:20px 16px;}
+/* FILTER TABS */
+.filter-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.ftab{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;border:2px solid var(--border);background:#fff;color:var(--muted);font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.ftab.active{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(14,165,233,0.3);}
+/* ORDER CARD */
+.order-card{background:var(--card);border-radius:22px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.07);border:1px solid var(--border);overflow:hidden;transition:all 0.2s;}
+.order-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.1);}
+.order-head{padding:16px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;}
+.order-id{font-size:12px;font-weight:800;color:var(--muted);}
+.order-name-row{font-size:16px;font-weight:900;color:var(--dark);margin:2px 0;}
+.order-date{font-size:12px;font-weight:600;color:var(--muted);}
+.status-pill{padding:5px 12px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;}
+.pill-pending{background:rgba(245,158,11,0.12);color:#b45309;}
+.pill-ongoing{background:rgba(14,165,233,0.12);color:#0369a1;}
+.pill-completed{background:rgba(34,197,94,0.12);color:#15803d;}
+.pill-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
+/* TESTS CHIPS */
+.tests-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 14px;}
+.test-chip{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.2);color:#0369a1;}
+/* RESULTS SECTION */
+.results-section{padding:0 18px 18px;border-top:1px solid var(--border);}
+.results-section.hidden{display:none;}
+.results-header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px;}
+.results-header h4{font-size:14px;font-weight:900;color:var(--dark);}
+.result-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.res-btn{padding:8px 14px;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;}
+.res-btn:hover{transform:translateY(-1px);}
+.btn-pdf{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;box-shadow:0 3px 10px rgba(139,92,246,0.3);}
+.btn-wa{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;}
+.result-box{background:#f8fafc;border-radius:14px;padding:14px 16px;font-size:13px;font-weight:600;color:#334155;line-height:1.8;white-space:pre-wrap;word-break:break-word;}
+.doctor-notes{background:rgba(14,165,233,0.06);border:1.5px solid rgba(14,165,233,0.2);border-radius:14px;padding:12px 16px;margin-top:10px;font-size:13px;font-weight:600;color:#0369a1;line-height:1.7;}
+.no-result-msg{text-align:center;padding:16px;color:var(--muted);font-size:13px;font-weight:700;}
+/* EMPTY */
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-state .icon{font-size:56px;margin-bottom:16px;}
+.empty-state h3{font-size:18px;font-weight:900;margin-bottom:8px;}
+.empty-state p{font-size:14px;font-weight:600;color:var(--muted);}
+.empty-state a{display:inline-block;margin-top:20px;padding:14px 28px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;border-radius:14px;font-weight:900;text-decoration:none;}
+/* PDF TEMPLATE (hidden, used for screenshot) */
+#pdfTemplate{position:fixed;left:-9999px;top:0;width:600px;background:#fff;padding:30px;font-family:'Nunito',Arial,sans-serif;}
+.pdf-header{text-align:center;border-bottom:3px solid #0ea5e9;padding-bottom:16px;margin-bottom:16px;}
+.pdf-logo{font-size:36px;margin-bottom:6px;}
+.pdf-clinic{font-size:20px;font-weight:900;color:#0369a1;}
+.pdf-sub{font-size:12px;color:#64748b;font-weight:600;}
+.pdf-title{font-size:18px;font-weight:900;margin:12px 0 4px;text-transform:uppercase;letter-spacing:1px;}
+.pdf-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
+.pdf-meta-item label{font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;display:block;}
+.pdf-meta-item span{font-size:13px;font-weight:700;color:#0f172a;}
+.pdf-results{background:#f8fafc;border-radius:10px;padding:14px;font-size:13px;font-weight:600;white-space:pre-wrap;line-height:1.8;color:#334155;margin-bottom:12px;}
+.pdf-notes{background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.2);border-radius:10px;padding:12px;font-size:13px;font-weight:600;color:#0369a1;line-height:1.7;}
+.pdf-footer{text-align:center;margin-top:20px;padding-top:14px;border-top:1px dashed #e2e8f0;font-size:12px;color:#64748b;font-weight:600;}
 /* TOAST */
 .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ══════════════════════════════
-   PRINT / PDF RESULT FORM
-══════════════════════════════ */
-#printArea{display:none;}
-@media print{
-  body > *{display:none !important;}
-  #printArea{display:block !important;margin:0;padding:0;}
-}
-.pdf-page{
-  width:210mm;min-height:297mm;padding:14mm 16mm;
-  font-family:'Nunito',Arial,sans-serif;background:#fff;color:#0f172a;
-  position:relative;
-}
-/* Header */
-.pdf-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:3px solid #0ea5e9;margin-bottom:16px;}
-.pdf-logo-area{display:flex;align-items:center;gap:12px;}
-.pdf-logo-circle{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#14b8a6);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;flex-shrink:0;}
-.pdf-lab-name{font-size:20px;font-weight:900;color:#0369a1;line-height:1.2;}
-.pdf-lab-sub{font-size:11px;font-weight:700;color:#64748b;margin-top:2px;}
-.pdf-header-right{text-align:right;font-size:11px;font-weight:700;color:#64748b;line-height:1.8;}
-.pdf-header-right strong{color:#0f172a;font-size:12px;}
-
-/* Colored band */
-.pdf-band{background:linear-gradient(135deg,#0ea5e9,#14b8a6);border-radius:12px;padding:12px 18px;color:#fff;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-.pdf-band-title{font-size:16px;font-weight:900;}
-.pdf-band-id{font-size:12px;font-weight:700;opacity:0.9;}
-
-/* Patient info grid */
-.pdf-patient-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin-bottom:18px;padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;}
-.pdf-field label{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:2px;}
-.pdf-field span{font-size:13px;font-weight:700;color:#0f172a;}
-
-/* Results table */
-.pdf-section-title{font-size:13px;font-weight:900;color:#0369a1;margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.5px;}
-.pdf-results-box{background:#f8fafc;border-radius:12px;padding:14px;border:1px solid #e2e8f0;margin-bottom:16px;font-size:13px;font-weight:600;line-height:2;white-space:pre-wrap;color:#0f172a;}
-.pdf-notes-box{background:linear-gradient(135deg,rgba(14,165,233,0.06),rgba(20,184,166,0.06));border-radius:12px;padding:14px;border-left:4px solid #0ea5e9;margin-bottom:18px;font-size:13px;font-weight:600;line-height:1.8;color:#0f172a;}
-
-/* Signature area */
-.pdf-sig-row{display:flex;justify-content:space-between;margin-top:24px;padding-top:16px;border-top:1px dashed #cbd5e1;}
-.pdf-sig{text-align:center;width:45%;}
-.pdf-sig-line{border-bottom:1.5px solid #0f172a;margin-bottom:6px;height:36px;}
-.pdf-sig-label{font-size:11px;font-weight:800;color:#64748b;}
-
-/* Footer */
-.pdf-footer{position:absolute;bottom:12mm;left:16mm;right:16mm;text-align:center;font-size:10px;font-weight:700;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:8px;}
-.pdf-footer strong{color:#0ea5e9;}
-
-/* Watermark */
-.pdf-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:72px;font-weight:900;color:rgba(14,165,233,0.04);pointer-events:none;white-space:nowrap;z-index:0;}
+@media print{body *{visibility:hidden;}#pdfTemplate,#pdfTemplate *{visibility:visible;}#pdfTemplate{position:fixed;top:0;left:0;width:100%;}}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
+<div id="loader"><div class="loader-ring"></div><p>Loading your results...</p></div>
 
-<!-- PRINT AREA (hidden, shown on print) -->
-<div id="printArea"></div>
+<!-- PDF template (hidden) -->
+<div id="pdfTemplate">
+  <div class="pdf-header">
+    <div class="pdf-logo">🧪</div>
+    <div class="pdf-clinic">Mobile Lab – Mityana</div>
+    <div class="pdf-sub">For the love of your health</div>
+    <div class="pdf-sub">📞 MTN: +256 778 379 791 | Airtel: 0750 992 939</div>
+    <div class="pdf-title">Lab Result Report</div>
+    <div class="pdf-sub" id="pdfOrderId"></div>
+  </div>
+  <div class="pdf-meta">
+    <div class="pdf-meta-item"><label>Patient Name</label><span id="pdfName"></span></div>
+    <div class="pdf-meta-item"><label>Date</label><span id="pdfDate"></span></div>
+    <div class="pdf-meta-item"><label>Tests Ordered</label><span id="pdfTests"></span></div>
+    <div class="pdf-meta-item"><label>Status</label><span id="pdfStatus"></span></div>
+  </div>
+  <div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:8px;">📋 Test Results</div>
+  <div class="pdf-results" id="pdfResults"></div>
+  <div style="font-size:13px;font-weight:800;color:#0369a1;margin-bottom:8px;">👨‍⚕️ Doctor's Advice</div>
+  <div class="pdf-notes" id="pdfNotes"></div>
+  <div class="pdf-footer">
+    <p>This is an official lab result from Mobile Lab Mityana.</p>
+    <p>Please consult your doctor for medical advice.</p>
+    <p>Generated: <span id="pdfGenDate"></span></p>
+  </div>
+</div>
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <a class="back-btn" href="dashboard.html">← Back</a>
-  <div class="topbar-title">📋 My Results</div>
-  <a class="chat-link" href="chat.html">💬 Doctor</a>
+  <span style="font-size:22px;">📋</span>
+  <h2>My Results</h2>
+  <a class="topbar-btn" href="dashboard.html">🏠 Home</a>
 </div>
 
-<!-- HERO -->
-<div class="hero">
-  <h2>📋 Lab Results & Orders</h2>
-  <p id="heroSub">Loading your results...</p>
-</div>
-
-<!-- RESULTS -->
-<div class="section-title">🧪 Test Results</div>
-<div id="resultsList">
-  <div class="loader"><div class="loader-ring"></div><p>Loading results...</p></div>
-</div>
-
-<!-- ORDERS -->
-<div class="section-title">📦 My Orders</div>
-<div id="ordersList">
-  <div class="loader"><div class="loader-ring"></div><p>Loading orders...</p></div>
+<div class="page-wrap">
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="filterOrders(this,'all')">All</button>
+    <button class="ftab" onclick="filterOrders(this,'pending')">⏳ Pending</button>
+    <button class="ftab" onclick="filterOrders(this,'ongoing')">🔬 Ongoing</button>
+    <button class="ftab" onclick="filterOrders(this,'completed')">✅ Completed</button>
+    <button class="ftab" onclick="filterOrders(this,'cancelled')">❌ Cancelled</button>
+  </div>
+  <div id="ordersList"></div>
 </div>
 
 <script>
-firebase.initializeApp({
-  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId:"mobile-lab-mityana-aeae2"
-});
-const auth = firebase.auth();
-const db = firebase.firestore();
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+let allOrders=[];
+let activeFilter="all";
+let currentUser=null;
 
-let currentUserData = {};
-const resultDataMap = {}; // stores result data by doc id
-
-auth.onAuthStateChanged(async user => {
-  if(!user){ window.location.href = "login.html"; return; }
-
-  // Load user profile
-  const userDoc = await db.collection("users").doc(user.uid).get();
-  if(userDoc.exists) currentUserData = userDoc.data();
-
-  loadResults(user.uid);
+auth.onAuthStateChanged(async user=>{
+  if(!user){window.location.href="login.html";return;}
+  currentUser=user;
   loadOrders(user.uid);
 });
 
-// ── LOAD RESULTS ──
-function loadResults(userId){
-  const list = document.getElementById("resultsList");
-
-  db.collection("results").where("userId","==",userId)
-    .onSnapshot(snapshot => {
-      document.getElementById("heroSub").innerText =
-        snapshot.size > 0 ? `${snapshot.size} result(s) available` : "No results yet";
-
-      if(snapshot.empty){
-        list.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">🧪</div>
-            <h3>No results yet</h3>
-            <p>Your lab results will appear here once ready</p>
-          </div>`;
-        return;
-      }
-
-      list.innerHTML = "";
-      snapshot.forEach((doc, idx) => {
-        const r = doc.data();
-        console.log("Result doc:", doc.id, r); // DEBUG — check in browser console
-        const date = r.createdAt ? r.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"}) : "—";
-        // Store result data in global map keyed by doc id
-        resultDataMap[doc.id] = r;
-
-        const card = document.createElement("div");
-        card.className = "result-card";
-        card.style.animationDelay = (idx * 0.08) + "s";
-
-        card.innerHTML = `
-          <div class="result-card-header">
-            <div>
-              <h3>🧪 ${r.patientName || currentUserData.fullName || "Patient"}</h3>
-              <p>📅 ${date} &nbsp;•&nbsp; ID: ${r.orderId || doc.id}</p>
-            </div>
-            <span class="result-status">✅ Ready</span>
-          </div>
-          <div class="result-body">
-            <div class="result-meta">
-              <span class="meta-chip">👤 ${currentUserData.fullName || r.patientName || "—"}</span>
-              <span class="meta-chip">📞 ${currentUserData.phone || "—"}</span>
-              <span class="meta-chip">🎂 Age: ${currentUserData.age || "—"}</span>
-              <span class="meta-chip">⚧ ${currentUserData.sex || "—"}</span>
-            </div>
-            <div style="font-size:13px;font-weight:800;color:var(--muted);margin-bottom:6px;">📋 TEST RESULTS</div>
-            <div class="result-text">${getResultDisplay(r)}</div>
-            ${r.resultNotes ? `
-            <div class="doctor-notes">
-              <strong>👨‍⚕️ Doctor's Notes & Advice:</strong><br>${r.resultNotes}
-            </div>` : ""}
-            <div class="result-actions">
-              <button class="action-btn btn-download" onclick="downloadPDF('${doc.id}')">⬇ Download PDF</button>
-              <button class="action-btn btn-print" onclick="printResult('${doc.id}')">🖨 Print</button>
-              <button class="action-btn btn-share" onclick="shareWA('${doc.id}')">💬 Share</button>
-            </div>
-          </div>
-        `;
-        list.appendChild(card);
+function loadOrders(uid){
+  db.collection("orders").where("userId","==",uid).orderBy("createdAt","desc")
+    .onSnapshot(snap=>{
+      allOrders=[];
+      snap.forEach(d=>allOrders.push({id:d.id,...d.data()}));
+      document.getElementById("loader").style.display="none";
+      renderOrders();
+      // Mark completed orders as seen
+      snap.forEach(d=>{
+        if(d.data().status==="completed"&&!d.data().seenByPatient){
+          db.collection("orders").doc(d.id).update({seenByPatient:true}).catch(()=>{});
+        }
       });
-    }, err => {
-      list.innerHTML = `<div class="empty-state"><div class="icon">❌</div><h3>Error loading results</h3><p>${err.message}</p></div>`;
+    },err=>{
+      document.getElementById("loader").style.display="none";
+      document.getElementById("ordersList").innerHTML=`<div class="empty-state"><div class="icon">⚠️</div><h3>Could not load results</h3><p>${err.message}</p></div>`;
     });
 }
 
-// ── LOAD ORDERS ──
-function loadOrders(userId){
-  const list = document.getElementById("ordersList");
-  db.collection("orders").where("userId","==",userId)
-    .orderBy("createdAt","desc")
-    .onSnapshot(snapshot => {
-      if(snapshot.empty){
-        list.innerHTML = `<div style="padding:0 16px 16px;"><div class="empty-state" style="padding:30px 20px;"><div class="icon" style="font-size:36px;">📦</div><p>No orders yet</p></div></div>`;
-        return;
-      }
-      list.innerHTML = "";
-      snapshot.forEach(doc => {
-        const o = doc.data();
-        const date = o.createdAt ? o.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric"}) : "—";
-        const statusMap = {pending:"⏳ Pending",ongoing:"🔬 In Progress",completed:"✅ Completed",cancelled:"❌ Cancelled"};
-        const statusClass = {pending:"s-pending",ongoing:"s-ongoing",completed:"s-completed",cancelled:"s-cancelled"};
-        const tests = (o.tests||"").split("\n").filter(t=>t.trim()).length;
-
-        const card = document.createElement("div");
-        card.className = "order-card";
-        card.innerHTML = `
-          <div class="order-info">
-            <h4>${o.name || "—"} &nbsp;•&nbsp; ${tests} test(s)</h4>
-            <p>📅 ${date} &nbsp;•&nbsp; ${o.total||"UGX 0"} &nbsp;•&nbsp; ${o.payment||"—"}</p>
-          </div>
-          <span class="status-pill ${statusClass[o.status]||'s-pending'}">${statusMap[o.status]||o.status}</span>
-        `;
-        list.appendChild(card);
-      });
-    });
+function filterOrders(btn,filter){
+  document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("active"));
+  btn.classList.add("active");
+  activeFilter=filter;
+  renderOrders();
 }
 
-// ── BUILD PDF HTML ──
-function buildPDFContent(docId){
-  const r = resultDataMap[docId];
-  if(!r){ showToast("Result data not found"); return null; }
-  const date = r.createdAt ? r.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"}) : new Date().toLocaleDateString();
-  const name = r.patientName || currentUserData.fullName || "Patient";
-  const phone = currentUserData.phone || "—";
-  const age = currentUserData.age || "—";
-  const sex = currentUserData.sex || "—";
-  const location = currentUserData.location || "—";
-
-  return `
-  <div class="pdf-page">
-    <div class="pdf-watermark">MOBILE LAB</div>
-
-    <!-- HEADER -->
-    <div class="pdf-header">
-      <div class="pdf-logo-area">
-        <div class="pdf-logo-circle">🧪</div>
+function renderOrders(){
+  const list=document.getElementById("ordersList");
+  const filtered=activeFilter==="all"?allOrders:allOrders.filter(o=>o.status===activeFilter);
+  if(filtered.length===0){
+    list.innerHTML=`<div class="empty-state"><div class="icon">📭</div><h3>No orders here</h3><p>${activeFilter==="all"?"You haven't booked any lab tests yet.":"No "+activeFilter+" orders."}</p>${activeFilter==="all"?`<a href="index.html">🧪 Book Your First Test</a>`:""}</div>`;
+    return;
+  }
+  list.innerHTML="";
+  filtered.forEach(o=>{
+    const date=o.createdAt?o.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
+    const statusLabels={pending:"⏳ Pending",ongoing:"🔬 In Progress",completed:"✅ Ready",cancelled:"❌ Cancelled"};
+    const pillClass={pending:"pill-pending",ongoing:"pill-ongoing",completed:"pill-completed",cancelled:"pill-cancelled"}[o.status]||"pill-pending";
+    const testsArr=(o.tests||"").split("\n").filter(Boolean);
+    const testChips=testsArr.map(t=>`<span class="test-chip">${t.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim()}</span>`).join("");
+    const hasResult=o.resultText&&o.resultText.trim();
+    const card=document.createElement("div");
+    card.className="order-card";
+    card.innerHTML=`
+      <div class="order-head" onclick="toggleResults('res-${o.id}')">
         <div>
-          <div class="pdf-lab-name">Mobile Lab Mityana</div>
-          <div class="pdf-lab-sub">Professional Laboratory Services</div>
-          <div class="pdf-lab-sub">📞 +256 778 379 791 &nbsp;|&nbsp; +256 750 992 939</div>
+          <div class="order-id">${o.order_id||o.id}</div>
+          <div class="order-name-row">${o.name||"—"}</div>
+          <div class="order-date">📅 ${date} &nbsp;|&nbsp; 💰 ${o.total||"—"}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span class="status-pill ${pillClass}">${statusLabels[o.status]||o.status}</span>
+          ${hasResult?`<span style="font-size:11px;font-weight:800;color:#15803d;background:rgba(34,197,94,0.1);padding:3px 10px;border-radius:999px;">📋 Results available</span>`:""}
         </div>
       </div>
-      <div class="pdf-header-right">
-        <div><strong>Date:</strong> ${date}</div>
-        <div><strong>Report ID:</strong> ${r.orderId || docId}</div>
-        <div><strong>Lab:</strong> Mityana, Uganda</div>
-        <div><strong>Email:</strong> edrinehero@gmail.com</div>
+      <div class="tests-chips">${testChips||`<span class="test-chip">No tests listed</span>`}</div>
+      <div class="results-section ${hasResult?"":"hidden"}" id="res-${o.id}" style="display:none;">
+        <div class="results-header">
+          <h4>📋 Your Test Results</h4>
+          <div class="result-actions">
+            <button class="res-btn btn-pdf" onclick="downloadPDF('${o.id}')">⬇️ Download PDF</button>
+            <button class="res-btn btn-wa" onclick="shareResultWA('${o.id}')">💬 WhatsApp</button>
+          </div>
+        </div>
+        <div class="result-box">${o.resultText||""}</div>
+        ${o.resultNotes?`<div class="doctor-notes"><b>👨‍⚕️ Doctor's Advice:</b><br>${o.resultNotes}</div>`:""}
       </div>
-    </div>
-
-    <!-- BAND -->
-    <div class="pdf-band">
-      <div class="pdf-band-title">🧪 Laboratory Test Report</div>
-      <div class="pdf-band-id">Order: ${r.orderId || docId}</div>
-    </div>
-
-    <!-- PATIENT INFO -->
-    <div class="pdf-section-title">👤 Patient Information</div>
-    <div class="pdf-patient-grid">
-      <div class="pdf-field"><label>Full Name</label><span>${name}</span></div>
-      <div class="pdf-field"><label>Phone</label><span>${phone}</span></div>
-      <div class="pdf-field"><label>Age</label><span>${age} years</span></div>
-      <div class="pdf-field"><label>Sex</label><span>${sex}</span></div>
-      <div class="pdf-field"><label>Location</label><span>${location}</span></div>
-      <div class="pdf-field"><label>Date of Report</label><span>${date}</span></div>
-    </div>
-
-    <!-- RESULTS -->
-    <div class="pdf-section-title">📋 Test Results</div>
-    <div class="pdf-results-box">${getResultDisplay(r).replace(/\n/g,"<br>")}</div>
-
-    <!-- DOCTOR NOTES -->
-    ${r.resultNotes ? `
-    <div class="pdf-section-title">👨‍⚕️ Doctor's Notes & Advice</div>
-    <div class="pdf-notes-box">${r.resultNotes.replace(/\n/g,"<br>")}</div>
-    ` : ""}
-
-    <!-- SIGNATURE -->
-    <div class="pdf-sig-row">
-      <div class="pdf-sig">
-        <div class="pdf-sig-line"></div>
-        <div class="pdf-sig-label">Laboratory Technician</div>
-        <div class="pdf-sig-label" style="color:#0369a1;font-weight:800;">Dr. Edrine</div>
-      </div>
-      <div class="pdf-sig">
-        <div class="pdf-sig-line"></div>
-        <div class="pdf-sig-label">Patient / Guardian Signature</div>
-      </div>
-    </div>
-
-    <!-- FOOTER -->
-    <div class="pdf-footer">
-      <strong>Mobile Lab Mityana</strong> &nbsp;•&nbsp; Professional Laboratory Services &nbsp;•&nbsp;
-      📞 +256 778 379 791 &nbsp;•&nbsp; Mityana, Uganda<br>
-      <em>This report is confidential and intended solely for the named patient.</em>
-    </div>
-  </div>`;
+      ${!hasResult&&o.status==="completed"?`<div class="no-result-msg">✅ Your test is complete. Results will appear here shortly.</div>`:""}
+      ${o.status==="ongoing"?`<div class="no-result-msg">🔬 Your sample is being processed. Results coming soon.</div>`:""}
+      ${o.status==="pending"?`<div class="no-result-msg">⏳ Waiting for sample collection. We'll contact you shortly.</div>`:""}`;
+    list.appendChild(card);
+  });
 }
 
-// ── PRINT ──
-function printResult(docId){
-  const content = buildPDFContent(docId);
-  if(!content){ showToast("Result not found"); return; }
-  const printArea = document.getElementById("printArea");
-  printArea.innerHTML = content;
-  window.print();
+function toggleResults(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.style.display=el.style.display==="none"?"block":"none";
 }
 
-// ── DOWNLOAD PDF (print to PDF) ──
-function downloadPDF(docId){
-  const content = buildPDFContent(docId);
-  if(!content){ showToast("Result not found"); return; }
-
-  // Open in new window for save as PDF
-  const win = window.open("","_blank");
-  win.document.write(`<!DOCTYPE html><html><head>
-    <meta charset="UTF-8">
-    <title>Lab Result – Mobile Lab</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-      *{box-sizing:border-box;margin:0;padding:0;}
-      body{font-family:'Nunito',Arial,sans-serif;background:#fff;}
-      ${getResultStyles()}
-    </style>
-  </head><body>${content}<script>window.onload=()=>{window.print();}<\/script></body></html>`);
-  win.document.close();
-}
-
-// ── SHARE VIA WHATSAPP ──
-function shareWA(docId){
-  const r = resultDataMap[docId];
-  if(!r){ showToast("Result not found"); return; }
-  const msg = `🧪 My Lab Results from Mobile Lab Mityana\n\nPatient: ${r.patientName||currentUserData.fullName||"—"}\nOrder: ${r.orderId||docId}\n\n📋 Results:\n${r.resultText||"—"}\n\n👨‍⚕️ Doctor's Notes:\n${r.resultNotes||"None"}\n\nMobile Lab – Mityana | +256 778 379 791`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-}
-
-// ── RESULT STYLES FOR PDF WINDOW ──
-function getResultStyles(){
-  return `
-    .pdf-page{width:210mm;min-height:297mm;padding:14mm 16mm;font-family:'Nunito',Arial,sans-serif;background:#fff;color:#0f172a;position:relative;}
-    .pdf-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:3px solid #0ea5e9;margin-bottom:16px;}
-    .pdf-logo-area{display:flex;align-items:center;gap:12px;}
-    .pdf-logo-circle{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#14b8a6);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;flex-shrink:0;}
-    .pdf-lab-name{font-size:20px;font-weight:900;color:#0369a1;line-height:1.2;}
-    .pdf-lab-sub{font-size:11px;font-weight:700;color:#64748b;margin-top:2px;}
-    .pdf-header-right{text-align:right;font-size:11px;font-weight:700;color:#64748b;line-height:1.8;}
-    .pdf-header-right strong{color:#0f172a;font-size:12px;}
-    .pdf-band{background:linear-gradient(135deg,#0ea5e9,#14b8a6);border-radius:12px;padding:12px 18px;color:#fff;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-    .pdf-band-title{font-size:16px;font-weight:900;}
-    .pdf-band-id{font-size:12px;font-weight:700;opacity:0.9;}
-    .pdf-patient-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin-bottom:18px;padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;}
-    .pdf-field label{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:2px;}
-    .pdf-field span{font-size:13px;font-weight:700;color:#0f172a;}
-    .pdf-section-title{font-size:13px;font-weight:900;color:#0369a1;margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.5px;}
-    .pdf-results-box{background:#f8fafc;border-radius:12px;padding:14px;border:1px solid #e2e8f0;margin-bottom:16px;font-size:13px;font-weight:600;line-height:2;color:#0f172a;}
-    .pdf-notes-box{background:rgba(14,165,233,0.05);border-radius:12px;padding:14px;border-left:4px solid #0ea5e9;margin-bottom:18px;font-size:13px;font-weight:600;line-height:1.8;color:#0f172a;}
-    .pdf-sig-row{display:flex;justify-content:space-between;margin-top:24px;padding-top:16px;border-top:1px dashed #cbd5e1;}
-    .pdf-sig{text-align:center;width:45%;}
-    .pdf-sig-line{border-bottom:1.5px solid #0f172a;margin-bottom:6px;height:36px;}
-    .pdf-sig-label{font-size:11px;font-weight:800;color:#64748b;}
-    .pdf-footer{margin-top:20px;text-align:center;font-size:10px;font-weight:700;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:8px;}
-    .pdf-footer strong{color:#0ea5e9;}
-    .pdf-watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:72px;font-weight:900;color:rgba(14,165,233,0.04);pointer-events:none;white-space:nowrap;}
-  `;
-}
-
-function showToast(msg){
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2500);
-}
-
-// ── HANDLE BOTH OLD & NEW RESULT FORMATS ──
-function getResultDisplay(r){
-  // New format: resultText is a plain string
-  if(r.resultText && r.resultText.trim()) return r.resultText;
-  // Old format: results is an object {testName: value}
-  if(r.results && typeof r.results === "object"){
-    return Object.entries(r.results)
-      .map(([test, val]) => `${test}: ${typeof val === "object" ? (val.value||"—") : (val||"—")}`)
-      .join("\n");
+async function downloadPDF(orderId){
+  const o=allOrders.find(x=>x.id===orderId);
+  if(!o||!o.resultText){showToast("No results to download");return;}
+  showToast("📄 Preparing PDF...");
+  // Fill hidden template
+  document.getElementById("pdfOrderId").innerText="Order: "+(o.order_id||orderId);
+  document.getElementById("pdfName").innerText=o.name||"—";
+  document.getElementById("pdfDate").innerText=o.createdAt?o.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"}):"—";
+  const testsArr=(o.tests||"").split("\n").filter(Boolean).map(t=>t.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim());
+  document.getElementById("pdfTests").innerText=testsArr.join(", ")||"—";
+  document.getElementById("pdfStatus").innerText="✅ Completed";
+  document.getElementById("pdfResults").innerText=o.resultText||"";
+  document.getElementById("pdfNotes").innerText=o.resultNotes||"No additional notes";
+  document.getElementById("pdfGenDate").innerText=new Date().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  // Show template briefly for capture
+  const tmpl=document.getElementById("pdfTemplate");
+  tmpl.style.left="0";tmpl.style.top="0";tmpl.style.zIndex="9998";
+  try{
+    const canvas=await html2canvas(tmpl,{scale:2,useCORS:true,backgroundColor:"#fff"});
+    tmpl.style.left="-9999px";tmpl.style.zIndex="";
+    const link=document.createElement("a");
+    link.download=`LabResult_${o.order_id||orderId}.png`;
+    link.href=canvas.toDataURL("image/png");
+    link.click();
+    showToast("✅ Result downloaded!");
+  }catch(e){
+    tmpl.style.left="-9999px";tmpl.style.zIndex="";
+    showToast("Download failed: "+e.message);
   }
-  return "No results recorded";
 }
+
+function shareResultWA(orderId){
+  const o=allOrders.find(x=>x.id===orderId);
+  if(!o||!o.resultText){showToast("No results to share");return;}
+  const msg=`📋 *Lab Results – Mobile Lab Mityana*\nOrder: ${o.order_id||orderId}\nPatient: ${o.name||"—"}\n\n*Results:*\n${o.resultText}\n\n👨‍⚕️ *Doctor's Advice:*\n${o.resultNotes||"None"}\n\nMobile Lab – Mityana | +256 778 379 791`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,"_blank");
+}
+
+function showToast(msg){const t=document.getElementById("toast");t.innerText=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500);}
 </script>
 </body>
 </html>
