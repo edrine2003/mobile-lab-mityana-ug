@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referral – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.topbar h2{color:#fff;font-size:18px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.page-wrap{max-width:600px;margin:0 auto;padding:20px 16px;}
+.hero-card{background:linear-gradient(135deg,#0ea5e9,#14b8a6);border-radius:24px;padding:28px 20px;text-align:center;color:#fff;margin-bottom:20px;box-shadow:0 8px 28px rgba(14,165,233,0.3);position:relative;overflow:hidden;}
+.hero-card::before{content:'🎁';position:absolute;font-size:120px;opacity:0.08;top:-20px;right:-10px;}
+.hero-card h2{font-size:22px;font-weight:900;margin-bottom:8px;}
+.hero-card p{font-size:14px;font-weight:600;opacity:0.9;line-height:1.6;}
+.code-box{background:rgba(255,255,255,0.2);border:2px dashed rgba(255,255,255,0.5);border-radius:16px;padding:16px 20px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.code-text{font-size:26px;font-weight:900;letter-spacing:3px;}
+.copy-btn{background:rgba(255,255,255,0.25);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.copy-btn:hover{background:rgba(255,255,255,0.4);}
+.share-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.share-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:999px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.share-btn:hover{background:rgba(255,255,255,0.35);}
+/* STEPS */
+.steps-card{background:var(--card);border-radius:20px;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,0.07);border:1px solid var(--border);margin-bottom:20px;}
+.steps-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:16px;}
+.step-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+.step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;}
+.step-text h4{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:2px;}
+.step-text p{font-size:13px;font-weight:600;color:var(--muted);}
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--card);border-radius:18px;padding:16px 10px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.07);border:1px solid var(--border);}
+.stat-val{font-size:24px;font-weight:900;color:var(--primary);}
+.stat-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-top:4px;}
+/* REFERRAL LIST */
+.section-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:12px;}
+.ref-card{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ref-name{font-size:14px;font-weight:800;color:var(--dark);}
+.ref-date{font-size:12px;font-weight:600;color:var(--muted);margin-top:2px;}
+.ref-status{padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;}
+.status-completed{background:rgba(34,197,94,0.12);color:#15803d;}
+.status-pending{background:rgba(245,158,11,0.12);color:#b45309;}
+.empty-state{text-align:center;padding:30px;color:var(--muted);font-weight:700;}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="topbar">
+  <span style="font-size:22px;">🎁</span>
+  <h2>Referral Program</h2>
+  <a class="topbar-btn" href="dashboard.html">🏠 Home</a>
+</div>
+
+<div class="page-wrap">
+  <!-- HERO / CODE -->
+  <div class="hero-card">
+    <h2>Refer & Earn UGX 5,000</h2>
+    <p>Share your code with friends. When they complete their first test, you both get <b>UGX 5,000</b> wallet credit!</p>
+    <div class="code-box">
+      <span class="code-text" id="refCode">Loading...</span>
+      <button class="copy-btn" onclick="copyCode()">📋 Copy</button>
+    </div>
+    <div class="share-btns">
+      <a class="share-btn" id="waShareBtn" href="#" target="_blank">💚 Share on WhatsApp</a>
+      <button class="share-btn" onclick="shareNative()">📤 Share</button>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="steps-card">
+    <div class="steps-title">📖 How it works</div>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-text"><h4>Share your code</h4><p>Send your unique referral code to friends, family, or colleagues.</p></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-text"><h4>Friend books a test</h4><p>They enter your code when booking their first lab test on Mobile Lab.</p></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-text"><h4>Both get rewarded</h4><p>Once their test is completed, you both receive <b>UGX 5,000</b> wallet credit automatically.</p></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-val" id="totalRefs">0</div>
+      <div class="stat-lbl">Total Referrals</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="completedRefs">0</div>
+      <div class="stat-lbl">Completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="totalEarned">0</div>
+      <div class="stat-lbl">Earned (UGX)</div>
+    </div>
+  </div>
+
+  <!-- REFERRALS LIST -->
+  <div class="section-title">👥 People you referred</div>
+  <div id="refList"><div class="empty-state">No referrals yet. Start sharing your code!</div></div>
+</div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+let myCode="";
+let currentUser=null;
+
+auth.onAuthStateChanged(async user=>{
+  if(!user){window.location.href="login.html";return;}
+  currentUser=user;
+  // Generate referral code from uid (first 6 chars uppercased)
+  myCode="ML-"+user.uid.slice(0,6).toUpperCase();
+  document.getElementById("refCode").innerText=myCode;
+  // Save code to user profile if not already saved
+  await db.collection("users").doc(user.uid).set({referralCode:myCode},{merge:true});
+  updateShareLinks();
+  loadReferrals(user.uid);
+});
+
+function updateShareLinks(){
+  const appUrl="https://mobile-lab-mityana-aeae2.web.app";
+  const msg=`🧪 Book your lab test at *Mobile Lab Mityana* – fast, affordable, home collection!\n\nUse my referral code *${myCode}* when booking to get UGX 5,000 off your first test!\n\n👉 Book here: ${appUrl}/index.html`;
+  document.getElementById("waShareBtn").href=`https://wa.me/?text=${encodeURIComponent(msg)}`;
+}
+
+function copyCode(){
+  navigator.clipboard.writeText(myCode).then(()=>showToast("✅ Code copied!")).catch(()=>{
+    // Fallback
+    const el=document.createElement("input");
+    el.value=myCode;document.body.appendChild(el);el.select();
+    document.execCommand("copy");document.body.removeChild(el);
+    showToast("✅ Code copied!");
+  });
+}
+
+function shareNative(){
+  if(navigator.share){
+    navigator.share({
+      title:"Mobile Lab Mityana – Referral",
+      text:`Use my code ${myCode} to get UGX 5,000 off your first lab test at Mobile Lab Mityana!`,
+      url:"https://mobile-lab-mityana-aeae2.web.app"
+    }).catch(()=>{});
+  } else {
+    copyCode();
+  }
+}
+
+function loadReferrals(userId){
+  db.collection("referrals").where("referrerId","==",userId)
+    .orderBy("createdAt","desc").onSnapshot(snap=>{
+    const list=document.getElementById("refList");
+    let total=snap.size, completed=0, earned=0;
+    if(snap.empty){list.innerHTML=`<div class="empty-state">No referrals yet. Start sharing your code!</div>`;}
+    else{
+      list.innerHTML="";
+      snap.forEach(d=>{
+        const r=d.data();
+        if(r.status==="completed"){completed++;earned+=5000;}
+        // Mask name: "Joyce Namiyingo" → "J***e N***o"
+        const maskName=name=>{
+          if(!name)return "Unknown";
+          return name.split(" ").map(w=>w.length<=2?w:w[0]+"*".repeat(w.length-2)+w[w.length-1]).join(" ");
+        };
+        const date=r.createdAt?r.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric"}):"—";
+        const card=document.createElement("div");
+        card.className="ref-card";
+        card.innerHTML=`
+          <div>
+            <div class="ref-name">${maskName(r.refereeName||"Patient")}</div>
+            <div class="ref-date">${date}</div>
+          </div>
+          <span class="ref-status status-${r.status||"pending"}">${r.status==="completed"?"✅ Completed":"⏳ Pending"}</span>`;
+        list.appendChild(card);
+      });
+    }
+    document.getElementById("totalRefs").innerText=total;
+    document.getElementById("completedRefs").innerText=completed;
+    document.getElementById("totalEarned").innerText=earned.toLocaleString();
+  },()=>{
+    document.getElementById("refList").innerHTML=`<div class="empty-state">Could not load referrals.</div>`;
+  });
+}
+
+function showToast(msg){
+  const t=document.getElementById("toast");t.innerText=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+</script>
+</body>
+</html>
