@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviews – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.topbar h2{color:#fff;font-size:18px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.page-wrap{max-width:680px;margin:0 auto;padding:20px 16px;}
+/* AVERAGE SCORE */
+.avg-card{background:linear-gradient(135deg,#0ea5e9,#14b8a6);border-radius:24px;padding:24px;color:#fff;text-align:center;margin-bottom:20px;box-shadow:0 8px 24px rgba(14,165,233,0.3);}
+.avg-score{font-size:56px;font-weight:900;line-height:1;}
+.avg-stars{font-size:28px;letter-spacing:4px;margin:6px 0;}
+.avg-count{font-size:13px;font-weight:600;opacity:0.9;}
+.bar-row{display:flex;align-items:center;gap:10px;margin:4px 0;}
+.bar-label{font-size:12px;font-weight:800;width:14px;text-align:right;}
+.bar-bg{flex:1;height:8px;background:rgba(255,255,255,0.25);border-radius:999px;overflow:hidden;}
+.bar-fill{height:8px;background:#fff;border-radius:999px;transition:width 0.6s ease;}
+.bar-count{font-size:11px;font-weight:800;width:20px;text-align:right;opacity:0.85;}
+/* WRITE REVIEW */
+.write-card{background:var(--card);border-radius:22px;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,0.07);border:1px solid var(--border);margin-bottom:20px;}
+.write-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:14px;}
+.stars-select{display:flex;gap:8px;margin-bottom:14px;}
+.star-btn{font-size:32px;cursor:pointer;transition:transform 0.15s;background:none;border:none;line-height:1;}
+.star-btn:hover,.star-btn.active{transform:scale(1.2);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:13px;font-weight:800;color:var(--dark);margin-bottom:6px;}
+.field select,.field textarea{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:var(--dark);outline:none;background:#fff;}
+.field select:focus,.field textarea:focus{border-color:var(--primary);}
+.field textarea{min-height:90px;resize:none;}
+.submit-btn{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;font-size:15px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;box-shadow:0 6px 18px rgba(14,165,233,0.3);transition:all 0.2s;}
+.submit-btn:hover{transform:translateY(-1px);}
+/* REVIEW CARDS */
+.review-card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,0.06);border:1px solid var(--border);}
+.rc-top{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.rc-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#14b8a6);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;}
+.rc-name{font-size:14px;font-weight:800;color:var(--dark);}
+.rc-date{font-size:12px;font-weight:600;color:var(--muted);margin-top:2px;}
+.rc-stars{font-size:16px;letter-spacing:2px;margin-left:auto;}
+.rc-cat{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;background:rgba(14,165,233,0.1);color:#0369a1;margin-bottom:8px;}
+.rc-comment{font-size:13px;font-weight:600;color:#334155;line-height:1.6;}
+.empty-state{text-align:center;padding:40px;color:var(--muted);font-weight:700;}
+/* THANK YOU */
+.thank-you{display:none;text-align:center;padding:20px;}
+.thank-you .ty-icon{font-size:56px;animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes pop{from{transform:scale(0);}to{transform:scale(1);}}
+.thank-you h3{font-size:20px;font-weight:900;color:var(--dark);margin:12px 0 6px;}
+.thank-you p{font-size:14px;font-weight:600;color:var(--muted);}
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="topbar">
+  <span style="font-size:22px;">⭐</span>
+  <h2>Ratings & Reviews</h2>
+  <a class="topbar-btn" href="dashboard.html">🏠 Home</a>
+</div>
+
+<div class="page-wrap">
+  <!-- AVERAGE -->
+  <div class="avg-card" id="avgCard">
+    <div class="avg-score" id="avgScore">—</div>
+    <div class="avg-stars" id="avgStars">☆☆☆☆☆</div>
+    <div class="avg-count" id="avgCount">No reviews yet</div>
+    <div style="margin-top:14px;" id="barsArea"></div>
+  </div>
+
+  <!-- WRITE REVIEW -->
+  <div class="write-card" id="writeCard">
+    <div class="write-title">✍️ Write a Review</div>
+    <div id="writeForm">
+      <div class="field"><label>Your Rating</label>
+        <div class="stars-select" id="starsSelect">
+          <button class="star-btn" data-v="1" onclick="setRating(1)">☆</button>
+          <button class="star-btn" data-v="2" onclick="setRating(2)">☆</button>
+          <button class="star-btn" data-v="3" onclick="setRating(3)">☆</button>
+          <button class="star-btn" data-v="4" onclick="setRating(4)">☆</button>
+          <button class="star-btn" data-v="5" onclick="setRating(5)">☆</button>
+        </div>
+      </div>
+      <div class="field"><label>Category</label>
+        <select id="rCat">
+          <option value="Overall">⭐ Overall Experience</option>
+          <option value="Lab Speed">⚡ Lab Speed</option>
+          <option value="Doctor Communication">💬 Doctor Communication</option>
+          <option value="Sample Collection">🧪 Sample Collection</option>
+          <option value="Value for Money">💰 Value for Money</option>
+        </select>
+      </div>
+      <div class="field"><label>Your Comment</label>
+        <textarea id="rComment" placeholder="Tell others about your experience..."></textarea>
+      </div>
+      <button class="submit-btn" onclick="submitReview()">⭐ Submit Review</button>
+    </div>
+    <div class="thank-you" id="thankYou">
+      <div class="ty-icon">🎉</div>
+      <h3>Thank you for your review!</h3>
+      <p>Your feedback helps us serve you better.</p>
+    </div>
+  </div>
+
+  <!-- REVIEWS LIST -->
+  <div style="font-size:15px;font-weight:900;color:var(--dark);margin-bottom:12px;">💬 What patients say</div>
+  <div id="reviewsList"><div class="empty-state">Loading reviews...</div></div>
+</div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+let currentUser=null;
+let selectedRating=0;
+
+auth.onAuthStateChanged(async user=>{
+  if(!user){window.location.href="login.html";return;}
+  currentUser=user;
+  // Check if already reviewed
+  const existing=await db.collection("reviews").where("userId","==",user.uid).limit(1).get();
+  if(!existing.empty){
+    document.getElementById("writeForm").style.display="none";
+    document.getElementById("thankYou").style.display="block";
+  }
+  loadReviews();
+});
+
+function setRating(v){
+  selectedRating=v;
+  document.querySelectorAll(".star-btn").forEach((btn,i)=>{
+    btn.innerText = i < v ? "⭐" : "☆";
+    btn.classList.toggle("active", i < v);
+  });
+}
+
+async function submitReview(){
+  if(selectedRating===0){showToast("Please select a star rating");return;}
+  const comment=document.getElementById("rComment").value.trim();
+  if(!comment){showToast("Please write a comment");return;}
+  const cat=document.getElementById("rCat").value;
+  const userDoc=await db.collection("users").doc(currentUser.uid).get();
+  const name=userDoc.exists?(userDoc.data().fullName||currentUser.email||"Patient"):"Patient";
+  try{
+    await db.collection("reviews").add({
+      userId:currentUser.uid,name,rating:selectedRating,
+      category:cat,comment,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById("writeForm").style.display="none";
+    document.getElementById("thankYou").style.display="block";
+    showToast("✅ Review submitted!");
+    loadReviews();
+  }catch(e){showToast("Failed: "+e.message);}
+}
+
+function loadReviews(){
+  db.collection("reviews").orderBy("createdAt","desc").onSnapshot(snap=>{
+    const list=document.getElementById("reviewsList");
+    if(snap.empty){list.innerHTML=`<div class="empty-state">No reviews yet. Be the first!</div>`;updateAvg([]);return;}
+    const all=[];
+    snap.forEach(d=>all.push(d.data()));
+    updateAvg(all);
+    list.innerHTML="";
+    all.forEach(r=>{
+      const initials=(r.name||"?").split(" ").map(n=>n[0]).slice(0,2).join("").toUpperCase();
+      const stars="⭐".repeat(r.rating||0)+"☆".repeat(5-(r.rating||0));
+      const date=r.createdAt?r.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric"}):"—";
+      const card=document.createElement("div");
+      card.className="review-card";
+      card.innerHTML=`
+        <div class="rc-top">
+          <div class="rc-avatar">${initials}</div>
+          <div><div class="rc-name">${r.name||"Patient"}</div><div class="rc-date">${date}</div></div>
+          <div class="rc-stars">${stars}</div>
+        </div>
+        <div class="rc-cat">${r.category||"Overall"}</div>
+        <div class="rc-comment">${r.comment||""}</div>`;
+      list.appendChild(card);
+    });
+  });
+}
+
+function updateAvg(all){
+  if(all.length===0){
+    document.getElementById("avgScore").innerText="—";
+    document.getElementById("avgStars").innerText="☆☆☆☆☆";
+    document.getElementById("avgCount").innerText="No reviews yet";
+    document.getElementById("barsArea").innerHTML="";
+    return;
+  }
+  const avg=(all.reduce((s,r)=>s+(r.rating||0),0)/all.length).toFixed(1);
+  const fullStars=Math.round(avg);
+  document.getElementById("avgScore").innerText=avg;
+  document.getElementById("avgStars").innerText="⭐".repeat(fullStars)+"☆".repeat(5-fullStars);
+  document.getElementById("avgCount").innerText=`Based on ${all.length} review${all.length!==1?"s":""}`;
+  // Bars
+  const counts=[5,4,3,2,1].map(v=>all.filter(r=>r.rating===v).length);
+  document.getElementById("barsArea").innerHTML=counts.map((c,i)=>{
+    const star=5-i;
+    const pct=all.length?Math.round((c/all.length)*100):0;
+    return `<div class="bar-row"><span class="bar-label">${star}</span><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><span class="bar-count">${c}</span></div>`;
+  }).join("");
+}
+
+function showToast(msg){
+  const t=document.getElementById("toast");t.innerText=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+</script>
+</body>
+</html>
+reviews
