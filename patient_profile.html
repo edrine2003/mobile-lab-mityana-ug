@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patient Profiles – Admin | Mobile Lab Mityana</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.topbar h2{color:#fff;font-size:17px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+.loader-ring{width:52px;height:52px;border-radius:50%;border:5px solid #e2e8f0;border-top-color:#0ea5e9;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#loader p{font-size:15px;font-weight:700;color:#0ea5e9;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 56px);}
+@media(max-width:768px){.layout{grid-template-columns:1fr;}}
+
+/* PATIENT LIST SIDEBAR */
+.sidebar{background:#fff;border-right:1px solid var(--border);height:calc(100vh - 56px);overflow-y:auto;position:sticky;top:56px;}
+@media(max-width:768px){.sidebar{height:auto;position:relative;top:0;border-right:none;border-bottom:1px solid var(--border);}}
+.sidebar-header{padding:14px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:10;}
+.sidebar-title{font-size:14px;font-weight:900;color:var(--dark);margin-bottom:10px;}
+.search-input{width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:13px;font-weight:600;outline:none;}
+.search-input:focus{border-color:var(--primary);}
+.patient-count{font-size:12px;font-weight:700;color:var(--muted);margin-top:8px;}
+.patient-list{padding:8px 0;}
+.patient-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;transition:all 0.15s;border-left:3px solid transparent;}
+.patient-item:hover{background:#f8fafc;}
+.patient-item.active{background:rgba(14,165,233,0.06);border-left-color:var(--primary);}
+.patient-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#14b8a6);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0;}
+.patient-name{font-size:13px;font-weight:800;color:var(--dark);}
+.patient-meta{font-size:11px;font-weight:600;color:var(--muted);margin-top:2px;}
+.patient-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:rgba(14,165,233,0.1);color:var(--primary);margin-left:auto;flex-shrink:0;}
+
+/* MAIN PANEL */
+.main-panel{padding:20px;overflow-y:auto;}
+.empty-select{text-align:center;padding:80px 20px;color:var(--muted);}
+.empty-select .icon{font-size:64px;margin-bottom:16px;opacity:0.4;}
+.empty-select h3{font-size:18px;font-weight:900;margin-bottom:8px;}
+
+/* PATIENT HEADER CARD */
+.patient-header-card{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);border-radius:22px;padding:24px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden;}
+.patient-header-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.07);}
+.ph-top{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.ph-avatar{width:64px;height:64px;border-radius:50%;border:3px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;}
+.ph-name{font-size:22px;font-weight:900;margin-bottom:4px;}
+.ph-sub{font-size:13px;opacity:0.88;font-weight:600;}
+.ph-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:500px){.ph-stats{grid-template-columns:repeat(2,1fr);}}
+.ph-stat{background:rgba(255,255,255,0.15);border-radius:14px;padding:12px 10px;text-align:center;}
+.ph-stat-val{font-size:20px;font-weight:900;}
+.ph-stat-lbl{font-size:11px;font-weight:700;opacity:0.85;margin-top:2px;}
+.ph-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.ph-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:999px;padding:8px 16px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;}
+.ph-btn:hover{background:rgba(255,255,255,0.3);}
+
+/* SECTION TABS */
+.section-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:12px;}
+.stab{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;border:2px solid var(--border);background:#fff;color:var(--muted);font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.stab.active{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(14,165,233,0.3);}
+
+/* SECTION */
+.data-section{display:none;}
+.data-section.active{display:block;}
+.section-title{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* INFO GRID */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+@media(max-width:500px){.info-grid{grid-template-columns:1fr;}}
+.info-item{background:#fff;border-radius:14px;padding:14px 16px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.info-label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.info-value{font-size:14px;font-weight:800;color:var(--dark);}
+
+/* DATA CARDS */
+.data-card{background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;border:1px solid var(--border);box-shadow:0 3px 10px rgba(0,0,0,0.05);}
+.dc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.dc-title{font-size:14px;font-weight:900;color:var(--dark);}
+.dc-date{font-size:12px;font-weight:700;color:var(--muted);}
+.dc-body{font-size:13px;font-weight:600;color:#334155;line-height:1.7;}
+.dc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.dc-chip{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.2);color:#0369a1;}
+.dc-chip.red{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2);color:#b91c1c;}
+.dc-chip.green{background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.2);color:#15803d;}
+.dc-chip.purple{background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);color:#7c3aed;}
+.dc-chip.pink{background:rgba(236,72,153,0.08);border-color:rgba(236,72,153,0.2);color:#be185d;}
+
+/* STATUS PILL */
+.status-pill{padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;}
+.pill-pending{background:rgba(245,158,11,0.12);color:#b45309;}
+.pill-ongoing{background:rgba(14,165,233,0.12);color:#0369a1;}
+.pill-completed{background:rgba(34,197,94,0.12);color:#15803d;}
+.pill-cancelled{background:rgba(239,68,68,0.1);color:#b91c1c;}
+
+/* CYCLE RING */
+.cycle-ring-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.mini-ring{position:relative;width:100px;height:100px;flex-shrink:0;}
+.mini-ring svg{width:100px;height:100px;transform:rotate(-90deg);}
+.mini-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.mini-ring-day{font-size:24px;font-weight:900;}
+.mini-ring-lbl{font-size:10px;font-weight:700;color:var(--muted);}
+
+/* EMPTY STATE */
+.empty-data{text-align:center;padding:30px;color:var(--muted);font-size:13px;font-weight:700;}
+
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div id="loader"><div class="loader-ring"></div><p>Loading patients...</p></div>
+
+<div class="topbar">
+  <span style="font-size:22px;">👥</span>
+  <h2>Patient Profiles</h2>
+  <a class="topbar-btn" href="new_requests.html">📋 Orders</a>
+  <a class="topbar-btn" href="reports.html">📊 Reports</a>
+  <button class="topbar-btn" id="logoutBtn">🚪 Logout</button>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR: Patient List -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">👥 All Patients</div>
+      <input class="search-input" id="patientSearch" placeholder="🔍 Search name or phone..." oninput="filterPatients()">
+      <div class="patient-count" id="patientCount">Loading...</div>
+    </div>
+    <div class="patient-list" id="patientList"></div>
+  </div>
+
+  <!-- MAIN: Patient Detail -->
+  <div class="main-panel" id="mainPanel">
+    <div class="empty-select">
+      <div class="icon">👤</div>
+      <h3>Select a patient</h3>
+      <p>Click any patient from the list to view their full profile and activity</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+let allPatients=[];
+let activePatientId=null;
+
+// ── AUTH ──
+auth.onAuthStateChanged(async user=>{
+  if(!user){location.href="login.html";return;}
+  const snap=await db.collection("users").doc(user.uid).get();
+  if(!snap.exists||snap.data().role!=="admin"){
+    if(user.email!=="edrinehero@gmail.com"){alert("Access denied");auth.signOut();location.href="login.html";return;}
+  }
+  loadPatients();
+});
+document.getElementById("logoutBtn").onclick=async()=>{await auth.signOut();location.href="login.html";};
+
+// ── LOAD ALL PATIENTS ──
+async function loadPatients(){
+  const snap=await db.collection("users").get();
+  allPatients=[];
+  snap.forEach(d=>{
+    const data=d.data();
+    if(data.role==="admin") return; // skip admin
+    allPatients.push({uid:d.id,...data});
+  });
+  allPatients.sort((a,b)=>(a.fullName||"").localeCompare(b.fullName||""));
+  document.getElementById("loader").style.display="none";
+  document.getElementById("patientCount").innerText=`${allPatients.length} patients`;
+  renderPatientList(allPatients);
+}
+
+function renderPatientList(list){
+  const el=document.getElementById("patientList");
+  el.innerHTML="";
+  if(list.length===0){el.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-weight:700;">No patients found</div>`;return;}
+  list.forEach(p=>{
+    const initials=(p.fullName||p.email||"?").split(" ").map(n=>n[0]).slice(0,2).join("").toUpperCase();
+    const item=document.createElement("div");
+    item.className="patient-item"+(activePatientId===p.uid?" active":"");
+    item.dataset.uid=p.uid;
+    item.innerHTML=`
+      <div class="patient-avatar">${initials}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="patient-name">${p.fullName||p.email||"Unknown"}</div>
+        <div class="patient-meta">${p.phone||"No phone"} · ${p.sex||"—"}, ${p.age||"—"} yrs</div>
+      </div>`;
+    item.onclick=()=>openPatient(p.uid);
+    el.appendChild(item);
+  });
+}
+
+function filterPatients(){
+  const q=document.getElementById("patientSearch").value.toLowerCase();
+  renderPatientList(allPatients.filter(p=>
+    (p.fullName||"").toLowerCase().includes(q)||
+    (p.phone||"").includes(q)||
+    (p.email||"").toLowerCase().includes(q)
+  ));
+}
+
+// ── OPEN PATIENT PROFILE ──
+async function openPatient(uid){
+  activePatientId=uid;
+  // Highlight in sidebar
+  document.querySelectorAll(".patient-item").forEach(el=>{
+    el.classList.toggle("active",el.dataset.uid===uid);
+  });
+  const panel=document.getElementById("mainPanel");
+  panel.innerHTML=`<div style="text-align:center;padding:60px;color:var(--muted);font-weight:700;font-size:15px;">Loading patient data...</div>`;
+
+  const patient=allPatients.find(p=>p.uid===uid);
+  if(!patient){panel.innerHTML=`<div style="padding:20px;color:red;">Patient not found</div>`;return;}
+
+  // Fetch ALL data in parallel
+  const [ordersSnap,resultsSnap,apptSnap,walletSnap,txnSnap,cycleSnap,notifsSnap,reviewSnap,referralSnap,receiptsSnap]=await Promise.all([
+    db.collection("orders").where("userId","==",uid).orderBy("createdAt","desc").get().catch(()=>({docs:[]})),
+    db.collection("results").where("userId","==",uid).orderBy("uploaded_at","desc").get().catch(()=>({docs:[]})),
+    db.collection("appointments").where("userId","==",uid).orderBy("createdAt","desc").get().catch(()=>({docs:[]})),
+    db.collection("wallets").doc(uid).get().catch(()=>null),
+    db.collection("wallet_transactions").where("userId","==",uid).orderBy("createdAt","desc").limit(20).get().catch(()=>({docs:[]})),
+    db.collection("cycle_tracker").doc(uid).get().catch(()=>null),
+    db.collection("notifications").where("userId","==",uid).orderBy("time","desc").limit(20).get().catch(()=>({docs:[]})),
+    db.collection("reviews").where("userId","==",uid).get().catch(()=>({docs:[]})),
+    db.collection("referrals").where("referrerId","==",uid).get().catch(()=>({docs:[]})),
+    db.collection("receipts").where("userId","==",uid).orderBy("createdAt","desc").get().catch(()=>({docs:[]}))
+  ]);
+
+  const orders=ordersSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const results=resultsSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const appointments=apptSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const wallet=walletSnap?.exists?walletSnap.data():{balance:0};
+  const transactions=txnSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const cycleData=cycleSnap?.exists?cycleSnap.data():null;
+  const notifications=notifsSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const review=reviewSnap.docs[0]?.data()||null;
+  const referrals=referralSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const receipts=receiptsSnap.docs.map(d=>({id:d.id,...d.data()}));
+
+  // Compute stats
+  const totalSpent=orders.filter(o=>o.status==="completed").reduce((s,o)=>s+parseInt((o.total||"0").replace(/\D/g,""))||0,0);
+  const completedOrders=orders.filter(o=>o.status==="completed").length;
+  const pendingOrders=orders.filter(o=>o.status==="pending"||o.status==="ongoing").length;
+
+  const initials=(patient.fullName||patient.email||"?").split(" ").map(n=>n[0]).slice(0,2).join("").toUpperCase();
+  const regDate=patient.createdAt?patient.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"}):"—";
+
+  panel.innerHTML=`
+    <!-- PATIENT HEADER -->
+    <div class="patient-header-card">
+      <div class="ph-top">
+        <div class="ph-avatar">${initials}</div>
+        <div>
+          <div class="ph-name">${patient.fullName||"Unknown"}</div>
+          <div class="ph-sub">${patient.email||"—"} · ${patient.phone||"—"}</div>
+          <div class="ph-sub">📍 ${patient.location||"—"} · Joined ${regDate}</div>
+        </div>
+      </div>
+      <div class="ph-stats">
+        <div class="ph-stat"><div class="ph-stat-val">${orders.length}</div><div class="ph-stat-lbl">Total Orders</div></div>
+        <div class="ph-stat"><div class="ph-stat-val">${completedOrders}</div><div class="ph-stat-lbl">Completed</div></div>
+        <div class="ph-stat"><div class="ph-stat-val">UGX ${totalSpent.toLocaleString()}</div><div class="ph-stat-lbl">Total Spent</div></div>
+        <div class="ph-stat"><div class="ph-stat-val">UGX ${(wallet.balance||0).toLocaleString()}</div><div class="ph-stat-lbl">Wallet</div></div>
+      </div>
+      <div class="ph-actions">
+        <a class="ph-btn" href="tel:${patient.phone||""}">📞 Call</a>
+        <a class="ph-btn" href="https://wa.me/${(patient.phone||"").replace(/^0/,"256")}" target="_blank">💚 WhatsApp</a>
+        <a class="ph-btn" href="mailto:${patient.email||""}">✉️ Email</a>
+        <button class="ph-btn" onclick="sendNotification('${uid}','${patient.fullName||""}')">🔔 Send Notification</button>
+      </div>
+    </div>
+
+    <!-- SECTION TABS -->
+    <div class="section-tabs">
+      <button class="stab active" onclick="showSection('info',this)">👤 Profile</button>
+      <button class="stab" onclick="showSection('orders',this)">🧪 Orders (${orders.length})</button>
+      <button class="stab" onclick="showSection('results',this)">📋 Results (${results.length})</button>
+      <button class="stab" onclick="showSection('appointments',this)">📅 Appointments (${appointments.length})</button>
+      <button class="stab" onclick="showSection('wallet',this)">💳 Wallet</button>
+      <button class="stab" onclick="showSection('cycle',this)">🌸 Cycle</button>
+      <button class="stab" onclick="showSection('receipts',this)">🧾 Receipts (${receipts.length})</button>
+      <button class="stab" onclick="showSection('activity',this)">🔔 Activity</button>
+    </div>
+
+    <!-- PROFILE INFO -->
+    <div class="data-section active" id="sec-info">
+      <div class="section-title">👤 Personal Information</div>
+      <div class="info-grid">
+        <div class="info-item"><div class="info-label">Full Name</div><div class="info-value">${patient.fullName||"—"}</div></div>
+        <div class="info-item"><div class="info-label">Email</div><div class="info-value">${patient.email||"—"}</div></div>
+        <div class="info-item"><div class="info-label">Phone</div><div class="info-value">${patient.phone||"—"}</div></div>
+        <div class="info-item"><div class="info-label">Age</div><div class="info-value">${patient.age||"—"} years</div></div>
+        <div class="info-item"><div class="info-label">Sex</div><div class="info-value">${patient.sex||"—"}</div></div>
+        <div class="info-item"><div class="info-label">Location</div><div class="info-value">${patient.location||"—"}</div></div>
+        <div class="info-item"><div class="info-label">Registered</div><div class="info-value">${regDate}</div></div>
+        <div class="info-item"><div class="info-label">Referral Code</div><div class="info-value">${patient.referralCode||"None"}</div></div>
+        <div class="info-item"><div class="info-label">Total Referrals Made</div><div class="info-value">${referrals.length}</div></div>
+        <div class="info-item"><div class="info-label">Review Left</div><div class="info-value">${review?"⭐".repeat(review.rating||0)+" — "+review.category:"None yet"}</div></div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="data-section" id="sec-orders">
+      <div class="section-title">🧪 All Orders</div>
+      ${orders.length===0?`<div class="empty-data">No orders yet</div>`:
+        orders.map(o=>{
+          const d=o.createdAt?o.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric"}):"—";
+          const tests=(o.tests||"").split("\n").filter(Boolean).map(t=>t.replace(/\s*\(UGX.*?\)/i,"").replace(/^[•\-]\s*/,"").trim());
+          const sc={pending:"pill-pending",ongoing:"pill-ongoing",completed:"pill-completed",cancelled:"pill-cancelled"}[o.status]||"pill-pending";
+          const sl={pending:"⏳ Pending",ongoing:"🔬 Ongoing",completed:"✅ Done",cancelled:"❌ Cancelled"}[o.status]||o.status;
+          return `<div class="data-card">
+            <div class="dc-top"><div><div class="dc-title">${o.order_id||o.id}</div><div class="dc-date">${d} · ${o.total||"—"} · ${o.payment||"—"}</div></div><span class="status-pill ${sc}">${sl}</span></div>
+            <div class="dc-chips">${tests.map(t=>`<span class="dc-chip">${t}</span>`).join("")}</div>
+            ${o.location?`<div class="dc-body" style="margin-top:8px;">📍 ${o.location}</div>`:""}
+            ${o.notes&&o.notes!=="None"?`<div class="dc-body">📝 ${o.notes}</div>`:""}
+          </div>`;
+        }).join("")}
+    </div>
+
+    <!-- RESULTS -->
+    <div class="data-section" id="sec-results">
+      <div class="section-title">📋 Lab Results</div>
+      ${results.length===0?`<div class="empty-data">No results uploaded yet</div>`:
+        results.map(r=>{
+          const d=r.uploaded_at?r.uploaded_at.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric"}):"—";
+          return `<div class="data-card">
+            <div class="dc-top"><div class="dc-title">Result – ${r.order_id||r.id}</div><div class="dc-date">${d}</div></div>
+            <div class="dc-body" style="white-space:pre-wrap;background:#f8fafc;border-radius:10px;padding:10px;margin-top:8px;">${r.resultText||JSON.stringify(r.results||{},null,2)}</div>
+            ${r.resultNotes?`<div class="dc-body" style="margin-top:8px;color:#0369a1;"><b>👨‍⚕️ Doctor Notes:</b><br>${r.resultNotes}</div>`:""}
+          </div>`;
+        }).join("")}
+    </div>
+
+    <!-- APPOINTMENTS -->
+    <div class="data-section" id="sec-appointments">
+      <div class="section-title">📅 Appointments</div>
+      ${appointments.length===0?`<div class="empty-data">No appointments booked</div>`:
+        appointments.map(a=>{
+          const sc={pending:"pill-pending",confirmed:"pill-ongoing",completed:"pill-completed",cancelled:"pill-cancelled"}[a.status]||"pill-pending";
+          return `<div class="data-card">
+            <div class="dc-top"><div><div class="dc-title">${a.service||"Appointment"}</div><div class="dc-date">📆 ${a.date||"—"} at ${a.time||"—"}</div></div><span class="status-pill ${sc}">${a.status||"pending"}</span></div>
+            <div class="dc-body">📍 ${a.location||"—"}</div>
+            ${a.notes?`<div class="dc-body">📝 ${a.notes}</div>`:""}
+          </div>`;
+        }).join("")}
+    </div>
+
+    <!-- WALLET -->
+    <div class="data-section" id="sec-wallet">
+      <div class="section-title">💳 Wallet</div>
+      <div class="data-card" style="background:linear-gradient(135deg,rgba(14,165,233,0.08),rgba(20,184,166,0.08));border-color:rgba(14,165,233,0.2);">
+        <div class="dc-title" style="font-size:28px;color:var(--primary);">UGX ${(wallet.balance||0).toLocaleString()}</div>
+        <div class="dc-date">Current wallet balance</div>
+      </div>
+      <div class="section-title" style="margin-top:16px;">Transaction History</div>
+      ${transactions.length===0?`<div class="empty-data">No transactions yet</div>`:
+        transactions.map(t=>{
+          const d=t.createdAt?t.createdAt.toDate().toLocaleDateString("en-UG",{day:"numeric",month:"short",year:"numeric"}):"—";
+          const isCredit=t.type==="credit"||t.type==="referral_credit";
+          return `<div class="data-card">
+            <div class="dc-top">
+              <div><div class="dc-title">${t.note||t.type}</div><div class="dc-date">${d}</div></div>
+              <span class="dc-chip ${isCredit?"green":"red"}">${isCredit?"+":"-"}UGX ${(t.amount||0).toLocaleString()}</span>
+            </div>
+          </div>`;
+        }).join("")}
+    </div>
+
+    <!-- CYCLE TRACKER -->
+    <div class="data-section" id="sec-cycle">
+      <div class="section-title">🌸 Cycle Tracker Data</div>
+      ${buildCycleSection(cycleData)}
+    </div>
+
+    <!-- RECEIPTS -->
+    <div class="data-section" id="sec-receipts">
+      <div class="section-title">🧾 Receipts</div>
+      ${receipts.length===0?`<div class="empty-data">No receipts issued</div>`:
+        receipts.map(r=>`<div class="data-card">
+          <div class="dc-top">
+            <div><div class="dc-title">${r.receiptNo||r.id}</div><div class="dc-date">${r.date||"—"} · ${r.payment||"—"}</div></div>
+            <span class="dc-chip ${r.status==="PAID"?"green":r.status==="PARTIAL"?"":"red"}">${r.status||"—"}</span>
+          </div>
+          <div class="dc-body">Paid: <b>UGX ${(r.paid||0).toLocaleString()}</b> of UGX ${(r.total||0).toLocaleString()}${r.balance>0?` · Balance: UGX ${r.balance.toLocaleString()}`:""}</div>
+          <div class="dc-chips">${(r.services||[]).map(s=>`<span class="dc-chip">${s.name}</span>`).join("")}</div>
+        </div>`).join("")}
+    </div>
+
+    <!-- ACTIVITY / NOTIFICATIONS -->
+    <div class="data-section" id="sec-activity">
+      <div class="section-title">🔔 Notifications & Activity</div>
+      ${notifications.length===0?`<div class="empty-data">No notifications</div>`:
+        notifications.map(n=>{
+          const d=n.time?n.time.toDate().toLocaleString("en-UG",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"—";
+          return `<div class="data-card">
+            <div class="dc-top"><div><div class="dc-title">${n.icon||"🔔"} ${n.title||"Notification"}</div><div class="dc-date">${d}</div></div></div>
+            <div class="dc-body">${n.message||""}</div>
+          </div>`;
+        }).join("")}
+    </div>`;
+}
+
+// ── CYCLE DATA SECTION ──
+function buildCycleSection(data){
+  if(!data||!data.lastPeriodDate) return `<div class="empty-data">No cycle tracking data for this patient</div>`;
+  const s=data.settings||{cycleLen:28,periodLen:4,goal:"track"};
+  const lastPeriod=new Date(data.lastPeriodDate);
+  const today=new Date();today.setHours(0,0,0,0);
+  let cycleStart=new Date(lastPeriod);cycleStart.setHours(0,0,0,0);
+  while(true){const next=new Date(cycleStart);next.setDate(cycleStart.getDate()+s.cycleLen);if(next>today)break;cycleStart=next;}
+  const dayOfCycle=Math.floor((today-cycleStart)/(1000*60*60*24))+1;
+  const ovulDay=s.cycleLen-14;
+  const ovulDate=new Date(cycleStart);ovulDate.setDate(cycleStart.getDate()+ovulDay-1);
+  const nextPeriod=new Date(cycleStart);nextPeriod.setDate(cycleStart.getDate()+s.cycleLen);
+  const daysToNext=Math.floor((nextPeriod-today)/(1000*60*60*24));
+  const history=(data.cycleHistory||[]).slice(0,6);
+  const logs=data.logs||{};
+  const logEntries=Object.entries(logs).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
+  const circumference=2*Math.PI*40;
+  const progress=Math.min(dayOfCycle/s.cycleLen,1);
+  const offset=circumference-progress*circumference;
+  let phase="";
+  if(dayOfCycle<=s.periodLen) phase="🩸 Menstrual";
+  else if(today.toDateString()===ovulDate.toDateString()) phase="💜 Ovulation";
+  else if(dayOfCycle<ovulDay-5) phase="🌼 Follicular";
+  else phase="🌙 Luteal";
+
+  return `
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label">Cycle Length</div><div class="info-value">${s.cycleLen} days</div></div>
+      <div class="info-item"><div class="info-label">Period Duration</div><div class="info-value">${s.periodLen} days</div></div>
+      <div class="info-item"><div class="info-label">Goal</div><div class="info-value">${s.goal==="conceive"?"👶 Get pregnant":s.goal==="avoid"?"🚫 Avoid pregnancy":"📊 Track cycle"}</div></div>
+      <div class="info-item"><div class="info-label">Last Period</div><div class="info-value">${lastPeriod.toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"})}</div></div>
+    </div>
+    <div class="data-card" style="background:linear-gradient(135deg,rgba(236,72,153,0.06),rgba(168,85,246,0.06));">
+      <div class="cycle-ring-wrap">
+        <div class="mini-ring">
+          <svg viewBox="0 0 100 100">
+            <circle fill="none" stroke="#fce7f3" stroke-width="10" cx="50" cy="50" r="40"/>
+            <circle fill="none" stroke="#db2777" stroke-width="10" stroke-linecap="round" cx="50" cy="50" r="40"
+              stroke-dasharray="${circumference.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
+          </svg>
+          <div class="mini-ring-center">
+            <div class="mini-ring-day" style="color:#db2777;">${dayOfCycle}</div>
+            <div class="mini-ring-lbl">Day ${dayOfCycle}/${s.cycleLen}</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:16px;font-weight:900;color:#db2777;margin-bottom:6px;">${phase}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--muted);">Next period in <b>${daysToNext>0?daysToNext+"d":"today"}</b></div>
+          <div style="font-size:13px;font-weight:700;color:var(--muted);">Ovulation: <b>${ovulDate.toLocaleDateString("en-UG",{day:"numeric",month:"short"})}</b></div>
+          <div style="font-size:13px;font-weight:700;color:var(--muted);">Cycles logged: <b>${history.length}</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:16px;">📅 Recent Cycle History</div>
+    ${history.map((h,i)=>`<div class="data-card">
+      <div class="dc-top"><div class="dc-title">Cycle ${history.length-i} — ${new Date(h.start).toLocaleDateString("en-UG",{day:"numeric",month:"long",year:"numeric"})}</div></div>
+      <div class="dc-body">Cycle length: ${h.cycleLen} days · Period: ${h.periodLen||s.periodLen} days</div>
+    </div>`).join("")}
+    <div class="section-title" style="margin-top:16px;">📝 Recent Diary Logs</div>
+    ${logEntries.length===0?`<div class="empty-data">No diary logs</div>`:
+      logEntries.map(([date,log])=>`<div class="data-card">
+        <div class="dc-top"><div class="dc-title">📅 ${date}</div></div>
+        <div class="dc-chips">
+          ${log.mood?`<span class="dc-chip pink">${log.mood}</span>`:""}
+          ${log.flow&&log.flow!=="None"?`<span class="dc-chip red">🩸 ${log.flow}</span>`:""}
+          ${(log.symptoms||[]).map(s=>`<span class="dc-chip">${s}</span>`).join("")}
+        </div>
+        ${log.notes?`<div class="dc-body" style="margin-top:6px;">📝 ${log.notes}</div>`:""}
+      </div>`).join("")}`;
+}
+
+function showSection(name, btn){
+  document.querySelectorAll(".data-section").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".stab").forEach(b=>b.classList.remove("active"));
+  const sec=document.getElementById("sec-"+name);
+  if(sec) sec.classList.add("active");
+  if(btn) btn.classList.add("active");
+}
+
+// ── SEND NOTIFICATION ──
+async function sendNotification(uid, name){
+  const msg=prompt(`Send a notification to ${name}:`);
+  if(!msg) return;
+  try{
+    await db.collection("notifications").add({
+      userId:uid,title:"Message from Mobile Lab",message:msg,
+      icon:"🔔",time:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("✅ Notification sent to "+name);
+  }catch(e){showToast("Failed: "+e.message);}
+}
+
+function showToast(msg){const t=document.getElementById("toast");t.innerText=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500);}
+</script>
+</body>
+</html>
