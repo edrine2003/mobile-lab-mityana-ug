@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;--card:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:60px;}
+.topbar{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:16px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+.topbar h2{color:#fff;font-size:18px;font-weight:900;flex:1;}
+.topbar-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.topbar-btn:hover{background:rgba(255,255,255,0.3);}
+.hero{background:linear-gradient(135deg,#0ea5e9,#14b8a6);padding:28px 20px 20px;text-align:center;}
+.hero h1{color:#fff;font-size:28px;font-weight:900;margin-bottom:8px;}
+.hero p{color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;}
+.search-wrap{max-width:600px;margin:20px auto 0;padding:0 16px;}
+.search-box{width:100%;padding:14px 18px;border-radius:16px;border:2px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:15px;font-weight:600;outline:none;box-shadow:0 4px 20px rgba(0,0,0,0.08);}
+.search-box:focus{border-color:var(--primary);}
+.tabs-wrap{max-width:700px;margin:16px auto 0;padding:0 16px;}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;}
+.tab{padding:8px 16px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;border:2px solid var(--border);background:#fff;color:var(--muted);font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;}
+.tab.active,.tab:hover{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(14,165,233,0.3);}
+.faq-wrap{max-width:700px;margin:20px auto;padding:0 16px;}
+.faq-item{background:#fff;border-radius:18px;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,0.06);border:1px solid var(--border);overflow:hidden;transition:box-shadow 0.2s;}
+.faq-item.open{box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:rgba(14,165,233,0.3);}
+.faq-item.hidden{display:none;}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;gap:12px;}
+.faq-q-text{font-size:14px;font-weight:800;color:var(--dark);flex:1;}
+.faq-icon{font-size:18px;transition:transform 0.3s;flex-shrink:0;color:var(--primary);}
+.faq-item.open .faq-icon{transform:rotate(180deg);}
+.faq-a{display:none;padding:0 18px 16px;font-size:14px;font-weight:600;color:#334155;line-height:1.7;border-top:1px solid var(--border);}
+.faq-item.open .faq-a{display:block;}
+.cat-badge{font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;margin-right:8px;flex-shrink:0;}
+.no-results{text-align:center;padding:40px;color:var(--muted);font-weight:700;}
+.contact-box{max-width:700px;margin:24px auto;padding:0 16px;}
+.contact-card{background:linear-gradient(135deg,#0ea5e9,#14b8a6);border-radius:22px;padding:24px;text-align:center;color:#fff;}
+.contact-card h3{font-size:18px;font-weight:900;margin-bottom:8px;}
+.contact-card p{font-size:14px;font-weight:600;opacity:0.9;margin-bottom:16px;}
+.contact-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.contact-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:999px;padding:10px 20px;font-size:13px;font-weight:800;text-decoration:none;cursor:pointer;font-family:'Nunito',Arial,sans-serif;display:inline-flex;align-items:center;gap:6px;}
+.contact-btn:hover{background:rgba(255,255,255,0.3);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span style="font-size:22px;">❓</span>
+  <h2>Frequently Asked Questions</h2>
+  <a class="topbar-btn" href="dashboard.html">🏠 Home</a>
+</div>
+
+<div class="hero">
+  <h1>❓ How can we help?</h1>
+  <p>Find answers to common questions about Mobile Lab Mityana</p>
+</div>
+
+<div class="search-wrap">
+  <input class="search-box" id="searchBox" placeholder="🔍 Search questions e.g. fasting, results, payment..." oninput="filterFAQ()">
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="filterByTab(this,'all')">All</button>
+    <button class="tab" onclick="filterByTab(this,'booking')">📅 Booking</button>
+    <button class="tab" onclick="filterByTab(this,'tests')">🧪 Tests</button>
+    <button class="tab" onclick="filterByTab(this,'payment')">💳 Payment</button>
+    <button class="tab" onclick="filterByTab(this,'results')">📋 Results</button>
+    <button class="tab" onclick="filterByTab(this,'general')">ℹ️ General</button>
+  </div>
+</div>
+
+<div class="faq-wrap" id="faqWrap"></div>
+
+<div class="contact-box">
+  <div class="contact-card">
+    <h3>Still have questions?</h3>
+    <p>Our team is ready to help you any time</p>
+    <div class="contact-btns">
+      <a class="contact-btn" href="chat.html">💬 Chat with Doctor</a>
+      <a class="contact-btn" href="tel:+256778379791">📞 Call MTN</a>
+      <a class="contact-btn" href="tel:0750992939">📞 Call Airtel</a>
+      <a class="contact-btn" href="https://wa.me/256750992939">💚 WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const FAQS = [
+  // BOOKING
+  {cat:"booking", q:"How do I book a lab test?", a:"Go to the Order Test page, fill in your name, phone number, location, and select the tests you need. Choose your payment method and click Submit Order. You will receive a WhatsApp confirmation and the lab team will contact you to arrange sample collection."},
+  {cat:"booking", q:"Can I book a test for someone else?", a:"Yes. Fill in the patient's name, age, sex, phone, and location in the order form. Make sure the phone number given is one where the patient can be reached for collection arrangements."},
+  {cat:"booking", q:"What areas do you cover?", a:"We currently cover Mityana Town and nearby areas including Mubende Road, Kampala Road, Ttamu, Kasana, Butebo, and surrounding villages within 20km. Call us to confirm if your area is covered."},
+  {cat:"booking", q:"What is the difference between walk-in and home collection?", a:"Walk-in means you come to our location and we collect your sample there. Home collection means our lab technician comes to your home or workplace. Home collection is available within our coverage area — just enter your address when booking."},
+  {cat:"booking", q:"How do I cancel or change my order?", a:"To cancel, open the order in My Results, or contact us on WhatsApp (+256 750 992 939) with your Order ID. Cancellations are free if done before sample collection. If collection has already happened, please call us directly."},
+  {cat:"booking", q:"Can I book an appointment for a specific time?", a:"Yes. Use the Appointments page on your dashboard to book a specific date and time. We will confirm within 2 hours."},
+  // TESTS
+  {cat:"tests", q:"Which tests require fasting?", a:"The following tests require fasting (nothing to eat or drink except water) for 8–12 hours before the test: Blood Glucose (fasting), Lipid Profile, Liver Function Test (LFT), and Kidney Function Test (RFT). All other tests can be done without fasting unless your doctor specifies otherwise."},
+  {cat:"tests", q:"How do I prepare for a urine test?", a:"Collect midstream urine — let some urine pass first, then collect in a clean dry container. Do not mix with urine from the beginning of urination. Bring it to the lab within 2 hours. Avoid urinating for at least 1 hour before collection if possible."},
+  {cat:"tests", q:"How do I prepare for a stool test?", a:"Collect a fresh stool sample in a clean, dry container. Do not let it mix with urine or toilet water. Bring it to the lab within 2 hours. Refrigerate if you cannot bring it immediately."},
+  {cat:"tests", q:"Is the HIV test confidential?", a:"Yes, completely. Your HIV result is private and is only shared with you. We do not share any patient information with third parties. All our staff follow strict confidentiality guidelines."},
+  {cat:"tests", q:"How accurate is the pregnancy test?", a:"Our urine pregnancy test is over 99% accurate when done correctly. For the most accurate result, use first-morning urine (most concentrated hCG). A blood hCG test is even more sensitive and can detect pregnancy earlier."},
+  {cat:"tests", q:"What is the Widal test and when do I need it?", a:"The Widal test checks for Typhoid fever (Salmonella typhi). You should get it if you have had fever for more than 5 days, headache, abdominal pain, or weakness. It is most accurate after 7–10 days of illness."},
+  // PAYMENT
+  {cat:"payment", q:"How do I pay for my test?", a:"You can pay by: Cash on Delivery (pay the technician when they arrive), MTN Mobile Money (send to 0778379591 – Kwikiriza Jenipher), Airtel Money (send to 0706559100 – Nambi Amina), or from your Mobile Lab Wallet. Payment is confirmed before results are released."},
+  {cat:"payment", q:"What is the Mobile Lab Wallet?", a:"The wallet is a prepaid balance you can load into your account. You can use it to pay for tests instantly without needing to do a MoMo transfer each time. Top up your wallet from your profile or wallet page, or ask the admin to credit it after making a payment."},
+  {cat:"payment", q:"How do I top up my wallet?", a:"Send money via MTN or Airtel MoMo to our numbers, then go to your Wallet page and submit a top-up request with the reference number. The admin will confirm and credit your wallet within a few minutes."},
+  {cat:"payment", q:"Is there a referral discount?", a:"Yes! Share your referral code (found on the Referral page) with friends. When they book their first test using your code, both of you receive UGX 5,000 wallet credit."},
+  // RESULTS
+  {cat:"results", q:"How long do results take?", a:"Most results are ready same day (2–4 hours after sample collection). Culture & Sensitivity (C&S) tests take 3–5 days. DNA tests take 7–14 days. You will be notified by WhatsApp when your results are ready."},
+  {cat:"results", q:"How do I view my results?", a:"Log in to your dashboard and tap My Results (Inbox). Your results will appear there once the lab has uploaded them. You can also download a PDF copy."},
+  {cat:"results", q:"What does a positive result mean?", a:"It depends on the test. Check our Tests Guide page for a full explanation of what positive and negative means for each specific test. For urgent concerns, use the Chat with Doctor feature for advice."},
+  {cat:"results", q:"Can I get a printed copy of my results?", a:"Yes. From the My Results page, tap the download button to get a PDF copy. You can also request a physical printed copy when the technician comes for collection or at our lab."},
+  // GENERAL
+  {cat:"general", q:"What are your operating hours?", a:"We are available Monday to Saturday, 7:00 AM to 7:00 PM. Emergency sample collection is available 24/7 — call +256 778 379 791 for urgent requests."},
+  {cat:"general", q:"How do I contact Mobile Lab Mityana?", a:"MTN: +256 778 379 791, Airtel: 0750 992 939, WhatsApp: +256 750 992 939. You can also use the Chat with Doctor feature inside the app for medical questions."},
+];
+
+let activeTab = "all";
+let searchTerm = "";
+
+function render(){
+  const wrap = document.getElementById("faqWrap");
+  wrap.innerHTML = "";
+  let shown = 0;
+  FAQS.forEach((f, i) => {
+    const matchTab = activeTab === "all" || f.cat === activeTab;
+    const matchSearch = !searchTerm || f.q.toLowerCase().includes(searchTerm) || f.a.toLowerCase().includes(searchTerm);
+    const item = document.createElement("div");
+    item.className = "faq-item" + (matchTab && matchSearch ? "" : " hidden");
+    if(matchTab && matchSearch) shown++;
+    const catColors = {booking:"rgba(14,165,233,0.12)", tests:"rgba(139,92,246,0.12)", payment:"rgba(245,158,11,0.12)", results:"rgba(34,197,94,0.12)", general:"rgba(100,116,139,0.12)"};
+    const catTexts = {booking:"#0369a1", tests:"#7c3aed", payment:"#b45309", results:"#15803d", general:"#475569"};
+    const catLabels = {booking:"📅 Booking", tests:"🧪 Tests", payment:"💳 Payment", results:"📋 Results", general:"ℹ️ General"};
+    item.innerHTML = `
+      <div class="faq-q" onclick="toggle(this)">
+        <span class="cat-badge" style="background:${catColors[f.cat]};color:${catTexts[f.cat]}">${catLabels[f.cat]}</span>
+        <span class="faq-q-text">${f.q}</span>
+        <span class="faq-icon">▾</span>
+      </div>
+      <div class="faq-a">${f.a}</div>`;
+    wrap.appendChild(item);
+  });
+  if(shown === 0) wrap.innerHTML = `<div class="no-results">😕 No results for "<b>${searchTerm||activeTab}</b>". Try a different search.</div>`;
+}
+
+function toggle(el){
+  const item = el.closest(".faq-item");
+  // Close others
+  document.querySelectorAll(".faq-item.open").forEach(x => { if(x!==item) x.classList.remove("open"); });
+  item.classList.toggle("open");
+}
+
+function filterByTab(btn, tab){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  btn.classList.add("active");
+  activeTab = tab;
+  render();
+}
+
+function filterFAQ(){
+  searchTerm = document.getElementById("searchBox").value.toLowerCase().trim();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
