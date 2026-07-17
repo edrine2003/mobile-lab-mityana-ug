@@ -120,28 +120,59 @@ body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .cal-header h2{font-size:18px;font-weight:900;color:var(--dark);}
 .cal-nav{background:#fff;border:1.5px solid var(--border);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:800;cursor:pointer;color:var(--pink);font-family:'Nunito',Arial,sans-serif;}
-.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;}
-.cal-weekday{text-align:center;font-size:12px;font-weight:800;color:var(--muted);padding:6px 0;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;}
+.cal-weekday{text-align:center;font-size:11px;font-weight:800;color:var(--muted);padding:4px 0;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+
+/* Each day is a tall cell with number + label */
 .cal-day{
-  aspect-ratio:1;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:13px;font-weight:700;cursor:pointer;
-  transition:all 0.15s;position:relative;
+  border-radius:12px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;cursor:pointer;transition:all 0.15s;position:relative;
+  padding:6px 2px 4px;min-height:52px;background:#f8fafc;border:1.5px solid transparent;
 }
-.cal-day:hover{background:rgba(219,39,119,0.1);}
-.cal-day.today{border:2px solid var(--pink);color:var(--pink);}
-.cal-day.period{background:var(--red);color:#fff;}
-.cal-day.fertile{background:rgba(34,197,94,0.2);color:#15803d;}
-.cal-day.ovulation{background:var(--purple);color:#fff;}
-.cal-day.predicted-period{background:rgba(239,68,68,0.15);color:var(--red);}
-.cal-day.empty{pointer-events:none;}
-.cal-day.logged{position:relative;}
-.cal-day.logged::after{content:'•';position:absolute;bottom:2px;font-size:8px;color:var(--pink);}
+.cal-day:hover{transform:scale(1.04);z-index:2;}
+.cal-day .day-num{font-size:14px;font-weight:900;line-height:1;}
+.cal-day .day-lbl{font-size:8px;font-weight:800;margin-top:2px;text-align:center;line-height:1.2;opacity:0.9;}
+.cal-day.empty{background:transparent;cursor:default;border-color:transparent;}
+.cal-day.empty:hover{transform:none;}
+
+/* COLOUR STATES */
+.cal-day.period{background:#fef2f2;border-color:#fca5a5;}
+.cal-day.period .day-num{color:#ef4444;}
+.cal-day.period .day-lbl{color:#ef4444;}
+
+.cal-day.ovulation{background:#f5f3ff;border-color:#c4b5fd;}
+.cal-day.ovulation .day-num{color:#7c3aed;}
+.cal-day.ovulation .day-lbl{color:#7c3aed;}
+
+.cal-day.fertile{background:#f0fdf4;border-color:#86efac;}
+.cal-day.fertile .day-num{color:#15803d;}
+.cal-day.fertile .day-lbl{color:#15803d;}
+
+.cal-day.luteal{background:#fefce8;border-color:#fde68a;}
+.cal-day.luteal .day-num{color:#92400e;}
+.cal-day.luteal .day-lbl{color:#92400e;}
+
+.cal-day.follicular{background:#eff6ff;border-color:#bfdbfe;}
+.cal-day.follicular .day-num{color:#1e40af;}
+.cal-day.follicular .day-lbl{color:#1e40af;}
+
+.cal-day.predicted-period{background:#fff1f2;border-color:rgba(239,68,68,0.3);border-style:dashed;}
+.cal-day.predicted-period .day-num{color:#f43f5e;}
+.cal-day.predicted-period .day-lbl{color:#f43f5e;opacity:0.7;}
+
+.cal-day.today{box-shadow:0 0 0 2.5px var(--pink);background:#fff0f6;}
+.cal-day.today .day-num{color:var(--pink);}
+
+.cal-day.logged::after{content:'•';position:absolute;top:3px;right:5px;font-size:10px;color:var(--pink);}
+
+/* IRREGULAR MODE */
+.irregular-notice{background:rgba(245,158,11,0.1);border:1.5px solid rgba(245,158,11,0.3);border-radius:16px;padding:14px;margin-bottom:14px;font-size:13px;font-weight:700;color:#92400e;}
 
 /* ── LEGEND ── */
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--dark);}
-.leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--dark);background:#fff;border-radius:999px;padding:4px 10px;border:1px solid var(--border);}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 
 /* ── FUTURE CYCLES ── */
 .future-cycles{margin-top:18px;}
@@ -368,11 +399,16 @@ select.settings-select:focus{border-color:var(--pink);}
     <div class="cal-weekday">Sa</div>
   </div>
   <div class="cal-grid" id="calGrid"></div>
+  <div id="irregularNotice" class="irregular-notice" style="display:none;margin-top:12px;">
+    ⚠️ <b>Irregular cycle mode:</b> Predictions are estimates based on your last period. Log each period for better accuracy.
+  </div>
   <div class="legend">
     <div class="leg-item"><div class="leg-dot" style="background:#ef4444"></div>Period</div>
-    <div class="leg-item"><div class="leg-dot" style="background:rgba(34,197,94,0.5)"></div>Fertile</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#a855f7"></div>Ovulation</div>
-    <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,0.2)"></div>Predicted</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#7c3aed"></div>Ovulation</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#15803d"></div>Fertile</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#1e40af"></div>Follicular</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#92400e"></div>Luteal</div>
+    <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,0.4);border:1px dashed #f43f5e"></div>Predicted</div>
     <div class="leg-item"><div class="leg-dot" style="border:2px solid #db2777;background:transparent"></div>Today</div>
   </div>
   <div class="future-cycles" id="futureCycles"></div>
@@ -447,6 +483,13 @@ select.settings-select:focus{border-color:var(--pink);}
       <option value="avoid">Avoid pregnancy</option>
     </select>
   </div>
+  <div class="settings-item">
+    <div class="settings-item-left"><span class="settings-icon">🔄</span><div><div class="settings-label">Cycle Type</div><div class="settings-sub">Regular or irregular periods?</div></div></div>
+    <select class="settings-select" id="setCycleType" onchange="saveSettings()">
+      <option value="regular">Regular</option>
+      <option value="irregular">Irregular</option>
+    </select>
+  </div>
   <div class="section-title">🔗 Quick Links</div>
   <div class="settings-item" onclick="window.location.href='index.html'" style="cursor:pointer;">
     <div class="settings-item-left"><span class="settings-icon">🧪</span><div><div class="settings-label">Order Lab Tests</div><div class="settings-sub">Mobile Lab – Mityana</div></div></div>
@@ -472,6 +515,12 @@ select.settings-select:focus{border-color:var(--pink);}
   <div class="modal">
     <div class="modal-handle"></div>
     <h3>🌸 Set Up Your Cycle</h3>
+    <label>Cycle Type</label>
+    <select id="setupCycleType" onchange="toggleSetupCycleLen()">
+      <option value="regular">Regular (predictable cycle)</option>
+      <option value="irregular">Irregular (varies each month)</option>
+    </select>
+    <div id="setupCycleLenWrap">
     <label>First day of your last period</label>
     <input type="date" id="setupDate">
     <label>Cycle length (days)</label>
@@ -487,6 +536,17 @@ select.settings-select:focus{border-color:var(--pink);}
       <option value="4" selected>4 days</option><option value="5">5 days</option>
       <option value="6">6 days</option><option value="7">7 days</option>
     </select>
+    </div>
+    <div id="setupIrregularWrap" style="display:none;">
+    <label>First day of your last period</label>
+    <input type="date" id="setupDateIrr">
+    <p style="font-size:13px;font-weight:700;color:#92400e;background:rgba(245,158,11,0.1);border-radius:12px;padding:12px;margin-bottom:10px;">⚠️ With an irregular cycle, predictions are estimates only. Log your period each time it starts for better accuracy.</p>
+    <label>Approximate period duration (days)</label>
+    <select id="setupPeriodLenIrr">
+      <option value="3">3 days</option><option value="4" selected>4 days</option>
+      <option value="5">5 days</option><option value="6">6 days</option><option value="7">7 days</option>
+    </select>
+    </div>
     <button class="modal-btn" onclick="saveSetup()">✅ Save & Start Tracking</button>
   </div>
 </div>
@@ -502,7 +562,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 // ── STATE ──
-let settings = { cycleLen:28, periodLen:4, goal:"track" };
+let settings = { cycleLen:28, periodLen:4, goal:"track", cycleType:"regular" };
 let lastPeriodDate = null;
 let cycleHistory = []; // [{start, cycleLen, periodLen}]
 let logs = {}; // {dateStr: {mood, flow, symptoms, notes}}
@@ -558,12 +618,14 @@ function applySettings(){
   document.getElementById("setCycleLen").value = settings.cycleLen;
   document.getElementById("setPeriodLen").value = settings.periodLen;
   document.getElementById("setGoal").value = settings.goal;
+  document.getElementById("setCycleType").value = settings.cycleType || "regular";
 }
 
 function saveSettings(){
   settings.cycleLen = parseInt(document.getElementById("setCycleLen").value);
   settings.periodLen = parseInt(document.getElementById("setPeriodLen").value);
   settings.goal = document.getElementById("setGoal").value;
+  settings.cycleType = document.getElementById("setCycleType").value;
   saveData();
   refreshHome();
   renderCalendar();
