@@ -149,6 +149,24 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
 .footer a{color:var(--primary);text-decoration:none;font-weight:800;}
 .footer a:hover{text-decoration:underline;}
 
+/* IN-APP BROWSER BANNER */
+.inapp-banner{
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(135deg,#f59e0b,#d97706);
+  padding:12px 16px;display:none;
+  font-family:'Nunito',Arial,sans-serif;
+  box-shadow:0 4px 20px rgba(0,0,0,0.2);
+}
+.inapp-inner{display:flex;align-items:flex-start;gap:10px;}
+.inapp-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.inapp-text{flex:1;}
+.inapp-text h4{font-size:14px;font-weight:900;color:#fff;margin-bottom:3px;}
+.inapp-text p{font-size:12px;font-weight:700;color:rgba(255,255,255,0.9);line-height:1.5;}
+.inapp-steps{margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+.inapp-step{font-size:12px;font-weight:800;color:#fff;background:rgba(255,255,255,0.2);border-radius:8px;padding:4px 8px;}
+.inapp-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;padding:0;opacity:0.8;}
+.inapp-close:hover{opacity:1;}
+
 /* FORGOT MODAL */
 .modal-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;
@@ -183,6 +201,22 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
 </style>
 </head>
 <body>
+
+<!-- IN-APP BROWSER BANNER -->
+<div class="inapp-banner" id="inappBanner">
+  <div class="inapp-inner">
+    <div class="inapp-icon">⚠️</div>
+    <div class="inapp-text">
+      <h4>Open in your browser to install the app</h4>
+      <p>You're viewing this inside WhatsApp. For the best experience and to install the app:</p>
+      <div class="inapp-steps">
+        <div class="inapp-step">📱 Android: Tap ⋮ menu → "Open in Chrome"</div>
+        <div class="inapp-step">🍎 iPhone: Tap ⋯ → "Open in Safari"</div>
+      </div>
+    </div>
+    <button class="inapp-close" onclick="document.getElementById('inappBanner').style.display='none'">✕</button>
+  </div>
+</div>
 
 <!-- FORGOT PASSWORD MODAL -->
 <div class="modal-overlay" id="forgotModal">
@@ -432,6 +466,19 @@ function showMsg(text, type){
   msg.innerText = text;
   msg.className = "msg " + type;
 }
+
+// ── DETECT IN-APP BROWSER (WhatsApp, Facebook, Instagram) ──
+(function(){
+  const ua = navigator.userAgent || "";
+  const isInApp = /FBAN|FBAV|Instagram|WhatsApp|wv/.test(ua) ||
+    (ua.includes("Android") && ua.includes("Version/") && ua.includes("Chrome") && !ua.includes("OPR"));
+  if(isInApp){
+    const banner = document.getElementById("inappBanner");
+    banner.style.display = "block";
+    // Push card down so banner doesn't cover it
+    document.querySelector(".card").style.marginTop = "90px";
+  }
+})();
 </script>
 </body>
 </html>
