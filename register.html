@@ -95,11 +95,16 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
 /* AVATAR UPLOAD */
 .avatar-upload{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
 .avatar-preview{
-  width:64px;height:64px;border-radius:50%;object-fit:cover;
+  width:64px;height:64px;border-radius:50%;
   border:2px solid var(--border);background:#f1f5f9;
-  display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;
+  overflow:hidden;position:relative;
 }
-.avatar-preview img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+.avatar-preview img{
+  width:64px;height:64px;border-radius:50%;
+  object-fit:cover;position:absolute;top:0;left:0;
+}
 .avatar-btn{
   padding:9px 16px;border:1.5px solid var(--primary);border-radius:12px;
   background:#fff;color:var(--primary);font-size:13px;font-weight:800;
@@ -205,6 +210,8 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
       <input type="text" id="fullName" placeholder="e.g. Namiyingo Joyce">
       <div class="field-error" id="err-fullName">Please enter your full name</div>
     </div>
+
+    <div class="field"><label>Username *</label><input type="text" id="username" placeholder="e.g. joyce123 (no spaces, lowercase)" autocomplete="off" oninput="this.value=this.value.replace(/\s/g,'').toLowerCase()"><div class="field-error" id="err-username">Username required (3–20 letters/numbers only, no spaces)</div></div>
 
     <div class="grid2">
       <div class="field">
@@ -415,9 +422,14 @@ function calcAge(){
 function previewAvatar(input){
   const file = input.files[0];
   if(!file) return;
+  const preview = document.getElementById("avatarPreview");
   const reader = new FileReader();
   reader.onload = e => {
-    document.getElementById("avatarPreview").innerHTML = `<img src="${e.target.result}" alt="avatar">`;
+    const img = document.createElement("img");
+    img.src = e.target.result;
+    img.style.cssText = "width:64px;height:64px;border-radius:50%;object-fit:cover;";
+    preview.innerHTML = "";
+    preview.appendChild(img);
   };
   reader.readAsDataURL(file);
 }
@@ -462,6 +474,8 @@ function clearErr(id){ showErr(id, false); }
 function goPage2(){
   let valid = true;
   if(!document.getElementById("fullName").value.trim()) valid = showErr("fullName",true)||false; else clearErr("fullName");
+  const uname = document.getElementById("username").value.trim();
+  if(!uname || !/^[a-z0-9_]{3,20}$/.test(uname)) valid = showErr("username",true)||false; else clearErr("username");
   const email = document.getElementById("email").value.trim();
   if(!email || !/\S+@\S+\.\S+/.test(email)) valid = showErr("email",true)||false; else clearErr("email");
   const phone = document.getElementById("phone").value.trim();
@@ -503,6 +517,7 @@ async function register(){
   try{
     const email = document.getElementById("email").value.trim();
     const fullName = document.getElementById("fullName").value.trim();
+    const username = document.getElementById("username").value.trim().toLowerCase();
     const phone = document.getElementById("phone").value.trim();
     const dob = document.getElementById("dob").value;
     const age = document.getElementById("age").value;
@@ -512,6 +527,14 @@ async function register(){
     const parish = document.getElementById("parish").value;
     const address = document.getElementById("address").value.trim();
     const emergency = document.getElementById("emergency").checked;
+
+    // Check username is not already taken
+    const usernameCheck = await db.collection("users").where("username","==",username).limit(1).get();
+    if(!usernameCheck.empty){
+      btn.classList.remove("loading"); btn.disabled = false;
+      showMsg("That username is already taken. Please choose another.", "error");
+      return;
+    }
 
     const cred = await auth.createUserWithEmailAndPassword(email, password);
     const uid = cred.user.uid;
@@ -535,9 +558,7 @@ async function register(){
 
     // Save to Firestore
     await db.collection("users").doc(uid).set({
-      patientID: generatePatientID(),
-      fullName, email, phone, dob,
-      age: age || null,
+      patientID: generatePatientID(),fullName, username, usernameLower: username, email, phone, dob,age: age || null,
       sex, nationality,
       district: "Mityana District",
       subcounty, parish,
