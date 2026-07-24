@@ -3,6 +3,7 @@
   "short_name": "Lab App",
   "description": "Book mobile lab tests in Mityana, Uganda",
   "start_url": "/dashboard.html",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0ea5e9",
@@ -42,10 +43,10 @@
       "description": "Go to dashboard"
     },
     {
-      "name": "FAQ",
-      "short_name": "FAQ",
-      "url": "/faq.html",
-      "description": "Frequently asked questions"
+      "name": "Chat Doctor",
+      "short_name": "Chat",
+      "url": "/chat.html",
+      "description": "Chat with the doctor"
     }
   ]
 }
