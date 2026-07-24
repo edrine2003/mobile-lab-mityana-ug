@@ -309,6 +309,13 @@ body.dark .loader-ring{border-color:#1e293b;border-top-color:#38bdf8;}
     <div class="card-sub" id="dashWalletBal">Balance: UGX 0</div>
   </div>
 
+  <!-- INSTALL APP CARD — shows on Android, hidden once installed -->
+  <div class="dash-card" id="installCard" onclick="installApp()" style="animation-delay:0.55s;display:none;border-color:rgba(34,197,94,0.3);">
+    <div class="card-icon" style="background:rgba(34,197,94,0.12);">⬇️</div>
+    <div class="card-label">Install App</div>
+    <div class="card-sub">Add to home screen</div>
+  </div>
+
 </div>
 
 <!-- NOTIFICATIONS -->
@@ -505,16 +512,33 @@ let deferredPrompt;
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById("installBtn").style.display = "block";
+  // Show the install card in the grid
+  const card = document.getElementById("installCard");
+  if(card) card.style.display = "block";
+  // Hide old floating button
+  document.getElementById("installBtn").style.display = "none";
 });
-document.getElementById("installBtn").onclick = async () => {
-  if(!deferredPrompt) return;
+
+async function installApp(){
+  if(!deferredPrompt){
+    // If no prompt (iOS or already installed), show iOS guide
+    if(isIOS()) {
+      document.getElementById("iosBanner").style.display = "block";
+    }
+    return;
+  }
   deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
+  const { outcome } = await deferredPrompt.userChoice;
   deferredPrompt = null;
-};
+  if(outcome === "accepted"){
+    document.getElementById("installCard").style.display = "none";
+  }
+}
+
 window.addEventListener("appinstalled", () => {
   document.getElementById("installBtn").style.display = "none";
+  const card = document.getElementById("installCard");
+  if(card) card.style.display = "none";
 });
 
 // ── iOS INSTALL BANNER ──
