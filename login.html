@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login – Mobile Lab Mityana</title>
 <meta name="theme-color" content="#0ea5e9">
-<!-- ✅ iOS PWA Support -->
+<link rel="manifest" href="manifest.json">
+<!-- iOS PWA Support -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mobile Lab">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-startup-image" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -17,146 +19,55 @@
 <style>
 :root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(15,23,42,0.12);}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{
-  font-family:'Nunito',Arial,sans-serif;
-  min-height:100vh;
-  background:linear-gradient(135deg,#0ea5e9,#14b8a6,#10b981);
-  background-size:300% 300%;
-  animation:gradShift 8s ease infinite;
-  display:flex;align-items:flex-start;justify-content:center;
-  padding:24px 16px 40px;position:relative;overflow-x:hidden;
-}
+body{font-family:'Nunito',Arial,sans-serif;min-height:100vh;background:linear-gradient(135deg,#0ea5e9,#14b8a6,#10b981);background-size:300% 300%;animation:gradShift 8s ease infinite;display:flex;align-items:flex-start;justify-content:center;padding:0;position:relative;overflow-x:hidden;}
 @keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
-
-/* Background blobs */
 body::before,body::after{content:'';position:fixed;border-radius:50%;filter:blur(80px);opacity:0.3;pointer-events:none;}
 body::before{width:400px;height:400px;background:radial-gradient(circle,#0ea5e9,transparent);top:-80px;left:-80px;animation:blob1 12s ease-in-out infinite alternate;}
 body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,transparent);bottom:-60px;right:-60px;animation:blob2 10s ease-in-out infinite alternate;}
 @keyframes blob1{0%{transform:translate(0,0);}100%{transform:translate(40px,30px);}}
 @keyframes blob2{0%{transform:translate(0,0);}100%{transform:translate(-40px,-30px);}}
-
-/* CARD */
-.card{
-  width:100%;max-width:420px;
-  background:rgba(255,255,255,0.97);
-  border-radius:28px;
-  box-shadow:0 24px 60px rgba(2,6,23,0.2);
-  overflow:hidden;
-  animation:cardIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
-  position:relative;z-index:1;
-}
-@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(0.96);}to{opacity:1;transform:none;}}
-
-/* HERO */
-.hero{
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  background-size:300% 300%;animation:gradShift 8s ease infinite;
-  padding:28px 24px 24px;text-align:center;color:#fff;position:relative;overflow:hidden;
-}
+.card{width:100%;max-width:100%;background:rgba(255,255,255,0.97);border-radius:0;box-shadow:none;animation:cardIn 0.5s ease both;position:relative;z-index:1;min-height:100vh;}
+@media(min-width:480px){.card{max-width:480px;border-radius:28px;box-shadow:0 24px 60px rgba(2,6,23,0.2);margin:24px 16px 40px;min-height:unset;}}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+.hero{background:linear-gradient(135deg,var(--primary),var(--primary2));background-size:300% 300%;animation:gradShift 8s ease infinite;padding:28px 24px 24px;text-align:center;color:#fff;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.08);}
+.hero-img{width:100%;max-height:180px;object-fit:cover;border-radius:16px;margin-bottom:14px;box-shadow:0 8px 20px rgba(0,0,0,0.2);}
 .hero h2{font-size:22px;font-weight:900;margin:0 0 6px;letter-spacing:-0.3px;}
 .hero p{font-size:13px;opacity:0.9;font-weight:600;margin:3px 0;}
-.hero-contact{
-  display:inline-flex;align-items:center;gap:6px;margin-top:10px;
-  background:rgba(255,255,255,0.18);border-radius:999px;
-  padding:6px 14px;font-size:12px;font-weight:700;
-  border:1px solid rgba(255,255,255,0.3);
-}
-
-/* FORM */
+.hero-contact{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:rgba(255,255,255,0.18);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,0.3);}
 .form{padding:24px;}
 .form-title{font-size:18px;font-weight:900;color:var(--dark);margin-bottom:20px;text-align:center;}
-
 .field{margin-bottom:16px;}
 .field label{font-size:13px;font-weight:800;color:var(--dark);display:block;margin-bottom:6px;}
 .input-wrap{position:relative;}
-.input-wrap input{
-  width:100%;padding:13px 44px 13px 14px;
-  border-radius:14px;border:1.5px solid var(--border);
-  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
-  color:var(--dark);background:#f8fafc;outline:none;transition:all 0.2s;
-}
-.input-wrap input:focus{
-  border-color:var(--primary);
-  box-shadow:0 0 0 4px rgba(14,165,233,0.12);
-  background:#fff;
-}
-.input-icon{
-  position:absolute;right:14px;top:50%;transform:translateY(-50%);
-  font-size:16px;cursor:pointer;color:var(--muted);user-select:none;
-  transition:color 0.2s;
-}
-.input-icon:hover{color:var(--primary);}
-
-/* REMEMBER + FORGOT */
+.input-wrap input{width:100%;padding:13px 44px 13px 14px;border-radius:14px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:var(--dark);background:#f8fafc;outline:none;transition:all 0.2s;}
+.input-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(14,165,233,0.12);background:#fff;}
+.input-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:16px;cursor:pointer;color:var(--muted);user-select:none;}
 .row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .remember{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--dark);cursor:pointer;}
 .remember input{width:auto;margin:0;accent-color:var(--primary);}
-.forgot{font-size:13px;font-weight:800;color:var(--primary);text-decoration:none;transition:opacity 0.2s;}
-.forgot:hover{opacity:0.7;}
-
-/* LOGIN BUTTON */
-.login-btn{
-  width:100%;padding:15px;border:none;border-radius:16px;
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:#fff;font-size:16px;font-weight:900;cursor:pointer;
-  font-family:'Nunito',Arial,sans-serif;
-  box-shadow:0 8px 24px rgba(14,165,233,0.35);
-  transition:all 0.25s;position:relative;overflow:hidden;
-}
-.login-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(14,165,233,0.45);}
-.login-btn:active{transform:translateY(0);}
+.forgot{font-size:13px;font-weight:800;color:var(--primary);text-decoration:none;}
+.login-btn{width:100%;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;box-shadow:0 8px 24px rgba(14,165,233,0.35);transition:all 0.25s;position:relative;overflow:hidden;}
+.login-btn:hover{transform:translateY(-2px);}
 .login-btn:disabled{opacity:0.7;cursor:not-allowed;transform:none;}
-.login-btn .btn-text{transition:opacity 0.2s;}
-.login-btn .btn-spinner{
-  display:none;width:20px;height:20px;border-radius:50%;
-  border:3px solid rgba(255,255,255,0.4);border-top-color:#fff;
-  animation:spin 0.7s linear infinite;margin:0 auto;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
 .login-btn.loading .btn-text{display:none;}
 .login-btn.loading .btn-spinner{display:block;}
-
-/* DIVIDER */
+.btn-spinner{display:none;width:20px;height:20px;border-radius:50%;border:3px solid rgba(255,255,255,0.4);border-top-color:#fff;animation:spin 0.7s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
 .divider{display:flex;align-items:center;gap:12px;margin:18px 0;}
 .divider hr{flex:1;border:none;border-top:1px solid var(--border);}
 .divider span{font-size:12px;font-weight:700;color:var(--muted);}
-
-/* GOOGLE BTN */
-.google-btn{
-  width:100%;padding:13px;border:1.5px solid var(--border);border-radius:14px;
-  background:#fff;font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:800;
-  color:var(--dark);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
-  transition:all 0.2s;
-}
+.google-btn{width:100%;padding:13px;border:1.5px solid var(--border);border-radius:14px;background:#fff;font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:800;color:var(--dark);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;}
 .google-btn:hover{background:#f8fafc;border-color:rgba(14,165,233,0.3);transform:translateY(-1px);}
 .google-icon{width:20px;height:20px;}
-
-/* MSG */
-.msg{
-  text-align:center;font-size:13px;font-weight:700;
-  margin-top:14px;padding:10px 14px;border-radius:12px;
-  display:none;
-}
+.msg{text-align:center;font-size:13px;font-weight:700;margin-top:14px;padding:10px 14px;border-radius:12px;display:none;}
 .msg.success{background:rgba(34,197,94,0.1);color:#15803d;display:block;}
 .msg.error{background:rgba(239,68,68,0.08);color:#b91c1c;display:block;}
-
-/* FOOTER */
-.footer{
-  text-align:center;font-size:13px;color:var(--muted);
-  padding:16px 24px 20px;font-weight:600;
-}
+.footer{text-align:center;font-size:13px;color:var(--muted);padding:16px 24px 20px;font-weight:600;}
 .footer a{color:var(--primary);text-decoration:none;font-weight:800;}
-.footer a:hover{text-decoration:underline;}
 
 /* IN-APP BROWSER BANNER */
-.inapp-banner{
-  position:fixed;top:0;left:0;right:0;z-index:9999;
-  background:linear-gradient(135deg,#f59e0b,#d97706);
-  padding:12px 16px;display:none;
-  font-family:'Nunito',Arial,sans-serif;
-  box-shadow:0 4px 20px rgba(0,0,0,0.2);
-}
+.inapp-banner{position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#f59e0b,#d97706);padding:12px 16px;display:none;font-family:'Nunito',Arial,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
 .inapp-inner{display:flex;align-items:flex-start;gap:10px;}
 .inapp-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
 .inapp-text{flex:1;}
@@ -164,40 +75,19 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
 .inapp-text p{font-size:12px;font-weight:700;color:rgba(255,255,255,0.9);line-height:1.5;}
 .inapp-steps{margin-top:6px;display:flex;flex-direction:column;gap:3px;}
 .inapp-step{font-size:12px;font-weight:800;color:#fff;background:rgba(255,255,255,0.2);border-radius:8px;padding:4px 8px;}
-.inapp-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;padding:0;opacity:0.8;}
-.inapp-close:hover{opacity:1;}
+.inapp-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;padding:0;}
 
-/* FORGOT MODAL */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;
-  display:flex;align-items:center;justify-content:center;padding:20px;
-  opacity:0;pointer-events:none;transition:opacity 0.3s;
-}
+/* FORGOT PASSWORD MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal{
-  background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:380px;
-  transform:scale(0.9);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-}
+.modal{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:380px;transform:scale(0.9);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
 .modal-overlay.open .modal{transform:scale(1);}
 .modal h3{font-size:18px;font-weight:900;color:var(--dark);margin-bottom:8px;}
 .modal p{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:16px;}
-.modal input{
-  width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--border);
-  font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;
-  color:var(--dark);background:#f8fafc;outline:none;margin-bottom:14px;
-}
+.modal input{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--border);font-family:'Nunito',Arial,sans-serif;font-size:14px;font-weight:600;color:var(--dark);background:#f8fafc;outline:none;margin-bottom:14px;}
 .modal input:focus{border-color:var(--primary);}
-.modal-btn{
-  width:100%;padding:13px;border:none;border-radius:14px;
-  background:linear-gradient(135deg,var(--primary),var(--primary2));
-  color:#fff;font-size:15px;font-weight:900;cursor:pointer;
-  font-family:'Nunito',Arial,sans-serif;margin-bottom:10px;
-}
-.modal-cancel{
-  width:100%;padding:11px;border:1.5px solid var(--border);border-radius:14px;
-  background:#fff;font-size:14px;font-weight:800;cursor:pointer;
-  color:var(--muted);font-family:'Nunito',Arial,sans-serif;
-}
+.modal-btn{width:100%;padding:13px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-size:15px;font-weight:900;cursor:pointer;font-family:'Nunito',Arial,sans-serif;margin-bottom:10px;}
+.modal-cancel{width:100%;padding:11px;border:1.5px solid var(--border);border-radius:14px;background:#fff;font-size:14px;font-weight:800;cursor:pointer;color:var(--muted);font-family:'Nunito',Arial,sans-serif;}
 </style>
 </head>
 <body>
@@ -207,8 +97,8 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
   <div class="inapp-inner">
     <div class="inapp-icon">⚠️</div>
     <div class="inapp-text">
-      <h4>Open in your browser to install the app</h4>
-      <p>You're viewing this inside WhatsApp. For the best experience and to install the app:</p>
+      <h4>Open in your browser for the best experience</h4>
+      <p>You're viewing this inside WhatsApp or another app. To log in and install:</p>
       <div class="inapp-steps">
         <div class="inapp-step">📱 Android: Tap ⋮ menu → "Open in Chrome"</div>
         <div class="inapp-step">🍎 iPhone: Tap ⋯ → "Open in Safari"</div>
@@ -231,11 +121,11 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
 </div>
 
 <!-- CARD -->
-<div class="card">
-
+<div class="card" id="mainCard">
   <!-- HERO -->
   <div class="hero">
-    <img src="lab-bg.jpg" alt="Mobile Lab Mityana" style="width:100%;max-height:180px;object-fit:cover;border-radius:16px;margin-bottom:14px;box-shadow:0 8px 20px rgba(0,0,0,0.2);">
+    <img class="hero-img" src="lab-bg.jpg" alt="Mobile Lab Mityana"
+      onerror="this.style.display='none'">
     <h2>Mobile Lab – Mityana</h2>
     <p>Quality Diagnostics • Trusted Results</p>
     <div class="hero-contact">📞 0750 992 939 &nbsp;|&nbsp; 0778 379 791</div>
@@ -257,7 +147,7 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
       <label for="password">Password</label>
       <div class="input-wrap">
         <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
-        <span class="input-icon" id="togglePwd" onclick="togglePassword()" title="Show/hide password">👁</span>
+        <span class="input-icon" id="togglePwd" onclick="togglePassword()" title="Show/hide">👁</span>
       </div>
     </div>
 
@@ -265,7 +155,7 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
       <label class="remember">
         <input type="checkbox" id="rememberMe"> Remember me
       </label>
-      <a class="forgot" href="#" onclick="openForgot(); return false;">Forgot password?</a>
+      <a class="forgot" href="#" onclick="openForgot();return false;">Forgot password?</a>
     </div>
 
     <button class="login-btn" id="loginBtn" onclick="login()">
@@ -288,197 +178,113 @@ body::after{width:350px;height:350px;background:radial-gradient(circle,#14b8a6,t
     </button>
   </div>
 
-  <!-- FOOTER -->
   <div class="footer">
     New patient? <a href="register.html">Create an account</a><br>
     <span style="font-size:11px;margin-top:4px;display:block;">Serving Mityana &amp; nearby areas 🏥</span>
   </div>
-
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
-  authDomain: "mobile-lab-mityana-aeae2.firebaseapp.com",
-  projectId: "mobile-lab-mityana-aeae2",
-  storageBucket: "mobile-lab-mityana-aeae2.firebasestorage.app",
-  messagingSenderId: "624002906588",
-  appId: "1:624002906588:web:08b4259f90ffa9adad7719"
-};
+const firebaseConfig={apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",projectId:"mobile-lab-mityana-aeae2",storageBucket:"mobile-lab-mityana-aeae2.firebasestorage.app",messagingSenderId:"624002906588",appId:"1:624002906588:web:08b4259f90ffa9adad7719"};
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const auth=firebase.auth();
+const db=firebase.firestore();
 
 // ── If already logged in, redirect ──
-auth.onAuthStateChanged(async user => {
-  if(user) await redirect(user);
-});
+auth.onAuthStateChanged(async user=>{if(user) await redirect(user);});
 
-// ── REDIRECT based on role ──
 async function redirect(user){
   try{
-    const snap = await db.collection("users").doc(user.uid).get();
-    if(snap.exists && snap.data().role === "admin"){
-      window.location.href = "new_requests.html";
-    } else {
-      window.location.href = "dashboard.html";
-    }
-  } catch(e){
-    window.location.href = "dashboard.html";
-  }
+    const snap=await db.collection("users").doc(user.uid).get();
+    if(snap.exists&&snap.data().role==="admin"){window.location.href="new_requests.html";}
+    else{window.location.href="dashboard.html";}
+  }catch(e){window.location.href="dashboard.html";}
 }
 
-// ── LOGIN ──
 async function login(){
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const btn = document.getElementById("loginBtn");
-  const msg = document.getElementById("msg");
-
-  if(!email || !password){
-    showMsg("Please enter your email and password", "error");
-    return;
-  }
-
-  btn.classList.add("loading");
-  btn.disabled = true;
-  msg.className = "msg";
-
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  const btn=document.getElementById("loginBtn");
+  if(!email||!password){showMsg("Please enter your email and password","error");return;}
+  btn.classList.add("loading");btn.disabled=true;
   try{
-    const cred = await auth.signInWithEmailAndPassword(email, password);
-    const user = cred.user;
-
-    // Auto-create Firestore profile if missing
-    const ref = db.collection("users").doc(user.uid);
-    const snap = await ref.get();
-    if(!snap.exists){
-      await ref.set({
-        email: user.email,
-        role: "user",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-
-    // Remember me
-    if(document.getElementById("rememberMe").checked){
-      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    }
-
-    showMsg("✅ Login successful! Redirecting...", "success");
-    setTimeout(() => redirect(user), 900);
-
-  } catch(err){
-    btn.classList.remove("loading");
-    btn.disabled = false;
-    const msgs = {
-      "auth/user-not-found": "No account found with this email.",
-      "auth/wrong-password": "Incorrect password. Try again.",
-      "auth/invalid-email": "Please enter a valid email address.",
-      "auth/too-many-requests": "Too many attempts. Please try again later.",
-      "auth/invalid-credential": "Incorrect email or password."
-    };
-    showMsg(msgs[err.code] || err.message, "error");
+    const cred=await auth.signInWithEmailAndPassword(email,password);
+    const user=cred.user;
+    const ref=db.collection("users").doc(user.uid);
+    const snap=await ref.get();
+    if(!snap.exists){await ref.set({email:user.email,role:"user",createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+    if(document.getElementById("rememberMe").checked){await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);}
+    showMsg("✅ Login successful! Redirecting...","success");
+    setTimeout(()=>redirect(user),900);
+  }catch(err){
+    btn.classList.remove("loading");btn.disabled=false;
+    const msgs={"auth/user-not-found":"No account found with this email.","auth/wrong-password":"Incorrect password. Try again.","auth/invalid-email":"Please enter a valid email address.","auth/too-many-requests":"Too many attempts. Please try again later.","auth/invalid-credential":"Incorrect email or password."};
+    showMsg(msgs[err.code]||err.message,"error");
   }
 }
 
-// ── GOOGLE LOGIN ──
 async function loginGoogle(){
-  const provider = new firebase.auth.GoogleAuthProvider();
+  const provider=new firebase.auth.GoogleAuthProvider();
   try{
-    const result = await auth.signInWithPopup(provider);
-    const user = result.user;
-    const ref = db.collection("users").doc(user.uid);
-    const snap = await ref.get();
-    if(!snap.exists){
-      await ref.set({
-        email: user.email,
-        fullName: user.displayName || "",
-        photoURL: user.photoURL || "",
-        role: "user",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-    showMsg("✅ Signed in with Google!", "success");
-    setTimeout(() => redirect(user), 900);
-  } catch(err){
-    if(err.code !== "auth/popup-closed-by-user"){
-      showMsg(err.message, "error");
-    }
-  }
+    const result=await auth.signInWithPopup(provider);
+    const user=result.user;
+    const ref=db.collection("users").doc(user.uid);
+    const snap=await ref.get();
+    if(!snap.exists){await ref.set({email:user.email,fullName:user.displayName||"",photoURL:user.photoURL||"",role:"user",createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+    showMsg("✅ Signed in with Google!","success");
+    setTimeout(()=>redirect(user),900);
+  }catch(err){if(err.code!=="auth/popup-closed-by-user")showMsg(err.message,"error");}
 }
 
-// ── SHOW/HIDE PASSWORD ──
 function togglePassword(){
-  const pwd = document.getElementById("password");
-  const icon = document.getElementById("togglePwd");
-  if(pwd.type === "password"){
-    pwd.type = "text";
-    icon.innerText = "🙈";
-  } else {
-    pwd.type = "password";
-    icon.innerText = "👁";
-  }
+  const pwd=document.getElementById("password");
+  const icon=document.getElementById("togglePwd");
+  if(pwd.type==="password"){pwd.type="text";icon.innerText="🙈";}
+  else{pwd.type="password";icon.innerText="👁";}
 }
 
-// ── ENTER KEY ──
-document.addEventListener("keydown", e => {
-  if(e.key === "Enter") login();
-});
+document.addEventListener("keydown",e=>{if(e.key==="Enter")login();});
 
-// ── FORGOT PASSWORD ──
 function openForgot(){
   document.getElementById("forgotModal").classList.add("open");
-  const emailVal = document.getElementById("email").value;
-  if(emailVal) document.getElementById("resetEmail").value = emailVal;
+  const v=document.getElementById("email").value;
+  if(v)document.getElementById("resetEmail").value=v;
 }
 function closeForgot(){
   document.getElementById("forgotModal").classList.remove("open");
-  document.getElementById("resetMsg").className = "msg";
+  document.getElementById("resetMsg").className="msg";
 }
-document.getElementById("forgotModal").addEventListener("click", e => {
-  if(e.target === e.currentTarget) closeForgot();
-});
+document.getElementById("forgotModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeForgot();});
 
 async function sendReset(){
-  const email = document.getElementById("resetEmail").value.trim();
-  const resetMsg = document.getElementById("resetMsg");
-  if(!email){
-    resetMsg.className = "msg error";
-    resetMsg.innerText = "Enter your email address";
-    return;
-  }
+  const email=document.getElementById("resetEmail").value.trim();
+  const msg=document.getElementById("resetMsg");
+  if(!email){msg.className="msg error";msg.innerText="Enter your email address";return;}
   try{
     await auth.sendPasswordResetEmail(email);
-    resetMsg.className = "msg success";
-    resetMsg.innerText = "✅ Reset link sent! Check your email.";
-    setTimeout(() => closeForgot(), 2500);
-  } catch(err){
-    resetMsg.className = "msg error";
-    resetMsg.innerText = err.code === "auth/user-not-found"
-      ? "No account found with this email."
-      : err.message;
+    msg.className="msg success";msg.innerText="✅ Reset link sent! Check your email.";
+    setTimeout(()=>closeForgot(),2500);
+  }catch(err){
+    msg.className="msg error";
+    msg.innerText=err.code==="auth/user-not-found"?"No account found with this email.":err.message;
   }
 }
 
-// ── HELPER ──
-function showMsg(text, type){
-  const msg = document.getElementById("msg");
-  msg.innerText = text;
-  msg.className = "msg " + type;
-}
+function showMsg(text,type){const m=document.getElementById("msg");m.innerText=text;m.className="msg "+type;}
 
 // ── DETECT IN-APP BROWSER (WhatsApp, Facebook, Instagram) ──
 (function(){
-  const ua = navigator.userAgent || "";
-  const isInApp = /FBAN|FBAV|Instagram|WhatsApp|wv/.test(ua) ||
-    (ua.includes("Android") && ua.includes("Version/") && ua.includes("Chrome") && !ua.includes("OPR"));
+  const ua=navigator.userAgent||"";
+  const isInApp=/FBAN|FBAV|Instagram|WhatsApp|wv/.test(ua)||
+    (ua.includes("Android")&&ua.includes("Version/")&&ua.includes("Chrome")&&!ua.includes("OPR"));
   if(isInApp){
-    const banner = document.getElementById("inappBanner");
-    banner.style.display = "block";
-    // Push card down so banner doesn't cover it
-    document.querySelector(".card").style.marginTop = "90px";
+    document.getElementById("inappBanner").style.display="block";
+    document.getElementById("mainCard").style.marginTop="90px";
   }
 })();
+
+// ── SERVICE WORKER (for PWA install from login page) ──
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
 </html>
