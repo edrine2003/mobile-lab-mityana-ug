@@ -1,29 +1,30 @@
-const CACHE_NAME = "lab-app-v3";
+const CACHE_NAME = "lab-app-v4";
+const BASE = "/mobile-lab-mityana-ug";
 
 const urlsToCache = [
-  "/",
-  "/dashboard.html",
-  "/index.html",
-  "/inbox.html",
-  "/login.html",
-  "/register.html",
-  "/chat.html",
-  "/appointments.html",
-  "/cycle.html",
-  "/wallet.html",
-  "/profile.html",
-  "/terms.html",
-  "/faq.html",
-  "/articles.html",
-  "/referral.html",
-  "/reviews.html",
-  "/doctor-referral.html",
-  "/tests-guide.html",
-  "/my-receipts.html",
-  "/receipt.html",
-  "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png"
+  BASE + "/",
+  BASE + "/dashboard.html",
+  BASE + "/index.html",
+  BASE + "/inbox.html",
+  BASE + "/login.html",
+  BASE + "/register.html",
+  BASE + "/chat.html",
+  BASE + "/appointments.html",
+  BASE + "/cycle.html",
+  BASE + "/wallet.html",
+  BASE + "/profile.html",
+  BASE + "/terms.html",
+  BASE + "/faq.html",
+  BASE + "/articles.html",
+  BASE + "/referral.html",
+  BASE + "/reviews.html",
+  BASE + "/doctor-referral.html",
+  BASE + "/tests-guide.html",
+  BASE + "/my-receipts.html",
+  BASE + "/receipt.html",
+  BASE + "/manifest.json",
+  BASE + "/icon-192.png",
+  BASE + "/icon-512.png"
 ];
 
 // ── INSTALL ──
@@ -49,7 +50,6 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const url = e.request.url;
 
-  // Skip non-GET
   if (e.request.method !== "GET") return;
 
   // Network-first for Firebase, APIs, CDN, fonts
@@ -62,13 +62,11 @@ self.addEventListener("fetch", e => {
     url.includes("cdnjs.cloudflare.com") ||
     url.includes("fonts.g")
   ) {
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match(e.request))
-    );
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     return;
   }
 
-  // Cache-first for app pages and assets
+  // Cache-first for app files
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
@@ -80,9 +78,9 @@ self.addEventListener("fetch", e => {
         }
         return response;
       }).catch(() => {
-        // Offline fallback for page navigation
+        // Offline fallback — serve dashboard if navigating
         if (e.request.mode === "navigate") {
-          return caches.match("/dashboard.html").then(cached => {
+          return caches.match(BASE + "/dashboard.html").then(cached => {
             if (cached) return cached;
             return new Response(`
               <!DOCTYPE html>
@@ -104,9 +102,9 @@ self.addEventListener("fetch", e => {
               <body>
                 <div class="icon">📡</div>
                 <h1>You're Offline</h1>
-                <p>No internet connection detected.<br>Some pages are available offline — try going back to the dashboard.</p>
-                <a class="btn" href="/dashboard.html">🏠 Dashboard</a>
-                <a class="btn sec" href="/login.html">🔐 Login</a>
+                <p>No internet connection detected.<br>Some pages are available offline.</p>
+                <a class="btn" href="${BASE}/dashboard.html">🏠 Dashboard</a>
+                <a class="btn sec" href="${BASE}/login.html">🔐 Login</a>
               </body>
               </html>
             `, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -123,17 +121,17 @@ self.addEventListener("push", e => {
   e.waitUntil(
     self.registration.showNotification(data.title || "🧪 Mobile Lab Mityana", {
       body: data.body || "You have a new update.",
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
+      icon: BASE + "/icon-192.png",
+      badge: BASE + "/icon-192.png",
       vibrate: [200, 100, 200],
-      data: { url: data.url || "/dashboard.html" }
+      data: { url: data.url || BASE + "/dashboard.html" }
     })
   );
 });
 
 self.addEventListener("notificationclick", e => {
   e.notification.close();
-  const target = e.notification.data?.url || "/dashboard.html";
+  const target = e.notification.data?.url || BASE + "/dashboard.html";
   e.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then(list => {
       for (const c of list) {
