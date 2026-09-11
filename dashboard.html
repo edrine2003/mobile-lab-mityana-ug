@@ -182,6 +182,7 @@ body.dark .pwa-platform{background:#0f172a;color:#94a3b8;}
   <a class="dash-card" href="my-receipts.html" style="animation-delay:0.45s"><div class="card-icon" style="background:rgba(34,197,94,0.12);">🧾</div><div class="card-label">My Receipts</div><div class="card-sub">View payments</div></a>
   <a class="dash-card" href="faq.html" style="animation-delay:0.5s"><div class="card-icon" style="background:rgba(245,158,11,0.12);">❓</div><div class="card-label">FAQ</div><div class="card-sub">Common questions</div></a>
   <a class="dash-card" href="articles.html" style="animation-delay:0.55s"><div class="card-icon" style="background:rgba(16,185,129,0.12);">📰</div><div class="card-label">Health Articles</div><div class="card-sub">Tips &amp; guides</div></a>
+  <a class="dash-card" id="adminArticlesCard" href="admin-articles.html" style="animation-delay:0.56s;display:none;"><div class="card-icon" style="background:rgba(14,165,233,0.12);">✍️</div><div class="card-label">Post Article</div><div class="card-sub">Admin — publish articles</div></a>
   <a class="dash-card" href="referral.html" style="animation-delay:0.6s"><div class="card-icon" style="background:rgba(139,92,246,0.12);">🎁</div><div class="card-label">Refer &amp; Earn</div><div class="card-sub">Get UGX 5,000</div></a>
   <a class="dash-card" href="reviews.html" style="animation-delay:0.65s"><div class="card-icon" style="background:rgba(245,158,11,0.12);">⭐</div><div class="card-label">Reviews</div><div class="card-sub">Rate experience</div></a>
   <a class="dash-card" href="doctor-referral.html" style="animation-delay:0.7s"><div class="card-icon" style="background:rgba(14,165,233,0.12);">👨‍⚕️</div><div class="card-label">Doctor Portal</div><div class="card-sub">Refer patients</div></a>
@@ -282,6 +283,11 @@ auth.onAuthStateChanged(async user=>{
     loadNotifications(user.uid);
     listenResultsBadge(user.uid);
     listenChatUnread(user.uid);
+    // Show admin article card only for admin
+    if(user.uid === "DvmwZiewijWX8IBvKY5yF12ECqk1"){
+      const adminCard = document.getElementById("adminArticlesCard");
+      if(adminCard) adminCard.style.display = "block";
+    }
     document.getElementById("loader").style.display="none";
     initInstall();
   }catch(e){document.getElementById("loader").style.display="none";}
