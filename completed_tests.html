@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Completed Results | Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+  font-family:Arial;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+.result-card{
+  background:#fff;
+  padding:16px;
+  margin:15px 0;
+  border-radius:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.05);
+}
+
+.status{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#22c55e;
+  color:white;
+  font-size:12px;
+  font-weight:bold;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:left;
+}
+
+th{background:#e2e8f0;}
+
+input{
+  width:100%;
+  padding:6px;
+}
+
+button{
+  margin-top:10px;
+  margin-right:6px;
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.save{background:#0ea5e9;color:#fff;}
+.pdf{background:#22c55e;color:#fff;}
+.back{background:#f59e0b;color:#fff;}
+.del{background:#ef4444;color:#fff;}
+</style>
+</head>
+
+<body>
+
+<h2>Completed Test Results (Admin)</h2>
+<button id="logoutBtn">Logout</button>
+
+<div id="resultsContainer">Loading…</div>
+
+<script>
+
+/* FIREBASE */
+firebase.initializeApp({
+  apiKey:"AIzaSyA4II_I1weZZGzP990t9UWJCXjuK932pdY",
+  authDomain:"mobile-lab-mityana-aeae2.firebaseapp.com",
+  projectId:"mobile-lab-mityana-aeae2"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const box = document.getElementById("resultsContainer");
+
+/* AUTH */
+auth.onAuthStateChanged(async user=>{
+  if(!user) return location.href="login.html";
+
+  const u = await db.collection("users").doc(user.uid).get();
+
+  if(!u.exists || u.data().role !== "admin"){
+    await auth.signOut();
+    return location.href="login.html";
+  }
+
+  loadResults();
+});
+
+/* LOGOUT */
+document.getElementById("logoutBtn").onclick = ()=>auth.signOut();
+
+/* NORMALIZE RESULTS (🔥 KEY FIX) */
+function normalize(results){
+
+  let clean = {};
+
+  // Case 1: New structured format
+  if(typeof results === "object" && !Array.isArray(results)){
+    Object.keys(results).forEach(test=>{
+      const val = results[test];
+
+      if(typeof val === "object"){
+        clean[test] = val.Result?.value || "";
+      } else {
+        clean[test] = val;
+      }
+    });
+  }
+
+  // Case 2: Old string format
+  if(typeof results === "string"){
+    clean["Result"] = results;
+  }
+
+  return clean;
+}
+
+/* LOAD */
+async function loadResults(){
+
+  box.innerHTML="";
+
+  const snap = await db.collection("orders")
+    .where("status","==","completed")
+    .get();
+
+  if(snap.empty){
+    box.innerHTML="<p>No completed results</p>";
+    return;
+  }
+
+  for(const o of snap.docs){
+
+    const resDoc = await db.collection("results").doc(o.id).get();
+    if(!resDoc.exists) continue;
+
+    const data = resDoc.data();
+    const results = normalize(data.results || data.result || "");
+
+    const card = document.createElement("div");
+    card.className="result-card";
+
+    let html = `
+      <h3>${data.patientName || "Patient"}</h3>
+      <p><b>Order ID:</b> ${o.id}</p>
+      <p><b>Status:</b> <span class="status">Completed</span></p>
+
+      <table>
+      <tr><th>Test</th><th>Result</th></tr>
+    `;
+
+    Object.keys(results).forEach(test=>{
+      html += `
+        <tr>
+          <td>${test}</td>
+          <td><input data-test="${test}" value="${results[test]}"></td>
+        </tr>
+      `;
+    });
+
+    html += `</table>
+
+      <button class="save">Update</button>
+      <button class="pdf">PDF</button>
+      <button class="back">Move to Ongoing</button>
+      <button class="del">Delete</button>
+    `;
+
+    card.innerHTML = html;
+    box.appendChild(card);
+
+    /* UPDATE */
+    card.querySelector(".save").onclick = async ()=>{
+
+      let updated = {};
+
+      card.querySelectorAll("input").forEach(i=>{
+        updated[i.dataset.test] = {
+          Result:{ value:i.value, units:"" }
+        };
+      });
+
+      await db.collection("results").doc(o.id).update({
+        results: updated
+      });
+
+      alert("Updated!");
+    };
+
+    /* PDF */
+    card.querySelector(".pdf").onclick = ()=>{
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      let y=20;
+
+      pdf.text(`Patient: ${data.patientName}`,20,y); y+=10;
+
+      Object.keys(results).forEach(t=>{
+        pdf.text(`${t}: ${results[t]}`,20,y);
+        y+=8;
+      });
+
+      pdf.save(`Result_${o.id}.pdf`);
+    };
+
+    /* BACK */
+    card.querySelector(".back").onclick = async ()=>{
+      await db.collection("orders").doc(o.id).update({status:"ongoing"});
+      card.remove();
+    };
+
+    /* DELETE */
+    card.querySelector(".del").onclick = async ()=>{
+      if(!confirm("Delete?")) return;
+
+      await db.collection("results").doc(o.id).delete();
+      await db.collection("orders").doc(o.id).update({status:"ongoing"});
+      card.remove();
+    };
+
+  }
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#0ea5e9">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#0ea5e9;--primary2:#14b8a6;--dark:#0f172a;--muted:#64748b;--border:rgba(0,0,0,0.08);--bg:#f1f5f9;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:40px;}
+
+/* TOP BAR */
+.topbar{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);background-size:300% 300%;animation:gradShift 8s ease infinite;padding:16px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.back-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;text-decoration:none;transition:background 0.2s;}
+.back-btn:hover{background:rgba(255,255,255,0.3);}
+.topbar-title{color:#fff;font-size:18px;font-weight:900;flex:1;text-align:center;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0369a1,#0ea5e9,#14b8a6);background-size:300% 300%;animation:gradShift 8s ease infinite;padding:32px 20px 36px;text-align:center;color:#fff;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.07);pointer-events:none;}
+.hero-icon{font-size:56px;margin-bottom:14px;}
+.hero h1{font-size:26px;font-weight:900;margin-bottom:8px;}
+.hero p{font-size:14px;opacity:0.9;font-weight:600;line-height:1.6;max-width:500px;margin:0 auto;}
+
+/* SECTION */
+.section{padding:0 16px;margin-top:20px;}
+.card{background:#fff;border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,0.06);border:1px solid var(--border);}
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.card-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.card-title{font-size:16px;font-weight:900;color:var(--dark);}
+.card p{font-size:14px;font-weight:600;color:var(--muted);line-height:1.7;}
+.card ul{list-style:none;padding:0;margin:0;}
+.card ul li{font-size:14px;font-weight:600;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.card ul li:last-child{border-bottom:none;}
+.card ul li::before{content:'✅';font-size:14px;flex-shrink:0;}
+
+/* CONTACT ITEMS */
+.contact-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--border);}
+.contact-row:last-child{border-bottom:none;}
+.contact-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:rgba(14,165,233,0.1);}
+.contact-label{font-size:12px;font-weight:700;color:var(--muted);}
+.contact-value{font-size:14px;font-weight:800;color:var(--dark);}
+.contact-value a{color:var(--primary);text-decoration:none;}
+
+/* ACTION BUTTONS */
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;margin-top:20px;}
+.action-btn{padding:15px 12px;border:none;border-radius:18px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;}
+.action-btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;box-shadow:0 6px 20px rgba(14,165,233,0.3);}
+.action-btn-primary:hover{transform:translateY(-2px);}
+.action-btn-secondary{background:#fff;color:var(--dark);border:1.5px solid var(--border);}
+.action-btn-secondary:hover{background:#f8fafc;}
+
+/* FOOTER */
+.footer{text-align:center;padding:24px 16px;font-size:12px;font-weight:700;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-btn" href="dashboard.html">← Back</a>
+  <div class="topbar-title">ℹ️ About</div>
+  <div style="width:70px;"></div>
+</div>
+
+<div class="hero">
+  <div class="hero-icon">🧪</div>
+  <h1>Mobile Lab Mityana</h1>
+  <p>Quality laboratory diagnostics — delivered to your door in Mityana and nearby areas.</p>
+</div>
+
+<div class="section">
+
+  <!-- ABOUT US -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(14,165,233,0.1);">🏥</div>
+      <div class="card-title">About Us</div>
+    </div>
+    <p>Mobile Lab Mityana is a digital laboratory service designed to make medical testing easier, faster, and more accessible. We allow patients to order laboratory tests online, receive results digitally, and communicate directly with laboratory professionals — all from their phones.</p>
+  </div>
+
+  <!-- MISSION -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(34,197,94,0.1);">🎯</div>
+      <div class="card-title">Our Mission</div>
+    </div>
+    <p>To provide reliable, fast, and accessible laboratory diagnostic services using modern technology, while maintaining the highest standards of medical professionalism.</p>
+  </div>
+
+  <!-- VISION -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(139,92,246,0.1);">🔭</div>
+      <div class="card-title">Our Vision</div>
+    </div>
+    <p>To become a trusted digital laboratory platform that connects patients and healthcare providers through efficient, innovative diagnostic solutions across Uganda.</p>
+  </div>
+
+  <!-- SERVICES -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(245,158,11,0.1);">🔬</div>
+      <div class="card-title">Services We Offer</div>
+    </div>
+    <ul>
+      <li>Complete Blood Count (CBC) &amp; Blood Tests</li>
+      <li>HIV, Hepatitis B &amp; C Testing</li>
+      <li>Malaria (Blood Slide) Testing</li>
+      <li>Urine &amp; Stool Analysis</li>
+      <li>Women's Health Tests (HVS, HCG)</li>
+      <li>STI &amp; Infection Screening</li>
+      <li>Home Sample Collection</li>
+      <li>Digital Result Delivery</li>
+      <li>Doctor Chat &amp; Consultation</li>
+    </ul>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(14,165,233,0.1);">📞</div>
+      <div class="card-title">Contact Us</div>
+    </div>
+    <div class="contact-row">
+      <div class="contact-icon">📍</div>
+      <div>
+        <div class="contact-label">Location</div>
+        <div class="contact-value">Mityana, Uganda</div>
+      </div>
+    </div>
+    <div class="contact-row">
+      <div class="contact-icon">📱</div>
+      <div>
+        <div class="contact-label">MTN</div>
+        <div class="contact-value"><a href="tel:+256778379591">+256 778 379 591</a></div>
+      </div>
+    </div>
+    <div class="contact-row">
+      <div class="contact-icon">📱</div>
+      <div>
+        <div class="contact-label">Airtel</div>
+        <div class="contact-value"><a href="tel:0750992939">0750 992 939</a></div>
+      </div>
+    </div>
+    <div class="contact-row">
+      <div class="contact-icon">✉️</div>
+      <div>
+        <div class="contact-label">Email</div>
+        <div class="contact-value"><a href="mailto:mobilelabmityana@gmail.com">mobilelabmityana@gmail.com</a></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ACTION BUTTONS -->
+<div class="action-row">
+  <a class="action-btn action-btn-primary" href="index.html">🧪 Order a Test</a>
+  <a class="action-btn action-btn-secondary" href="dashboard.html">🏠 Dashboard</a>
+</div>
+
+<div class="footer">© 2026 Mobile Lab Mityana. All rights reserved.</div>
+
+</body>
+</html>

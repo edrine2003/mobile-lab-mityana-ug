@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emergency – Mobile Lab Mityana</title>
+<meta name="theme-color" content="#ef4444">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#ef4444;--red2:#dc2626;--orange:#f97316;--dark:#0f172a;--muted:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',Arial,sans-serif;background:#fff1f1;color:var(--dark);min-height:100vh;padding-bottom:40px;}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#dc2626,#ef4444);padding:16px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(239,68,68,0.35);}
+.back-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;text-decoration:none;}
+.topbar-title{color:#fff;font-size:18px;font-weight:900;flex:1;text-align:center;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#dc2626,#ef4444,#f97316);background-size:300% 300%;animation:gradShift 6s ease infinite;padding:30px 20px 50px;text-align:center;color:#fff;position:relative;overflow:hidden;}
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:30px;background:#fff1f1;border-radius:30px 30px 0 0;}
+.hero-icon{font-size:64px;animation:pulse 1.5s ease-in-out infinite;display:block;margin-bottom:12px;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+.hero h1{font-size:26px;font-weight:900;margin-bottom:8px;}
+.hero p{font-size:14px;opacity:0.92;font-weight:600;}
+
+/* BIG CALL BUTTON */
+.big-call{
+  display:flex;align-items:center;justify-content:center;gap:14px;
+  background:linear-gradient(135deg,#dc2626,#ef4444);
+  color:#fff;border-radius:24px;padding:22px 20px;margin:16px;
+  text-decoration:none;box-shadow:0 8px 30px rgba(239,68,68,0.45);
+  animation:callPulse 2s ease-in-out infinite;transition:all 0.2s;
+  border:none;cursor:pointer;font-family:'Nunito',Arial,sans-serif;width:calc(100% - 32px);
+}
+.big-call:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(239,68,68,0.55);}
+@keyframes callPulse{0%,100%{box-shadow:0 8px 30px rgba(239,68,68,0.45);}50%{box-shadow:0 8px 50px rgba(239,68,68,0.7);}}
+.big-call-icon{font-size:36px;flex-shrink:0;}
+.big-call-text{text-align:left;}
+.big-call-label{font-size:13px;font-weight:700;opacity:0.9;margin-bottom:2px;}
+.big-call-number{font-size:22px;font-weight:900;letter-spacing:0.5px;}
+
+/* SECTION TITLE */
+.section-title{font-size:15px;font-weight:900;color:var(--dark);padding:16px 16px 10px;display:flex;align-items:center;gap:8px;}
+
+/* CONTACT CARDS */
+.contacts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;}
+@media(max-width:400px){.contacts-grid{grid-template-columns:1fr;}}
+.contact-card{background:#fff;border-radius:20px;padding:18px 14px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.06);text-decoration:none;transition:all 0.2s;display:block;}
+.contact-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.12);}
+.contact-icon{width:52px;height:52px;border-radius:16px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.contact-name{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:3px;}
+.contact-number{font-size:13px;font-weight:700;color:var(--muted);}
+.contact-type{font-size:11px;font-weight:700;border-radius:999px;padding:3px 10px;margin-top:6px;display:inline-block;}
+
+/* FIRST AID TIPS */
+.tips-list{padding:0 16px;}
+.tip-card{background:#fff;border-radius:18px;padding:16px;margin-bottom:10px;box-shadow:0 3px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.05);display:flex;align-items:flex-start;gap:14px;}
+.tip-num{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;}
+.tip-title{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:4px;}
+.tip-text{font-size:13px;font-weight:600;color:var(--muted);line-height:1.6;}
+
+/* WARNING BOX */
+.warning-box{background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(249,115,22,0.06));border-radius:20px;padding:18px;margin:0 16px 16px;border:1.5px solid rgba(239,68,68,0.2);}
+.warning-box h3{font-size:15px;font-weight:900;color:#dc2626;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.warning-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(239,68,68,0.1);font-size:13px;font-weight:700;color:var(--dark);}
+.warning-item:last-child{border-bottom:none;}
+.warning-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;}
+
+/* NEARBY HOSPITALS */
+.hospital-card{background:#fff;border-radius:18px;padding:14px 16px;margin:0 16px 10px;box-shadow:0 3px 12px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.05);display:flex;align-items:center;gap:14px;}
+.hospital-icon{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#14b8a6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.hospital-info h4{font-size:14px;font-weight:800;color:var(--dark);margin:0 0 2px;}
+.hospital-info p{font-size:12px;font-weight:600;color:var(--muted);}
+.hospital-call{background:linear-gradient(135deg,#0ea5e9,#14b8a6);color:#fff;border:none;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',Arial,sans-serif;text-decoration:none;white-space:nowrap;}
+
+/* SOS BUTTON */
+.sos-section{padding:16px;text-align:center;}
+.sos-btn{
+  width:140px;height:140px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;
+  font-size:28px;font-weight:900;font-family:'Nunito',Arial,sans-serif;
+  box-shadow:0 0 0 0 rgba(239,68,68,0.5);
+  animation:sosPulse 2s infinite;transition:all 0.2s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;margin:0 auto;
+}
+.sos-btn:active{transform:scale(0.95);}
+@keyframes sosPulse{
+  0%{box-shadow:0 0 0 0 rgba(239,68,68,0.5);}
+  70%{box-shadow:0 0 0 24px rgba(239,68,68,0);}
+  100%{box-shadow:0 0 0 0 rgba(239,68,68,0);}
+}
+.sos-label{font-size:11px;font-weight:700;opacity:0.85;}
+.sos-sub{font-size:12px;font-weight:700;color:var(--muted);margin-top:10px;}
+
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--dark);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;z-index:300;opacity:0;transition:all 0.3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="back-btn" href="dashboard.html">← Back</a>
+  <div class="topbar-title">🚨 Emergency</div>
+  <div style="width:70px;"></div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-icon">🚑</span>
+  <h1>Emergency Help</h1>
+  <p>Stay calm. Help is one tap away.</p>
+</div>
+
+<!-- SOS BUTTON -->
+<div class="sos-section">
+  <button class="sos-btn" onclick="callLab()">
+    <span style="font-size:32px;">🆘</span>
+    <span>SOS</span>
+    <span class="sos-label">Tap to Call</span>
+  </button>
+  <div class="sos-sub">Calls Mobile Lab Emergency Line</div>
+</div>
+
+<!-- MAIN CALL BUTTONS -->
+<div class="section-title">📞 Emergency Contacts</div>
+
+<a class="big-call" href="tel:+256778379791">
+  <span class="big-call-icon">📞</span>
+  <div class="big-call-text">
+    <div class="big-call-label">MTN – Mobile Lab Mityana</div>
+    <div class="big-call-number">+256 778 379 791</div>
+  </div>
+</a>
+
+<a class="big-call" href="tel:+256750992939" style="background:linear-gradient(135deg,#dc2626,#b91c1c);animation-delay:0.3s;">
+  <span class="big-call-icon">📱</span>
+  <div class="big-call-text">
+    <div class="big-call-label">Airtel – Mobile Lab Mityana</div>
+    <div class="big-call-number">+256 750 992 939</div>
+  </div>
+</a>
+
+<a class="big-call" href="https://wa.me/256778379791?text=🚨 EMERGENCY: I need urgent medical help. Please respond immediately." target="_blank" style="background:linear-gradient(135deg,#16a34a,#15803d);animation:none;box-shadow:0 8px 30px rgba(22,163,74,0.4);">
+  <span class="big-call-icon">💬</span>
+  <div class="big-call-text">
+    <div class="big-call-label">WhatsApp Emergency Message</div>
+    <div class="big-call-number">Send SOS Message</div>
+  </div>
+</a>
+
+<!-- NEARBY HOSPITALS -->
+<div class="section-title">🏥 Nearby Hospitals</div>
+
+<div class="hospital-card">
+  <div class="hospital-icon">🏥</div>
+  <div class="hospital-info" style="flex:1;">
+    <h4>Mityana General Hospital</h4>
+    <p>📍 Mityana Town, Uganda</p>
+  </div>
+  <a class="hospital-call" href="tel:+256414320001">Call</a>
+</div>
+
+<div class="hospital-card">
+  <div class="hospital-icon">🏥</div>
+  <div class="hospital-info" style="flex:1;">
+    <h4>Mityana Health Centre IV</h4>
+    <p>📍 Mityana, Central Uganda</p>
+  </div>
+  <a class="hospital-call" href="tel:+256414320002">Call</a>
+</div>
+
+<div class="hospital-card">
+  <div class="hospital-icon">🚑</div>
+  <div class="hospital-info" style="flex:1;">
+    <h4>Uganda Ambulance Service</h4>
+    <p>📍 National Emergency Line</p>
+  </div>
+  <a class="hospital-call" href="tel:999">Call 999</a>
+</div>
+
+<div class="hospital-card">
+  <div class="hospital-icon">🚒</div>
+  <div class="hospital-info" style="flex:1;">
+    <h4>Police Emergency</h4>
+    <p>📍 Uganda Police Force</p>
+  </div>
+  <a class="hospital-call" href="tel:999">Call 999</a>
+</div>
+
+<!-- WARNING SIGNS -->
+<div class="section-title">⚠️ Seek Immediate Help If</div>
+<div class="warning-box">
+  <h3>🚨 Go to hospital immediately if you have:</h3>
+  <div class="warning-item"><div class="warning-dot"></div>Chest pain or difficulty breathing</div>
+  <div class="warning-item"><div class="warning-dot"></div>Severe bleeding that won't stop</div>
+  <div class="warning-item"><div class="warning-dot"></div>Loss of consciousness or fainting</div>
+  <div class="warning-item"><div class="warning-dot"></div>High fever above 39°C (102°F)</div>
+  <div class="warning-item"><div class="warning-dot"></div>Severe abdominal pain</div>
+  <div class="warning-item"><div class="warning-dot"></div>Signs of stroke (face drooping, arm weakness, speech difficulty)</div>
+  <div class="warning-item"><div class="warning-dot"></div>Severe allergic reaction or swelling</div>
+  <div class="warning-item"><div class="warning-dot"></div>Seizures or convulsions</div>
+</div>
+
+<!-- FIRST AID TIPS -->
+<div class="section-title">🩹 Basic First Aid</div>
+<div class="tips-list">
+
+  <div class="tip-card">
+    <div class="tip-num" style="background:#ef4444;">1</div>
+    <div>
+      <div class="tip-title">🩸 Severe Bleeding</div>
+      <div class="tip-text">Apply firm pressure with a clean cloth. Do not remove the cloth. Elevate the injured area above heart level if possible. Call for help immediately.</div>
+    </div>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-num" style="background:#f97316;">2</div>
+    <div>
+      <div class="tip-title">💓 Someone Unconscious</div>
+      <div class="tip-text">Check for breathing. If not breathing, start CPR — 30 chest compressions then 2 rescue breaths. Continue until help arrives.</div>
+    </div>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-num" style="background:#eab308;">3</div>
+    <div>
+      <div class="tip-title">🔥 Burns</div>
+      <div class="tip-text">Cool the burn with running cold water for at least 10 minutes. Do NOT use ice, butter or toothpaste. Cover loosely with a clean bandage.</div>
+    </div>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-num" style="background:#22c55e;">4</div>
+    <div>
+      <div class="tip-title">🤢 Poisoning / Overdose</div>
+      <div class="tip-text">Do NOT induce vomiting unless told by a doctor. Keep the person calm and awake. Bring the container/medicine to the hospital.</div>
+    </div>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-num" style="background:#0ea5e9;">5</div>
+    <div>
+      <div class="tip-title">🦴 Broken Bone / Fracture</div>
+      <div class="tip-text">Do not try to straighten the bone. Immobilize the area with a splint or padding. Apply ice wrapped in cloth to reduce swelling.</div>
+    </div>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-num" style="background:#8b5cf6;">6</div>
+    <div>
+      <div class="tip-title">🫁 Choking</div>
+      <div class="tip-text">For adults — give 5 back blows between shoulder blades, then 5 abdominal thrusts (Heimlich maneuver). For infants — use gentle back blows only.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function callLab(){
+  window.location.href = "tel:+256778379791";
+}
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2500);
+}
+</script>
+</body>
+</html>

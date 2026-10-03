@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.code-workspace
+
+# Firebase local
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
