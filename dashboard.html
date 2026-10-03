@@ -53,7 +53,7 @@ body{font-family:'Nunito',Arial,sans-serif;background:var(--bg);color:var(--dark
 .dash-card{background:#fff;border-radius:20px;padding:18px 12px;text-align:center;cursor:pointer;transition:all 0.22s;border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,0.06);position:relative;overflow:hidden;animation:cardIn 0.5s ease both;text-decoration:none;display:block;}
 .dash-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(0,0,0,0.12);}
 .dash-card:active{transform:scale(0.97);}
-.card-icon{width:52px;height:52px;border-radius:16px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:26px;}
+.card-icon{width:52px;height:52px;border-radius:16px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
 .card-label{font-size:13px;font-weight:800;color:var(--dark);}
 .card-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:3px;}
 .card-badge{position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;border-radius:999px;font-size:10px;font-weight:900;padding:2px 7px;animation:badgePop 0.3s cubic-bezier(0.34,1.56,0.64,1);}
@@ -172,26 +172,80 @@ body.dark .pwa-platform{background:#0f172a;color:#94a3b8;}
 <!-- QUICK ACTIONS -->
 <div class="section-title">⚡ Quick Actions</div>
 <div class="cards-grid">
-  <a class="dash-card" href="index.html" style="animation-delay:0.05s"><div class="card-icon" style="background:rgba(14,165,233,0.12);">🧪</div><div class="card-label">Order Test</div><div class="card-sub">Book a lab test</div></a>
-  <a class="dash-card" href="inbox.html" style="animation-delay:0.1s"><div class="card-icon" style="background:rgba(34,197,94,0.12);">📋</div><div class="card-label">My Results</div><div class="card-sub">View lab results</div><span class="card-badge" id="resultsBadge" style="display:none;">New</span></a>
-  <a class="dash-card" href="chat.html" style="animation-delay:0.15s"><div class="card-icon" style="background:rgba(139,92,246,0.12);">💬</div><div class="card-label">Chat Doctor</div><div class="card-sub">Ask a question</div><span class="card-badge" id="chatBadge" style="display:none;">•</span></a>
-  <a class="dash-card" href="cycle.html" style="animation-delay:0.2s"><div class="card-icon" style="background:rgba(236,72,153,0.12);">🌸</div><div class="card-label">Cycle Tracker</div><div class="card-sub">Period &amp; fertility</div></a>
-  <a class="dash-card" href="tests-guide.html" style="animation-delay:0.25s"><div class="card-icon" style="background:rgba(14,165,233,0.12);">📖</div><div class="card-label">Tests Guide</div><div class="card-sub">Learn about tests</div></a>
-  <a class="dash-card" href="wallet.html" style="animation-delay:0.3s"><div class="card-icon" style="background:rgba(245,158,11,0.12);">💳</div><div class="card-label">My Wallet</div><div class="card-sub" id="dashWalletBal">Balance: UGX 0</div></a>
-  <a class="dash-card" href="appointments.html" style="animation-delay:0.35s"><div class="card-icon" style="background:rgba(245,158,11,0.12);">📅</div><div class="card-label">Appointments</div><div class="card-sub">Book a visit</div></a>
-  <a class="dash-card" href="profile.html" style="animation-delay:0.4s"><div class="card-icon" style="background:rgba(14,165,233,0.1);">👤</div><div class="card-label">My Profile</div><div class="card-sub">Edit your info</div></a>
-  <a class="dash-card" href="my-receipts.html" style="animation-delay:0.45s"><div class="card-icon" style="background:rgba(34,197,94,0.12);">🧾</div><div class="card-label">My Receipts</div><div class="card-sub">View payments</div></a>
-  <a class="dash-card" href="faq.html" style="animation-delay:0.5s"><div class="card-icon" style="background:rgba(245,158,11,0.12);">❓</div><div class="card-label">FAQ</div><div class="card-sub">Common questions</div></a>
-  <a class="dash-card" href="articles.html" style="animation-delay:0.55s"><div class="card-icon" style="background:rgba(16,185,129,0.12);">📰</div><div class="card-label">Health Articles</div><div class="card-sub">Tips &amp; guides</div></a>
-  <a class="dash-card" id="adminArticlesCard" href="admin-articles.html" style="animation-delay:0.56s;display:none;"><div class="card-icon" style="background:rgba(14,165,233,0.12);">✍️</div><div class="card-label">Post Article</div><div class="card-sub">Admin — publish articles</div></a>
-  <a class="dash-card" href="referral.html" style="animation-delay:0.6s"><div class="card-icon" style="background:rgba(139,92,246,0.12);">🎁</div><div class="card-label">Refer &amp; Earn</div><div class="card-sub">Get UGX 5,000</div></a>
-  <a class="dash-card" href="reviews.html" style="animation-delay:0.65s"><div class="card-icon" style="background:rgba(245,158,11,0.12);">⭐</div><div class="card-label">Reviews</div><div class="card-sub">Rate experience</div></a>
-  <a class="dash-card" href="doctor-referral.html" style="animation-delay:0.7s"><div class="card-icon" style="background:rgba(14,165,233,0.12);">👨‍⚕️</div><div class="card-label">Doctor Portal</div><div class="card-sub">Refer patients</div></a>
-  <a class="dash-card" href="tel:+256778379591" style="animation-delay:0.75s;border-color:rgba(239,68,68,0.2);"><div class="card-icon" style="background:rgba(239,68,68,0.1);">🚑</div><div class="card-label">Emergency</div><div class="card-sub">Call MTN now</div></a>
-  <a class="dash-card" href="tel:0750992939" style="animation-delay:0.8s"><div class="card-icon" style="background:rgba(16,185,129,0.12);">📞</div><div class="card-label">Contact Lab</div><div class="card-sub">Call Airtel</div></a>
+  <a class="dash-card" href="index.html" style="animation-delay:0.05s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);">🧪</div>
+    <div class="card-label">Order Test</div><div class="card-sub">Book a lab test</div>
+  </a>
+  <a class="dash-card" href="inbox.html" style="animation-delay:0.1s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#22c55e,#4ade80);">📋</div>
+    <div class="card-label">My Results</div><div class="card-sub">View lab results</div>
+    <span class="card-badge" id="resultsBadge" style="display:none;">New</span>
+  </a>
+  <a class="dash-card" href="chat.html" style="animation-delay:0.15s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);">💬</div>
+    <div class="card-label">Chat Doctor</div><div class="card-sub">Ask a question</div>
+    <span class="card-badge" id="chatBadge" style="display:none;">•</span>
+  </a>
+  <a class="dash-card" href="cycle.html" style="animation-delay:0.2s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#ec4899,#f472b6);">🌸</div>
+    <div class="card-label">Cycle Tracker</div><div class="card-sub">Period &amp; fertility</div>
+  </a>
+  <a class="dash-card" href="tests-guide.html" style="animation-delay:0.25s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#0ea5e9,#14b8a6);">📖</div>
+    <div class="card-label">Tests Guide</div><div class="card-sub">Learn about tests</div>
+  </a>
+  <a class="dash-card" href="wallet.html" style="animation-delay:0.3s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">💳</div>
+    <div class="card-label">My Wallet</div><div class="card-sub" id="dashWalletBal">Balance: UGX 0</div>
+  </a>
+  <a class="dash-card" href="appointments.html" style="animation-delay:0.35s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#f97316,#fb923c);">📅</div>
+    <div class="card-label">Appointments</div><div class="card-sub">Book a visit</div>
+  </a>
+  <a class="dash-card" href="profile.html" style="animation-delay:0.4s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#06b6d4,#22d3ee);">👤</div>
+    <div class="card-label">My Profile</div><div class="card-sub">Edit your info</div>
+  </a>
+  <a class="dash-card" href="my-receipts.html" style="animation-delay:0.45s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#10b981,#34d399);">🧾</div>
+    <div class="card-label">My Receipts</div><div class="card-sub">View payments</div>
+  </a>
+  <a class="dash-card" href="faq.html" style="animation-delay:0.5s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">❓</div>
+    <div class="card-label">FAQ</div><div class="card-sub">Common questions</div>
+  </a>
+  <a class="dash-card" href="articles.html" style="animation-delay:0.55s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">📰</div>
+    <div class="card-label">Health Articles</div><div class="card-sub">Tips &amp; guides</div>
+  </a>
+  <a class="dash-card" href="referral.html" style="animation-delay:0.6s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#8b5cf6,#ec4899);">🎁</div>
+    <div class="card-label">Refer &amp; Earn</div><div class="card-sub">Get UGX 5,000</div>
+  </a>
+  <a class="dash-card" href="reviews.html" style="animation-delay:0.65s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316);">⭐</div>
+    <div class="card-label">Reviews</div><div class="card-sub">Rate experience</div>
+  </a>
+  <a class="dash-card" href="doctor-referral.html" style="animation-delay:0.7s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);">👨‍⚕️</div>
+    <div class="card-label">Doctor Portal</div><div class="card-sub">Refer patients</div>
+  </a>
+  <a class="dash-card" href="tel:+256778379591" style="animation-delay:0.75s;border-color:rgba(239,68,68,0.25);">
+    <div class="card-icon" style="background:linear-gradient(135deg,#ef4444,#f97316);">🚑</div>
+    <div class="card-label">Emergency</div><div class="card-sub">Call MTN now</div>
+  </a>
+  <a class="dash-card" href="tel:0750992939" style="animation-delay:0.8s">
+    <div class="card-icon" style="background:linear-gradient(135deg,#14b8a6,#10b981);">📞</div>
+    <div class="card-label">Contact Lab</div><div class="card-sub">Call Airtel</div>
+  </a>
+  <!-- ADMIN CARD — hidden until role check -->
+  <a class="dash-card" id="adminArticlesCard" href="admin-articles.html" style="animation-delay:0.82s;display:none;">
+    <div class="card-icon" style="background:linear-gradient(135deg,#0ea5e9,#14b8a6);">✍️</div>
+    <div class="card-label">Post Article</div><div class="card-sub">Admin — publish</div>
+  </a>
   <!-- INSTALL CARD — shown dynamically by JS -->
   <div class="dash-card install-card" id="installCard" onclick="handleInstall()" style="display:none;animation-delay:0.85s;">
-    <div class="card-icon" style="background:rgba(34,197,94,0.15);" id="installCardIcon">⬇️</div>
+    <div class="card-icon" style="background:linear-gradient(135deg,#22c55e,#16a34a);" id="installCardIcon">⬇️</div>
     <div class="card-label" id="installCardLabel">Install App</div>
     <div class="card-sub" id="installCardSub">Add to home screen</div>
   </div>
